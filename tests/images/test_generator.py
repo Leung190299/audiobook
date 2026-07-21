@@ -12,10 +12,11 @@ from images.generator import ImageGenerationError, generate_background_image
 def test_generate_background_image_returns_file_bytes(monkeypatch):
     written = {}
 
-    def fake_run(cmd, check, capture_output, text, timeout):
+    def fake_run(cmd, check, capture_output, text, timeout, env):
         output_path = Path(cmd[cmd.index("--output") + 1])
         output_path.write_bytes(b"fake png bytes")
         written["cmd"] = cmd
+        written["env"] = env
         return MagicMock(returncode=0)
 
     monkeypatch.setattr(generator_module.subprocess, "run", fake_run)
@@ -32,10 +33,11 @@ def test_generate_background_image_returns_file_bytes(monkeypatch):
     assert cmd[cmd.index("--height") + 1] == "576"
     assert cmd[cmd.index("--width") + 1] == "1024"
     assert "--low-ram" in cmd
+    assert written["env"]["HF_HUB_DISABLE_XET"] == "1"
 
 
 def test_generate_background_image_raises_on_process_error(monkeypatch):
-    def fake_run(cmd, check, capture_output, text, timeout):
+    def fake_run(cmd, check, capture_output, text, timeout, env):
         raise subprocess.CalledProcessError(1, cmd, stderr="mflux crashed")
 
     monkeypatch.setattr(generator_module.subprocess, "run", fake_run)
@@ -45,7 +47,7 @@ def test_generate_background_image_raises_on_process_error(monkeypatch):
 
 
 def test_generate_background_image_raises_on_timeout(monkeypatch):
-    def fake_run(cmd, check, capture_output, text, timeout):
+    def fake_run(cmd, check, capture_output, text, timeout, env):
         raise subprocess.TimeoutExpired(cmd, timeout)
 
     monkeypatch.setattr(generator_module.subprocess, "run", fake_run)
@@ -55,7 +57,7 @@ def test_generate_background_image_raises_on_timeout(monkeypatch):
 
 
 def test_generate_background_image_raises_when_output_file_missing(monkeypatch):
-    def fake_run(cmd, check, capture_output, text, timeout):
+    def fake_run(cmd, check, capture_output, text, timeout, env):
         return MagicMock(returncode=0)
 
     monkeypatch.setattr(generator_module.subprocess, "run", fake_run)
@@ -65,7 +67,7 @@ def test_generate_background_image_raises_when_output_file_missing(monkeypatch):
 
 
 def test_generate_background_image_raises_when_mflux_generate_not_found(monkeypatch):
-    def fake_run(cmd, check, capture_output, text, timeout):
+    def fake_run(cmd, check, capture_output, text, timeout, env):
         raise FileNotFoundError("mflux-generate not found")
 
     monkeypatch.setattr(generator_module.subprocess, "run", fake_run)

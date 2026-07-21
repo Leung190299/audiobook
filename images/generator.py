@@ -1,4 +1,5 @@
 # images/generator.py
+import os
 import subprocess
 import tempfile
 from pathlib import Path
@@ -18,6 +19,12 @@ class ImageGenerationError(Exception):
 
 def generate_background_image(scene_description: str) -> bytes:
     prompt = f"{scene_description}, {STYLE_SUFFIX}"
+
+    # HF_HUB_DISABLE_XET: huggingface_hub's "xet" fast-transfer backend has a
+    # known bug ("Unable to parse string as hex hash value") downloading the
+    # gated FLUX.1-schnell repo on this setup; forcing the plain HTTP
+    # downloader avoids it. See docs/superpowers/specs/2026-07-21-flux-images-module-design.md.
+    env = {**os.environ, "HF_HUB_DISABLE_XET": "1"}
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         output_path = Path(tmp_dir) / "output.png"
@@ -39,6 +46,7 @@ def generate_background_image(scene_description: str) -> bytes:
                 capture_output=True,
                 text=True,
                 timeout=600,
+                env=env,
             )
         except subprocess.CalledProcessError as exc:
             raise ImageGenerationError(
