@@ -16,10 +16,21 @@ Yêu cầu:
 """
 
 
-def build_user_prompt(trope_name: str, trope_description: str) -> str:
-    return (
-        f"Motif: {trope_name}\n"
-        f"Mô tả motif: {trope_description}\n\n"
-        "Hãy sáng tác một truyện gốc theo motif trên, tuân thủ đúng yêu cầu trong "
-        "system prompt. Gọi tool `output_script` với kết quả."
-    )
+def build_prompt(trope_name: str, trope_description: str) -> str:
+    return f"""{SYSTEM_PROMPT}
+
+Motif: {trope_name}
+Mô tả motif: {trope_description}
+
+Hãy sáng tác một truyện gốc theo motif trên, tuân thủ đúng yêu cầu ở trên.
+
+QUAN TRỌNG: Chỉ trả về DUY NHẤT một khối JSON hợp lệ, không kèm bất kỳ giải thích hay
+văn bản nào khác ngoài JSON, đúng theo cấu trúc sau:
+{{
+  "title": "<tiêu đề truyện, dạng câu hook giật>",
+  "chapters": [
+    {{"heading": "<tiêu đề chương 1>", "text": "<toàn bộ nội dung chương 1>"}},
+    {{"heading": "<tiêu đề chương 2>", "text": "<toàn bộ nội dung chương 2>"}}
+  ]
+}}
+"""

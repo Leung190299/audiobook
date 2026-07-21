@@ -1,4 +1,6 @@
+# tests/scripts/test_cli.py
 import json
+from unittest.mock import AsyncMock
 
 from scripts import cli
 from scripts.models import Chapter, Script
@@ -17,7 +19,7 @@ def test_main_generates_validates_and_saves_script(tmp_path, monkeypatch, capsys
         title="Tiêu đề demo",
         chapters=[Chapter(index=1, heading="Chương 1", text="Nội dung " * 10)],
     )
-    monkeypatch.setattr(cli, "generate_script", lambda *args, **kwargs: fake_script)
+    monkeypatch.setattr(cli, "generate_script", AsyncMock(return_value=fake_script))
 
     validated_scripts = []
     monkeypatch.setattr(cli, "validate_script", validated_scripts.append)
