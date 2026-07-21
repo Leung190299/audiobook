@@ -22,20 +22,18 @@ async def test_run_generates_scene_descriptions_and_images_and_saves(
     monkeypatch.setattr(cli, "OUTPUT_DIR", tmp_path / "output")
 
     fake_gemini_client = object()
-    fake_flux_client = object()
 
     async def fake_generate_scene_description(chapter, client):
         assert client is fake_gemini_client
         return f"scene for chapter {chapter.index}"
 
-    def fake_generate_background_image(scene_description, client):
-        assert client is fake_flux_client
+    def fake_generate_background_image(scene_description):
         return f"fake image bytes for {scene_description}".encode("utf-8")
 
     monkeypatch.setattr(cli, "generate_scene_description", fake_generate_scene_description)
     monkeypatch.setattr(cli, "generate_background_image", fake_generate_background_image)
 
-    await cli._run(script_path, gemini_client=fake_gemini_client, flux_client=fake_flux_client)
+    await cli._run(script_path, gemini_client=fake_gemini_client)
 
     saved_images = sorted((tmp_path / "output").glob("*.png"))
     assert len(saved_images) == 2
@@ -54,7 +52,7 @@ async def test_run_generates_scene_descriptions_and_images_and_saves(
 def test_main_parses_argv_and_calls_run(monkeypatch):
     calls = []
 
-    async def fake_run(script_path, gemini_client=None, flux_client=None):
+    async def fake_run(script_path, gemini_client=None):
         calls.append(script_path)
 
     monkeypatch.setattr(cli, "_run", fake_run)
