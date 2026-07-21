@@ -7,6 +7,10 @@ dependencies = [
     "gemini-webapi>=1.0.0",
     "pyyaml>=6.0",
     "python-dotenv>=1.0.0",
+    "omnivoice>=0.1.0",
+    "torch>=2.0.0",
+    "pyloudnorm>=0.1.1",
+    "soundfile>=0.12.1",
 ]
 
 [dependency-groups]
