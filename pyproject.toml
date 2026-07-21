@@ -11,7 +11,7 @@ dependencies = [
     "torch>=2.0.0",
     "pyloudnorm>=0.1.1",
     "soundfile>=0.12.1",
-    "together>=1.3.0",
+    "mflux",
 ]
 
 [dependency-groups]
