@@ -48,24 +48,37 @@ def generate_script(
 ) -> Script:
     client = client or anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
-    response = client.messages.create(
+    with client.messages.stream(
         model=MODEL,
-        max_tokens=16000,
+        max_tokens=32000,
         system=SYSTEM_PROMPT,
         tools=[OUTPUT_SCRIPT_TOOL],
         tool_choice={"type": "tool", "name": "output_script"},
         messages=[
             {"role": "user", "content": build_user_prompt(trope_name, trope_description)}
         ],
-    )
+    ) as stream:
+        response = stream.get_final_message()
+
+    if response.stop_reason == "max_tokens":
+        raise ScriptGenerationError(
+            "Claude dừng sinh nội dung do đạt giới hạn max_tokens trước khi hoàn thành truyện."
+        )
 
     tool_use_blocks = [block for block in response.content if block.type == "tool_use"]
     if not tool_use_blocks:
         raise ScriptGenerationError("Claude không trả về tool_use block nào.")
 
     data = tool_use_blocks[0].input
-    chapters = [
-        Chapter(index=i + 1, heading=chapter["heading"], text=chapter["text"])
-        for i, chapter in enumerate(data["chapters"])
-    ]
-    return Script(trope=trope_id, title=data["title"], chapters=chapters)
+    try:
+        title = data["title"]
+        chapters = [
+            Chapter(index=i + 1, heading=chapter["heading"], text=chapter["text"])
+            for i, chapter in enumerate(data["chapters"])
+        ]
+    except (KeyError, TypeError) as exc:
+        raise ScriptGenerationError(
+            f"Dữ liệu tool_use trả về không đúng cấu trúc mong đợi: {exc}"
+        ) from exc
+
+    return Script(trope=trope_id, title=title, chapters=chapters)

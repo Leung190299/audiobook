@@ -29,7 +29,7 @@ def validate_script(script: Script) -> None:
 
     lowered_text = script.full_text.lower()
     for term in BANNED_TERMS:
-        if term in lowered_text:
+        if term.lower() in lowered_text:
             errors.append(f"Nội dung chứa từ khoá bị cấm: '{term}'.")
 
     if errors:
