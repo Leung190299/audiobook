@@ -41,11 +41,22 @@ def generate_background_image(scene_description: str) -> bytes:
             "--output", str(output_path),
         ]
 
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True)
+        except OSError as exc:
+            raise ImageGenerationError(
+                f"Không thể gọi {_resolve_mflux_cli()}: {exc}"
+            ) from exc
 
-        if result.returncode != 0 or not output_path.exists():
+        if result.returncode != 0:
             raise ImageGenerationError(
                 f"Lỗi khi gọi mflux sinh ảnh: {result.stderr or result.stdout}"
+            )
+
+        if not output_path.exists():
+            raise ImageGenerationError(
+                "mflux-generate-flux2 trả về thành công (returncode 0) nhưng không ghi ra file output — "
+                "có thể do lỗi no-op đã biết của công cụ"
             )
 
         return output_path.read_bytes()
