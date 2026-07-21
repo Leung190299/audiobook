@@ -21,35 +21,49 @@ Ràng buộc của người thực hiện:
 - **Định dạng video**: audio full 1 tập/truyện, 25–45 phút, ảnh nền tĩnh hoặc pan nhẹ (Ken Burns), tiêu đề dạng "câu hook giật + #Full audio".
 - **Tên kênh & thương hiệu**: cần khác hẳn "Phù Mỏ Audio" để tránh nhầm lẫn thương hiệu. Chốt tên, logo, banner ở giai đoạn triển khai (không chặn thiết kế pipeline).
 
+### Phong cách hình ảnh (template video)
+
+Dựa trên bộ ảnh tham khảo do người thực hiện cung cấp, mọi video dùng chung một template gồm:
+
+- **Avatar kênh** (hình tròn, cố định mọi video): nhân vật minh hoạ đặc trưng của kênh — đây là yếu tố nhận diện thương hiệu, cần thiết kế nhất quán qua tất cả video.
+- **Icon waveform** nhỏ ngay dưới avatar, báo hiệu đang phát audio.
+- **Tiêu đề tập truyện** in nghiêng, ngay dưới waveform.
+- **Nền minh hoạ full-khung hình**: tranh watercolor/flat-illustration ấm áp, chủ đề nội thất hoặc thiên nhiên (núi đồi, hồ nước, bãi biển, tiệm sách...), đổi theo từng phân đoạn/chương để tránh nhàm chán khi nghe 25–45 phút. Sinh bằng **Flux**.
+- **Caption cháy nền**: phụ đề trắng trên nền pill bán trong suốt, căn giữa, tự động wrap 2 dòng, đồng bộ theo audio — tăng khả năng giữ chân người xem lướt thấy video (kể cả khi tắt tiếng).
+
 ## 2. Pipeline sản xuất (full tự động)
 
 ```
 [Kho ý tưởng/trope]
-   → 1. LLM sinh kịch bản: outline + full script (~5.000–8.000 từ/tập)
+   → 1. LLM sinh kịch bản: outline + full script (~5.000–8.000 từ/tập), chia theo chương/phân đoạn
    → 2. Kiểm tra tự động: độ dài, cấu trúc, lọc từ nhạy cảm/vi phạm thương hiệu bên thứ 3
-   → 3. OmniVoice TTS: đọc theo giọng đã chọn/thiết kế, xuất audio theo chương
+   → 3. OmniVoice TTS: đọc theo giọng đã chọn/thiết kế, xuất audio + timestamp theo chương
    → 4. Hậu kỳ audio: chuẩn hoá loudness, nối chương, (tuỳ chọn) nhạc nền royalty-free nhẹ
-   → 5. Dựng video: ffmpeg ghép ảnh nền/waveform + audio, card tiêu đề, chương mục
-   → 6. Sinh metadata: tiêu đề, mô tả, tag, chapters bằng LLM
-   → 7. Thumbnail: AI image gen hoặc template cố định (Pillow/Canva API)
-   → 8. Upload: YouTube Data API, lên lịch đăng
+   → 5. Sinh ảnh nền: Flux tạo tranh minh hoạ theo từng phân đoạn, đúng style template (avatar, nội thất/thiên nhiên ấm áp)
+   → 6. Sinh caption: transcript có timestamp (từ script gốc hoặc forced-alignment với audio TTS)
+   → 7. Dựng video bằng Remotion: component React ghép avatar + waveform + tiêu đề + ảnh nền Flux (Ken Burns) + audio + caption cháy nền theo template, render ra MP4
+   → 8. Sinh metadata: tiêu đề, mô tả, tag, chapters bằng LLM
+   → 9. Upload: YouTube Data API, lên lịch đăng
 ```
 
-Toàn bộ điều phối bằng một script Python duy nhất. Người vận hành duyệt nhanh (nghe lướt audio + đọc kịch bản) trước khi publish — kể cả ở chế độ full tự động, để chặn nội dung phản cảm/lỗi mà AI có thể tạo ra mà không ai phát hiện.
+Toàn bộ điều phối bằng script orchestration (Python cho script/TTS/ảnh, gọi sang Remotion CLI cho bước dựng video). Người vận hành duyệt nhanh (nghe lướt audio + đọc kịch bản) trước khi publish — kể cả ở chế độ full tự động, để chặn nội dung phản cảm/lỗi mà AI có thể tạo ra mà không ai phát hiện.
 
 ## 3. Cấu trúc thư mục kỹ thuật
 
 ```
 audiobook/
-├── config/          # kho trope, cấu hình giọng đọc, branding
+├── config/          # kho trope, cấu hình giọng đọc, branding, style prompt Flux
 ├── scripts/         # gọi LLM sinh kịch bản
 ├── tts/             # wrapper OmniVoice
-├── video/           # ffmpeg assembly
-├── assets/          # ảnh nền, nhạc nền royalty-free
+├── images/          # wrapper gọi Flux sinh ảnh nền theo phân đoạn
+├── remotion/         # dự án Remotion (React/TS) — component avatar/waveform/caption/Ken Burns, render video
+├── assets/          # nhạc nền royalty-free, avatar/logo cố định
 ├── metadata/        # sinh title/desc/tag/thumbnail
 ├── upload/          # YouTube Data API
 └── output/          # video thành phẩm
 ```
+
+Lưu ý: đây là dự án lai Python (script gen, TTS, gọi Flux) + Node/TypeScript (Remotion). Script orchestration chính có thể viết bằng Python, gọi `npx remotion render` như một subprocess ở bước dựng video.
 
 ## 4. Rủi ro pháp lý & cách giảm thiểu
 
@@ -58,6 +72,8 @@ audiobook/
 - **Ảnh nền/thumbnail**: dùng ảnh AI tự tạo hoặc stock có giấy phép thương mại, không lấy ảnh chưa rõ nguồn.
 - **Công khai nội dung AI**: bật mục khai báo "nội dung tổng hợp/AI-generated" khi upload theo chính sách YouTube.
 - **OmniVoice**: Apache-2.0, dùng thương mại được — nhưng nếu clone giọng một người thật/nghệ sĩ lồng tiếng cụ thể, cần được người đó đồng ý (quyền giọng nói).
+- **Flux (sinh ảnh)**: `FLUX.1 [dev]` chỉ miễn phí cho mục đích **phi thương mại** — dùng cho kênh kiếm tiền bắt buộc phải mua license thương mại từ Black Forest Labs. `FLUX.1 [schnell]` là Apache-2.0, miễn phí và **được phép dùng thương mại** — mặc định dùng schnell để tránh vi phạm license; nếu cần chất lượng cao hơn dev, cân nhắc trả phí qua API chính thức (BFL API/Replicate/fal.ai) vốn cấp quyền thương mại cho ảnh xuất ra.
+- **Remotion**: miễn phí cho cá nhân/nhóm tối đa 3 người kể cả dùng thương mại — phù hợp với việc làm một mình hiện tại; chỉ cần mua license nếu sau này mở rộng đội nhóm ≥4 người.
 
 ## 5. Chiến lược tăng trưởng
 
@@ -76,4 +92,6 @@ audiobook/
 
 - Thiết kế chi tiết prompt kỹ thuật cho từng bước LLM (sẽ nằm trong kế hoạch triển khai).
 - Chọn nhà cung cấp LLM cụ thể và chi phí API.
-- Thiết kế logo/branding cụ thể.
+- Thiết kế logo/branding cụ thể (avatar nhân vật, tên kênh) — cần chốt trước khi sinh style prompt Flux cố định.
+- Chọn nơi chạy Flux (local GPU vs API trả phí) và cấu hình chi tiết prompt/LoRA để giữ phong cách nhất quán qua nhiều video.
+- Thiết kế chi tiết component Remotion (layout, animation timing, font, forced-alignment caption).
