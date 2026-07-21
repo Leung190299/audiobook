@@ -52,8 +52,10 @@ Tóm tắt diễn biến chương này theo dàn ý đã thống nhất ở trê
 
 YÊU CẦU BẮT BUỘC:
 - Viết đầy đủ cảnh, thoại giữa các nhân vật, diễn biến nội tâm chi tiết — KHÔNG tóm tắt.
-- Độ dài BẮT BUỘC từ 700 đến 900 từ. Nếu thấy nội dung sắp hết trước khi đủ, hãy mở
-  rộng bằng thêm thoại, thêm miêu tả cảm xúc/suy nghĩ nhân vật, thêm chi tiết bối cảnh.
+- Độ dài BẮT BUỘC từ 650 đến 800 từ — TUYỆT ĐỐI không vượt quá 800 từ (các chương trước
+  từng viết dài hơn yêu cầu, dẫn đến tổng truyện vượt giới hạn cho phép). Nếu thấy nội
+  dung sắp hết trước khi đủ 650 từ, hãy mở rộng bằng thêm thoại, thêm miêu tả cảm
+  xúc/suy nghĩ nhân vật, thêm chi tiết bối cảnh — nhưng dừng lại ngay khi chạm mốc 800 từ.
 - Giữ nhất quán với các chương trước đó trong cuộc trò chuyện này (tên nhân vật, bối
   cảnh, mạch cảm xúc, mốc thời gian).
 - CHỈ trả về nội dung văn xuôi của chương, KHÔNG kèm tiêu đề chương, KHÔNG kèm JSON,

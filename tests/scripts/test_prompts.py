@@ -15,5 +15,5 @@ def test_build_chapter_prompt_enforces_minimum_words():
     assert "Chương 3/8" in prompt
     assert "Bí mật" in prompt
     assert "Tóm tắt chương 3." in prompt
-    assert "700" in prompt
-    assert "900" in prompt
+    assert "650" in prompt
+    assert "800" in prompt
