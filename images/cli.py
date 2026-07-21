@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
 from gemini_webapi import GeminiClient
 from together import Together
 
@@ -11,6 +12,8 @@ from images.generator import generate_background_image
 from images.scene_prompt import generate_scene_description
 from images.storage import save_chapter_images
 from scripts.models import Script
+
+load_dotenv()
 
 OUTPUT_DIR = Path(__file__).resolve().parent.parent / "output" / "images"
 
