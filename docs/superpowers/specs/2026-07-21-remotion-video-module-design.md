@@ -22,7 +22,7 @@ Công nghệ dựng video: **Remotion** (React/TypeScript, license miễn phí c
 - **Độ phân giải video**: **1024×576**, khớp đúng độ phân giải ảnh nền hiện có (không upscale — tránh mờ/artifact khi Ken Burns zoom sâu, render nhanh hơn). Vẫn là tỷ lệ 16:9 chuẩn YouTube.
 - **Frame rate**: 30fps (mặc định Remotion, chuẩn phổ biến cho YouTube).
 - **Thời lượng video**: tính động qua `calculateMetadata` của Remotion — `durationInFrames = chapters.at(-1).endSeconds * fps`, không cộng buffer (audio module đã kết thúc audio đúng tại mốc đó).
-- **Đường dẫn asset trong props**: dùng **đường dẫn tuyệt đối** trực tiếp cho `<Audio src>`/`<Img src>` (audio/ảnh nằm ở `output/audio/`, `output/images/` bên ngoài dự án Remotion) — không copy file vào `remotion/public/` trước khi render, vì `npx remotion render` đọc thẳng filesystem cục bộ.
+- **Đường dẫn asset trong props**: ban đầu định dùng đường dẫn tuyệt đối trực tiếp cho `<Audio src>`/`<Img src>`, nhưng **xác nhận thực tế qua Task 1 của kế hoạch triển khai** rằng `npx remotion render` **không** hỗ trợ path tuyệt đối hay `file://` khi mux audio/ảnh vào MP4 — bước tải asset của `@remotion/renderer` yêu cầu bắt buộc URL `http://`/`https://` (xác nhận qua docs chính thức: remotion.dev/docs/miscellaneous/absolute-paths, remotion.dev/docs/assets). Quyết định cập nhật: dùng **flag `--public-dir` của Remotion CLI**, trỏ trực tiếp vào `output/` (thư mục cha chung của `output/audio/` và `output/images/`, không copy file) — Remotion tự phục vụ thư mục này qua HTTP nội bộ của chính nó khi render, không cần dựng/quản lý server riêng. Theo đó, `VideoProps.audioPath`/`imagePath` là **đường dẫn tương đối so với `output/`** (ví dụ `"audio/demo-20260721T120000Z.wav"`, `"images/demo-chapter-1.png"`), và component đọc qua `staticFile(props.audioPath)`/`staticFile(chapter.imagePath)` thay vì gán thẳng `src`. Avatar (nằm trong `remotion/public/`, không phải output động) vẫn dùng `staticFile("avatar.png")` như cũ, không đổi.
 - **Chuyển cảnh giữa chương**: crossfade 0.5s giữa 2 ảnh nền chương liền kề — khớp đúng `gap_seconds` (khoảng lặng 0.5s) đã có trong audio, để hình ảnh và âm thanh chuyển cảnh cùng nhịp.
 - **Không viết automated test cho code React/TypeScript** ở lần lặp này — repo hiện chưa có hạ tầng test JS/TS (Jest/Vitest), và dựng hạ tầng đó là công sức đáng kể so với lợi ích ở giai đoạn đầu. Bù lại bằng smoke test thủ công chạy CLI thật.
 
@@ -59,13 +59,15 @@ video/                        # module Python mới, cùng cấp scripts/tts/ima
         - Chuyển field snake_case của JSON Python (sample_rate, start_seconds,
           end_seconds) sang camelCase khớp interface TypeScript (sampleRate,
           startSeconds, endSeconds)
+        - Chuyển audioPath/imagePath thành đường dẫn TƯƠNG ĐỐI so với output/
+          (không phải tuyệt đối — xem mục "Quyết định thiết kế")
         - Báo lỗi rõ ràng nếu thiếu chương ở bất kỳ nguồn nào
         - Báo lỗi rõ ràng nếu trope/title không khớp giữa 3 file
         → dict VideoProps (trope, title, audioPath, sampleRate, chapters[])
    → 2. storage.py: lưu VideoProps thành file JSON vào output/video/
    → 3. cli.py: gọi subprocess (cwd=remotion/ để tìm đúng node_modules/package.json)
         npx remotion render src/index.ts MainVideo <output.mp4>
-          --props=<props.json>
+          --props=<props.json> --public-dir=<đường dẫn tuyệt đối tới output/>
    → 4. Coi thành công khi returncode == 0 VÀ file .mp4 tồn tại sau khi chạy
         (không chỉ dựa vào returncode — cùng nguyên tắc đã áp dụng ở module ảnh mflux)
    → 5. Lỗi → raise VideoRenderError kèm stderr/stdout
@@ -80,12 +82,12 @@ interface ChapterProps {
   text: string;
   startSeconds: number;
   endSeconds: number;
-  imagePath: string;   // đường dẫn tuyệt đối tới .png
+  imagePath: string;   // đường dẫn tương đối so với output/ (dùng qua staticFile())
 }
 interface VideoProps {
   trope: string;
   title: string;
-  audioPath: string;    // đường dẫn tuyệt đối tới .wav
+  audioPath: string;    // đường dẫn tương đối so với output/ (dùng qua staticFile())
   sampleRate: number;
   chapters: ChapterProps[];
 }
@@ -94,9 +96,9 @@ interface VideoProps {
 **Hành vi từng component Remotion:**
 
 - `MainVideo.tsx`: root composition, 1024×576, 30fps, `calculateMetadata` tính `durationInFrames` động từ chương cuối.
-- `ChapterBackground.tsx`: mỗi chương hiện ảnh nền full-khung trong đúng `[startSeconds, endSeconds]`, Ken Burns bằng `interpolate` trên scale/translate (đổi hướng pan xen kẽ theo chỉ số chương), crossfade 0.5s giữa 2 chương liền kề.
+- `ChapterBackground.tsx`: mỗi chương hiện ảnh nền full-khung trong đúng `[startSeconds, endSeconds]` (đọc qua `staticFile(chapter.imagePath)`), Ken Burns bằng `interpolate` trên scale/translate (đổi hướng pan xen kẽ theo chỉ số chương), crossfade 0.5s giữa 2 chương liền kề.
 - `Avatar.tsx`: ảnh tròn cố định từ `remotion/public/avatar.png`, hiển thị xuyên suốt video.
-- `Waveform.tsx`: vài thanh nhảy theo amplitude thật, đọc qua `@remotion/media-utils` từ `audioPath`.
+- `Waveform.tsx`: vài thanh nhảy theo amplitude thật, đọc qua `@remotion/media-utils` từ `staticFile(audioPath)`.
 - Tiêu đề chương: chữ nghiêng dưới waveform, đổi theo `heading` của chương hiện tại (cắt cảnh đơn giản khi đổi chương).
 - `Caption.tsx`: chia `text` mỗi chương thành cụm ~70-90 ký tự, phân bổ thời lượng hiển thị theo tỷ lệ độ dài ký tự trong `[startSeconds, endSeconds]` của chương, hiển thị dạng chữ trắng trên nền pill bán trong suốt, căn giữa.
 
@@ -117,7 +119,7 @@ interface VideoProps {
 - **Node.js đã có sẵn trên máy vận hành** (xác nhận v22.21.1) — không cần cài thêm runtime, chỉ cần `npm install` trong `remotion/`.
 - **Render Remotion cần Chromium headless** (Remotion tự tải/quản lý qua Puppeteer khi cần) — lần chạy đầu có thể mất thêm thời gian tải Chromium, tương tự việc tải model lần đầu ở các module trước.
 - **Caption không khớp chính xác từng từ nói ra** (do chỉ dùng timing theo chương) — chấp nhận đánh đổi này ở lần lặp đầu; nếu retention/feedback cho thấy cần khớp chính xác hơn, cân nhắc forced-alignment ở lần lặp sau.
-- **Đường dẫn asset tuyệt đối**: hoạt động đúng với `npx remotion render` (đọc thẳng filesystem cục bộ), nhưng sẽ **không** hoạt động nếu sau này chuyển sang chạy Remotion Studio qua trình duyệt từ xa hoặc render trên máy chủ cloud khác với máy sinh audio/ảnh — ngoài phạm vi hiện tại (đang vận hành 100% local).
+- **`--public-dir` trỏ vào `output/`**: hoạt động đúng khi Python (sinh audio/ảnh) và Remotion CLI chạy trên cùng một máy, cùng thấy chung filesystem — đúng với vận hành 100% local hiện tại. Sẽ **không** hoạt động nếu sau này tách render sang máy chủ khác với máy sinh audio/ảnh (cần chuyển sang tự dựng HTTP server hoặc rsync asset trước khi render) — ngoài phạm vi hiện tại.
 - **License Remotion**: miễn phí cho cá nhân/nhóm ≤3 người kể cả dùng thương mại (đã xác nhận ở spec kênh mục 4) — phù hợp với việc làm một mình hiện tại.
 
 ## Ngoài phạm vi (không giải quyết trong bản thiết kế này)
