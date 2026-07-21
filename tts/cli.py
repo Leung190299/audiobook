@@ -16,7 +16,7 @@ def _load_model():
     import torch
     from omnivoice import OmniVoice
 
-    return OmniVoice.from_pretrained("k2-fsa/OmniVoice", device_map="mps", dtype=torch.float16)
+    return OmniVoice.from_pretrained("k2-fsa/OmniVoice", device_map="cpu", dtype=torch.float32)
 
 
 def _run(script_path: Path, model=None) -> None:

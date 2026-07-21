@@ -14,7 +14,7 @@ Công nghệ TTS: [OmniVoice](https://github.com/k2-fsa/OmniVoice) — TTS zero-
 ## 1. Quyết định thiết kế
 
 - **Nguồn giọng đọc**: **voice design** bằng mô tả text (ví dụ "giọng nữ, ấm áp, tốc độ vừa") — không dùng voice cloning từ audio mẫu có sẵn, để tránh cần tìm nguồn giọng và rủi ro bản quyền/quyền giọng nói.
-- **Hạ tầng chạy**: local trên máy Mac của người vận hành (Apple Silicon/MPS backend của OmniVoice) — không thuê GPU cloud, giữ chi phí bằng 0. Nếu sau này tốc độ không đủ, cân nhắc chuyển sang GPU cloud (ngoài phạm vi thiết kế này).
+- **Hạ tầng chạy**: local trên máy Mac của người vận hành. Thiết kế ban đầu nhắm tới Apple Silicon/MPS backend của OmniVoice, nhưng smoke test thực tế cho thấy load model qua MPS bị crash (SIGSEGV) hoặc treo vô hạn ở bước "Loading weights" trên máy cụ thể của người vận hành (torch 2.13.0, macOS 26.5.2) — trong khi load qua **CPU** (`device_map="cpu"`, `dtype=torch.float32`) thành công ổn định (dưới 1 giây). Quyết định cập nhật: chạy **CPU**, không dùng MPS, cho đến khi xác định được nguyên nhân gốc (bug của OmniVoice/torch trên MPS) hoặc có bản vá. Không thuê GPU cloud, giữ chi phí bằng 0. Tốc độ sinh audio trên CPU chậm hơn GPU/MPS đáng kể — cần đo thực tế khi chạy sản xuất; nếu quá chậm cho khối lượng 2-3 video/tuần, cân nhắc GPU cloud (ngoài phạm vi thiết kế này).
 - **Phạm vi module**: gộp cả **TTS (đọc từng chương) + hậu kỳ audio (chuẩn hoá loudness + nối chương)** — khớp bước 3 và 4 trong pipeline tổng ở spec kênh. Lý do gộp: kết quả cuối cùng hữu ích ngay (1 file audio dùng được), dễ test end-to-end (script → audio hoàn chỉnh) hơn là tách thành 2 sub-project rời rạc chỉ để xuất audio thô từng chương chưa dùng được ngay.
 - **Nhạc nền**: mục "tuỳ chọn" trong spec kênh — **ngoài phạm vi module này**. Có thể thêm ở bước dựng video (Remotion) sau, giữ module TTS gọn, chỉ lo phần giọng đọc.
 - **Xử lý độ dài văn bản**: mỗi chương (650–900 từ theo QA của module trước) được đưa vào TTS như một lần gọi riêng — không cần chia nhỏ thêm, vì cấu trúc chương đã có sẵn từ module trước và tài liệu OmniVoice không nêu giới hạn độ dài text/lần gọi.
@@ -66,7 +66,7 @@ gap_seconds: 0.5
 ## 4. Rủi ro & lưu ý
 
 - **License OmniVoice**: Apache-2.0, dùng thương mại được. README có điều khoản cấm dùng để "giả mạo/lừa đảo giọng người khác" — không áp dụng ở đây vì dùng voice design (mô tả), không clone giọng người thật.
-- **Hiệu năng trên Apple Silicon**: chưa được đo thực tế trong thiết kế này — nếu tốc độ sinh audio quá chậm cho khối lượng 2-3 video/tuần, cần đánh giá lại hạ tầng (GPU cloud) ở giai đoạn triển khai/vận hành, không chặn thiết kế module.
+- **MPS không dùng được trên máy hiện tại**: xem mục "Hạ tầng chạy" — đã xác nhận qua smoke test thực tế (không phải suy đoán). Đang chạy CPU thay thế; tốc độ sinh audio trên CPU cho khối lượng 2-3 video/tuần cần đo thực tế ở giai đoạn vận hành, chưa đo trong thiết kế này.
 - **Chất lượng đọc số/từ viết tắt tiếng Việt**: OmniVoice có thể đọc sai số/ký hiệu/từ viết tắt trong văn bản gốc — không xử lý chuẩn hoá text đặc biệt (number normalization) trong phạm vi thiết kế này; nếu smoke test phát hiện vấn đề rõ rệt, sẽ xử lý ở lần lặp sau.
 
 ## Ngoài phạm vi (không giải quyết trong bản thiết kế này)
