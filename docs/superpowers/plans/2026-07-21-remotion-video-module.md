@@ -15,7 +15,10 @@
 - Crossfade between adjacent chapters' backgrounds: **0.5s**, matching the TTS module's `gap_seconds` (the silent gap already baked into the audio between chapters) — implemented so the fade window exactly coincides with that gap.
 - Caption: **chapter-level timing only** (no forced alignment). Split each chapter's text into ~70-90-character chunks; distribute chunk display time across `[chapter.startSeconds, chapter.endSeconds]` proportional to each chunk's character length.
 - Avatar/branding assets: **placeholder** at `remotion/public/avatar.png` (operator swaps in the real file later, no code change needed).
-- Audio/background-image paths in `VideoProps` are **absolute filesystem paths** (not copied into `remotion/public/`) — `npx remotion render` reads the local filesystem directly. The avatar is the one asset that legitimately lives inside `remotion/public/` and is referenced via Remotion's `staticFile()`.
+- **CORRECTED during Task 1** (the plan originally assumed this, verified false in practice): `npx remotion render` cannot mux audio/images from raw absolute filesystem paths or `file://` URLs — `@remotion/renderer`'s asset-download step requires `http://`/`https://` (confirmed against https://www.remotion.dev/docs/miscellaneous/absolute-paths and https://www.remotion.dev/docs/assets, and by tracing the failure into `@remotion/renderer`'s own source). The corrected mechanism: pass `--public-dir=<repo root>` to `npx remotion render` (Remotion serves that directory over its own ephemeral local HTTP server for the render's duration only — no server to manage, no files copied). Because `remotion/public/avatar.png` (versioned, lives with the Remotion project) and `output/audio/`, `output/images/` (gitignored, generated per run) share no common ancestor except the repo root, the repo root is the directory to point `--public-dir` at. Consequently:
+  - `VideoProps.audioPath`/`ChapterProps.imagePath` are paths **relative to the repo root** (e.g. `"output/audio/demo-20260721T120000Z.wav"`, `"output/images/demo-chapter-1.png"`), read in components via `staticFile(...)` — never a raw `src={...}`.
+  - The avatar reference changes accordingly: `staticFile("remotion/public/avatar.png")` (relative to repo root), not `staticFile("avatar.png")`.
+  - `video/cli.py` adds `--public-dir=<repo root absolute path>` to the render command (alongside `--props=`), and `video/props_builder.py` computes both paths via `.relative_to(repo_root)`.
 - `video/cli.py` invokes `npx remotion render src/index.ts MainVideo <output.mp4> --props=<props.json>` with `cwd` set to the `remotion/` directory.
 - Success = `returncode == 0` **AND** the output `.mp4` file exists afterward — same no-op-guard discipline already used in `images/generator.py` for mflux.
 - **No automated tests for the React/TypeScript side** this iteration (no JS test framework in this repo yet) — verify each Remotion task by actually running `npx remotion render` against small fixture inputs and inspecting the result (`ffprobe`, file size). The Python side (`video/props_builder.py`, `video/storage.py`, `video/cli.py`) follows the same TDD + mocked-`subprocess.run` pattern already used in `images/generator.py`.
@@ -126,13 +129,13 @@ Create `remotion/src/MainVideo.tsx` (this will grow in later tasks — for now i
 
 ```tsx
 import React from "react";
-import { AbsoluteFill, Audio } from "remotion";
+import { AbsoluteFill, Audio, staticFile } from "remotion";
 import type { VideoProps } from "./types";
 
 export const MainVideo: React.FC<VideoProps> = ({ audioPath }) => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
-      {audioPath ? <Audio src={audioPath} /> : null}
+      {audioPath ? <Audio src={staticFile(audioPath)} /> : null}
     </AbsoluteFill>
   );
 };
@@ -208,16 +211,16 @@ with wave.open('/tmp/remotion-task1-audio.wav', 'w') as w:
 "
 ```
 
-Create `/tmp/remotion-task1-props.json`:
+Create `/tmp/remotion-task1-props.json`. Since these fixtures live flat in `/tmp` (no repo involved yet), use `--public-dir=/tmp` for this standalone smoke test and paths relative to `/tmp` (just the filename); the real pipeline in later tasks points `--public-dir` at the repo root instead — see Global Constraints:
 
 ```json
 {
   "trope": "demo",
   "title": "Demo",
-  "audioPath": "/tmp/remotion-task1-audio.wav",
+  "audioPath": "remotion-task1-audio.wav",
   "sampleRate": 24000,
   "chapters": [
-    { "index": 1, "heading": "Chuong 1", "text": "Noi dung demo.", "startSeconds": 0, "endSeconds": 4, "imagePath": "/tmp/does-not-matter-yet.png" }
+    { "index": 1, "heading": "Chuong 1", "text": "Noi dung demo.", "startSeconds": 0, "endSeconds": 4, "imagePath": "does-not-matter-yet.png" }
   ]
 }
 ```
@@ -226,7 +229,7 @@ Run:
 
 ```bash
 cd remotion
-npx remotion render src/index.ts MainVideo /tmp/remotion-task1-output.mp4 --props=/tmp/remotion-task1-props.json
+npx remotion render src/index.ts MainVideo /tmp/remotion-task1-output.mp4 --props=/tmp/remotion-task1-props.json --public-dir=/tmp
 ```
 
 Expected: command exits 0, prints a "rendered" success message, `/tmp/remotion-task1-output.mp4` exists and is non-empty.
@@ -295,7 +298,7 @@ export const Avatar: React.FC = () => {
       }}
     >
       <Img
-        src={staticFile("avatar.png")}
+        src={staticFile("remotion/public/avatar.png")}
         style={{ width: "100%", height: "100%", objectFit: "cover" }}
       />
     </div>
@@ -309,7 +312,7 @@ Create `remotion/src/ChapterBackground.tsx`:
 
 ```tsx
 import React from "react";
-import { AbsoluteFill, Img, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
 import type { ChapterProps } from "./types";
 
 interface ChapterBackgroundProps {
@@ -346,7 +349,7 @@ export const ChapterBackground: React.FC<ChapterBackgroundProps> = ({
   return (
     <AbsoluteFill style={{ opacity }}>
       <Img
-        src={chapter.imagePath}
+        src={staticFile(chapter.imagePath)}
         style={{
           width: "100%",
           height: "100%",
@@ -367,7 +370,7 @@ Replace the contents of `remotion/src/MainVideo.tsx`:
 
 ```tsx
 import React from "react";
-import { AbsoluteFill, Audio, useVideoConfig } from "remotion";
+import { AbsoluteFill, Audio, staticFile, useVideoConfig } from "remotion";
 import type { VideoProps } from "./types";
 import { Avatar } from "./Avatar";
 import { ChapterBackground } from "./ChapterBackground";
@@ -391,7 +394,7 @@ export const MainVideo: React.FC<VideoProps> = ({ audioPath, chapters }) => {
         />
       ))}
       <Avatar />
-      {audioPath ? <Audio src={audioPath} /> : null}
+      {audioPath ? <Audio src={staticFile(audioPath)} /> : null}
     </AbsoluteFill>
   );
 };
@@ -415,17 +418,17 @@ open('/tmp/remotion-task2-bg.png', 'wb').write(data)
 "
 ```
 
-Create `/tmp/remotion-task2-props.json` (chapter 2 starts 0.5s after chapter 1 ends, matching `gap_seconds`):
+Create `/tmp/remotion-task2-props.json` (chapter 2 starts 0.5s after chapter 1 ends, matching `gap_seconds`). As in Task 1, paths are relative to `/tmp` since `--public-dir=/tmp` is used for this standalone fixture render:
 
 ```json
 {
   "trope": "demo",
   "title": "Demo",
-  "audioPath": "/tmp/remotion-task1-audio.wav",
+  "audioPath": "remotion-task1-audio.wav",
   "sampleRate": 24000,
   "chapters": [
-    { "index": 1, "heading": "Chuong 1", "text": "Noi dung mot.", "startSeconds": 0, "endSeconds": 2, "imagePath": "/tmp/remotion-task2-bg.png" },
-    { "index": 2, "heading": "Chuong 2", "text": "Noi dung hai.", "startSeconds": 2.5, "endSeconds": 4, "imagePath": "/tmp/remotion-task2-bg.png" }
+    { "index": 1, "heading": "Chuong 1", "text": "Noi dung mot.", "startSeconds": 0, "endSeconds": 2, "imagePath": "remotion-task2-bg.png" },
+    { "index": 2, "heading": "Chuong 2", "text": "Noi dung hai.", "startSeconds": 2.5, "endSeconds": 4, "imagePath": "remotion-task2-bg.png" }
   ]
 }
 ```
@@ -434,7 +437,7 @@ Run:
 
 ```bash
 cd remotion
-npx remotion render src/index.ts MainVideo /tmp/remotion-task2-output.mp4 --props=/tmp/remotion-task2-props.json
+npx remotion render src/index.ts MainVideo /tmp/remotion-task2-output.mp4 --props=/tmp/remotion-task2-props.json --public-dir=/tmp
 ```
 
 Expected: exits 0, no runtime errors in the output, `/tmp/remotion-task2-output.mp4` exists and is non-empty.
@@ -465,7 +468,7 @@ Create `remotion/src/Waveform.tsx`:
 
 ```tsx
 import React from "react";
-import { useCurrentFrame, useVideoConfig } from "remotion";
+import { staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { useAudioData, visualizeAudio } from "@remotion/media-utils";
 
 interface WaveformProps {
@@ -477,7 +480,7 @@ const BAR_COUNT = 5;
 export const Waveform: React.FC<WaveformProps> = ({ audioPath }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const audioData = useAudioData(audioPath);
+  const audioData = useAudioData(staticFile(audioPath));
 
   if (!audioData) {
     return null;
@@ -599,7 +602,7 @@ Replace the contents of `remotion/src/MainVideo.tsx`:
 
 ```tsx
 import React from "react";
-import { AbsoluteFill, Audio, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Audio, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import type { VideoProps } from "./types";
 import { Avatar } from "./Avatar";
 import { ChapterBackground } from "./ChapterBackground";
@@ -647,7 +650,7 @@ export const MainVideo: React.FC<VideoProps> = ({ audioPath, chapters }) => {
         </div>
       ) : null}
       <Caption chapters={chapters} />
-      {audioPath ? <Audio src={audioPath} /> : null}
+      {audioPath ? <Audio src={staticFile(audioPath)} /> : null}
     </AbsoluteFill>
   );
 };
@@ -665,7 +668,7 @@ Reuse `/tmp/remotion-task2-props.json` from Task 2 (already has 2 chapters with 
 
 ```bash
 cd remotion
-npx remotion render src/index.ts MainVideo /tmp/remotion-task3-output.mp4 --props=/tmp/remotion-task2-props.json
+npx remotion render src/index.ts MainVideo /tmp/remotion-task3-output.mp4 --props=/tmp/remotion-task2-props.json --public-dir=/tmp
 ```
 
 Expected: exits 0, no runtime errors (this is the first render that actually decodes `/tmp/remotion-task1-audio.wav` for the waveform — a crash here would most likely mean `useAudioData` couldn't read the fixture file), `/tmp/remotion-task3-output.mp4` exists and is non-empty.
@@ -689,7 +692,7 @@ git commit -m "feat: add amplitude-synced waveform, chapter title, and captions"
 
 **Interfaces:**
 - Consumes: `scripts.models.Script`/`Chapter` (existing dataclasses: `Script.trope: str`, `Script.title: str`, `Script.chapters: list[Chapter]`; `Chapter.index: int`, `Chapter.heading: str`, `Chapter.text: str`).
-- Produces: `build_video_props(script: Script, tts_metadata: dict, images_metadata: dict, audio_path: Path, images_dir: Path) -> dict` and `PropsBuildError(Exception)` — relied on by Task 6's `video/cli.py`.
+- Produces: `build_video_props(script: Script, tts_metadata: dict, images_metadata: dict, audio_path: Path, images_dir: Path, repo_root: Path) -> dict` and `PropsBuildError(Exception)` — relied on by Task 6's `video/cli.py`. **Note:** `audioPath`/`imagePath` in the returned dict are paths **relative to `repo_root`** (a Global Constraint corrected after Task 1's finding that Remotion can't consume raw absolute paths) — `repo_root` must be an ancestor of both `audio_path` and `images_dir` or `Path.relative_to()` raises `ValueError`.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -737,17 +740,19 @@ def test_build_video_props_joins_all_sources():
         ],
     }
 
+    repo_root = Path("/repo")
     props = build_video_props(
         script,
         tts_metadata,
         images_metadata,
-        audio_path=Path("/output/audio/demo.wav"),
-        images_dir=Path("/output/images"),
+        audio_path=Path("/repo/output/audio/demo.wav"),
+        images_dir=Path("/repo/output/images"),
+        repo_root=repo_root,
     )
 
     assert props["trope"] == "demo"
     assert props["title"] == "Tieu de demo"
-    assert props["audioPath"] == str(Path("/output/audio/demo.wav"))
+    assert props["audioPath"] == str(Path("output/audio/demo.wav"))
     assert props["sampleRate"] == 24000
     assert len(props["chapters"]) == 2
     assert props["chapters"][0] == {
@@ -756,9 +761,9 @@ def test_build_video_props_joins_all_sources():
         "text": "Noi dung mot.",
         "startSeconds": 0.0,
         "endSeconds": 2.0,
-        "imagePath": str(Path("/output/images/demo-chapter-1.png")),
+        "imagePath": str(Path("output/images/demo-chapter-1.png")),
     }
-    assert props["chapters"][1]["imagePath"] == str(Path("/output/images/demo-chapter-2.png"))
+    assert props["chapters"][1]["imagePath"] == str(Path("output/images/demo-chapter-2.png"))
 
 
 def test_build_video_props_raises_on_title_mismatch():
@@ -776,8 +781,9 @@ def test_build_video_props_raises_on_title_mismatch():
             script,
             tts_metadata,
             images_metadata,
-            audio_path=Path("/a.wav"),
-            images_dir=Path("/images"),
+            audio_path=Path("/repo/a.wav"),
+            images_dir=Path("/repo/images"),
+            repo_root=Path("/repo"),
         )
 
 
@@ -805,8 +811,9 @@ def test_build_video_props_raises_on_missing_chapter():
             script,
             tts_metadata,
             images_metadata,
-            audio_path=Path("/a.wav"),
-            images_dir=Path("/images"),
+            audio_path=Path("/repo/a.wav"),
+            images_dir=Path("/repo/images"),
+            repo_root=Path("/repo"),
         )
 ```
 
@@ -839,6 +846,7 @@ def build_video_props(
     images_metadata: dict,
     audio_path: Path,
     images_dir: Path,
+    repo_root: Path,
 ) -> dict:
     for source_name, source in (("tts", tts_metadata), ("images", images_metadata)):
         if source["trope"] != script.trope or source["title"] != script.title:
@@ -871,14 +879,14 @@ def build_video_props(
                 "text": chapter.text,
                 "startSeconds": tts_chapter["start_seconds"],
                 "endSeconds": tts_chapter["end_seconds"],
-                "imagePath": str(images_dir / image_chapter["filename"]),
+                "imagePath": str((images_dir / image_chapter["filename"]).relative_to(repo_root)),
             }
         )
 
     return {
         "trope": script.trope,
         "title": script.title,
-        "audioPath": str(audio_path),
+        "audioPath": str(audio_path.relative_to(repo_root)),
         "sampleRate": tts_metadata["sample_rate"],
         "chapters": chapters,
     }
@@ -1003,8 +1011,8 @@ git commit -m "feat: persist VideoProps JSON to output/video/"
 - Test: `tests/video/test_cli.py`
 
 **Interfaces:**
-- Consumes: `scripts.models.Script.from_dict(dict) -> Script` (existing), `build_video_props(...)` and `PropsBuildError` from Task 4, `save_video_props(video_props: dict, output_dir: Path) -> Path` from Task 5.
-- Produces: `video.cli._run(script_path: Path, tts_metadata_path: Path, images_metadata_path: Path) -> Path` (returns the rendered `.mp4` path), `video.cli.main() -> None`, `video.cli.VideoRenderError(Exception)`, module-level constants `video.cli.REMOTION_DIR: Path` and `video.cli.OUTPUT_DIR: Path`.
+- Consumes: `scripts.models.Script.from_dict(dict) -> Script` (existing), `build_video_props(script, tts_metadata, images_metadata, audio_path, images_dir, repo_root) -> dict` and `PropsBuildError` from Task 4 (note the `repo_root` parameter — Task 4's output paths are relative to it), `save_video_props(video_props: dict, output_dir: Path) -> Path` from Task 5.
+- Produces: `video.cli._run(script_path: Path, tts_metadata_path: Path, images_metadata_path: Path) -> Path` (returns the rendered `.mp4` path), `video.cli.main() -> None`, `video.cli.VideoRenderError(Exception)`, module-level constants `video.cli.REPO_ROOT: Path`, `video.cli.REMOTION_DIR: Path` and `video.cli.OUTPUT_DIR: Path`. The render command passes `--public-dir=<REPO_ROOT>` (Global Constraints — corrected after Task 1's finding) in addition to `--props=<file>`.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1067,6 +1075,9 @@ def _write_fixture_inputs(tmp_path: Path) -> tuple[Path, Path, Path]:
 
 def test_run_builds_props_and_renders_video(tmp_path, monkeypatch):
     monkeypatch.setattr(cli, "OUTPUT_DIR", tmp_path / "output")
+    # REPO_ROOT must be an ancestor of the fixture files for build_video_props'
+    # Path.relative_to() to succeed — tmp_path stands in for the repo root here.
+    monkeypatch.setattr(cli, "REPO_ROOT", tmp_path)
     script_path, tts_metadata_path, images_metadata_path = _write_fixture_inputs(tmp_path)
 
     def fake_run(cmd, **kwargs):
@@ -1086,16 +1097,18 @@ def test_run_builds_props_and_renders_video(tmp_path, monkeypatch):
     assert cmd[:5] == ["npx", "remotion", "render", "src/index.ts", "MainVideo"]
     assert cmd[5] == str(result_path)
     assert cmd[6].startswith("--props=")
+    assert cmd[7] == f"--public-dir={tmp_path}"
 
-    # audio path is derived from the tts metadata path's sibling .wav file
+    # audio/image paths are relative to REPO_ROOT (tmp_path here), not absolute
     props_path = Path(cmd[6].removeprefix("--props="))
     saved_props = json.loads(props_path.read_text(encoding="utf-8"))
-    assert saved_props["audioPath"] == str(tmp_path / "tts.wav")
-    assert saved_props["chapters"][0]["imagePath"] == str(tmp_path / "demo-chapter-1.png")
+    assert saved_props["audioPath"] == "tts.wav"
+    assert saved_props["chapters"][0]["imagePath"] == "demo-chapter-1.png"
 
 
 def test_run_raises_on_render_failure(tmp_path, monkeypatch):
     monkeypatch.setattr(cli, "OUTPUT_DIR", tmp_path / "output")
+    monkeypatch.setattr(cli, "REPO_ROOT", tmp_path)
     script_path, tts_metadata_path, images_metadata_path = _write_fixture_inputs(tmp_path)
 
     def fake_run(cmd, **kwargs):
@@ -1108,6 +1121,7 @@ def test_run_raises_on_render_failure(tmp_path, monkeypatch):
 
 def test_run_raises_when_output_file_missing_despite_success_code(tmp_path, monkeypatch):
     monkeypatch.setattr(cli, "OUTPUT_DIR", tmp_path / "output")
+    monkeypatch.setattr(cli, "REPO_ROOT", tmp_path)
     script_path, tts_metadata_path, images_metadata_path = _write_fixture_inputs(tmp_path)
 
     def fake_run(cmd, **kwargs):
@@ -1181,6 +1195,7 @@ def _run(
         images_metadata,
         audio_path=audio_path,
         images_dir=images_dir,
+        repo_root=REPO_ROOT,
     )
     props_path = save_video_props(video_props, OUTPUT_DIR)
 
@@ -1194,6 +1209,7 @@ def _run(
         "MainVideo",
         str(output_path),
         f"--props={props_path}",
+        f"--public-dir={REPO_ROOT}",
     ]
 
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=REMOTION_DIR)
