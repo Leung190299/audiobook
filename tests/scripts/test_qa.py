@@ -53,9 +53,9 @@ def test_validate_script_passes_at_exact_maximum_boundaries():
 
 
 def test_validate_script_raises_just_below_minimum_words():
-    # 4999 // 8 = 624, 624 * 8 = 4992 (< 5000, so should fail)
-    script = _make_script(word_count=4999, num_chapters=8)
-    assert script.word_count == 4992  # verify it's below minimum
+    # 4999 // 8 = 624, 624 * 8 = 4992, so add 7 extra words to reach exactly 4999
+    script = _make_script(word_count=4999, num_chapters=8, extra_text="từ từ từ từ từ từ từ")
+    assert script.word_count == 4999  # verify it's exactly at target boundary
     with pytest.raises(ScriptQAError, match="Độ dài"):
         validate_script(script)
 
