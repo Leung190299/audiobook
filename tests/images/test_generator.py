@@ -1,48 +1,64 @@
 # tests/images/test_generator.py
-import base64
+import subprocess
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
 
+import images.generator as generator_module
 from images.generator import ImageGenerationError, generate_background_image
 
 
-def _make_fake_client(b64_data: "str | None"):
-    fake_image = MagicMock()
-    fake_image.b64_json = b64_data
-    fake_response = MagicMock()
-    fake_response.data = [fake_image] if b64_data is not None else []
-    fake_client = MagicMock()
-    fake_client.images.generate.return_value = fake_response
-    return fake_client
+def test_generate_background_image_returns_file_bytes(monkeypatch):
+    written = {}
+
+    def fake_run(cmd, check, capture_output, text, timeout):
+        output_path = Path(cmd[cmd.index("--output") + 1])
+        output_path.write_bytes(b"fake png bytes")
+        written["cmd"] = cmd
+        return MagicMock(returncode=0)
+
+    monkeypatch.setattr(generator_module.subprocess, "run", fake_run)
+
+    image_bytes = generate_background_image("cozy living room at dusk")
+
+    assert image_bytes == b"fake png bytes"
+    cmd = written["cmd"]
+    joined = " ".join(cmd)
+    assert "cozy living room at dusk," in joined
+    assert "no text" in joined
+    assert cmd[cmd.index("--model") + 1] == "schnell"
+    assert cmd[cmd.index("--quantize") + 1] == "4"
+    assert cmd[cmd.index("--height") + 1] == "576"
+    assert cmd[cmd.index("--width") + 1] == "1024"
+    assert "--low-ram" in cmd
 
 
-def test_generate_background_image_returns_decoded_bytes():
-    original_bytes = b"fake png bytes"
-    b64_data = base64.b64encode(original_bytes).decode("ascii")
-    fake_client = _make_fake_client(b64_data)
+def test_generate_background_image_raises_on_process_error(monkeypatch):
+    def fake_run(cmd, check, capture_output, text, timeout):
+        raise subprocess.CalledProcessError(1, cmd, stderr="mflux crashed")
 
-    image_bytes = generate_background_image("cozy living room at dusk", client=fake_client)
-
-    assert image_bytes == original_bytes
-    call_kwargs = fake_client.images.generate.call_args.kwargs
-    assert call_kwargs["prompt"].startswith("cozy living room at dusk, ")
-    assert "no text" in call_kwargs["prompt"]
-    assert call_kwargs["model"] == "black-forest-labs/FLUX.1-schnell-Free"
-    assert call_kwargs["width"] == 1024
-    assert call_kwargs["height"] == 576
-
-
-def test_generate_background_image_raises_on_client_error():
-    fake_client = MagicMock()
-    fake_client.images.generate.side_effect = RuntimeError("API down")
-
-    with pytest.raises(ImageGenerationError):
-        generate_background_image("a scene", client=fake_client)
-
-
-def test_generate_background_image_raises_on_missing_data():
-    fake_client = _make_fake_client(None)
+    monkeypatch.setattr(generator_module.subprocess, "run", fake_run)
 
     with pytest.raises(ImageGenerationError):
-        generate_background_image("a scene", client=fake_client)
+        generate_background_image("a scene")
+
+
+def test_generate_background_image_raises_on_timeout(monkeypatch):
+    def fake_run(cmd, check, capture_output, text, timeout):
+        raise subprocess.TimeoutExpired(cmd, timeout)
+
+    monkeypatch.setattr(generator_module.subprocess, "run", fake_run)
+
+    with pytest.raises(ImageGenerationError, match="thời gian"):
+        generate_background_image("a scene")
+
+
+def test_generate_background_image_raises_when_output_file_missing(monkeypatch):
+    def fake_run(cmd, check, capture_output, text, timeout):
+        return MagicMock(returncode=0)
+
+    monkeypatch.setattr(generator_module.subprocess, "run", fake_run)
+
+    with pytest.raises(ImageGenerationError):
+        generate_background_image("a scene")

@@ -1,46 +1,57 @@
 # images/generator.py
-import base64
-import os
-
-from together import Together
+import subprocess
+import tempfile
+from pathlib import Path
 
 from images.style import STYLE_SUFFIX
 
-MODEL = "black-forest-labs/FLUX.1-schnell-Free"
+MODEL = "schnell"
 WIDTH = 1024
 HEIGHT = 576
 STEPS = 4
+QUANTIZE = 4
 
 
 class ImageGenerationError(Exception):
     pass
 
 
-def generate_background_image(
-    scene_description: str, client: "Together | None" = None
-) -> bytes:
-    client = client or Together(api_key=os.environ["TOGETHER_API_KEY"])
-
+def generate_background_image(scene_description: str) -> bytes:
     prompt = f"{scene_description}, {STYLE_SUFFIX}"
 
-    try:
-        response = client.images.generate(
-            model=MODEL,
-            prompt=prompt,
-            width=WIDTH,
-            height=HEIGHT,
-            steps=STEPS,
-            n=1,
-            response_format="base64",
-        )
-    except Exception as exc:
-        raise ImageGenerationError(f"Lỗi khi gọi Flux sinh ảnh: {exc}") from exc
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        output_path = Path(tmp_dir) / "output.png"
 
-    try:
-        b64_data = response.data[0].b64_json
-    except (AttributeError, IndexError, TypeError) as exc:
-        raise ImageGenerationError(
-            f"Kết quả Together AI không đúng định dạng mong đợi: {exc}"
-        ) from exc
+        try:
+            subprocess.run(
+                [
+                    "mflux-generate",
+                    "--model", MODEL,
+                    "--steps", str(STEPS),
+                    "--quantize", str(QUANTIZE),
+                    "--height", str(HEIGHT),
+                    "--width", str(WIDTH),
+                    "--low-ram",
+                    "--prompt", prompt,
+                    "--output", str(output_path),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=600,
+            )
+        except subprocess.CalledProcessError as exc:
+            raise ImageGenerationError(
+                f"mflux-generate lỗi (exit code {exc.returncode}): {exc.stderr}"
+            ) from exc
+        except subprocess.TimeoutExpired as exc:
+            raise ImageGenerationError(
+                "mflux-generate quá thời gian chờ (10 phút)"
+            ) from exc
 
-    return base64.b64decode(b64_data)
+        if not output_path.exists():
+            raise ImageGenerationError(
+                "mflux-generate chạy xong nhưng không tạo ra file ảnh output"
+            )
+
+        return output_path.read_bytes()
