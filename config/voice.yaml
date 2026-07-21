@@ -1,4 +1,4 @@
-instruction: "giọng nữ, ấm áp, tốc độ đọc vừa phải, ngữ điệu tự nhiên như đang kể chuyện cho người nghe"
+instruction: "female, moderate pitch, young adult"
 target_lufs: -16.0
 sample_rate: 24000
 gap_seconds: 0.5
