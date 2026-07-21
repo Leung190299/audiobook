@@ -20,6 +20,17 @@ def test_normalize_loudness_moves_audio_toward_target_lufs():
     assert abs(result_lufs - (-16.0)) < 0.5
 
 
+def test_normalize_loudness_caps_peak_to_avoid_clipping():
+    sample_rate = 24000
+    audio = _sine_wave(1.0, sample_rate, amplitude=0.9)
+
+    normalized = normalize_loudness(audio, sample_rate, target_lufs=-1.0)
+
+    peak = np.max(np.abs(normalized))
+    peak_ceiling = 10 ** (-1.0 / 20)
+    assert peak <= peak_ceiling + 1e-6
+
+
 def test_concatenate_chapters_inserts_gap_and_computes_timestamps():
     sample_rate = 24000
     gap_seconds = 0.5

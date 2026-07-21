@@ -27,6 +27,7 @@ def test_save_audio_writes_wav_and_metadata_json(tmp_path):
     data = json.loads(metadata_path.read_text(encoding="utf-8"))
     assert data["title"] == "Tiêu đề"
     assert data["trope"] == "test_trope"
+    assert data["sample_rate"] == 24000
     assert data["chapters"][0]["heading"] == "Chương 1"
     assert data["chapters"][0]["end_seconds"] == 1.0
 

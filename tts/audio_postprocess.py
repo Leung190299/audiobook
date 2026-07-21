@@ -15,7 +15,14 @@ class ChapterTiming:
 def normalize_loudness(audio: np.ndarray, sample_rate: int, target_lufs: float) -> np.ndarray:
     meter = pyln.Meter(sample_rate)
     loudness = meter.integrated_loudness(audio)
-    return pyln.normalize.loudness(audio, loudness, target_lufs)
+    normalized = pyln.normalize.loudness(audio, loudness, target_lufs)
+
+    peak = np.max(np.abs(normalized))
+    peak_ceiling = 10 ** (-1.0 / 20)  # -1 dBFS headroom, avoids clipping on 16-bit PCM write
+    if peak > peak_ceiling:
+        normalized = normalized * (peak_ceiling / peak)
+
+    return normalized
 
 
 def concatenate_chapters(

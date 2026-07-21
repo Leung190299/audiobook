@@ -26,6 +26,7 @@ def save_audio(
     metadata = {
         "trope": trope,
         "title": title,
+        "sample_rate": sample_rate,
         "chapters": [
             {
                 "index": t.index,
