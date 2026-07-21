@@ -1,16 +1,19 @@
-from scripts.prompts import build_prompt
+from scripts.prompts import build_chapter_prompt, build_outline_prompt
 
 
-def test_build_prompt_includes_trope_details():
-    prompt = build_prompt("Trọng sinh báo thù", "Mô tả test.")
+def test_build_outline_prompt_includes_trope_details():
+    prompt = build_outline_prompt("Trọng sinh báo thù", "Mô tả test.")
 
     assert "Trọng sinh báo thù" in prompt
     assert "Mô tả test." in prompt
-
-
-def test_build_prompt_enforces_minimum_words_per_chapter():
-    prompt = build_prompt("Trọng sinh báo thù", "Mô tả test.")
-
     assert "8 chương" in prompt
-    assert "700 từ" in prompt
-    assert "5.000–8.000 từ" in prompt
+
+
+def test_build_chapter_prompt_enforces_minimum_words():
+    prompt = build_chapter_prompt(3, 8, "Chương 3: Bí mật", "Tóm tắt chương 3.")
+
+    assert "Chương 3/8" in prompt
+    assert "Bí mật" in prompt
+    assert "Tóm tắt chương 3." in prompt
+    assert "700" in prompt
+    assert "900" in prompt

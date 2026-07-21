@@ -3,9 +3,10 @@ import json
 import os
 
 from gemini_webapi import GeminiClient
+from gemini_webapi.exceptions import APIError, AuthError, GeminiError
 
 from scripts.models import Chapter, Script
-from scripts.prompts import build_prompt
+from scripts.prompts import build_chapter_prompt, build_outline_prompt
 
 
 class ScriptGenerationError(Exception):
@@ -25,24 +26,45 @@ async def generate_script(
         )
         await client.init(timeout=30, auto_close=False, close_delay=300, auto_refresh=True)
 
-    response = await client.generate_content(build_prompt(trope_name, trope_description))
-    data = _parse_script_json(response.text)
+    chat = client.start_chat()
 
     try:
-        title = data["title"]
-        chapters = [
-            Chapter(index=i + 1, heading=chapter["heading"], text=chapter["text"])
-            for i, chapter in enumerate(data["chapters"])
-        ]
+        outline_response = await chat.send_message(
+            build_outline_prompt(trope_name, trope_description)
+        )
+    except (GeminiError, APIError, AuthError) as exc:
+        raise ScriptGenerationError(f"Gemini lỗi khi sinh dàn ý: {exc}") from exc
+
+    outline = _parse_json_response(outline_response.text)
+    try:
+        title = outline["title"]
+        chapter_plans = [(plan["heading"], plan["summary"]) for plan in outline["chapters"]]
     except (KeyError, TypeError) as exc:
         raise ScriptGenerationError(
-            f"Dữ liệu JSON không đúng cấu trúc mong đợi: {exc}"
+            f"Dữ liệu dàn ý không đúng cấu trúc mong đợi: {exc}"
         ) from exc
+
+    total_chapters = len(chapter_plans)
+    chapters = []
+    for i, (heading, summary) in enumerate(chapter_plans):
+        chapter_number = i + 1
+        try:
+            chapter_response = await chat.send_message(
+                build_chapter_prompt(chapter_number, total_chapters, heading, summary)
+            )
+        except (GeminiError, APIError, AuthError) as exc:
+            raise ScriptGenerationError(
+                f"Gemini lỗi khi sinh chương {chapter_number}: {exc}"
+            ) from exc
+
+        chapters.append(
+            Chapter(index=chapter_number, heading=heading, text=chapter_response.text.strip())
+        )
 
     return Script(trope=trope_id, title=title, chapters=chapters)
 
 
-def _parse_script_json(raw_text: str) -> dict:
+def _parse_json_response(raw_text: str) -> dict:
     text = raw_text.strip()
     if text.startswith("```"):
         text = text.strip("`").strip()

@@ -16,33 +16,44 @@ Yêu cầu:
 """
 
 
-def build_prompt(trope_name: str, trope_description: str) -> str:
+def build_outline_prompt(trope_name: str, trope_description: str) -> str:
     return f"""{SYSTEM_PROMPT}
 
 Motif: {trope_name}
 Mô tả motif: {trope_description}
 
-Hãy sáng tác một truyện gốc theo motif trên, tuân thủ đúng yêu cầu ở trên.
-
-YÊU CẦU BẮT BUỘC VỀ ĐỘ DÀI (không được vi phạm):
-- Viết đúng 8 chương. MỖI CHƯƠNG phải dài tối thiểu 700 từ và tối đa 900 từ — không
-  được viết chương nào ngắn hơn 700 từ.
-- Tổng độ dài toàn truyện phải đạt 5.000–8.000 từ. Đây là yêu cầu cứng bắt buộc, tuyệt
-  đối không được dừng lại sớm hay tóm tắt cho ngắn gọn.
-- Mỗi chương phải có đầy đủ cảnh, thoại giữa các nhân vật, diễn biến nội tâm chi tiết.
-  Nếu thấy nội dung sắp hết trước khi đạt 700 từ, hãy mở rộng bằng cách thêm thoại,
-  thêm miêu tả cảm xúc/suy nghĩ nhân vật, thêm chi tiết bối cảnh — không được kết thúc
-  chương sớm hoặc chuyển sang chương tiếp theo khi chưa đủ độ dài.
-- Trước khi đưa ra JSON cuối cùng, hãy tự kiểm tra lại: đếm nhẩm độ dài từng chương để
-  chắc chắn không có chương nào dưới 700 từ.
+Hãy LÊN DÀN Ý (outline) cho truyện gốc theo motif trên — CHƯA viết nội dung đầy đủ, chỉ
+lên kế hoạch. Dàn ý gồm:
+- Tiêu đề truyện (dạng câu hook giật).
+- Đúng 8 chương, mỗi chương có: tiêu đề ngắn gọn, và tóm tắt 2-3 câu về diễn biến
+  chính, nhân vật xuất hiện, và cảm xúc/xung đột trung tâm của chương đó. Đảm bảo mạch
+  truyện xuyên suốt có cao trào rõ ràng ở các chương cuối và kết thúc thoả mãn.
 
 QUAN TRỌNG: Chỉ trả về DUY NHẤT một khối JSON hợp lệ, không kèm bất kỳ giải thích hay
 văn bản nào khác ngoài JSON, đúng theo cấu trúc sau:
 {{
-  "title": "<tiêu đề truyện, dạng câu hook giật>",
+  "title": "<tiêu đề truyện>",
   "chapters": [
-    {{"heading": "<tiêu đề chương 1>", "text": "<toàn bộ nội dung chương 1, tối thiểu 700 từ>"}},
-    {{"heading": "<tiêu đề chương 2>", "text": "<toàn bộ nội dung chương 2, tối thiểu 700 từ>"}}
+    {{"heading": "<tiêu đề chương 1>", "summary": "<tóm tắt chương 1>"}},
+    {{"heading": "<tiêu đề chương 2>", "summary": "<tóm tắt chương 2>"}}
   ]
 }}
+"""
+
+
+def build_chapter_prompt(
+    chapter_number: int, total_chapters: int, heading: str, summary: str
+) -> str:
+    return f"""Bây giờ hãy viết ĐẦY ĐỦ nội dung Chương {chapter_number}/{total_chapters}: "{heading}".
+
+Tóm tắt diễn biến chương này theo dàn ý đã thống nhất ở trên: {summary}
+
+YÊU CẦU BẮT BUỘC:
+- Viết đầy đủ cảnh, thoại giữa các nhân vật, diễn biến nội tâm chi tiết — KHÔNG tóm tắt.
+- Độ dài BẮT BUỘC từ 700 đến 900 từ. Nếu thấy nội dung sắp hết trước khi đủ, hãy mở
+  rộng bằng thêm thoại, thêm miêu tả cảm xúc/suy nghĩ nhân vật, thêm chi tiết bối cảnh.
+- Giữ nhất quán với các chương trước đó trong cuộc trò chuyện này (tên nhân vật, bối
+  cảnh, mạch cảm xúc, mốc thời gian).
+- CHỈ trả về nội dung văn xuôi của chương, KHÔNG kèm tiêu đề chương, KHÔNG kèm JSON,
+  KHÔNG kèm giải thích hay bình luận nào khác ngoài nội dung truyện.
 """
