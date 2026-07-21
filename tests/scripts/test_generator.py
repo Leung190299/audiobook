@@ -73,6 +73,15 @@ async def test_generate_script_raises_on_missing_outline_fields():
         await generate_script("id", "name", "desc", client=fake_client)
 
 
+async def test_generate_script_error_includes_raw_response_on_structure_mismatch():
+    fake_client, _ = _make_fake_client(
+        '{"title": "T", "chapters": [["not", "a dict"]]}', []
+    )
+
+    with pytest.raises(ScriptGenerationError, match="Phản hồi thô"):
+        await generate_script("id", "name", "desc", client=fake_client)
+
+
 async def test_generate_script_wraps_api_error_from_outline():
     fake_chat = MagicMock()
     fake_chat.send_message = AsyncMock(side_effect=APIError("boom"))

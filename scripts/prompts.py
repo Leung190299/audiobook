@@ -30,7 +30,9 @@ lên kế hoạch. Dàn ý gồm:
   truyện xuyên suốt có cao trào rõ ràng ở các chương cuối và kết thúc thoả mãn.
 
 QUAN TRỌNG: Chỉ trả về DUY NHẤT một khối JSON hợp lệ, không kèm bất kỳ giải thích hay
-văn bản nào khác ngoài JSON, đúng theo cấu trúc sau:
+văn bản nào khác ngoài JSON, đúng theo cấu trúc sau — "chapters" PHẢI là một mảng gồm
+CHÍNH XÁC 8 object phẳng (không được lồng mảng con, không được bọc thêm object cha
+nào khác), mỗi object chỉ có đúng 2 field "heading" và "summary" dạng chuỗi văn bản:
 {{
   "title": "<tiêu đề truyện>",
   "chapters": [

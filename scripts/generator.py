@@ -41,7 +41,8 @@ async def generate_script(
         chapter_plans = [(plan["heading"], plan["summary"]) for plan in outline["chapters"]]
     except (KeyError, TypeError) as exc:
         raise ScriptGenerationError(
-            f"Dữ liệu dàn ý không đúng cấu trúc mong đợi: {exc}"
+            f"Dữ liệu dàn ý không đúng cấu trúc mong đợi: {exc}\n"
+            f"Phản hồi thô từ Gemini: {outline_response.text[:500]!r}"
         ) from exc
 
     total_chapters = len(chapter_plans)
