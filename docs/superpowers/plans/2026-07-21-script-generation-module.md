@@ -883,8 +883,359 @@ git commit -m "feat: add script generation CLI entrypoint"
 
 ---
 
+### Task 8: Swap script generator backend from Claude to Gemini-API (gemini-webapi)
+
+**Context:** After Tasks 1–7 shipped and merged (using the Claude API), the project owner decided to switch the LLM backend to [gemini-webapi](https://github.com/HanaokaYuzu/Gemini-API) — a reverse-engineered async client for the Gemini web app, authenticated via browser session cookies (`SECURE_1PSID`/`SECURE_1PSIDTS`) from a secondary Google account rather than an official API key. See the design spec's §4 for the ToS/account-risk rationale. Unlike the Anthropic SDK, this library has no forced tool-use/structured-output mode, so `generate_script` must ask Gemini to return raw JSON in its text response and parse it — less reliable than tool-use, so parsing failures must raise `ScriptGenerationError`, not leak a raw `json.JSONDecodeError`/`KeyError`. `generate_content` is `async`, so `generate_script` becomes `async def`, and `scripts/cli.py`'s `main()` must run it via `asyncio.run(...)`.
+
+**Files:**
+- Modify: `pyproject.toml`
+- Modify: `.env.example`
+- Modify: `scripts/prompts.py`
+- Modify: `scripts/generator.py`
+- Modify: `scripts/cli.py`
+- Modify: `tests/scripts/test_generator.py`
+- Modify: `tests/scripts/test_cli.py`
+
+**Interfaces:**
+- Consumes: `Chapter`, `Script` from `scripts/models.py` (unchanged); `get_trope` from `scripts/trope_bank.py` (unchanged); `validate_script` from `scripts/qa.py` (unchanged); `save_script` from `scripts/storage.py` (unchanged).
+- Produces: `async def generate_script(trope_id: str, trope_name: str, trope_description: str, client: "GeminiClient | None" = None) -> Script` (raises `ScriptGenerationError`) — signature is the same shape as before except **`async`** and the `client` type. `build_prompt(trope_name: str, trope_description: str) -> str` replaces the old `build_user_prompt` (combines system instructions + JSON-output instructions into one string, since `gemini-webapi` has no separate system-prompt parameter). `scripts/cli.py`'s `main()` stays a plain sync function (unchanged external interface — still `python -m scripts.cli <trope_id>`), now internally wrapping an `async def _run(trope_id: str) -> None` via `asyncio.run`.
+
+- [ ] **Step 1: Update `pyproject.toml` dependencies**
+
+Replace the `[project]` `dependencies` list and the `[dependency-groups]` `dev` list, and add `asyncio_mode` to the pytest config:
+
+```toml
+[project]
+name = "audiobook"
+version = "0.1.0"
+description = "Pipeline sản xuất video truyện audio cho YouTube"
+requires-python = ">=3.11"
+dependencies = [
+    "gemini-webapi>=1.0.0",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+asyncio_mode = "auto"
+```
+
+Run: `uv sync`
+Expected: `anthropic` is removed, `gemini-webapi` and `pytest-asyncio` are installed, no errors.
+
+- [ ] **Step 2: Update `.env.example`**
+
+```
+SECURE_1PSID=your_secure_1psid_cookie_value
+SECURE_1PSIDTS=your_secure_1psidts_cookie_value
+```
+
+- [ ] **Step 3: Rewrite `scripts/prompts.py`**
+
+```python
+# scripts/prompts.py
+SYSTEM_PROMPT = """Bạn là biên kịch chuyên viết truyện audio tiếng Việt cho kênh YouTube.
+Nhiệm vụ: sáng tác một truyện HOÀN TOÀN GỐC (nguyên tác của bạn), lấy cảm hứng từ
+motif/trope được cung cấp — KHÔNG được chuyển thể, dịch, hay mô phỏng sát nội dung
+của bất kỳ tiểu thuyết/tác phẩm có sẵn nào. Nhân vật, tên riêng, tình tiết cụ thể
+phải do bạn tự sáng tạo.
+
+Yêu cầu:
+- Độ dài: 5.000–8.000 từ tiếng Việt.
+- Chia thành 6–10 chương, mỗi chương có tiêu đề ngắn gọn.
+- Văn phong ưu tiên thoại và diễn biến tâm lý nhân vật hơn là mô tả thị giác thuần
+  tuý, vì người nghe không nhìn màn hình khi nghe.
+- Có cao trào rõ ràng và kết thúc thoả mãn (không bỏ lửng trừ khi được yêu cầu).
+- Không dùng tên nhân vật, địa danh, hoặc chi tiết cốt truyện trùng với tác phẩm nổi
+  tiếng nào đang tồn tại.
+"""
+
+
+def build_prompt(trope_name: str, trope_description: str) -> str:
+    return f"""{SYSTEM_PROMPT}
+
+Motif: {trope_name}
+Mô tả motif: {trope_description}
+
+Hãy sáng tác một truyện gốc theo motif trên, tuân thủ đúng yêu cầu ở trên.
+
+QUAN TRỌNG: Chỉ trả về DUY NHẤT một khối JSON hợp lệ, không kèm bất kỳ giải thích hay
+văn bản nào khác ngoài JSON, đúng theo cấu trúc sau:
+{{
+  "title": "<tiêu đề truyện, dạng câu hook giật>",
+  "chapters": [
+    {{"heading": "<tiêu đề chương 1>", "text": "<toàn bộ nội dung chương 1>"}},
+    {{"heading": "<tiêu đề chương 2>", "text": "<toàn bộ nội dung chương 2>"}}
+  ]
+}}
+"""
+```
+
+- [ ] **Step 4: Rewrite `tests/scripts/test_generator.py`**
+
+```python
+# tests/scripts/test_generator.py
+from unittest.mock import AsyncMock, MagicMock
+
+from scripts.generator import ScriptGenerationError, generate_script
+
+
+def _make_fake_client(response_text: str):
+    fake_response = MagicMock()
+    fake_response.text = response_text
+    fake_client = MagicMock()
+    fake_client.generate_content = AsyncMock(return_value=fake_response)
+    return fake_client
+
+
+async def test_generate_script_parses_json_response():
+    response_text = (
+        '{"title": "Ký ức không thể xoá", "chapters": ['
+        + ", ".join(
+            f'{{"heading": "Chương {i}", "text": "Nội dung chương {i}."}}'
+            for i in range(1, 7)
+        )
+        + "]}"
+    )
+    fake_client = _make_fake_client(response_text)
+
+    script = await generate_script(
+        trope_id="trong_sinh_bao_thu",
+        trope_name="Trọng sinh báo thù",
+        trope_description="Mô tả test.",
+        client=fake_client,
+    )
+
+    assert script.title == "Ký ức không thể xoá"
+    assert script.trope == "trong_sinh_bao_thu"
+    assert len(script.chapters) == 6
+    assert script.chapters[0].index == 1
+    assert script.chapters[0].heading == "Chương 1"
+    fake_client.generate_content.assert_called_once()
+
+
+async def test_generate_script_strips_markdown_json_fence():
+    response_text = (
+        "```json\n"
+        '{"title": "T", "chapters": ['
+        + ", ".join(f'{{"heading": "C{i}", "text": "Nội dung {i}"}}' for i in range(1, 7))
+        + "]}\n```"
+    )
+    fake_client = _make_fake_client(response_text)
+
+    script = await generate_script("id", "name", "desc", client=fake_client)
+
+    assert script.title == "T"
+    assert len(script.chapters) == 6
+
+
+async def test_generate_script_raises_on_invalid_json():
+    fake_client = _make_fake_client("Xin lỗi, tôi không thể giúp việc này.")
+
+    try:
+        await generate_script("id", "name", "desc", client=fake_client)
+        assert False, "expected ScriptGenerationError"
+    except ScriptGenerationError:
+        pass
+
+
+async def test_generate_script_raises_on_missing_fields():
+    fake_client = _make_fake_client('{"title": "Thiếu chapters"}')
+
+    try:
+        await generate_script("id", "name", "desc", client=fake_client)
+        assert False, "expected ScriptGenerationError"
+    except ScriptGenerationError:
+        pass
+```
+
+Run: `uv run pytest tests/scripts/test_generator.py -v`
+Expected: FAIL — `scripts/generator.py` still imports `anthropic` and uses the old sync `client.messages.stream` shape, so these new tests fail (import error or attribute mismatch on the old `generate_script`).
+
+- [ ] **Step 5: Rewrite `scripts/generator.py`**
+
+```python
+# scripts/generator.py
+import json
+import os
+
+from gemini_webapi import GeminiClient
+
+from scripts.models import Chapter, Script
+from scripts.prompts import build_prompt
+
+
+class ScriptGenerationError(Exception):
+    pass
+
+
+async def generate_script(
+    trope_id: str,
+    trope_name: str,
+    trope_description: str,
+    client: "GeminiClient | None" = None,
+) -> Script:
+    if client is None:
+        client = GeminiClient(
+            os.environ["SECURE_1PSID"],
+            os.environ["SECURE_1PSIDTS"],
+        )
+        await client.init(timeout=30, auto_close=False, close_delay=300, auto_refresh=True)
+
+    response = await client.generate_content(build_prompt(trope_name, trope_description))
+    data = _parse_script_json(response.text)
+
+    try:
+        title = data["title"]
+        chapters = [
+            Chapter(index=i + 1, heading=chapter["heading"], text=chapter["text"])
+            for i, chapter in enumerate(data["chapters"])
+        ]
+    except (KeyError, TypeError) as exc:
+        raise ScriptGenerationError(
+            f"Dữ liệu JSON không đúng cấu trúc mong đợi: {exc}"
+        ) from exc
+
+    return Script(trope=trope_id, title=title, chapters=chapters)
+
+
+def _parse_script_json(raw_text: str) -> dict:
+    text = raw_text.strip()
+    if text.startswith("```"):
+        text = text.strip("`").strip()
+        if text.lower().startswith("json"):
+            text = text[len("json") :].strip()
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise ScriptGenerationError(
+            f"Không parse được JSON từ phản hồi Gemini: {exc}"
+        ) from exc
+```
+
+Run: `uv run pytest tests/scripts/test_generator.py -v`
+Expected: PASS (4 tests)
+
+- [ ] **Step 6: Update `scripts/cli.py` to run the now-async `generate_script`**
+
+```python
+# scripts/cli.py
+import argparse
+import asyncio
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+from scripts.generator import generate_script
+from scripts.qa import validate_script
+from scripts.storage import save_script
+from scripts.trope_bank import get_trope
+
+load_dotenv()
+
+CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "tropes.yaml"
+OUTPUT_DIR = Path(__file__).resolve().parent.parent / "output" / "scripts"
+
+
+async def _run(trope_id: str) -> None:
+    trope = get_trope(CONFIG_PATH, trope_id)
+    script = await generate_script(trope.id, trope.name, trope.description)
+    validate_script(script)
+    out_path = save_script(script, OUTPUT_DIR)
+
+    print(
+        f"Đã lưu kịch bản: {out_path} "
+        f"({script.word_count} từ, {len(script.chapters)} chương)"
+    )
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Sinh kịch bản truyện audio từ trope.")
+    parser.add_argument("trope_id", help="ID trope trong config/tropes.yaml")
+    args = parser.parse_args()
+    asyncio.run(_run(args.trope_id))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+- [ ] **Step 7: Update `tests/scripts/test_cli.py`**
+
+```python
+# tests/scripts/test_cli.py
+import json
+from unittest.mock import AsyncMock
+
+from scripts import cli
+from scripts.models import Chapter, Script
+from scripts.trope_bank import Trope
+
+
+def test_main_generates_validates_and_saves_script(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(cli, "CONFIG_PATH", tmp_path / "tropes.yaml")
+    monkeypatch.setattr(cli, "OUTPUT_DIR", tmp_path / "output")
+
+    fake_trope = Trope(id="demo", name="Demo", description="Mô tả demo")
+    monkeypatch.setattr(cli, "get_trope", lambda path, trope_id: fake_trope)
+
+    fake_script = Script(
+        trope="demo",
+        title="Tiêu đề demo",
+        chapters=[Chapter(index=1, heading="Chương 1", text="Nội dung " * 10)],
+    )
+    monkeypatch.setattr(cli, "generate_script", AsyncMock(return_value=fake_script))
+
+    validated_scripts = []
+    monkeypatch.setattr(cli, "validate_script", validated_scripts.append)
+
+    monkeypatch.setattr("sys.argv", ["cli.py", "demo"])
+    cli.main()
+
+    assert validated_scripts == [fake_script]
+    saved_files = list((tmp_path / "output").glob("*.json"))
+    assert len(saved_files) == 1
+    data = json.loads(saved_files[0].read_text(encoding="utf-8"))
+    assert data["title"] == "Tiêu đề demo"
+
+    out = capsys.readouterr().out
+    assert "Đã lưu kịch bản" in out
+```
+
+Run: `uv run pytest tests/scripts/test_cli.py -v`
+Expected: PASS (1 test)
+
+- [ ] **Step 8: Run the full test suite**
+
+Run: `uv run pytest tests/ -v`
+Expected: PASS (all tests: models, trope_bank, qa unchanged; generator now 4 tests; cli 1 test — no real network calls, no `anthropic` import anywhere)
+
+- [ ] **Step 9: Commit**
+
+```bash
+git add pyproject.toml uv.lock .env.example scripts/prompts.py scripts/generator.py scripts/cli.py tests/scripts/test_generator.py tests/scripts/test_cli.py
+git commit -m "feat: swap script generator backend from Claude API to Gemini-API"
+```
+
+- [ ] **Step 10: Manual smoke test with real Gemini cookies (not automated — requires a real secondary Google account session)**
+
+1. Log into the secondary Google account in a browser at gemini.google.com, extract `__Secure-1PSID` and `__Secure-1PSIDTS` cookie values (e.g. via browser devtools or `browser-cookie3` per the library's README), and put them in `.env` as `SECURE_1PSID`/`SECURE_1PSIDTS`.
+2. Run: `uv run python -m scripts.cli trong_sinh_bao_thu`
+3. Expected: prints `Đã lưu kịch bản: output/scripts/trong_sinh_bao_thu-<timestamp>.json (N từ, M chương)` with N in 5000–8000 and M in 6–10.
+4. Open the saved JSON file and read at least one chapter to confirm the story is original and reads naturally for audio narration. If Gemini's response isn't valid JSON (common failure mode without forced tool-use), `ScriptGenerationError` should surface with a clear message rather than a raw parse traceback — verify this by checking the error message quality if it happens.
+
+---
+
 ## Self-Review Notes
 
 - **Spec coverage**: This plan implements spec section 2 pipeline steps 1–2 (LLM script generation + automated QA) for the "Sinh kịch bản" stage only. Steps 3–9 (TTS, image gen, video assembly, metadata, upload) are explicitly out of scope — each needs its own plan per the Scope Check in the spec, since they are independent subsystems with different toolchains (OmniVoice, Flux, Remotion/Node, YouTube API).
 - **Placeholder scan**: no TBD/TODO; every step has runnable code or an exact command with expected output.
 - **Type consistency**: `Chapter(index, heading, text)` and `Script(trope, title, chapters)` from Task 2 are used with the same field names/order across Tasks 4–7. `generate_script(trope_id, trope_name, trope_description, client=None) -> Script` and `save_script(script, output_dir) -> Path` signatures match how `cli.py` calls them.
+- **Task 8 addendum**: added after Tasks 1–7 shipped, to swap the LLM backend from Claude to `gemini-webapi` per the project owner's decision (see spec §4). `generate_script`'s signature is preserved except it becomes `async` and takes a `GeminiClient` instead of an `anthropic.Anthropic` client — `scripts/cli.py` is the only other consumer, updated in the same task to run it via `asyncio.run`. `Chapter`/`Script` construction and field names are unchanged from Task 2.
