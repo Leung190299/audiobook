@@ -1,0 +1,28 @@
+tropes:
+  - id: trong_sinh_bao_thu
+    name: "Trọng sinh báo thù"
+    description: >
+      Nhân vật chính chết oan hoặc bị hại ở kiếp trước, trọng sinh về quá khứ
+      với ký ức nguyên vẹn, dùng hiểu biết đó để thay đổi số phận và trả thù
+      những kẻ đã hãm hại mình.
+  - id: xuyen_khong_gia_toc
+    name: "Xuyên không vào gia tộc hào môn"
+    description: >
+      Nhân vật chính xuyên không vào thân phận một tiểu thư/thiếu gia bị coi
+      thường trong gia tộc giàu có, dần bộc lộ thực lực khiến cả nhà kinh ngạc.
+  - id: duong_nu_phan_don
+    name: "Dưỡng nữ bị hắt hủi rồi phản đòn"
+    description: >
+      Con nuôi bị gia đình đối xử bất công so với con ruột, sau biến cố phát
+      hiện thân thế thật hoặc năng lực đặc biệt, phản đòn ngoạn mục.
+  - id: tong_tai_sung_vo
+    name: "Tổng tài lạnh lùng sủng vợ"
+    description: >
+      Vị tổng tài lạnh lùng, quyền lực bất ngờ hết lòng cưng chiều người vợ
+      bị xem thường, khiến những kẻ từng coi thường cô phải trả giá.
+  - id: anh_chi_em_tranh_sung
+    name: "Anh chị em ruột tranh sủng"
+    description: >
+      Trong một gia đình nhiều anh chị em, nhân vật chính bị lép vế tình cảm
+      cha mẹ dành cho anh/chị/em khác, đến khi sự thật và tài năng thật sự
+      của nhân vật chính được phơi bày.
