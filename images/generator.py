@@ -1,12 +1,14 @@
 # images/generator.py
-import base64
 import os
-
-from together import Together
+import shutil
+import subprocess
+import tempfile
+from pathlib import Path
 
 from images.style import STYLE_SUFFIX
 
-MODEL = "black-forest-labs/FLUX.1-schnell-Free"
+MODEL = "Runpod/FLUX.2-klein-4B-mflux-4bit"
+BASE_MODEL = "flux2-klein-4b"
 WIDTH = 1024
 HEIGHT = 576
 STEPS = 4
@@ -16,31 +18,36 @@ class ImageGenerationError(Exception):
     pass
 
 
-def generate_background_image(
-    scene_description: str, client: "Together | None" = None
-) -> bytes:
-    client = client or Together(api_key=os.environ["TOGETHER_API_KEY"])
+def _resolve_mflux_cli() -> str:
+    venv_cli = os.path.join(".venv", "bin", "mflux-generate-flux2")
+    return venv_cli if os.path.exists(venv_cli) else "mflux-generate-flux2"
 
+
+def generate_background_image(scene_description: str) -> bytes:
     prompt = f"{scene_description}, {STYLE_SUFFIX}"
 
+    tmp_dir = tempfile.mkdtemp(prefix="mflux-image-")
     try:
-        response = client.images.generate(
-            model=MODEL,
-            prompt=prompt,
-            width=WIDTH,
-            height=HEIGHT,
-            steps=STEPS,
-            n=1,
-            response_format="base64",
-        )
-    except Exception as exc:
-        raise ImageGenerationError(f"Lỗi khi gọi Flux sinh ảnh: {exc}") from exc
+        output_path = Path(tmp_dir) / "scene.png"
 
-    try:
-        b64_data = response.data[0].b64_json
-    except (AttributeError, IndexError, TypeError) as exc:
-        raise ImageGenerationError(
-            f"Kết quả Together AI không đúng định dạng mong đợi: {exc}"
-        ) from exc
+        cmd = [
+            _resolve_mflux_cli(),
+            "--model", MODEL,
+            "--base-model", BASE_MODEL,
+            "--prompt", prompt,
+            "--steps", str(STEPS),
+            "--width", str(WIDTH),
+            "--height", str(HEIGHT),
+            "--output", str(output_path),
+        ]
 
-    return base64.b64decode(b64_data)
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        if result.returncode != 0 or not output_path.exists():
+            raise ImageGenerationError(
+                f"Lỗi khi gọi mflux sinh ảnh: {result.stderr or result.stdout}"
+            )
+
+        return output_path.read_bytes()
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
