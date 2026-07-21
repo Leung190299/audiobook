@@ -6,6 +6,7 @@ import { ChapterBackground } from "./ChapterBackground";
 import { Waveform } from "./Waveform";
 import { Caption } from "./Caption";
 
+// Must match gap_seconds in config/voice.yaml; audio chapter gaps depend on this.
 const CROSSFADE_SECONDS = 0.5;
 
 export const MainVideo: React.FC<VideoProps> = ({ audioPath, chapters }) => {

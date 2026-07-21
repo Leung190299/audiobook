@@ -107,7 +107,7 @@ def test_run_raises_when_output_file_missing_despite_success_code(tmp_path, monk
         return subprocess.CompletedProcess(cmd, returncode=0, stdout="", stderr="")
 
     with patch("video.cli.subprocess.run", side_effect=fake_run):
-        with pytest.raises(cli.VideoRenderError):
+        with pytest.raises(cli.VideoRenderError, match="file video không được tạo"):
             cli._run(script_path, tts_metadata_path, images_metadata_path)
 
 

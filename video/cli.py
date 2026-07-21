@@ -52,9 +52,14 @@ def _run(
 
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=REMOTION_DIR)
 
-    if result.returncode != 0 or not output_path.exists():
+    if result.returncode != 0:
         raise VideoRenderError(
             f"Lỗi khi render video bằng Remotion: {result.stderr or result.stdout}"
+        )
+
+    if not output_path.exists():
+        raise VideoRenderError(
+            f"Lỗi: Remotion trả về mã thành công nhưng file video không được tạo tại {output_path}"
         )
 
     print(f"Đã render video vào {output_path}")
