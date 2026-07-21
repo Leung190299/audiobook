@@ -5,3 +5,4 @@ __pycache__/
 .env
 output/
 uv.lock.bak
+remotion/node_modules/
