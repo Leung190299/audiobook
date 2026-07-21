@@ -74,6 +74,7 @@ Lưu ý: đây là dự án lai Python (script gen, TTS, gọi Flux) + Node/Type
 - **OmniVoice**: Apache-2.0, dùng thương mại được — nhưng nếu clone giọng một người thật/nghệ sĩ lồng tiếng cụ thể, cần được người đó đồng ý (quyền giọng nói).
 - **Flux (sinh ảnh)**: `FLUX.1 [dev]` chỉ miễn phí cho mục đích **phi thương mại** — dùng cho kênh kiếm tiền bắt buộc phải mua license thương mại từ Black Forest Labs. `FLUX.1 [schnell]` là Apache-2.0, miễn phí và **được phép dùng thương mại** — mặc định dùng schnell để tránh vi phạm license; nếu cần chất lượng cao hơn dev, cân nhắc trả phí qua API chính thức (BFL API/Replicate/fal.ai) vốn cấp quyền thương mại cho ảnh xuất ra.
 - **Remotion**: miễn phí cho cá nhân/nhóm tối đa 3 người kể cả dùng thương mại — phù hợp với việc làm một mình hiện tại; chỉ cần mua license nếu sau này mở rộng đội nhóm ≥4 người.
+- **Sinh kịch bản qua [Gemini-API (gemini-webapi)](https://github.com/HanaokaYuzu/Gemini-API)**: đây là thư viện reverse-engineered, xác thực bằng cookie phiên đăng nhập web (`__Secure-1PSID`/`__Secure-1PSIDTS`) chứ không phải API key chính thức — nằm ngoài Điều khoản dịch vụ của Google, tài khoản có thể bị gắn cờ/khoá nếu tự động hoá gọi đều đặn ở quy mô pipeline sản xuất hàng loạt. Quyết định: dùng **tài khoản Google phụ** (không phải tài khoản chính) để cô lập rủi ro này. Thư viện cũng không hỗ trợ tool-use/structured output — kịch bản JSON được lấy bằng cách yêu cầu model trả JSON thuần trong prompt rồi tự parse, kém tin cậy hơn forced tool-use.
 
 ## 5. Chiến lược tăng trưởng
 
@@ -91,7 +92,7 @@ Lưu ý: đây là dự án lai Python (script gen, TTS, gọi Flux) + Node/Type
 ## Ngoài phạm vi (không giải quyết trong bản thiết kế này)
 
 - Thiết kế chi tiết prompt kỹ thuật cho từng bước LLM (sẽ nằm trong kế hoạch triển khai).
-- Chọn nhà cung cấp LLM cụ thể và chi phí API.
+- ~~Chọn nhà cung cấp LLM cụ thể~~ — đã chốt: Gemini qua `gemini-webapi` (xem mục 4).
 - Thiết kế logo/branding cụ thể (avatar nhân vật, tên kênh) — cần chốt trước khi sinh style prompt Flux cố định.
 - Chọn nơi chạy Flux (local GPU vs API trả phí) và cấu hình chi tiết prompt/LoRA để giữ phong cách nhất quán qua nhiều video.
 - Thiết kế chi tiết component Remotion (layout, animation timing, font, forced-alignment caption).
