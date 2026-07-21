@@ -62,3 +62,13 @@ def test_generate_background_image_raises_when_output_file_missing(monkeypatch):
 
     with pytest.raises(ImageGenerationError):
         generate_background_image("a scene")
+
+
+def test_generate_background_image_raises_when_mflux_generate_not_found(monkeypatch):
+    def fake_run(cmd, check, capture_output, text, timeout):
+        raise FileNotFoundError("mflux-generate not found")
+
+    monkeypatch.setattr(generator_module.subprocess, "run", fake_run)
+
+    with pytest.raises(ImageGenerationError, match="mflux-generate"):
+        generate_background_image("a scene")

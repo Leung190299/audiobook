@@ -48,6 +48,11 @@ def generate_background_image(scene_description: str) -> bytes:
             raise ImageGenerationError(
                 "mflux-generate quá thời gian chờ (10 phút)"
             ) from exc
+        except FileNotFoundError as exc:
+            raise ImageGenerationError(
+                "Không tìm thấy lệnh 'mflux-generate' trên PATH — "
+                "hãy chạy trong .venv của project (uv run ...) hoặc kiểm tra mflux đã cài chưa"
+            ) from exc
 
         if not output_path.exists():
             raise ImageGenerationError(
