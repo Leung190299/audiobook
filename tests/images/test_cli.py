@@ -1,4 +1,3 @@
-# tests/images/test_cli.py
 import json
 from pathlib import Path
 

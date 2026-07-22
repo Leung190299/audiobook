@@ -1,70 +1,64 @@
 # images/generator.py
 import os
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
 
 from images.style import STYLE_SUFFIX
 
-MODEL = "schnell"
+MODEL = "Runpod/FLUX.2-klein-4B-mflux-4bit"
+BASE_MODEL = "flux2-klein-4b"
 WIDTH = 1024
 HEIGHT = 576
 STEPS = 4
-QUANTIZE = 4
 
 
 class ImageGenerationError(Exception):
     pass
 
 
+def _resolve_mflux_cli() -> str:
+    venv_cli = os.path.join(".venv", "bin", "mflux-generate-flux2")
+    return venv_cli if os.path.exists(venv_cli) else "mflux-generate-flux2"
+
+
 def generate_background_image(scene_description: str) -> bytes:
     prompt = f"{scene_description}, {STYLE_SUFFIX}"
 
-    # HF_HUB_DISABLE_XET: huggingface_hub's "xet" fast-transfer backend has a
-    # known bug ("Unable to parse string as hex hash value") downloading the
-    # gated FLUX.1-schnell repo on this setup; forcing the plain HTTP
-    # downloader avoids it. See docs/superpowers/specs/2026-07-21-flux-images-module-design.md.
-    env = {**os.environ, "HF_HUB_DISABLE_XET": "1"}
+    tmp_dir = tempfile.mkdtemp(prefix="mflux-image-")
+    try:
+        output_path = Path(tmp_dir) / "scene.png"
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        output_path = Path(tmp_dir) / "output.png"
+        cmd = [
+            _resolve_mflux_cli(),
+            "--model", MODEL,
+            "--base-model", BASE_MODEL,
+            "--prompt", prompt,
+            "--steps", str(STEPS),
+            "--width", str(WIDTH),
+            "--height", str(HEIGHT),
+            "--output", str(output_path),
+        ]
 
         try:
-            subprocess.run(
-                [
-                    "mflux-generate",
-                    "--model", MODEL,
-                    "--steps", str(STEPS),
-                    "--quantize", str(QUANTIZE),
-                    "--height", str(HEIGHT),
-                    "--width", str(WIDTH),
-                    "--low-ram",
-                    "--prompt", prompt,
-                    "--output", str(output_path),
-                ],
-                check=True,
-                capture_output=True,
-                text=True,
-                timeout=600,
-                env=env,
+            result = subprocess.run(cmd, capture_output=True, text=True)
+        except OSError as exc:
+            raise ImageGenerationError(
+                f"Không thể gọi {_resolve_mflux_cli()}: {exc}"
+            ) from exc
+
+        if result.returncode != 0:
+            raise ImageGenerationError(
+                f"Lỗi khi gọi mflux sinh ảnh: {result.stderr or result.stdout}"
             )
-        except subprocess.CalledProcessError as exc:
-            raise ImageGenerationError(
-                f"mflux-generate lỗi (exit code {exc.returncode}): {exc.stderr}"
-            ) from exc
-        except subprocess.TimeoutExpired as exc:
-            raise ImageGenerationError(
-                "mflux-generate quá thời gian chờ (10 phút)"
-            ) from exc
-        except FileNotFoundError as exc:
-            raise ImageGenerationError(
-                "Không tìm thấy lệnh 'mflux-generate' trên PATH — "
-                "hãy chạy trong .venv của project (uv run ...) hoặc kiểm tra mflux đã cài chưa"
-            ) from exc
 
         if not output_path.exists():
             raise ImageGenerationError(
-                "mflux-generate chạy xong nhưng không tạo ra file ảnh output"
+                "mflux-generate-flux2 trả về thành công (returncode 0) nhưng không ghi ra file output — "
+                "có thể do lỗi no-op đã biết của công cụ"
             )
 
         return output_path.read_bytes()
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)

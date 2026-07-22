@@ -1,4 +1,3 @@
-# images/cli.py
 import argparse
 import asyncio
 import json
@@ -33,7 +32,6 @@ async def _run(script_path: Path, gemini_client=None) -> None:
 
     images = []
     for chapter in script.chapters:
-        print(f"Đang sinh ảnh chương {chapter.index}/{len(script.chapters)}...")
         scene_description = await generate_scene_description(chapter, gemini_client)
         image_bytes = generate_background_image(scene_description)
         images.append((chapter.index, scene_description, image_bytes))
