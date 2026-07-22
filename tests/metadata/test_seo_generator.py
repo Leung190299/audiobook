@@ -68,3 +68,21 @@ async def test_generate_seo_copy_wraps_api_error():
 
     with pytest.raises(SeoGenerationError):
         await generate_seo_copy(_sample_script(), client=fake_client)
+
+
+async def test_generate_seo_copy_ignores_embedded_label_substring_in_description():
+    response_text = (
+        "TITLE: Video hay\n"
+        "DESCRIPTION: Xem thêm TAGS: linh tinh không phải nhãn thật\n"
+        "TAGS: truyen, audio\n"
+        "HASHTAGS: #a #b"
+    )
+    fake_client = _make_fake_client(response_text)
+
+    seo_copy = await generate_seo_copy(_sample_script(), client=fake_client)
+
+    assert seo_copy.tags == ["truyen", "audio"]
+    assert (
+        seo_copy.description_draft
+        == "Xem thêm TAGS: linh tinh không phải nhãn thật"
+    )

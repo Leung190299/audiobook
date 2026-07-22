@@ -1,4 +1,5 @@
 import os
+import re
 from dataclasses import dataclass
 
 from gemini_webapi import GeminiClient
@@ -43,21 +44,22 @@ def build_seo_prompt(script: Script) -> str:
 
 
 def _parse_label(text: str, label: str) -> str:
-    marker = f"{label}:"
-    start = text.find(marker)
-    if start == -1:
+    pattern = re.compile(rf"^{re.escape(label)}:", re.MULTILINE)
+    match = pattern.search(text)
+    if match is None:
         raise SeoGenerationError(f"Gemini không trả về nhãn '{label}:' trong output SEO")
-    start += len(marker)
+    start = match.end()
 
-    next_positions = [
-        pos
-        for other in _LABELS
-        if other != label
-        for pos in [text.find(f"\n{other}:", start)]
-        if pos != -1
-    ]
+    next_positions = []
+    for other in _LABELS:
+        if other == label:
+            continue
+        other_pattern = re.compile(rf"^{re.escape(other)}:", re.MULTILINE)
+        other_match = other_pattern.search(text, start)
+        if other_match is not None:
+            next_positions.append(other_match.start())
+
     end = min(next_positions) if next_positions else len(text)
-
     value = text[start:end].strip()
     if not value:
         raise SeoGenerationError(f"Gemini trả về nhãn '{label}:' rỗng")
