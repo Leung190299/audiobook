@@ -20,6 +20,14 @@ class VideoRenderError(Exception):
 def _run(
     script_path: Path, tts_metadata_path: Path, images_metadata_path: Path
 ) -> Path:
+    # Resolve to absolute before deriving audio_path/images_dir below --
+    # build_video_props() computes paths via .relative_to(REPO_ROOT), which
+    # requires both sides to be absolute (a relative input path here would
+    # otherwise raise "not in the subpath of" even when it's really under
+    # the repo root).
+    tts_metadata_path = tts_metadata_path.resolve()
+    images_metadata_path = images_metadata_path.resolve()
+
     script = Script.from_dict(json.loads(script_path.read_text(encoding="utf-8")))
     tts_metadata = json.loads(tts_metadata_path.read_text(encoding="utf-8"))
     images_metadata = json.loads(images_metadata_path.read_text(encoding="utf-8"))

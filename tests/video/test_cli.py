@@ -85,6 +85,32 @@ def test_run_builds_props_and_renders_video(tmp_path, monkeypatch):
     assert saved_props["chapters"][0]["imagePath"] == "demo-chapter-1.png"
 
 
+def test_run_resolves_relative_input_paths(tmp_path, monkeypatch):
+    # Regression test: a real pipeline run invoked video.cli with paths relative
+    # to the cwd (e.g. "output/audio/x.json") rather than absolute paths. Since
+    # build_video_props() computes `.relative_to(REPO_ROOT)` (always absolute),
+    # a still-relative tts/images path raised "not in the subpath of" even
+    # though it really was under the repo root once resolved.
+    monkeypatch.setattr(cli, "OUTPUT_DIR", tmp_path / "output")
+    monkeypatch.setattr(cli, "REPO_ROOT", tmp_path)
+    script_path, tts_metadata_path, images_metadata_path = _write_fixture_inputs(tmp_path)
+
+    monkeypatch.chdir(tmp_path)
+    relative_script_path = Path(script_path.name)
+    relative_tts_path = Path(tts_metadata_path.name)
+    relative_images_path = Path(images_metadata_path.name)
+
+    def fake_run(cmd, **kwargs):
+        output_path = Path(cmd[5])
+        output_path.write_bytes(b"fake mp4")
+        return subprocess.CompletedProcess(cmd, returncode=0, stdout="", stderr="")
+
+    with patch("video.cli.subprocess.run", side_effect=fake_run):
+        result_path = cli._run(relative_script_path, relative_tts_path, relative_images_path)
+
+    assert result_path.exists()
+
+
 def test_run_raises_on_render_failure(tmp_path, monkeypatch):
     monkeypatch.setattr(cli, "OUTPUT_DIR", tmp_path / "output")
     monkeypatch.setattr(cli, "REPO_ROOT", tmp_path)
