@@ -3,6 +3,10 @@ import unicodedata
 from pathlib import Path
 
 
+class VideoRenameError(Exception):
+    pass
+
+
 def slugify(title: str, max_length: int = 100) -> str:
     normalized = unicodedata.normalize("NFD", title)
     without_accents = "".join(
@@ -21,5 +25,10 @@ def slugify(title: str, max_length: int = 100) -> str:
 def rename_video_file(video_path: Path, title: str) -> Path:
     slug = slugify(title)
     new_path = video_path.with_name(f"{slug}{video_path.suffix}")
+    if new_path.exists() and new_path != video_path:
+        raise VideoRenameError(
+            f"Không thể đổi tên video: file đích đã tồn tại ({new_path}). "
+            "Xoá hoặc đổi tên file đó trước, hoặc kiểm tra xem tiêu đề video có bị trùng không."
+        )
     video_path.rename(new_path)
     return new_path
