@@ -97,7 +97,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "gemini-webapi", specifier = ">=1.0.0" },
-    { name = "mflux" },
+    { name = "mflux", specifier = ">=0.10.0" },
     { name = "omnivoice", specifier = ">=0.1.0" },
     { name = "pyloudnorm", specifier = ">=0.1.1" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
