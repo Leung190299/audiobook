@@ -88,8 +88,14 @@ for chapter in script.chapters:
 
 ## 5. Rủi ro & lưu ý
 
-- **Chi phí load lại model 8 lần/truyện**: xem mục "Quyết định thiết kế" — chưa đo thời gian thực tế, cần xác nhận ở smoke test. Nếu quá chậm, cân nhắc chuyển sang Python API của mflux (load 1 lần, tái dùng) ở lần lặp sau.
-- **Tải model lần đầu**: `Runpod/FLUX.2-klein-4B-mflux-4bit` cần tải về từ HuggingFace ở lần chạy đầu tiên (vài GB) — không tính trong thời gian sinh ảnh của các lần chạy sau, nhưng cần lưu ý khi đo performance lần đầu.
+- **Smoke test thật đã chạy (2026-07-22), kết quả: THÀNH CÔNG, không lặp lại rủi ro hạ tầng của lần thử schnell trước đó**:
+  1. Tải model `Runpod/FLUX.2-klein-4B-mflux-4bit` (~4.3GB) qua HuggingFace **không cần `HF_TOKEN`** (không phải gated repo, khác với `black-forest-labs/FLUX.1-schnell` gốc) và **không gặp lại bug "xet" transfer backend** (không cần set `HF_HUB_DISABLE_XET=1`).
+  2. Đủ dung lượng ổ đĩa trên máy vận hành hiện tại (~8-13GB trống lúc chạy) — không lặp lại sự cố "No space left on device" đã gặp với schnell.
+  3. mflux (MLX) chạy ổn định trên máy này qua toàn bộ 8 chương, không crash/treo — xác nhận không thừa hưởng rủi ro MPS đã gặp ở TTS.
+  4. Đo thời gian thực tế: **~22 phút 25 giây cho 8 ảnh** (bao gồm chi phí load lại model 8 lần, không tính lần tải weight đầu tiên) — chấp nhận được cho nhịp sản xuất 2-3 video/tuần đã đặt ra, dù chậm hơn nhiều so với giữ model trong bộ nhớ.
+  5. Chất lượng ảnh: đúng phong cách watercolor/flat-illustration đã duyệt, tông màu ấm nhất quán giữa các ảnh, không có chữ/logo lạ chèn vào ảnh (runes cách điệu ở ảnh có phép thuật không phải chữ thật).
+- **Chi phí load lại model 8 lần/truyện**: xem mục "Quyết định thiết kế" — đã đo thực tế ở trên (~22.5 phút/8 ảnh). Nếu sau này thấy quá chậm cho khối lượng sản xuất lớn hơn, cân nhắc chuyển sang Python API của mflux (load 1 lần, tái dùng) ở lần lặp sau.
+- **Tải model lần đầu**: `Runpod/FLUX.2-klein-4B-mflux-4bit` cần tải về từ HuggingFace ở lần chạy đầu tiên (~4.3GB, đã xác nhận thực tế) — không tính trong thời gian sinh ảnh của các lần chạy sau, nhưng cần lưu ý khi đo performance lần đầu.
 - **Phụ thuộc vào công cụ bên thứ ba (mflux) còn khá mới**: FLUX.2 Klein mới phát hành (2026-01), CLI/tham số có thể đổi ở phiên bản sau — nếu `uv sync` nâng cấp mflux và CLI đổi tham số, cần cập nhật lại `generator.py`.
 - **License**: mflux (MIT) và FLUX.2 Klein — cần xác nhận license của riêng weights `Runpod/FLUX.2-klein-4B-mflux-4bit` trên HuggingFace cho phép dùng thương mại trước khi publish kênh kiếm tiền (chưa xác nhận trong thiết kế này — **ngoài phạm vi**, cần kiểm tra ở giai đoạn vận hành trước khi bật kiếm tiền).
 
