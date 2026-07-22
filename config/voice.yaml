@@ -1,4 +1,5 @@
-instruction: "female, moderate pitch, young adult"
+instruction: "female, moderate pitch, young adult"  # used only if ref_audio_path is unset
+ref_audio_path: "config/voices/female_ngochuyen.mp3"  # voice-clone mode: overrides instruction
 target_lufs: -16.0
 sample_rate: 24000
-gap_seconds: 0.5
+gap_seconds: 0.5  # Must match CROSSFADE_SECONDS in remotion/src/MainVideo.tsx

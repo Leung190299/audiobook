@@ -35,6 +35,7 @@ def test_generate_background_image_returns_file_bytes(monkeypatch):
     assert "--low-ram" in cmd
     assert written["env"]["HF_HUB_DISABLE_XET"] == "1"
 
+    assert result == fake_bytes
 
 def test_generate_background_image_raises_on_process_error(monkeypatch):
     def fake_run(cmd, check, capture_output, text, timeout, env):
@@ -55,6 +56,11 @@ def test_generate_background_image_raises_on_timeout(monkeypatch):
     with pytest.raises(ImageGenerationError, match="thời gian"):
         generate_background_image("a scene")
 
+def test_generate_background_image_raises_on_nonzero_returncode():
+    def _run(cmd, **kwargs):
+        return subprocess.CompletedProcess(
+            cmd, returncode=1, stdout="", stderr="model load failed"
+        )
 
 def test_generate_background_image_raises_when_output_file_missing(monkeypatch):
     def fake_run(cmd, check, capture_output, text, timeout, env):

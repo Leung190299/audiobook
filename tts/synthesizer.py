@@ -11,7 +11,12 @@ class SynthesisError(Exception):
 
 def synthesize_chapter(chapter: Chapter, model, voice_profile: VoiceProfile) -> np.ndarray:
     try:
-        result = model.generate(text=chapter.text, instruct=voice_profile.instruction)
+        if voice_profile.ref_audio_path is not None:
+            result = model.generate(
+                text=chapter.text, ref_audio=str(voice_profile.ref_audio_path)
+            )
+        else:
+            result = model.generate(text=chapter.text, instruct=voice_profile.instruction)
     except Exception as exc:
         raise SynthesisError(
             f"Lỗi khi lồng tiếng chương {chapter.index} ({chapter.heading}): {exc}"
