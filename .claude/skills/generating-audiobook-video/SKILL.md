@@ -41,6 +41,17 @@ Run from the repo root. Each command prints the path(s) it wrote — capture tho
 
 Stage 2 and 3 both take stage 1's script path directly — they don't depend on each other and could run in parallel, but running them sequentially is simpler to reason about and this repo has no orchestration for concurrent runs.
 
+**Stage 2 also has a per-chapter mode** for speeding up an 8-chapter run (see "Parallel TTS" below): `uv run python -m tts.cli <script_path> --chapter N` synthesizes only chapter N, writing to `output/audio/chapters/` instead of `output/audio/`. A separate merge step, `uv run python -m tts.merge_cli <script_path> <chapter_audio_dir>`, combines all per-chapter files back into one full-story `output/audio/<trope>-<ts>.wav` + `.json` in the exact same format stage 4 expects — so stage 4 is unaffected either way.
+
+### Parallel TTS (stage 2), real findings
+
+Running all 8 chapters through `tts.cli --chapter N` lets you parallelize stage 2, which otherwise dominates total pipeline time (TTS is CPU-only on this machine). Real findings from doing this on the operator's 16GB MacBook Air (8 cores):
+
+- **Run at most 2 chapters concurrently.** Each `tts.cli` process loads OmniVoice (~2.5GB RSS) plus, on first use, a Whisper ASR model for auto-transcribing the voice-clone reference. 2 concurrent processes work reliably; going higher risks OOM on this machine (only ~3.5GB free RAM was observed even with nothing else running).
+- **2-way parallelism is a modest win, not ~2x.** CPU contention roughly doubles each individual chapter's wall time (solo ~20-31 min → ~44-54 min when paired), so a round of 2 chapters takes about as long as one chapter would solo-adjacent-plus-overhead — the net saving over fully sequential (8 × solo time) is real but only around 15-25%, not linear speedup.
+- **Do NOT dispatch these long-running (20+ min) background jobs through the Agent/subagent tool.** In practice, subagents that start a `run_in_background: true` Bash command and then end their own turn cause that background job to vanish silently sometime later — no Python traceback, no exit code, no crash report, no OS-level jetsam/OOM log entry matching it. It just disappears. Launch these jobs directly from the main session's own Bash tool with `run_in_background: true` instead — that has run reliably for every long job in this project (TTS, image generation, video rendering all take many minutes to tens of minutes).
+- **Practical batching that worked:** chapters `[1]` (or whichever's already done) reused as-is, then rounds of `[2,3]`, `[4,5]`, `[6,7]`, `[8]` (last one solo since 7 is odd) — each round launched as two separate direct (non-agent) `Bash` calls with `run_in_background: true` in the same turn, then wait for both completion notifications before starting the next round.
+
 ## Example
 
 ```bash
@@ -70,3 +81,5 @@ If a printed path is missed, recover the newest file instead of re-running: `ls 
 - **Passing the wrong JSON to `video.cli`.** It takes 3 paths in this order: script, TTS metadata, images metadata — not the `.wav`/`.png` files themselves.
 - **Expecting this to be fast.** TTS runs on CPU (no GPU/MPS on this project's dev machine); image generation reloads the mflux model from scratch for each of the 8 chapters (~20-25 min total for stage 3, more on the very first run while weights download) — don't assume a hang is a failure.
 - **Running without a real `.env`.** `scripts`/`images` call Gemini via cookie auth; without real `SECURE_1PSID`/`SECURE_1PSIDTS` they crash with a raw `KeyError` traceback (not a clean error message) — check `.env` exists before starting, don't wait for the crash to notice.
+- **Using the Agent/subagent tool to run a long TTS/image/video job in the background.** See "Parallel TTS" above — this has caused jobs to silently vanish. Use the main session's own `Bash` tool with `run_in_background: true` instead.
+- **Merging per-chapter TTS audio out of order.** `tts.merge_cli` orders chapters by the *original script's* chapter index, not by filename or discovery order — it's safe to run chapters in any order/any batching, but always pass the same original multi-chapter script JSON as its first argument.
