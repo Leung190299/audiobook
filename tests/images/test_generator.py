@@ -1,48 +1,99 @@
 # tests/images/test_generator.py
-import base64
-from unittest.mock import MagicMock
+import subprocess
+from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
 from images.generator import ImageGenerationError, generate_background_image
 
 
-def _make_fake_client(b64_data: "str | None"):
-    fake_image = MagicMock()
-    fake_image.b64_json = b64_data
-    fake_response = MagicMock()
-    fake_response.data = [fake_image] if b64_data is not None else []
-    fake_client = MagicMock()
-    fake_client.images.generate.return_value = fake_response
-    return fake_client
+def _fake_run_writing_output(png_bytes: bytes):
+    def _run(cmd, **kwargs):
+        output_path = Path(cmd[cmd.index("--output") + 1])
+        output_path.write_bytes(png_bytes)
+        return subprocess.CompletedProcess(cmd, returncode=0, stdout="", stderr="")
+
+    return _run
 
 
-def test_generate_background_image_returns_decoded_bytes():
-    original_bytes = b"fake png bytes"
-    b64_data = base64.b64encode(original_bytes).decode("ascii")
-    fake_client = _make_fake_client(b64_data)
+def test_generate_background_image_returns_bytes_from_output_file():
+    fake_bytes = b"fake png bytes"
 
-    image_bytes = generate_background_image("cozy living room at dusk", client=fake_client)
+    with patch(
+        "images.generator.subprocess.run",
+        side_effect=_fake_run_writing_output(fake_bytes),
+    ) as mock_run:
+        result = generate_background_image("cozy living room at dusk")
 
-    assert image_bytes == original_bytes
-    call_kwargs = fake_client.images.generate.call_args.kwargs
-    assert call_kwargs["prompt"].startswith("cozy living room at dusk, ")
-    assert "no text" in call_kwargs["prompt"]
-    assert call_kwargs["model"] == "black-forest-labs/FLUX.1-schnell-Free"
-    assert call_kwargs["width"] == 1024
-    assert call_kwargs["height"] == 576
+    assert result == fake_bytes
+
+    cmd = mock_run.call_args.args[0]
+    assert cmd[0].endswith("mflux-generate-flux2")
+    assert cmd[cmd.index("--model") + 1] == "Runpod/FLUX.2-klein-4B-mflux-4bit"
+    assert cmd[cmd.index("--base-model") + 1] == "flux2-klein-4b"
+    assert cmd[cmd.index("--width") + 1] == "1024"
+    assert cmd[cmd.index("--height") + 1] == "576"
+    assert cmd[cmd.index("--steps") + 1] == "4"
+    prompt = cmd[cmd.index("--prompt") + 1]
+    assert prompt.startswith("cozy living room at dusk, ")
+    assert "no text" in prompt
 
 
-def test_generate_background_image_raises_on_client_error():
-    fake_client = MagicMock()
-    fake_client.images.generate.side_effect = RuntimeError("API down")
+def test_generate_background_image_raises_on_nonzero_returncode():
+    def _run(cmd, **kwargs):
+        return subprocess.CompletedProcess(
+            cmd, returncode=1, stdout="", stderr="model load failed"
+        )
 
-    with pytest.raises(ImageGenerationError):
-        generate_background_image("a scene", client=fake_client)
+    with patch("images.generator.subprocess.run", side_effect=_run):
+        with pytest.raises(ImageGenerationError, match="model load failed"):
+            generate_background_image("a scene")
 
 
-def test_generate_background_image_raises_on_missing_data():
-    fake_client = _make_fake_client(None)
+def test_generate_background_image_raises_on_missing_binary():
+    """Test that OSError from subprocess.run is wrapped as ImageGenerationError."""
+    with patch(
+        "images.generator.subprocess.run",
+        side_effect=FileNotFoundError("mflux-generate-flux2 not found"),
+    ):
+        with pytest.raises(ImageGenerationError) as exc_info:
+            generate_background_image("a scene")
 
-    with pytest.raises(ImageGenerationError):
-        generate_background_image("a scene", client=fake_client)
+        # Should mention the CLI path and preserve the exception chain
+        error_msg = str(exc_info.value)
+        assert "mflux-generate-flux2" in error_msg
+        assert exc_info.value.__cause__ is not None
+        assert isinstance(exc_info.value.__cause__, FileNotFoundError)
+
+
+def test_generate_background_image_raises_when_output_file_missing_despite_success_code():
+    def _run(cmd, **kwargs):
+        # Simulates the known mflux-generate-flux2 no-op bug: returncode 0
+        # but no file actually written.
+        return subprocess.CompletedProcess(cmd, returncode=0, stdout="", stderr="")
+
+    with patch("images.generator.subprocess.run", side_effect=_run):
+        with pytest.raises(ImageGenerationError) as exc_info:
+            generate_background_image("a scene")
+
+        # Should have a distinct message for the no-op bug case
+        error_msg = str(exc_info.value)
+        assert "returncode 0" in error_msg
+        assert "no-op" in error_msg.lower() or "không ghi ra" in error_msg
+
+
+def test_generate_background_image_cleans_up_temp_dir():
+    fake_bytes = b"fake png bytes"
+    captured_dirs = {}
+
+    def _run(cmd, **kwargs):
+        output_path = Path(cmd[cmd.index("--output") + 1])
+        captured_dirs["dir"] = output_path.parent
+        output_path.write_bytes(fake_bytes)
+        return subprocess.CompletedProcess(cmd, returncode=0, stdout="", stderr="")
+
+    with patch("images.generator.subprocess.run", side_effect=_run):
+        generate_background_image("a scene")
+
+    assert not captured_dirs["dir"].exists()
