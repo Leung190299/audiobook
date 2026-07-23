@@ -10,8 +10,10 @@ FONT_PATH = (
 MAX_FONT_SIZE = 100
 # NOTE: measured against the actual bundled Be Vietnam Pro Black font at
 # TEXT_WIDTH_RATIO=0.9 on a 1280px-wide canvas, very long hook strings need to
-# shrink to ~30pt to fit. 40 was not low enough (see task-3-report.md), so the
-# floor is set lower to give the shrink loop room to actually reach a fit.
+# shrink to ~30pt to fit. A floor of 40 was too high -- the shrink loop (step
+# -4 from MAX_FONT_SIZE=100) never lands on a checked size below 44 in that
+# case, so it fell through to a still-too-wide 40pt font. The floor is set
+# lower here to give the loop room to actually reach a fitting size.
 MIN_FONT_SIZE = 20
 TEXT_WIDTH_RATIO = 0.9
 STROKE_WIDTH = 6
