@@ -15,7 +15,7 @@ Spec module SEO metadata ([docs/superpowers/specs/2026-07-22-seo-metadata-module
 - **1 lần gọi Gemini duy nhất** cho cả hook text (tiếng Việt) và visual description (tiếng Anh, cho mflux) — dùng format nhãn `HOOK:`/`VISUAL:` giống pattern `seo_generator.py` đã dùng (nhãn dòng-đơn giản, không dùng JSON — bài học đã ghi nhận nhiều lần về độ tin cậy gemini-webapi).
 - **Input cho Gemini là tóm tắt** (title + trope + toàn bộ heading 8 chương), không gửi full text truyện — giống đúng quyết định đã áp dụng ở `seo_generator.py`, để Gemini tự suy luận cao trào/cảm xúc chủ đạo mà không cần code tự chọn "chương nào là cao trào".
 - **Không phụ thuộc vào stage 5 (metadata)**: thumbnail không cần title SEO đã sinh, không cần video đã đổi tên — chỉ cần `script.json`. Trình tự "ngay sau khi render xong" là quy ước vận hành (ghi trong skill), không phải phụ thuộc dữ liệu bắt buộc.
-- **Cần 1 file font TTF chữ đậm, hỗ trợ dấu tiếng Việt đầy đủ**, đóng gói sẵn trong repo tại `assets/fonts/` (không dựa vào font hệ thống — không đảm bảo tồn tại/nhất quán giữa các máy). Dùng **Noto Sans Bold** (SIL Open Font License, miễn phí thương mại, hỗ trợ đầy đủ tổ hợp dấu tiếng Việt).
+- **Cần 1 file font TTF chữ đậm, hỗ trợ dấu tiếng Việt đầy đủ**, đóng gói sẵn trong repo tại `assets/fonts/` (không dựa vào font hệ thống — không đảm bảo tồn tại/nhất quán giữa các máy). **CẬP NHẬT lúc triển khai**: ban đầu định dùng Noto Sans Bold, nhưng bản Noto Sans hiện tại trên kho `google/fonts` chỉ còn dạng variable font (không có file "Bold" tĩnh riêng, gây phức tạp khi nạp qua Pillow). Đổi sang **Be Vietnam Pro Black** (SIL Open Font License, miễn phí thương mại) — font thiết kế riêng cho tiếng Việt, có sẵn file trọng lượng tĩnh (bao gồm Black, đậm hơn Bold), hỗ trợ đầy đủ tổ hợp dấu tiếng Việt.
 - **Không tự động upload thumbnail lên YouTube**: giữ đúng quyết định "không tự động hoá upload" đã chốt ở spec SEO metadata — người vận hành tự tải ảnh `.png` lên khi upload video thủ công.
 
 ## 2. Kiến trúc
@@ -32,7 +32,7 @@ thumbnail/
 
 assets/
 └── fonts/
-    └── NotoSans-Bold.ttf    # font đóng gói sẵn (SIL OFL), dùng cho compositor.py
+    └── BeVietnamPro-Black.ttf    # font đóng gói sẵn (SIL OFL), dùng cho compositor.py
 ```
 
 **Luồng xử lý:**
@@ -44,7 +44,7 @@ assets/
         → ThumbnailPrompt(hook_text: str, visual_description: str)
    → 3. mflux-generate-flux2: f"{visual_description}, {THUMBNAIL_STYLE_SUFFIX}"
         --width 1280 --height 720 --steps 8 -> ảnh PNG (bytes)
-   → 4. Pillow: mở ảnh, vẽ hook_text (in hoa, font Noto Sans Bold, viền đen, căn giữa
+   → 4. Pillow: mở ảnh, vẽ hook_text (in hoa, font Be Vietnam Pro Black, viền đen, căn giữa
         theo chiều ngang, đặt ở 1/3 dưới khung hình, tự co cỡ chữ nếu bề rộng vượt
         ~90% chiều rộng ảnh) -> PNG bytes hoàn chỉnh
    → 5. Lưu output/thumbnails/<trope>-<ts>.png
@@ -93,7 +93,7 @@ STEPS = 8
 Raise `ThumbnailGenerationError` (exception riêng của module, không dùng chung `images.generator.ImageGenerationError`).
 
 **`compositor.py`** — `overlay_hook_text(image_bytes: bytes, hook_text: str) -> bytes`. Dùng `PIL.Image`/`PIL.ImageDraw`/`PIL.ImageFont`:
-- Mở ảnh từ bytes, vẽ text `hook_text.upper()` bằng font `assets/fonts/NotoSans-Bold.ttf`.
+- Mở ảnh từ bytes, vẽ text `hook_text.upper()` bằng font `assets/fonts/BeVietnamPro-Black.ttf`.
 - Màu chữ trắng, viền đen (stroke) độ dày đủ để đọc được trên mọi nền ảnh.
 - Căn giữa theo chiều ngang, đặt tại khoảng 1/3 dưới khung hình (không che khuôn mặt thường nằm giữa/trên ảnh).
 - Cỡ chữ mặc định lớn (ví dụ ~100px ở ảnh 1280×720), tự giảm dần nếu bề rộng dòng chữ vượt quá ~90% chiều rộng ảnh (dùng `font.getlength()`/`draw.textlength()` để đo trước khi vẽ).
@@ -106,7 +106,7 @@ Raise `ThumbnailGenerationError` (exception riêng của module, không dùng ch
 ## 3. Dependencies
 
 - Thêm `Pillow` vào `pyproject.toml` (dependency mới, chưa có trong dự án).
-- Thêm file `assets/fonts/NotoSans-Bold.ttf` (tải từ Google Fonts, SIL Open Font License — cần ghi rõ nguồn/license trong thư mục `assets/fonts/` khi triển khai, ví dụ 1 file `LICENSE.txt` đi kèm).
+- Thêm file `assets/fonts/BeVietnamPro-Black.ttf` (tải từ kho `google/fonts` trên GitHub, SIL Open Font License — kèm file `assets/fonts/OFL.txt` ghi rõ nguồn/license).
 - Không cần thêm dependency Node/Remotion nào (thumbnail là ảnh tĩnh, không qua Remotion).
 
 ## 4. Testing & vận hành
