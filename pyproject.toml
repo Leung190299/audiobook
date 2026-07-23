@@ -12,6 +12,7 @@ dependencies = [
     "pyloudnorm>=0.1.1",
     "soundfile>=0.12.1",
     "mflux",
+    "Pillow",
 ]
 
 [dependency-groups]
