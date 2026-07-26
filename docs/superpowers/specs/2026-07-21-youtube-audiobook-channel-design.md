@@ -18,7 +18,7 @@ Ràng buộc của người thực hiện:
 - **Khác biệt cốt lõi so với kênh mẫu**: AI sáng tác truyện gốc dựa trên các *motif/trope* đang thịnh hành, không chuyển thể tiểu thuyết cụ thể của tác giả nào — giảm rủi ro bản quyền so với mô hình "dịch truyện".
 - **Thể loại lõi**: trọng sinh/báo thù, xuyên không, gia tộc hào môn, "phế vật nghịch tập", dưỡng nữ/con nuôi bị hắt hủi rồi phản đòn, tổng tài lạnh lùng sủng vợ, anh chị em ruột tranh sủng.
 - **Đối tượng nghe**: nữ 18–45, nghe khi làm việc nhà/lái xe/trước khi ngủ — nội dung phải "nghe được không cần nhìn màn hình" (thoại rõ nhân vật, ít mô tả thị giác thuần tuý).
-- **Định dạng video**: audio full 1 tập/truyện, 25–45 phút, ảnh nền tĩnh hoặc pan nhẹ (Ken Burns), tiêu đề dạng "câu hook giật + #Full audio".
+- **Định dạng video**: audio full 1 tập/truyện, 40–55 phút (cập nhật 2026-07-23 khi nâng kịch bản từ 8 lên 16 chương — xem [2026-07-23-longer-script-16-chapters-design.md](2026-07-23-longer-script-16-chapters-design.md)), ảnh nền tĩnh hoặc pan nhẹ (Ken Burns), tiêu đề dạng "câu hook giật + #Full audio".
 - **Tên kênh & thương hiệu**: cần khác hẳn "Phù Mỏ Audio" để tránh nhầm lẫn thương hiệu. Chốt tên, logo, banner ở giai đoạn triển khai (không chặn thiết kế pipeline).
 
 ### Phong cách hình ảnh (template video)
@@ -28,14 +28,14 @@ Dựa trên bộ ảnh tham khảo do người thực hiện cung cấp, mọi v
 - **Avatar kênh** (hình tròn, cố định mọi video): nhân vật minh hoạ đặc trưng của kênh — đây là yếu tố nhận diện thương hiệu, cần thiết kế nhất quán qua tất cả video.
 - **Icon waveform** nhỏ ngay dưới avatar, báo hiệu đang phát audio.
 - **Tiêu đề tập truyện** in nghiêng, ngay dưới waveform.
-- **Nền minh hoạ full-khung hình**: tranh watercolor/flat-illustration ấm áp, chủ đề nội thất hoặc thiên nhiên (núi đồi, hồ nước, bãi biển, tiệm sách...), đổi theo từng phân đoạn/chương để tránh nhàm chán khi nghe 25–45 phút. Sinh bằng **Flux**.
+- **Nền minh hoạ full-khung hình**: tranh watercolor/flat-illustration ấm áp, chủ đề nội thất hoặc thiên nhiên (núi đồi, hồ nước, bãi biển, tiệm sách...), đổi theo từng phân đoạn/chương để tránh nhàm chán khi nghe 40–55 phút. Sinh bằng **Flux**.
 - **Caption cháy nền**: phụ đề trắng trên nền pill bán trong suốt, căn giữa, tự động wrap 2 dòng, đồng bộ theo audio — tăng khả năng giữ chân người xem lướt thấy video (kể cả khi tắt tiếng).
 
 ## 2. Pipeline sản xuất (full tự động)
 
 ```
 [Kho ý tưởng/trope]
-   → 1. LLM sinh kịch bản: outline + full script (~5.000–8.000 từ/tập), chia theo chương/phân đoạn
+   → 1. LLM sinh kịch bản: outline + full script (~10.000–13.000 từ/tập), chia theo chương/phân đoạn
    → 2. Kiểm tra tự động: độ dài, cấu trúc, lọc từ nhạy cảm/vi phạm thương hiệu bên thứ 3
    → 3. OmniVoice TTS: đọc theo giọng đã chọn/thiết kế, xuất audio + timestamp theo chương
    → 4. Hậu kỳ audio: chuẩn hoá loudness, nối chương, (tuỳ chọn) nhạc nền royalty-free nhẹ
