@@ -6,7 +6,8 @@ def test_build_outline_prompt_includes_trope_details():
 
     assert "Trọng sinh báo thù" in prompt
     assert "Mô tả test." in prompt
-    assert "8 chương" in prompt
+    assert "16 chương" in prompt
+    assert "10.000–13.000" in prompt
 
 
 def test_build_chapter_prompt_enforces_minimum_words():
