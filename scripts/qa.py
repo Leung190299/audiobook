@@ -1,9 +1,9 @@
 from scripts.models import Script
 
-MIN_WORDS = 5000
-MAX_WORDS = 8000
-MIN_CHAPTERS = 6
-MAX_CHAPTERS = 10
+MIN_WORDS = 9000
+MAX_WORDS = 14000
+MIN_CHAPTERS = 14
+MAX_CHAPTERS = 18
 
 BANNED_TERMS = [
     "phù mỏ audio",
