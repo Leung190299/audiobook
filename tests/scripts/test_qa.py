@@ -16,80 +16,96 @@ def _make_script(word_count: int, num_chapters: int, extra_text: str = "") -> Sc
 
 
 def test_validate_script_passes_for_valid_script():
-    script = _make_script(word_count=6000, num_chapters=8)
+    # 11200 // 16 = 700, 700 * 16 = 11200 (divides evenly, no rounding loss)
+    script = _make_script(word_count=11200, num_chapters=16)
+    assert script.word_count == 11200
     validate_script(script)  # không raise
 
 
 def test_validate_script_raises_when_too_short():
-    script = _make_script(word_count=1000, num_chapters=8)
+    # 1600 // 16 = 100, 100 * 16 = 1600 (well below MIN_WORDS, chapter count valid)
+    script = _make_script(word_count=1600, num_chapters=16)
     with pytest.raises(ScriptQAError, match="Độ dài"):
         validate_script(script)
 
 
 def test_validate_script_raises_when_too_many_chapters():
-    script = _make_script(word_count=6000, num_chapters=12)
+    # 11000 // 20 = 550, 550 * 20 = 11000 (words valid, but 20 > MAX_CHAPTERS)
+    script = _make_script(word_count=11000, num_chapters=20)
     with pytest.raises(ScriptQAError, match="Số chương"):
         validate_script(script)
 
 
 def test_validate_script_raises_when_banned_term_present():
-    script = _make_script(word_count=6000, num_chapters=8, extra_text="phù mỏ audio")
+    # Valid words and chapters; the 3 extra words keep it inside MAX_WORDS.
+    script = _make_script(word_count=11200, num_chapters=16, extra_text="phù mỏ audio")
     with pytest.raises(ScriptQAError, match="từ khoá bị cấm"):
         validate_script(script)
 
 
 def test_validate_script_passes_at_exact_minimum_boundaries():
-    # 5000 // 6 = 833, 833 * 6 = 4998, so add 2 extra words to reach exactly 5000
-    script = _make_script(word_count=5000, num_chapters=6, extra_text="từ từ")
-    assert script.word_count == 5000
+    # 9000 // 14 = 642, 642 * 14 = 8988, so add 12 extra words to reach exactly 9000
+    script = _make_script(
+        word_count=9000,
+        num_chapters=14,
+        extra_text="từ từ từ từ từ từ từ từ từ từ từ từ",
+    )
+    assert script.word_count == 9000  # exactly MIN_WORDS
+    assert len(script.chapters) == 14  # exactly MIN_CHAPTERS
     validate_script(script)  # không raise
 
 
 def test_validate_script_passes_at_exact_maximum_boundaries():
-    # 8000 // 10 = 800, 800 * 10 = 8000 (perfect, no rounding loss)
-    script = _make_script(word_count=8000, num_chapters=10)
-    assert script.word_count == 8000
+    # 14000 // 18 = 777, 777 * 18 = 13986, so add 14 extra words to reach exactly 14000
+    script = _make_script(
+        word_count=14000,
+        num_chapters=18,
+        extra_text="từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+    )
+    assert script.word_count == 14000  # exactly MAX_WORDS
+    assert len(script.chapters) == 18  # exactly MAX_CHAPTERS
     validate_script(script)  # không raise
 
 
 def test_validate_script_raises_just_below_minimum_words():
-    # 4999 // 8 = 624, 624 * 8 = 4992, so add 7 extra words to reach exactly 4999
-    script = _make_script(word_count=4999, num_chapters=8, extra_text="từ từ từ từ từ từ từ")
-    assert script.word_count == 4999  # verify it's exactly at target boundary
+    # 8999 // 16 = 562, 562 * 16 = 8992, so add 7 extra words to reach exactly 8999
+    script = _make_script(word_count=8999, num_chapters=16, extra_text="từ từ từ từ từ từ từ")
+    assert script.word_count == 8999  # one word below MIN_WORDS
     with pytest.raises(ScriptQAError, match="Độ dài"):
         validate_script(script)
 
 
 def test_validate_script_raises_just_above_maximum_words():
-    # 8001 // 8 = 1000, 1000 * 8 = 8000, so add 1 extra word to reach 8001
-    script = _make_script(word_count=8001, num_chapters=8, extra_text="từ")
-    assert script.word_count == 8001
+    # 14001 // 16 = 875, 875 * 16 = 14000, so add 1 extra word to reach exactly 14001
+    script = _make_script(word_count=14001, num_chapters=16, extra_text="từ")
+    assert script.word_count == 14001  # one word above MAX_WORDS
     with pytest.raises(ScriptQAError, match="Độ dài"):
         validate_script(script)
 
 
 def test_validate_script_raises_when_too_few_chapters():
-    # 6000 // 5 = 1200, 1200 * 5 = 6000 (exact, no rounding loss)
-    script = _make_script(word_count=6000, num_chapters=5)
-    assert script.word_count == 6000
-    assert len(script.chapters) == 5
+    # 13000 // 13 = 1000, 1000 * 13 = 13000 (words valid, but 13 < MIN_CHAPTERS)
+    script = _make_script(word_count=13000, num_chapters=13)
+    assert script.word_count == 13000
+    assert len(script.chapters) == 13
     with pytest.raises(ScriptQAError, match="Số chương"):
         validate_script(script)
 
 
 def test_validate_script_raises_just_above_maximum_chapters():
-    # 6000 // 11 = 545, 545 * 11 = 5995 (below max words, but > 10 chapters)
-    script = _make_script(word_count=6000, num_chapters=11)
-    assert len(script.chapters) == 11
+    # 11400 // 19 = 600, 600 * 19 = 11400 (words valid, but 19 > MAX_CHAPTERS)
+    script = _make_script(word_count=11400, num_chapters=19)
+    assert script.word_count == 11400
+    assert len(script.chapters) == 19
     with pytest.raises(ScriptQAError, match="Số chương"):
         validate_script(script)
 
 
 def test_validate_script_aggregates_multiple_failures_in_one_message():
-    # 1000 // 12 = 83, 83 * 12 = 996 (< 5000 AND > 10 chapters)
-    script = _make_script(word_count=1000, num_chapters=12)
-    assert script.word_count == 996  # below minimum
-    assert len(script.chapters) == 12  # above maximum
+    # 1000 // 20 = 50, 50 * 20 = 1000 (< MIN_WORDS AND > MAX_CHAPTERS)
+    script = _make_script(word_count=1000, num_chapters=20)
+    assert script.word_count == 1000  # below minimum
+    assert len(script.chapters) == 20  # above maximum
     with pytest.raises(ScriptQAError) as exc_info:
         validate_script(script)
     message = str(exc_info.value)
