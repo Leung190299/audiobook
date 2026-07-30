@@ -24,4 +24,14 @@ def synthesize_chapter(chapter: Chapter, model, voice_profile: VoiceProfile) -> 
             f"Kết quả VieNeu-TTS cho chương {chapter.index} không đúng định dạng mong đợi"
         )
 
-    return np.asarray(audio, dtype=np.float32)
+    if len(audio) == 0:
+        raise SynthesisError(
+            f"Kết quả VieNeu-TTS cho chương {chapter.index} ({chapter.heading}) rỗng (0 mẫu âm thanh)"
+        )
+
+    try:
+        return np.asarray(audio, dtype=np.float32)
+    except Exception as exc:
+        raise SynthesisError(
+            f"Kết quả VieNeu-TTS cho chương {chapter.index} không đúng định dạng mong đợi: {exc}"
+        ) from exc

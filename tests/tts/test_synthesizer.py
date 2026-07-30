@@ -56,3 +56,19 @@ def test_synthesize_chapter_raises_synthesis_error_on_none_result():
 
     with pytest.raises(SynthesisError):
         synthesize_chapter(chapter, model, _voice_profile())
+
+
+def test_synthesize_chapter_raises_synthesis_error_on_empty_audio():
+    chapter = Chapter(index=1, heading="Chương 1", text="Nội dung.")
+    model = _FakeModel(np.array([], dtype=np.float32))
+
+    with pytest.raises(SynthesisError):
+        synthesize_chapter(chapter, model, _voice_profile())
+
+
+def test_synthesize_chapter_raises_synthesis_error_on_non_numeric_result():
+    chapter = Chapter(index=1, heading="Chương 1", text="Nội dung.")
+    model = _FakeModel("not audio")
+
+    with pytest.raises(SynthesisError):
+        synthesize_chapter(chapter, model, _voice_profile())
