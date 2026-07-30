@@ -11,22 +11,17 @@ class SynthesisError(Exception):
 
 def synthesize_chapter(chapter: Chapter, model, voice_profile: VoiceProfile) -> np.ndarray:
     try:
-        if voice_profile.ref_audio_path is not None:
-            result = model.generate(
-                text=chapter.text, ref_audio=str(voice_profile.ref_audio_path)
-            )
-        else:
-            result = model.generate(text=chapter.text, instruct=voice_profile.instruction)
+        audio = model.infer(
+            text=chapter.text, voice=voice_profile.voice, style=voice_profile.style
+        )
     except Exception as exc:
         raise SynthesisError(
             f"Lỗi khi lồng tiếng chương {chapter.index} ({chapter.heading}): {exc}"
         ) from exc
 
-    try:
-        audio = result[0]
-    except (TypeError, IndexError, KeyError) as exc:
+    if audio is None or not hasattr(audio, "__len__"):
         raise SynthesisError(
-            f"Kết quả OmniVoice cho chương {chapter.index} không đúng định dạng mong đợi: {exc}"
-        ) from exc
+            f"Kết quả VieNeu-TTS cho chương {chapter.index} không đúng định dạng mong đợi"
+        )
 
     return np.asarray(audio, dtype=np.float32)
