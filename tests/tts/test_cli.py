@@ -2,20 +2,19 @@ import json
 from pathlib import Path
 
 import numpy as np
-import pytest
 
 from scripts.models import Chapter, Script
 from tts import cli
 
 
-def _fake_chapter_audio(duration_seconds=1.0, sample_rate=24000, amplitude=0.1) -> np.ndarray:
+def _fake_chapter_audio(duration_seconds=1.0, sample_rate=48000, amplitude=0.1) -> np.ndarray:
     t = np.linspace(0, duration_seconds, int(duration_seconds * sample_rate), endpoint=False)
     return (amplitude * np.sin(2 * np.pi * 440 * t)).astype(np.float32)
 
 
 class _FakeModel:
-    def generate(self, text, instruct=None, ref_audio=None):
-        return [_fake_chapter_audio()]
+    def infer(self, text, voice=None, style=None):
+        return _fake_chapter_audio()
 
 
 def test_run_generates_normalizes_concatenates_and_saves(tmp_path, monkeypatch, capsys):
@@ -32,7 +31,8 @@ def test_run_generates_normalizes_concatenates_and_saves(tmp_path, monkeypatch, 
 
     voice_path = tmp_path / "voice.yaml"
     voice_path.write_text(
-        "instruction: test voice\ntarget_lufs: -16.0\nsample_rate: 24000\ngap_seconds: 0.1\n",
+        'voice: "Ngọc Linh"\nstyle: "doc_truyen"\ntarget_lufs: -16.0\n'
+        "sample_rate: 48000\ngap_seconds: 0.1\n",
         encoding="utf-8",
     )
     monkeypatch.setattr(cli, "VOICE_CONFIG_PATH", voice_path)
@@ -54,76 +54,15 @@ def test_run_generates_normalizes_concatenates_and_saves(tmp_path, monkeypatch, 
     assert "Đã lưu audio" in out
 
 
-def test_run_with_chapter_index_synthesizes_only_that_chapter(tmp_path, monkeypatch):
-    script = Script(
-        trope="demo",
-        title="Tiêu đề demo",
-        chapters=[
-            Chapter(index=1, heading="Chương 1", text="Nội dung một."),
-            Chapter(index=2, heading="Chương 2", text="Nội dung hai."),
-        ],
-    )
-    script_path = tmp_path / "script.json"
-    script_path.write_text(json.dumps(script.to_dict(), ensure_ascii=False), encoding="utf-8")
-
-    voice_path = tmp_path / "voice.yaml"
-    voice_path.write_text(
-        "instruction: test voice\ntarget_lufs: -16.0\nsample_rate: 24000\ngap_seconds: 0.1\n",
-        encoding="utf-8",
-    )
-    monkeypatch.setattr(cli, "VOICE_CONFIG_PATH", voice_path)
-    monkeypatch.setattr(cli, "CHAPTER_OUTPUT_DIR", tmp_path / "output" / "chapters")
-
-    cli._run(script_path, model=_FakeModel(), chapter_index=2)
-
-    saved_metadata = list((tmp_path / "output" / "chapters").glob("*.json"))
-    assert len(saved_metadata) == 1
-    data = json.loads(saved_metadata[0].read_text(encoding="utf-8"))
-    assert len(data["chapters"]) == 1
-    assert data["chapters"][0]["index"] == 2
-    assert data["chapters"][0]["heading"] == "Chương 2"
-
-
-def test_run_with_unknown_chapter_index_raises(tmp_path, monkeypatch):
-    script = Script(
-        trope="demo",
-        title="Tiêu đề demo",
-        chapters=[Chapter(index=1, heading="Chương 1", text="Nội dung một.")],
-    )
-    script_path = tmp_path / "script.json"
-    script_path.write_text(json.dumps(script.to_dict(), ensure_ascii=False), encoding="utf-8")
-
-    with pytest.raises(cli.ChapterNotFoundError, match=r"\[1\]"):
-        cli._run(script_path, model=_FakeModel(), chapter_index=99)
-
-
 def test_main_parses_argv_and_calls_run(monkeypatch):
     calls = []
     monkeypatch.setattr(
         cli,
         "_run",
-        lambda script_path, model=None, chapter_index=None: calls.append(
-            (script_path, chapter_index)
-        ),
+        lambda script_path, model=None: calls.append(script_path),
     )
     monkeypatch.setattr("sys.argv", ["cli.py", "some/script.json"])
 
     cli.main()
 
-    assert calls == [(Path("some/script.json"), None)]
-
-
-def test_main_parses_chapter_flag(monkeypatch):
-    calls = []
-    monkeypatch.setattr(
-        cli,
-        "_run",
-        lambda script_path, model=None, chapter_index=None: calls.append(
-            (script_path, chapter_index)
-        ),
-    )
-    monkeypatch.setattr("sys.argv", ["cli.py", "some/script.json", "--chapter", "3"])
-
-    cli.main()
-
-    assert calls == [(Path("some/script.json"), 3)]
+    assert calls == [Path("some/script.json")]
