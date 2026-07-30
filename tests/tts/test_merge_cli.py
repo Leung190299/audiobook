@@ -84,6 +84,35 @@ def test_merge_combines_chapters_in_script_order(tmp_path, monkeypatch, capsys):
     assert "Đã ghép 2 chương" in out
 
 
+def test_merge_ignores_other_tropes_sharing_the_same_directory(tmp_path, monkeypatch):
+    # Regression test: chapter_audio_dir is shared across every story ever run
+    # with `tts.cli --chapter N`, not scoped per-run. A story whose trope name
+    # sorts after "demo" alphabetically (e.g. "zzz_other_story") using the same
+    # chapter indices must not silently overwrite "demo"'s chapters in the merge.
+    script_path = _write_script(tmp_path)
+    chapter_dir = tmp_path / "chapters"
+    _write_chapter_audio(chapter_dir, "demo", 1, "Chương 1 đúng")
+    _write_chapter_audio(chapter_dir, "demo", 2, "Chương 2 đúng")
+    _write_chapter_audio(chapter_dir, "zzz_other_story", 1, "Chương 1 truyện khác")
+    _write_chapter_audio(chapter_dir, "zzz_other_story", 2, "Chương 2 truyện khác")
+
+    voice_path = tmp_path / "voice.yaml"
+    voice_path.write_text(
+        "instruction: test voice\ntarget_lufs: -16.0\nsample_rate: 24000\ngap_seconds: 0.5\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(merge_cli, "VOICE_CONFIG_PATH", voice_path)
+    monkeypatch.setattr(merge_cli, "OUTPUT_DIR", tmp_path / "output")
+
+    merge_cli._run(script_path, chapter_dir)
+
+    saved_metadata = list((tmp_path / "output").glob("*.json"))
+    assert len(saved_metadata) == 1
+    data = json.loads(saved_metadata[0].read_text(encoding="utf-8"))
+    assert data["trope"] == "demo"
+    assert [c["heading"] for c in data["chapters"]] == ["Chương 1 đúng", "Chương 2 đúng"]
+
+
 def test_merge_raises_on_missing_chapter(tmp_path, monkeypatch):
     script_path = _write_script(tmp_path)
     chapter_dir = tmp_path / "chapters"

@@ -40,7 +40,13 @@ def _run(script_path: Path, chapter_audio_dir: Path) -> None:
 
     by_index = {}
     sample_rates = set()
-    for metadata_path in sorted(chapter_audio_dir.glob("*.json")):
+    # Scoped to this trope's own files -- chapter_audio_dir is shared across
+    # every story ever run with `tts.cli --chapter N` (it's not per-run), and
+    # different stories' chapter files can share the same index (1, 2, 3...).
+    # An unscoped glob here previously let a later-sorting trope's chapter N
+    # silently overwrite this trope's chapter N in by_index, merging the
+    # wrong story's audio into this one with no error.
+    for metadata_path in sorted(chapter_audio_dir.glob(f"{script.trope}-*.json")):
         index, heading, audio, sample_rate = _load_chapter_audio(metadata_path)
         by_index[index] = (heading, audio)
         sample_rates.add(sample_rate)
