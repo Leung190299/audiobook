@@ -26,6 +26,14 @@ tropes:
       Trong một gia đình nhiều anh chị em, nhân vật chính bị lép vế tình cảm
       cha mẹ dành cho anh/chị/em khác, đến khi sự thật và tài năng thật sự
       của nhân vật chính được phơi bày.
+  - id: va_mat_cong_so
+    name: "Vả mặt đồng nghiệp cặn bã chốn công sở"
+    description: >
+      Nhân vật chính có thân thế hoặc thực lực khủng nhưng ẩn giấu, đi làm
+      như một nhân viên bình thường. Bị đồng nghiệp cặn bã chèn ép, cướp công,
+      hãm hại và bị sếp coi thường, nhân vật chính từng bước dùng chính thực
+      lực của mình vạch trần và "vả mặt" từng kẻ xấu, khiến cả công ty chấn
+      động khi thân thế thật được hé lộ.
   - id: phe_vat_nghich_tap
     name: "Phế vật nghịch tập"
     description: >
@@ -33,3 +41,26 @@ tropes:
       thường xuyên bị khinh thường và chế giễu công khai. Sau một biến cố,
       tài năng hoặc sức mạnh thực sự bị che giấu bấy lâu bộc phát, khiến tất
       cả những kẻ từng coi thường phải kinh ngạc và hối hận.
+  - id: trong_sinh_mat_the
+    name: "Trọng sinh trước ngày tận thế"
+    description: >
+      Nhân vật chính chết thảm trong ngày tận thế ở kiếp trước, trọng sinh về
+      vài ngày trước thảm hoạ với ký ức nguyên vẹn về mọi thứ sắp xảy ra.
+      Trong khi người thân và hàng xóm chế giễu là điên rồ, hoang tưởng, nhân
+      vật chính âm thầm dốc sạch tiền bạc thu gom lương thực, nước sạch, thuốc
+      men, nhiên liệu và vật tư sinh tồn, gia cố nơi trú ẩn. Đến khi tận thế
+      thật sự ập xuống đúng như ký ức, những kẻ từng cười nhạo phải hối hận và
+      cầu xin giúp đỡ, còn nhân vật chính dùng hiểu biết đi trước một bước để
+      bảo vệ người mình thương và từng bước giành lấy sự sống.
+  - id: nghe_thau_tieng_long
+    name: "Nghe thấu tiếng lòng người khác"
+    description: >
+      Sau một biến cố bất ngờ, nhân vật chính có được năng lực nghe được suy
+      nghĩ thật sự trong lòng của bất kỳ ai xung quanh, dù ngoài miệng họ nói
+      hoàn toàn khác. Nhờ vậy, nhân vật chính nhìn thấu bộ mặt thật của những
+      kẻ giả tạo, âm mưu hãm hại mình trong gia đình, công sở hoặc tình cảm,
+      kịp thời né tránh cạm bẫy và đưa ra quyết định đúng đắn trước khi quá
+      muộn. Ban đầu phải giấu kín năng lực và học cách chịu đựng khi nghe được
+      những suy nghĩ tàn nhẫn từ người thân cận, nhưng dần dần dùng chính khả
+      năng đặc biệt này để bảo vệ những người thật lòng tốt với mình và vạch
+      trần từng kẻ hai mặt, khiến tất cả phải kinh ngạc.
