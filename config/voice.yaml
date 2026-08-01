@@ -1,4 +1,5 @@
-voice: "Thục Đoan"
+voice: "Thục Đoan"  # used only if ref_audio_path is unset
+ref_audio_path: "config/voices/female_ngochuyen.mp3"  # voice-clone mode: overrides voice preset
 style: "doc_truyen"
 target_lufs: -16.0
 sample_rate: 48000

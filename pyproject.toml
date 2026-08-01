@@ -8,6 +8,8 @@ dependencies = [
     "pyyaml>=6.0",
     "python-dotenv>=1.0.0",
     "vieneu",
+    "torch",       # CPU only: needed by vieneu's ONNX speaker-embedding path for voice cloning (fbank extraction), not for TTS inference itself
+    "torchaudio",  # CPU only: same reason as torch above
     "pyloudnorm>=0.1.1",
     "soundfile>=0.12.1",
     "mflux",

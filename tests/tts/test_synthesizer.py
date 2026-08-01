@@ -1,4 +1,6 @@
 # tests/tts/test_synthesizer.py
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -7,13 +9,14 @@ from tts.synthesizer import SynthesisError, synthesize_chapter
 from tts.voice_profile import VoiceProfile
 
 
-def _voice_profile() -> VoiceProfile:
+def _voice_profile(ref_audio_path=None) -> VoiceProfile:
     return VoiceProfile(
         voice="Ngọc Linh",
         style="doc_truyen",
         target_lufs=-16.0,
         sample_rate=48000,
         gap_seconds=0.5,
+        ref_audio_path=ref_audio_path,
     )
 
 
@@ -22,8 +25,8 @@ class _FakeModel:
         self.result = result
         self.calls = []
 
-    def infer(self, text, voice=None, style=None):
-        self.calls.append((text, voice, style))
+    def infer(self, text, voice=None, style=None, ref_audio=None, denoise=None):
+        self.calls.append((text, voice, style, ref_audio, denoise))
         return self.result
 
 
@@ -36,7 +39,23 @@ def test_synthesize_chapter_returns_audio_array():
 
     assert isinstance(audio, np.ndarray)
     assert audio.shape == (1000,)
-    assert model.calls == [("Nội dung chương một.", "Ngọc Linh", "doc_truyen")]
+    assert model.calls == [
+        ("Nội dung chương một.", "Ngọc Linh", "doc_truyen", None, None)
+    ]
+
+
+def test_synthesize_chapter_uses_ref_audio_when_voice_clone_configured():
+    chapter = Chapter(index=1, heading="Chương 1", text="Nội dung chương một.")
+    fake_audio = np.zeros(1000, dtype=np.float32)
+    model = _FakeModel(fake_audio)
+    ref_audio_path = Path("/tmp/female_ngochuyen.mp3")
+
+    audio = synthesize_chapter(chapter, model, _voice_profile(ref_audio_path))
+
+    assert isinstance(audio, np.ndarray)
+    assert model.calls == [
+        ("Nội dung chương một.", None, "doc_truyen", str(ref_audio_path), True)
+    ]
 
 
 def test_synthesize_chapter_raises_synthesis_error_on_model_failure():
