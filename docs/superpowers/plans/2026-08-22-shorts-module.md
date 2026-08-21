@@ -231,9 +231,6 @@ class ShortExcerpt:
 MIN_EXCERPT_WORDS = 120
 MAX_EXCERPT_WORDS = 250
 
-# Câu ngắn hơn ngưỡng này bị gộp vào câu liền trước — phụ đề nhấp nháy khó đọc.
-MIN_SENTENCE_CHARS = 15
-
 _LABELS = ("CHAPTER", "HOOK", "EXCERPT", "TITLE", "DESCRIPTION")
 _SENTENCE_END = re.compile(r"(?<=[.!?…])\s+")
 
