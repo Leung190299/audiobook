@@ -14,3 +14,20 @@ export interface VideoProps {
   sampleRate: number;
   chapters: ChapterProps[];
 }
+
+export interface ShortCaption {
+  text: string;
+  startSeconds: number;
+  endSeconds: number;
+}
+
+export interface ShortProps {
+  trope: string;
+  title: string;
+  audioPath: string;
+  imagePath: string;
+  hookText: string;
+  captions: ShortCaption[];
+  audioDurationSeconds: number;
+  ctaSeconds: number;
+}
