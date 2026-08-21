@@ -1,13 +1,15 @@
 ---
 name: generating-audiobook-video
-description: Use when asked to produce, render, or generate a finished audiobook video (MP4) for this project from a trope/story idea — e.g. "tạo video truyện", "render video cho trope X", "chạy full pipeline", "làm 1 tập truyện audio".
+description: Use when asked to produce, render, or generate a finished audiobook video (MP4) for this project from a trope/story idea — e.g. "tạo video truyện", "render video cho trope X", "chạy full pipeline", "làm 1 tập truyện audio", "chạy tập hôm nay", "làm truyện bắt trend", "up lên YouTube".
 ---
 
 # Generating an Audiobook Video
 
 ## Overview
 
-Chains this repo's six pipeline modules — `scripts` → `tts` → `images` → `video` → `thumbnail` → `metadata` — into one finished MP4 (plus a thumbnail PNG). Each module is a CLI that reads the previous module's JSON output and writes its own JSON + asset output; there is no single orchestrator command, so each stage's exact output path must be captured and passed to the next.
+Chains this repo's pipeline modules — `trend` → `scripts` → `tts` → `images` → `video` → `thumbnail` → `metadata` — into a finished MP4 plus a thumbnail PNG and copy-paste-ready SEO metadata. **The operator uploads to YouTube manually**; stage 7 (`upload/`) exists but is opt-in behind `--upload` and is off by default. Each module is a CLI that reads the previous module's JSON output and writes its own JSON + asset output.
+
+**`./run_daily.sh` already chains all of them** (and notifies via Telegram when it finishes or fails) — prefer it over driving the stages by hand. Run the stages individually only when debugging one of them, or when the user explicitly asks for a partial run. When you do run them by hand, each stage's exact output path must be captured from stdout and passed to the next; nothing derives paths from a previous stage's timestamp.
 
 ## When to Use
 
@@ -20,7 +22,10 @@ Chains this repo's six pipeline modules — `scripts` → `tts` → `images` →
 
 - `.env` exists with real `SECURE_1PSID`/`SECURE_1PSIDTS` (Gemini cookies) — required by `scripts` and `images`. **This is the one that actually breaks in practice.** Without it, stage 1 crashes with a raw `KeyError: 'SECURE_1PSID'` traceback (not a clean auth-error message — `scripts/generator.py` does `os.environ["SECURE_1PSID"]` with no try/except). Check `.env` exists (not just `.env.example`) before running anything. No API key is needed for stage 3 (images) — it runs `mflux-generate-flux2` locally, not a hosted API.
 - `cd remotion && npm install` has been run at least once — needed by stage 4 only.
-- Pick a `trope_id` from `config/tropes.yaml` (or ask the user which one).
+- Pick a `trope_id` from `config/tropes.yaml` (or ask the user which one) — **or** let stage 0 pick a trending topic instead, which is the default for `./run_daily.sh`.
+- Stage 0 needs no credentials at all — it reads public RSS (Dân Trí / VnExpress tâm sự, đời sống, pháp luật; optionally YouTube channel feeds) configured in `config/trend.yaml`. Any source that fails is skipped; it only errors out if every source is dead.
+- Stage 7 is only reachable via `./run_daily.sh --upload` and needs `config/youtube_token.json` from `uv run python -m upload.auth`. Do not run it unless the user explicitly asks to publish.
+- `uv run python -m preflight.cli --deep` checks all of the above in ~10 seconds. Run it before a long unattended job instead of discovering a missing token at minute 50.
 
 (`uv run` auto-syncs the Python venv itself on first use — no separate `uv sync` step needed.)
 
@@ -28,18 +33,20 @@ Chains this repo's six pipeline modules — `scripts` → `tts` → `images` →
 
 If `.env` is missing, stop and tell the user to create it from `.env.example` with real cookie values — don't guess credentials or silently skip the stage.
 
-## The Six Stages
+## The Stages
 
 Run from the repo root. Each command prints the path(s) it wrote — capture those from stdout, don't guess filenames. Every stage's output filename embeds its own fresh UTC timestamp (`<trope>-<timestamp>.json`), independently per stage, so stage N's timestamp will NOT match stage N+1's.
 
 | # | Command | Reads | Writes (path printed to stdout) |
 |---|---------|-------|----------------------------------|
-| 1 | `uv run python -m scripts.cli <trope_id>` | `config/tropes.yaml` | `output/scripts/<trope>-<ts>.json` |
+| 0 | `uv run python -m trend.cli` | `config/trend.yaml` (RSS báo + Google Trends, no keys) | `output/ideas/<slug>-<ts>.txt` (path after "Đã lưu ý tưởng:", slug after "Slug:") |
+| 1 | `uv run python -m scripts.cli <trope_id>` *or* `--idea-file <txt> --label <slug>` | `config/tropes.yaml` or stage 0's `.txt` | `output/scripts/<trope>-<ts>.json` |
 | 2 | `uv run python -m tts.cli <script_path>` | stage 1's JSON | `output/audio/<trope>-<ts>.wav` + `.json` (line 2 of stdout, after "Metadata:") |
 | 3 | `uv run python -m images.cli <script_path>` | stage 1's JSON | `output/images/<trope>-<ts>.json` + 8 `.png` (metadata path after "Metadata:") |
 | 4 | `uv run python -m video.cli <script_path> <tts_metadata_path> <images_metadata_path>` | stage 1 + 2 + 3's JSON | `output/video/<trope>-<ts>.mp4` |
 | 5 | `uv run python -m thumbnail.cli <script_path>` | stage 1's JSON only | `output/thumbnails/<trope>-<ts>.png` |
 | 6 | `uv run python -m metadata.cli <script_path> <tts_metadata_path> <video_path>` | stage 1 + 2 + 4's output | `output/metadata/<trope>-<ts>.txt` + `.json`; also renames stage 4's `.mp4` in place to an SEO slug |
+| 7 | *(opt-in)* `uv run python -m upload.cli <renamed_mp4> <metadata_json> --thumbnail <png>` | stage 5 + 6's output | Publishes to YouTube; prints `Đã upload: https://youtu.be/<id>` |
 
 Stage 2 and 3 both take stage 1's script path directly — they don't depend on each other and could run in parallel, but running them sequentially is simpler to reason about and this repo has no orchestration for concurrent runs.
 
@@ -53,7 +60,8 @@ Stage 6 automates the parts of YouTube SEO that can be derived from data already
 
 **Manual checklist — do these yourself in YouTube Studio at upload time, this pipeline does not automate them:**
 
-- **Uploading the generated thumbnail**: stage 5 generates `output/thumbnails/<trope>-<ts>.png` automatically — you still have to upload it as the video's thumbnail in YouTube Studio yourself (no API upload).
+- ~~Uploading the generated thumbnail~~ — **now automated** by stage 7 (`upload/uploader.py::set_thumbnail`). It fails soft: a channel without a verified phone number has no custom-thumbnail permission, in which case stage 7 prints `Thumbnail: chưa đặt` and you set it in Studio. The video itself still uploads.
+- **Flipping the video to public**: stage 7 defaults to `private`, and an OAuth project that has not passed Google's API audit gets its uploads forced to `private` regardless of what you request — so this stays a manual step in Studio until that audit is done.
 - **Cards & End Screens**: add in YouTube Studio after upload, pointing to related videos/playlists and a subscribe prompt.
 - **Pinned comment**: pin a high-value comment or discussion question yourself after publishing.
 - **Early engagement**: encourage likes/comments/shares in the first 24-48 hours — this is on you, not automatable.
@@ -90,6 +98,16 @@ uv run python -m thumbnail.cli output/scripts/trong_sinh_bao_thu-20260722T090000
 ```
 
 If a printed path is missed, recover the newest file instead of re-running: `ls -t output/<stage_dir>/*.json | head -1`.
+
+## Running the daily job
+
+`./run_daily.sh` runs stage 0-6 in order (add `--upload` for stage 7), writes per-stage logs to `output/daily/<date>/0N-<stage>.log`, and notifies on success or failure via `notify/dispatch.py` (macOS notification by default, Telegram if configured). Flags: `--trope <id>` skips stage 0 and uses a fixed trope, `--upload` adds the YouTube publish step (`--no-upload` is accepted but is now the default).
+
+It parses each stage's stdout with `sed -E`, so **changing a stage's printed output format silently breaks the chain** — the stage still succeeds, then the script fails with "không parse được output". If you edit any CLI's `print()` strings, update the matching pattern in `run_daily.sh` (and in `n8n/audiobook-pipeline.workflow.json`, which parses the same strings).
+
+`tests/test_run_daily.py` covers that chain: it runs the real `run_daily.sh` with `AUDIOBOOK_RUNNER` pointed at `tests/fake_stage.sh`, which prints each stage's exact stdout format without doing any work. **After changing any stage's `print()` output, update `fake_stage.sh` to match and run that test** — it takes ~2 seconds and catches a broken chain that would otherwise surface 50 minutes into a real run.
+
+Scheduling is `launchd/com.lee.audiobook.daily.plist` (09:00 daily). The n8n workflow is an alternative path to the same thing — if both are active the pipeline runs twice a day.
 
 ## Common Mistakes
 

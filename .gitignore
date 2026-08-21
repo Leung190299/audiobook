@@ -6,3 +6,10 @@ __pycache__/
 output/
 uv.lock.bak
 remotion/node_modules/
+
+config/youtube_client_secret.json
+config/youtube_token.json
+
+.DS_Store
+_to_delete/
+.superpowers/

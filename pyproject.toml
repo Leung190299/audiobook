@@ -14,6 +14,9 @@ dependencies = [
     "soundfile>=0.12.1",
     "mflux",
     "Pillow",
+    "google-api-python-client>=2.100.0",  # upload/: videos.insert + thumbnails.set; trend/: search.list
+    "google-auth-oauthlib>=1.2.0",        # upload/auth.py: OAuth desktop flow một lần
+    "google-auth-httplib2>=0.2.0",        # transport cho google-api-python-client
 ]
 
 [dependency-groups]

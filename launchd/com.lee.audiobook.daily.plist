@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.lee.audiobook.daily</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/lee/Project/Apps/audiobook/run_daily.sh</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/lee/Project/Apps/audiobook</string>
+
+  <!-- Chạy 09:00 mỗi ngày. Máy ngủ vào giờ này thì launchd chạy bù ngay khi máy thức. -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>9</integer>
+    <key>Minute</key><integer>0</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/Users/lee/Project/Apps/audiobook/output/daily/launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/lee/Project/Apps/audiobook/output/daily/launchd.err.log</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>LANG</key><string>en_US.UTF-8</string>
+    <key>LC_ALL</key><string>en_US.UTF-8</string>
+  </dict>
+
+  <!-- Lượt chạy kéo dài hơn một tiếng; không để macOS giết tiến trình giữa chừng. -->
+  <key>ExitTimeOut</key>
+  <integer>0</integer>
+  <key>ProcessType</key>
+  <string>Background</string>
+
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>
