@@ -21,7 +21,7 @@ Mục tiêu là dẫn lưu lượng từ Shorts về video dài, nên short **kh
 
 - **Không viết code TTS mới.** Dùng lại nguyên `tts.synthesizer.synthesize_chapter`, `tts.audio_postprocess`, `tts.voice_profile` — short vì thế luôn cùng giọng clone với tập dài, và mọi thay đổi ở `config/voice.yaml` tự động áp dụng cho cả hai.
 
-- **Tách câu bằng dấu kết câu** (`.`, `!`, `?`, `…`), gộp câu dưới 15 ký tự vào câu liền trước để tránh phụ đề nhấp nháy.
+- **Tách câu bằng dấu kết câu** (`.`, `!`, `?`, `…`) thuần túy, mỗi câu thành một dòng phụ đề — câu trong thể loại truyện này vốn ngắn và dứt khoát.
 
 - **`gap_seconds` giữa các câu là 0.15s, không dùng giá trị trong `config/voice.yaml`.** Giá trị ở đó (~0.5s) dành cho khoảng nghỉ giữa các chương; áp vào giữa câu sẽ nghe rời rạc.
 

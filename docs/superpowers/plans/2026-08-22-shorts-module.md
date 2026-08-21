@@ -173,9 +173,11 @@ def test_tach_cau_theo_dau_ket_cau():
     ]
 
 
-def test_cau_qua_ngan_duoc_gop_vao_cau_truoc():
-    assert split_sentences("Cô ấy bước vào phòng khách. Im lặng.") == [
-        "Cô ấy bước vào phòng khách. Im lặng."
+def test_cau_ngan_giu_tach_biet():
+    assert split_sentences("Không. Dừng lại. Sao?") == [
+        "Không.",
+        "Dừng lại.",
+        "Sao?",
     ]
 
 
@@ -264,15 +266,7 @@ def build_excerpt_prompt(script: Script) -> str:
 
 
 def split_sentences(text: str) -> list[str]:
-    parts = [p.strip() for p in _SENTENCE_END.split(text.strip()) if p.strip()]
-
-    merged: list[str] = []
-    for part in parts:
-        if merged and len(part) < MIN_SENTENCE_CHARS:
-            merged[-1] = f"{merged[-1]} {part}"
-        else:
-            merged.append(part)
-    return merged
+    return [p.strip() for p in _SENTENCE_END.split(text.strip()) if p.strip()]
 
 
 def _parse_label(text: str, label: str) -> str:

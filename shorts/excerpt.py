@@ -36,9 +36,6 @@ class ShortExcerpt:
 MIN_EXCERPT_WORDS = 120
 MAX_EXCERPT_WORDS = 250
 
-# Câu ngắn hơn ngưỡng này bị gộp vào câu liền trước — phụ đề nhấp nháy khó đọc.
-MIN_SENTENCE_CHARS = 15
-
 _LABELS = ("CHAPTER", "HOOK", "EXCERPT", "TITLE", "DESCRIPTION")
 _SENTENCE_END = re.compile(r"(?<=[.!?…])\s+")
 
@@ -71,15 +68,7 @@ def build_excerpt_prompt(script: Script) -> str:
 
 
 def split_sentences(text: str) -> list[str]:
-    parts = [p.strip() for p in _SENTENCE_END.split(text.strip()) if p.strip()]
-
-    merged: list[str] = []
-    for part in parts:
-        if merged and len(part) < MIN_SENTENCE_CHARS and len(merged[-1]) >= MIN_SENTENCE_CHARS:
-            merged[-1] = f"{merged[-1]} {part}"
-        else:
-            merged.append(part)
-    return merged
+    return [p.strip() for p in _SENTENCE_END.split(text.strip()) if p.strip()]
 
 
 def _parse_label(text: str, label: str) -> str:

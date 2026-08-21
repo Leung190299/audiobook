@@ -111,9 +111,11 @@ def test_tach_cau_theo_dau_ket_cau():
     ]
 
 
-def test_cau_qua_ngan_duoc_gop_vao_cau_truoc():
-    assert split_sentences("Cô ấy bước vào phòng khách. Im lặng.") == [
-        "Cô ấy bước vào phòng khách. Im lặng."
+def test_cau_ngan_giu_tach_biet():
+    assert split_sentences("Không. Dừng lại. Sao?") == [
+        "Không.",
+        "Dừng lại.",
+        "Sao?",
     ]
 
 
