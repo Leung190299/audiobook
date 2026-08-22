@@ -68,8 +68,11 @@ def eligible_chapters(script: Script) -> list[Chapter]:
     return eligible
 
 
-def build_excerpt_prompt(script: Script) -> str:
-    chapters = eligible_chapters(script)
+def build_excerpt_prompt(script: Script, chapters: list[Chapter] | None = None) -> str:
+    # Nhận sẵn danh sách chương hợp lệ khi người gọi đã tính rồi, để không lọc hai
+    # lần trong cùng một lượt gọi.
+    if chapters is None:
+        chapters = eligible_chapters(script)
     chapters_block = "\n\n".join(
         f"[Chương {c.index}] {c.heading}\n{c.text}" for c in chapters
     )
@@ -144,7 +147,7 @@ async def pick_short_chapter(
         await client.init(timeout=30, auto_close=False, close_delay=300, auto_refresh=True)
 
     eligible = eligible_chapters(script)
-    prompt = build_excerpt_prompt(script)
+    prompt = build_excerpt_prompt(script, eligible)
 
     try:
         response = await client.generate_content(prompt)
