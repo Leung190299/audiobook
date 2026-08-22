@@ -1,7 +1,6 @@
 export interface ChapterProps {
   index: number;
   heading: string;
-  text: string;
   startSeconds: number;
   endSeconds: number;
   imagePath: string;

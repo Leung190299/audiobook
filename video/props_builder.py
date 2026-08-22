@@ -60,7 +60,6 @@ def build_video_props(
             {
                 "index": chapter.index,
                 "heading": chapter.heading,
-                "text": chapter.text,
                 "startSeconds": tts_chapter["start_seconds"],
                 "endSeconds": tts_chapter["end_seconds"],
                 "imagePath": str((images_dir / image_chapter["filename"]).relative_to(repo_root)),

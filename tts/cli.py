@@ -7,7 +7,7 @@ from tts.audio_postprocess import concatenate_sentences, normalize_loudness
 from tts.sentences import split_sentences
 from tts.storage import save_audio
 from tts.synthesizer import synthesize_chapter
-from tts.voice_profile import load_voice_profile
+from tts.voice_profile import CLONED_VOICE_NAME, load_voice_profile
 
 VOICE_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "voice.yaml"
 OUTPUT_DIR = Path(__file__).resolve().parent.parent / "output" / "audio"
@@ -27,6 +27,21 @@ def _run(script_path: Path, model=None) -> None:
 
     if model is None:
         model = _load_model()
+
+    if voice_profile.ref_audio_path is not None:
+        # Enroll giọng tham chiếu đúng MỘT LẦN ở đây, ngay sau khi model sẵn
+        # sàng — không phải trong vòng lặp từng câu bên dưới. model.infer(...,
+        # ref_audio=...) trước đây tự enroll lại (giải mã mp3, khử ồn, trích
+        # speaker embedding + reference codes) mỗi lần gọi; add_voice làm việc
+        # đó một lần rồi lưu trong bộ nhớ model, tái dùng qua voice=. Cùng
+        # denoise=True/use_ref_codes=True như trước để audio ra không đổi.
+        model.add_voice(
+            CLONED_VOICE_NAME,
+            str(voice_profile.ref_audio_path),
+            denoise=True,
+            use_ref_codes=True,
+        )
+        voice_profile.voice = CLONED_VOICE_NAME
 
     # Đọc từng câu một, không đọc trọn chương, để ghi được mốc thời gian theo
     # câu — stage 7 cần mốc đó để cắt short đúng chỗ mà không phải TTS lại.
@@ -67,6 +82,10 @@ def _run(script_path: Path, model=None) -> None:
     full_audio = normalize_loudness(
         raw_audio, voice_profile.sample_rate, voice_profile.target_lufs
     )
+    # normalize_loudness giờ chỉnh gain TẠI CHỖ trên raw_audio và trả về chính
+    # nó (full_audio is raw_audio) — xoá tên raw_audio để không ai nhầm đó vẫn
+    # là bản audio chưa chuẩn hoá còn sống song song với full_audio.
+    del raw_audio
 
     audio_path, metadata_path = save_audio(
         trope=script.trope,

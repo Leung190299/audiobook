@@ -1,7 +1,7 @@
 # Thiết kế lại: short thành series cắt từ cả tập
 
 **Ngày**: 2026-08-22
-**Trạng thái**: Chờ duyệt
+**Trạng thái**: Đã triển khai
 **Thay thế**: [2026-08-21-shorts-module-design.md](2026-08-21-shorts-module-design.md) ở phần chọn nội dung; giữ nguyên phần bố cục hình ảnh và composition Remotion.
 
 ## Vì sao phải làm lại
@@ -55,7 +55,7 @@ Một chương ~800 từ (186 giây) vì thế tách thành 2 phần ~93 giây; 
 
 ```json
 {
-  "trope": "...", "title": "...", "sample_rate": 24000,
+  "trope": "...", "title": "...", "sample_rate": 48000,
   "chapters":  [{"index": 1, "heading": "...", "start_seconds": 0.0, "end_seconds": 211.3}],
   "sentences": [{"chapter_index": 1, "index": 1, "text": "...",
                  "start_seconds": 0.0, "end_seconds": 3.9}]

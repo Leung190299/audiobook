@@ -10,18 +10,15 @@ class SynthesisError(Exception):
 
 
 def synthesize_chapter(chapter: Chapter, model, voice_profile: VoiceProfile) -> np.ndarray:
+    # Không còn nhánh theo ref_audio_path ở đây: khi cấu hình là voice-clone,
+    # tts/cli.py đã enroll ref_audio_path một lần (model.add_voice) rồi gán
+    # voice_profile.voice thành tên giọng đã enroll đó trước khi vào vòng lặp
+    # từng câu. Gọi ref_audio= ở đây (mỗi câu) sẽ enroll lại từ đầu mỗi lần —
+    # đúng lỗi mà cách này sửa.
     try:
-        if voice_profile.ref_audio_path is not None:
-            audio = model.infer(
-                text=chapter.text,
-                ref_audio=str(voice_profile.ref_audio_path),
-                denoise=True,
-                style=voice_profile.style,
-            )
-        else:
-            audio = model.infer(
-                text=chapter.text, voice=voice_profile.voice, style=voice_profile.style
-            )
+        audio = model.infer(
+            text=chapter.text, voice=voice_profile.voice, style=voice_profile.style
+        )
     except Exception as exc:
         raise SynthesisError(
             f"Lỗi khi lồng tiếng chương {chapter.index} ({chapter.heading}): {exc}"

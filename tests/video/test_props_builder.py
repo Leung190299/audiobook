@@ -70,7 +70,6 @@ def test_build_video_props_joins_all_sources():
     assert props["chapters"][0] == {
         "index": 1,
         "heading": "Chuong 1",
-        "text": "Noi dung mot.",
         "startSeconds": 0.0,
         "endSeconds": 2.0,
         "imagePath": str(Path("output/images/demo-chapter-1.png")),

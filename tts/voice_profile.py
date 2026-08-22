@@ -3,6 +3,13 @@ from pathlib import Path
 
 import yaml
 
+# Tên đăng ký cho giọng nhân bản (voice clone) trong bộ nhớ của model VieNeu.
+# tts/cli.py enroll ref_audio_path một lần dưới tên này rồi gán lại vào
+# voice_profile.voice — từ đó tts/synthesizer.py chỉ cần đọc voice_profile.voice
+# như mọi voice preset khác, không phải biết gì về ref_audio_path hay tự gõ lại
+# chuỗi tên này. Đặt hằng số ở đây (cạnh VoiceProfile) để chỉ một chỗ định nghĩa.
+CLONED_VOICE_NAME = "__cloned_reference__"
+
 
 @dataclass
 class VoiceProfile:

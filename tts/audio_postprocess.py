@@ -22,47 +22,29 @@ class SentenceTiming:
 
 
 def normalize_loudness(audio: np.ndarray, sample_rate: int, target_lufs: float) -> np.ndarray:
+    """Chuẩn hoá độ ồn TẠI CHỖ trên `audio` và trả về chính mảng đó.
+
+    Một tập thật ~3135s @ 48kHz nặng ~600MB mỗi bản sao float32. Gọi thẳng
+    pyln.normalize.loudness() rồi nhân peak-ceiling như cách cũ cấp phát thêm
+    hai bản sao full-size (một cho mỗi bước) trong lúc audio gốc vẫn còn sống ở
+    tay người gọi — đỉnh bộ nhớ ~3 bản. Tự tính gain rồi nhân tại chỗ (`*=`) chỉ
+    còn đúng bản audio đầu vào; công thức gain giữ y hệt
+    pyloudnorm.normalize.loudness (xem .venv/.../pyloudnorm/normalize.py) nên
+    kết quả không đổi.
+    """
     meter = pyln.Meter(sample_rate)
     loudness = meter.integrated_loudness(audio)
-    normalized = pyln.normalize.loudness(audio, loudness, target_lufs)
 
-    peak = np.max(np.abs(normalized))
+    delta_loudness = target_lufs - loudness
+    gain = 10 ** (delta_loudness / 20.0)
+    audio *= gain
+
+    peak = np.max(np.abs(audio))
     peak_ceiling = 10 ** (-1.0 / 20)  # -1 dBFS headroom, avoids clipping on 16-bit PCM write
     if peak > peak_ceiling:
-        normalized = normalized * (peak_ceiling / peak)
+        audio *= peak_ceiling / peak
 
-    return normalized
-
-
-def concatenate_chapters(
-    chapters: list[tuple[int, str, np.ndarray]],
-    sample_rate: int,
-    gap_seconds: float,
-) -> tuple[np.ndarray, list[ChapterTiming]]:
-    gap_samples = int(gap_seconds * sample_rate)
-    gap = np.zeros(gap_samples, dtype=np.float32)
-
-    segments = []
-    timings = []
-    cursor_samples = 0
-
-    for i, (index, heading, audio) in enumerate(chapters):
-        start_seconds = cursor_samples / sample_rate
-        segments.append(audio)
-        cursor_samples += len(audio)
-        end_seconds = cursor_samples / sample_rate
-        timings.append(
-            ChapterTiming(
-                index=index, heading=heading, start_seconds=start_seconds, end_seconds=end_seconds
-            )
-        )
-
-        if i < len(chapters) - 1:
-            segments.append(gap)
-            cursor_samples += gap_samples
-
-    full_audio = np.concatenate(segments) if segments else np.zeros(0, dtype=np.float32)
-    return full_audio, timings
+    return audio
 
 
 def concatenate_sentences(

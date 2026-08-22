@@ -3,9 +3,7 @@ import pyloudnorm as pyln
 import pytest
 
 from tts.audio_postprocess import (
-    ChapterTiming,
     SentenceTiming,
-    concatenate_chapters,
     concatenate_sentences,
     normalize_loudness,
 )
@@ -38,40 +36,16 @@ def test_normalize_loudness_caps_peak_to_avoid_clipping():
     assert peak <= peak_ceiling + 1e-6
 
 
-def test_concatenate_chapters_inserts_gap_and_computes_timestamps():
+def test_normalize_loudness_chinh_tai_cho_khong_cap_phat_mang_moi():
+    # Một tập thật ~3135s @ 48kHz nặng ~600MB/bản sao float32 -- normalize_loudness
+    # phải chỉnh gain tại chỗ trên chính mảng đầu vào, không trả về bản sao mới,
+    # nếu không đỉnh bộ nhớ ở stage 2 sẽ lại tăng gấp nhiều lần như trước khi sửa.
     sample_rate = 24000
-    gap_seconds = 0.5
-    chapter1_audio = np.ones(sample_rate, dtype=np.float32)
-    chapter2_audio = np.ones(sample_rate * 2, dtype=np.float32)
+    audio = _sine_wave(1.0, sample_rate, amplitude=0.1)
 
-    full_audio, timings = concatenate_chapters(
-        [(1, "Chương 1", chapter1_audio), (2, "Chương 2", chapter2_audio)],
-        sample_rate=sample_rate,
-        gap_seconds=gap_seconds,
-    )
+    normalized = normalize_loudness(audio, sample_rate, target_lufs=-16.0)
 
-    expected_length = sample_rate + int(gap_seconds * sample_rate) + sample_rate * 2
-    assert len(full_audio) == expected_length
-
-    assert timings[0] == ChapterTiming(
-        index=1, heading="Chương 1", start_seconds=0.0, end_seconds=1.0
-    )
-    assert timings[1].index == 2
-    assert timings[1].start_seconds == 1.5
-    assert timings[1].end_seconds == 3.5
-
-
-def test_concatenate_chapters_no_trailing_gap_after_last_chapter():
-    sample_rate = 24000
-    chapter_audio = np.ones(sample_rate, dtype=np.float32)
-
-    full_audio, _ = concatenate_chapters(
-        [(1, "Chương 1", chapter_audio)],
-        sample_rate=sample_rate,
-        gap_seconds=0.5,
-    )
-
-    assert len(full_audio) == sample_rate
+    assert normalized is audio
 
 
 def _chapters_for_sentence_concat(sample_rate: int):

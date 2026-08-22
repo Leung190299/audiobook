@@ -220,3 +220,80 @@ def test_remotion_bao_thanh_cong_nhung_khong_co_file_thi_bao_loi_ro_so_phan(
     with pytest.raises(shorts_cli.ShortRenderError, match="phần 1") as exc_info:
         shorts_cli._run(tts_path, images_path)
     assert "không có file" in str(exc_info.value)
+
+
+def test_loi_neu_thong_bao_ro_so_phan_da_hoan_tat_truoc_do(sandbox, monkeypatch):
+    tts_path, images_path, _ = sandbox
+    calls = {"n": 0}
+
+    def _fail_second(cmd, **kwargs):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            mp4 = [c for c in cmd if str(c).endswith(".mp4")][0]
+            Path(mp4).write_bytes(b"fake mp4")
+            return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+        return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="remotion hỏng")
+
+    monkeypatch.setattr(subprocess, "run", _fail_second)
+
+    with pytest.raises(shorts_cli.ShortRenderError, match="1 phần trước đó"):
+        shorts_cli._run(tts_path, images_path)
+
+
+def test_phan_loi_bi_xoa_file_do_dang_con_phan_da_xong_thi_giu_nguyen(sandbox, monkeypatch):
+    # Phần 1 render trót lọt, phần 2 lỗi giữa chừng nhưng kịp để lại wav đã cắt,
+    # props.json đã lưu, và (mô phỏng Remotion crash giữa chừng) một mp4 dở
+    # dang -- cả ba phải bị dọn sạch, còn 4 file của phần 1 phải nguyên vẹn.
+    tts_path, images_path, output_dir = sandbox
+    calls = {"n": 0}
+
+    def _fail_second_leaves_partial_mp4(cmd, **kwargs):
+        calls["n"] += 1
+        mp4 = [c for c in cmd if str(c).endswith(".mp4")][0]
+        if calls["n"] == 1:
+            Path(mp4).write_bytes(b"fake mp4")
+            return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+        Path(mp4).write_bytes(b"mp4 do dang")
+        return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="remotion crash")
+
+    monkeypatch.setattr(subprocess, "run", _fail_second_leaves_partial_mp4)
+
+    with pytest.raises(shorts_cli.ShortRenderError):
+        shorts_cli._run(tts_path, images_path)
+
+    assert list(output_dir.glob("*-part-01.wav"))
+    assert list(output_dir.glob("*-part-01.mp4"))
+    assert list(output_dir.glob("*-part-01-props.json"))
+    assert list(output_dir.glob("*-part-01.txt"))
+
+    assert not list(output_dir.glob("*-part-02.wav"))
+    assert not list(output_dir.glob("*-part-02.mp4"))
+    assert not list(output_dir.glob("*-part-02-props.json"))
+    assert not list(output_dir.glob("*-part-02.txt"))
+
+
+def test_qua_99_phan_thi_bao_loi_ngay_khong_render_gi(sandbox, monkeypatch):
+    # part_stem() vốn chỉ ném lỗi khi thật sự chạm tới phần ngoài khoảng, tức
+    # là sau khi đã lỡ render một mớ phần trước đó. Kiểm tra số phần ngay từ
+    # đầu để không phí công render rồi mới vỡ giữa chừng.
+    tts_path, images_path, output_dir = sandbox
+    monkeypatch.setattr(shorts_cli, "plan_parts", lambda tts_metadata: [object()] * 100)
+
+    render_calls = []
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: render_calls.append(1))
+
+    with pytest.raises(shorts_cli.ShortRenderError, match="100"):
+        shorts_cli._run(tts_path, images_path)
+
+    assert render_calls == []
+    assert not output_dir.exists()
+
+
+def test_thieu_file_wav_nguon_thi_bao_loi_ro_duong_dan(sandbox):
+    tts_path, images_path, _ = sandbox
+    source_wav = tts_path.with_suffix(".wav")
+    source_wav.unlink()
+
+    with pytest.raises(shorts_cli.ShortRenderError) as exc_info:
+        shorts_cli._run(tts_path, images_path)
+    assert str(source_wav) in str(exc_info.value)

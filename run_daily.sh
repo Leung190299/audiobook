@@ -6,7 +6,7 @@
 #   ./run_daily.sh --trope trong_sinh_bao_thu   # bỏ qua trend, dùng trope có sẵn
 #   ./run_daily.sh --upload                     # dựng xong đăng luôn lên YouTube
 #
-# Mỗi lượt dựng 1 video dài + 1 thumbnail + 1 video ngắn (Shorts) + metadata SEO.
+# Mỗi lượt dựng 1 video dài + 1 thumbnail + một series short đánh số (Shorts) + metadata SEO.
 #
 # Mỗi lượt ghi log vào output/daily/<ngày>/. Lỗi ở bất kỳ stage nào cũng dừng ngay
 # và bắn Telegram kèm phần cuối log của stage đó — trừ Stage 7 (short), stage này
