@@ -22,10 +22,15 @@ def _excerpt() -> ShortExcerpt:
 
 
 class _FakeModel:
-    """Trả về 0.5 giây âm thanh cho mỗi câu, đủ để tính mốc thời gian."""
+    """Trả về 0.5 giây âm thanh cho mỗi câu, đủ để tính mốc thời gian.
+
+    Phải là sóng có biên độ thật chứ không phải toàn số 0: chuẩn hoá độ ồn của
+    im lặng tuyệt đối cho ra NaN, khiến pyloudnorm bắn RuntimeWarning.
+    """
 
     def infer(self, **kwargs):
-        return np.zeros(12000, dtype=np.float32)
+        t = np.arange(12000, dtype=np.float32) / 24000
+        return (0.1 * np.sin(2 * np.pi * 220 * t)).astype(np.float32)
 
 
 @pytest.fixture

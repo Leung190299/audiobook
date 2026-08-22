@@ -79,12 +79,38 @@ async def test_chapter_khong_phai_so_thi_bao_loi():
         await generate_short_excerpt(_sample_script(), client=client)
 
 
-@pytest.mark.parametrize("word_count", [119, 251])
+@pytest.mark.parametrize("word_count", [119, 321])
 async def test_doan_trich_sai_do_dai_thi_bao_loi(word_count):
     client = _make_fake_client(_response(excerpt_words=word_count))
 
-    with pytest.raises(ShortExcerptError, match="120-250"):
+    with pytest.raises(ShortExcerptError, match="120-320"):
         await generate_short_excerpt(_sample_script(), client=client)
+
+    assert client.generate_content.await_count == 2
+
+
+async def test_doan_trich_sai_do_dai_lan_dau_thu_lai_thanh_cong():
+    lan_dau = MagicMock()
+    lan_dau.text = _response(excerpt_words=400)
+    lan_hai = MagicMock()
+    lan_hai.text = _response(excerpt_words=150)
+
+    client = MagicMock()
+    client.generate_content = AsyncMock(side_effect=[lan_dau, lan_hai])
+
+    excerpt = await generate_short_excerpt(_sample_script(), client=client)
+
+    assert len(excerpt.excerpt_text.split()) == 150
+    assert client.generate_content.await_count == 2
+
+
+async def test_thieu_nhan_thi_khong_thu_lai():
+    client = _make_fake_client("HOOK: CHỈ CÓ HOOK THÔI")
+
+    with pytest.raises(ShortExcerptError, match="CHAPTER"):
+        await generate_short_excerpt(_sample_script(), client=client)
+
+    assert client.generate_content.await_count == 1
 
 
 async def test_gemini_loi_thi_boc_thanh_loi_cua_module():

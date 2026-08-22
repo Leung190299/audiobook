@@ -76,7 +76,7 @@ images.json ────┘                      │
 |---|---|---|
 | `chapter_index` | int | Chương được chọn, 1-based, phải tồn tại trong kịch bản |
 | `hook_text` | str | Câu giật tít hiện 3 giây đầu, 4-10 từ |
-| `excerpt_text` | str | Đoạn trích để đọc, 120-250 từ |
+| `excerpt_text` | str | Đoạn trích để đọc, 120-320 từ |
 | `short_title` | str | Tiêu đề đăng short, ≤100 ký tự |
 | `short_description` | str | Mô tả short, có CTA và `#shorts` |
 
@@ -131,7 +131,9 @@ Metadata short: output/shorts/<trope>-<ts>.txt
 Mọi trường hợp dưới đây dừng stage với thông báo tiếng Việt rõ ràng, không render ra short hỏng:
 
 - Gemini trả `chapter_index` ngoài phạm vi chương của kịch bản.
-- Đoạn trích ngoài khoảng 120-250 từ (Gemini trả quá ngắn hoặc trả nguyên chương).
+- Đoạn trích ngoài khoảng 120-320 từ sau **hai** lần hỏi Gemini. Lần đầu sai độ dài
+  thì hỏi lại một lần với yêu cầu độ dài gắt hơn — đo thực tế cho thấy Gemini vượt
+  trần ở phần lớn lượt đầu. Lỗi phân tích nhãn hay lỗi API thì KHÔNG thử lại.
 - Thiếu bất kỳ nhãn nào trong phản hồi Gemini.
 - File ảnh của chương được chọn không tồn tại trong thư mục ảnh.
 - Remotion trả mã lỗi, hoặc trả mã thành công nhưng không có file — bắt cả hai như `video/cli.py` đang làm.

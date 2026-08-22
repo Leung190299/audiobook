@@ -34,7 +34,7 @@ class ShortExcerpt:
 
 
 MIN_EXCERPT_WORDS = 120
-MAX_EXCERPT_WORDS = 250
+MAX_EXCERPT_WORDS = 320
 
 _LABELS = ("CHAPTER", "HOOK", "EXCERPT", "TITLE", "DESCRIPTION")
 _SENTENCE_END = re.compile(r"(?<=[.!?…])\s+")
@@ -108,6 +108,17 @@ def _parse_chapter_index(raw: str, script: Script) -> int:
     return index
 
 
+def _forceful_retry_prompt(base_prompt: str, word_count: int) -> str:
+    """Nối thêm yêu cầu độ dài gắt hơn vào cuối prompt gốc, không lặp lại nội
+    dung của `build_excerpt_prompt` — Gemini đã bỏ qua yêu cầu đó một lần."""
+    return (
+        f"{base_prompt}\n\n"
+        f"Câu trả lời trước của bạn dài {word_count} từ, KHÔNG đúng yêu cầu. "
+        f"Lần này đoạn trích BẮT BUỘC phải nằm trong khoảng "
+        f"{MIN_EXCERPT_WORDS}-{MAX_EXCERPT_WORDS} từ."
+    )
+
+
 async def generate_short_excerpt(
     script: Script, client: "GeminiClient | None" = None
 ) -> ShortExcerpt:
@@ -115,27 +126,34 @@ async def generate_short_excerpt(
         client = GeminiClient(os.environ["SECURE_1PSID"], os.environ["SECURE_1PSIDTS"])
         await client.init(timeout=30, auto_close=False, close_delay=300, auto_refresh=True)
 
-    try:
-        response = await client.generate_content(build_excerpt_prompt(script))
-    except (GeminiError, APIError, AuthError) as exc:
-        raise ShortExcerptError(f"Gemini lỗi khi chọn đoạn trích: {exc}") from exc
+    prompt = build_excerpt_prompt(script)
 
-    text = response.text.strip()
+    for attempt in range(2):
+        try:
+            response = await client.generate_content(prompt)
+        except (GeminiError, APIError, AuthError) as exc:
+            raise ShortExcerptError(f"Gemini lỗi khi chọn đoạn trích: {exc}") from exc
 
-    chapter_index = _parse_chapter_index(_parse_label(text, "CHAPTER"), script)
-    excerpt_text = _parse_label(text, "EXCERPT")
+        text = response.text.strip()
 
-    word_count = len(excerpt_text.split())
-    if not MIN_EXCERPT_WORDS <= word_count <= MAX_EXCERPT_WORDS:
+        chapter_index = _parse_chapter_index(_parse_label(text, "CHAPTER"), script)
+        excerpt_text = _parse_label(text, "EXCERPT")
+
+        word_count = len(excerpt_text.split())
+        if MIN_EXCERPT_WORDS <= word_count <= MAX_EXCERPT_WORDS:
+            return ShortExcerpt(
+                chapter_index=chapter_index,
+                hook_text=_parse_label(text, "HOOK"),
+                excerpt_text=excerpt_text,
+                short_title=_parse_label(text, "TITLE"),
+                short_description=_parse_label(text, "DESCRIPTION"),
+            )
+
+        if attempt == 0:
+            prompt = _forceful_retry_prompt(prompt, word_count)
+            continue
+
         raise ShortExcerptError(
             f"Đoạn trích dài {word_count} từ, nằm ngoài khoảng "
             f"{MIN_EXCERPT_WORDS}-{MAX_EXCERPT_WORDS}"
         )
-
-    return ShortExcerpt(
-        chapter_index=chapter_index,
-        hook_text=_parse_label(text, "HOOK"),
-        excerpt_text=excerpt_text,
-        short_title=_parse_label(text, "TITLE"),
-        short_description=_parse_label(text, "DESCRIPTION"),
-    )

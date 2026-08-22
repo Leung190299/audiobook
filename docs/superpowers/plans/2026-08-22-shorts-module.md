@@ -14,7 +14,7 @@
 
 - Mọi thông báo lỗi và chuỗi in ra stdout đều bằng tiếng Việt, theo đúng giọng văn các module hiện có.
 - Không viết code TTS mới — dùng lại `tts.synthesizer`, `tts.audio_postprocess`, `tts.voice_profile`.
-- Đoạn trích hợp lệ: 120-250 từ (`MIN_EXCERPT_WORDS` / `MAX_EXCERPT_WORDS`).
+- Đoạn trích hợp lệ: 120-320 từ (`MIN_EXCERPT_WORDS` / `MAX_EXCERPT_WORDS`); sai độ dài thì hỏi lại Gemini một lần.
 - Khoảng nghỉ giữa các câu khi ghép audio: 0.15 giây — KHÔNG dùng `gap_seconds` trong `config/voice.yaml` (giá trị đó dành cho khoảng nghỉ giữa chương).
 - Card CTA cuối video: 4.0 giây (`CTA_SECONDS`).
 - Hook hiện ở 3 giây đầu (`HOOK_SECONDS` trong `ShortVideo.tsx`).
@@ -37,7 +37,7 @@
 - Produces:
   - `ShortExcerpt(chapter_index: int, hook_text: str, excerpt_text: str, short_title: str, short_description: str)`
   - `ShortExcerptError(Exception)`
-  - `MIN_EXCERPT_WORDS = 120`, `MAX_EXCERPT_WORDS = 250`
+  - `MIN_EXCERPT_WORDS = 120`, `MAX_EXCERPT_WORDS = 320`
   - `build_excerpt_prompt(script: Script) -> str`
   - `split_sentences(text: str) -> list[str]`
   - `async generate_short_excerpt(script: Script, client=None) -> ShortExcerpt`
@@ -141,11 +141,11 @@ async def test_chapter_khong_phai_so_thi_bao_loi():
         await generate_short_excerpt(_sample_script(), client=client)
 
 
-@pytest.mark.parametrize("word_count", [119, 251])
+@pytest.mark.parametrize("word_count", [119, 321])
 async def test_doan_trich_sai_do_dai_thi_bao_loi(word_count):
     client = _make_fake_client(_response(excerpt_words=word_count))
 
-    with pytest.raises(ShortExcerptError, match="120-250"):
+    with pytest.raises(ShortExcerptError, match="120-320"):
         await generate_short_excerpt(_sample_script(), client=client)
 
 
@@ -229,7 +229,7 @@ class ShortExcerpt:
 
 
 MIN_EXCERPT_WORDS = 120
-MAX_EXCERPT_WORDS = 250
+MAX_EXCERPT_WORDS = 320
 
 _LABELS = ("CHAPTER", "HOOK", "EXCERPT", "TITLE", "DESCRIPTION")
 _SENTENCE_END = re.compile(r"(?<=[.!?…])\s+")
