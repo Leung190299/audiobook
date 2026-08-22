@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from scripts.models import Chapter, Script
-from shorts.excerpt import ShortExcerpt
+from shorts.excerpt import ShortPick
 from shorts.props_builder import ShortPropsBuildError, build_short_props
 from tts.audio_postprocess import ChapterTiming
 
@@ -20,11 +20,11 @@ def _script() -> Script:
     )
 
 
-def _excerpt() -> ShortExcerpt:
-    return ShortExcerpt(
+def _pick() -> ShortPick:
+    return ShortPick(
         chapter_index=2,
         hook_text="CÔ ẤY BIẾT HẾT RỒI",
-        excerpt_text="Cô ấy đến. Trời mưa.",
+        chapter_text="Cô ấy đến. Trời mưa.",
         short_title="Tiêu đề short",
         short_description="Mô tả short #shorts",
     )
@@ -68,7 +68,7 @@ def test_props_dung_anh_cua_chuong_duoc_chon(tmp_path: Path):
 
     props = build_short_props(
         script=_script(),
-        excerpt=_excerpt(),
+        pick=_pick(),
         sentences=["Cô ấy đến.", "Trời mưa."],
         timings=_timings(),
         images_metadata=_images_metadata(),
@@ -89,7 +89,7 @@ def test_moi_cau_giu_dung_moc_thoi_gian_that(tmp_path: Path):
 
     props = build_short_props(
         script=_script(),
-        excerpt=_excerpt(),
+        pick=_pick(),
         sentences=["Cô ấy đến.", "Trời mưa."],
         timings=_timings(),
         images_metadata=_images_metadata(),
@@ -112,7 +112,7 @@ def test_lech_so_cau_va_so_moc_thi_bao_loi(tmp_path: Path):
     with pytest.raises(ShortPropsBuildError, match="không khớp"):
         build_short_props(
             script=_script(),
-            excerpt=_excerpt(),
+            pick=_pick(),
             sentences=["Chỉ một câu."],
             timings=_timings(),
             images_metadata=_images_metadata(),
@@ -130,7 +130,7 @@ def test_khong_co_anh_cho_chuong_do_thi_bao_loi(tmp_path: Path):
     with pytest.raises(ShortPropsBuildError, match="chương 2"):
         build_short_props(
             script=_script(),
-            excerpt=_excerpt(),
+            pick=_pick(),
             sentences=["Cô ấy đến.", "Trời mưa."],
             timings=_timings(),
             images_metadata=images_metadata,
@@ -147,7 +147,7 @@ def test_file_anh_khong_ton_tai_thi_bao_loi(tmp_path: Path):
     with pytest.raises(ShortPropsBuildError, match="Không tìm thấy file ảnh"):
         build_short_props(
             script=_script(),
-            excerpt=_excerpt(),
+            pick=_pick(),
             sentences=["Cô ấy đến.", "Trời mưa."],
             timings=_timings(),
             images_metadata=_images_metadata(),
@@ -165,7 +165,7 @@ def test_images_metadata_khac_trope_thi_bao_loi(tmp_path: Path):
     with pytest.raises(ShortPropsBuildError, match="trope/title"):
         build_short_props(
             script=_script(),
-            excerpt=_excerpt(),
+            pick=_pick(),
             sentences=["Cô ấy đến.", "Trời mưa."],
             timings=_timings(),
             images_metadata=images_metadata,
@@ -185,7 +185,7 @@ def test_images_metadata_khac_title_thi_bao_loi(tmp_path: Path):
     with pytest.raises(ShortPropsBuildError, match="trope/title"):
         build_short_props(
             script=_script(),
-            excerpt=_excerpt(),
+            pick=_pick(),
             sentences=["Cô ấy đến.", "Trời mưa."],
             timings=_timings(),
             images_metadata=images_metadata,
@@ -214,7 +214,7 @@ def test_anh_ngoai_repo_root_bao_loi_dung_kieu_khong_phai_valueerror(tmp_path: P
     with pytest.raises(ShortPropsBuildError, match="nằm ngoài repo"):
         build_short_props(
             script=_script(),
-            excerpt=_excerpt(),
+            pick=_pick(),
             sentences=["Cô ấy đến.", "Trời mưa."],
             timings=_timings(),
             images_metadata=_images_metadata(),
@@ -230,7 +230,7 @@ def test_khong_co_cau_nao_thi_bao_loi(tmp_path: Path):
     with pytest.raises(ShortPropsBuildError, match="Không có câu nào"):
         build_short_props(
             script=_script(),
-            excerpt=_excerpt(),
+            pick=_pick(),
             sentences=[],
             timings=[],
             images_metadata=_images_metadata(),

@@ -14,7 +14,7 @@ from pathlib import Path
 import numpy as np
 import soundfile as sf
 
-from shorts.excerpt import ShortExcerpt
+from shorts.excerpt import ShortPick
 
 
 def make_stem(trope: str) -> str:
@@ -44,7 +44,7 @@ def short_video_path(stem: str, output_dir: Path) -> Path:
 
 def save_short_metadata(
     stem: str,
-    excerpt: ShortExcerpt,
+    pick: ShortPick,
     episode_title: str,
     video_filename: str,
     output_dir: Path,
@@ -52,8 +52,8 @@ def save_short_metadata(
     output_dir.mkdir(parents=True, exist_ok=True)
     path = output_dir / f"{stem}.txt"
     path.write_text(
-        f"TIÊU ĐỀ:\n{excerpt.short_title}\n\n"
-        f"MÔ TẢ:\n{excerpt.short_description}\n\n"
+        f"TIÊU ĐỀ:\n{pick.short_title}\n\n"
+        f"MÔ TẢ:\n{pick.short_description}\n\n"
         f"TẬP ĐẦY ĐỦ:\n{episode_title}\n\n"
         f"TÊN FILE VIDEO:\n{video_filename}\n",
         encoding="utf-8",

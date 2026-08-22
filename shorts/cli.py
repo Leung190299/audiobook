@@ -65,8 +65,8 @@ async def _run(
     script = Script.from_dict(json.loads(script_path.read_text(encoding="utf-8")))
     images_metadata = json.loads(images_metadata_path.read_text(encoding="utf-8"))
 
-    excerpt = await excerpt_module.generate_short_excerpt(script, gemini_client)
-    sentences = excerpt_module.split_sentences(excerpt.excerpt_text)
+    pick = await excerpt_module.pick_short_chapter(script, gemini_client)
+    sentences = excerpt_module.split_sentences(pick.chapter_text)
 
     voice_profile = load_voice_profile(VOICE_CONFIG_PATH)
     if model is None:
@@ -103,7 +103,7 @@ async def _run(
 
     props = build_short_props(
         script=script,
-        excerpt=excerpt,
+        pick=pick,
         sentences=sentences,
         timings=timings,
         images_metadata=images_metadata,
@@ -136,7 +136,7 @@ async def _run(
         )
 
     metadata_path = save_short_metadata(
-        stem, excerpt, script.title, output_path.name, OUTPUT_DIR
+        stem, pick, script.title, output_path.name, OUTPUT_DIR
     )
 
     print(f"Đã render short: {output_path}")

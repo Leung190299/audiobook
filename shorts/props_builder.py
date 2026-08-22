@@ -2,7 +2,7 @@
 from pathlib import Path
 
 from scripts.models import Script
-from shorts.excerpt import ShortExcerpt
+from shorts.excerpt import ShortPick
 from tts.audio_postprocess import ChapterTiming
 
 
@@ -15,7 +15,7 @@ CTA_SECONDS = 4.0
 
 def build_short_props(
     script: Script,
-    excerpt: ShortExcerpt,
+    pick: ShortPick,
     sentences: list[str],
     timings: list[ChapterTiming],
     images_metadata: dict,
@@ -43,10 +43,10 @@ def build_short_props(
         )
 
     images_by_index = {c["index"]: c for c in images_metadata["chapters"]}
-    image_chapter = images_by_index.get(excerpt.chapter_index)
+    image_chapter = images_by_index.get(pick.chapter_index)
     if image_chapter is None:
         raise ShortPropsBuildError(
-            f"Metadata ảnh không có chương {excerpt.chapter_index}"
+            f"Metadata ảnh không có chương {pick.chapter_index}"
         )
 
     image_path = images_dir / image_chapter["filename"]
@@ -75,7 +75,7 @@ def build_short_props(
         "title": script.title,
         "audioPath": str(audio_path.relative_to(repo_root)),
         "imagePath": str(image_path_relative),
-        "hookText": excerpt.hook_text,
+        "hookText": pick.hook_text,
         "captions": captions,
         "audioDurationSeconds": timings[-1].end_seconds,
         "ctaSeconds": cta_seconds,

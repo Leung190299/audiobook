@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import soundfile as sf
 
-from shorts.excerpt import ShortExcerpt
+from shorts.excerpt import ShortPick
 from shorts.storage import (
     make_stem,
     save_short_audio,
@@ -16,11 +16,11 @@ from shorts.storage import (
 )
 
 
-def _excerpt() -> ShortExcerpt:
-    return ShortExcerpt(
+def _pick() -> ShortPick:
+    return ShortPick(
         chapter_index=2,
         hook_text="CÔ ẤY BIẾT HẾT RỒI",
-        excerpt_text="Cô ấy đến.",
+        chapter_text="Cô ấy đến.",
         short_title="Trọng sinh báo thù - đoạn gay cấn nhất",
         short_description="Nghe full trên kênh nhé. #shorts",
     )
@@ -67,7 +67,7 @@ def test_luu_props_giu_nguyen_tieng_viet(tmp_path: Path):
 def test_file_metadata_du_bon_muc(tmp_path: Path):
     path = save_short_metadata(
         "abc-20260822T010000Z",
-        _excerpt(),
+        pick=_pick(),
         episode_title="Trọng Sinh Báo Thù",
         video_filename="abc-20260822T010000Z.mp4",
         output_dir=tmp_path,

@@ -8,14 +8,14 @@ import numpy as np
 import pytest
 
 from shorts import cli as shorts_cli
-from shorts.excerpt import ShortExcerpt
+from shorts.excerpt import ShortPick
 
 
-def _excerpt() -> ShortExcerpt:
-    return ShortExcerpt(
+def _pick() -> ShortPick:
+    return ShortPick(
         chapter_index=2,
         hook_text="CÔ ẤY BIẾT HẾT RỒI",
-        excerpt_text="Cô ấy bước vào phòng khách. Trời đổ mưa rất to.",
+        chapter_text="Cô ấy bước vào phòng khách. Trời đổ mưa rất to.",
         short_title="Tiêu đề short",
         short_description="Nghe full trên kênh. #shorts",
     )
@@ -96,7 +96,7 @@ def sandbox(tmp_path: Path, monkeypatch):
     monkeypatch.setattr(shorts_cli, "OUTPUT_DIR", output_dir)
     monkeypatch.setattr(shorts_cli, "VOICE_CONFIG_PATH", repo_root / "config" / "voice.yaml")
     monkeypatch.setattr(
-        shorts_cli.excerpt_module, "generate_short_excerpt", AsyncMock(return_value=_excerpt())
+        shorts_cli.excerpt_module, "pick_short_chapter", AsyncMock(return_value=_pick())
     )
 
     return script_path, images_path, output_dir
@@ -180,28 +180,28 @@ async def test_moi_cau_duoc_doc_rieng(sandbox, monkeypatch):
 
     await shorts_cli._run(script_path, images_path, model=_CountingModel())
 
-    # Đoạn trích có đúng 2 câu -> 2 lần gọi TTS, không phải 1 lần cho cả đoạn.
+    # Chương được chọn có đúng 2 câu -> 2 lần gọi TTS, không phải 1 lần cho cả chương.
     assert calls == ["Cô ấy bước vào phòng khách.", "Trời đổ mưa rất to."]
 
 
 async def test_cau_ngan_duoi_0_4s_khong_lam_vo_chuan_hoa_do_on(sandbox, monkeypatch):
     # Câu thoại một từ ("Sao?", "Không!") synthesize ra dưới 0.4s — block size tối
-    # thiểu của pyloudnorm — nên từng câu riêng lẻ đều dưới ngưỡng đó. Đoạn trích
-    # thật luôn có nhiều câu (tối thiểu MIN_EXCERPT_WORDS từ) nên cả đoạn ghép lại
-    # luôn dài hơn 0.4s; dựng excerpt giả có 6 câu ngắn để mô phỏng đúng hình dạng
-    # đó thay vì đoạn trích 2 câu quá ngắn của sandbox mặc định. Chuẩn hoá độ ồn
-    # phải chạy trên cả đoạn đã ghép, không phải trên từng câu riêng, nếu không
-    # pyloudnorm bắn ValueError và stage chết.
+    # thiểu của pyloudnorm — nên từng câu riêng lẻ đều dưới ngưỡng đó. Một chương
+    # thật luôn có nhiều câu nên cả chương ghép lại luôn dài hơn 0.4s; dựng chương
+    # giả có 6 câu ngắn để mô phỏng đúng hình dạng đó thay vì chương 2 câu quá
+    # ngắn của sandbox mặc định. Chuẩn hoá độ ồn phải chạy trên cả chương đã ghép,
+    # không phải trên từng câu riêng, nếu không pyloudnorm bắn ValueError và stage
+    # chết.
     script_path, images_path, output_dir = sandbox
     monkeypatch.setattr(subprocess, "run", _fake_render_ok())
     monkeypatch.setattr(
         shorts_cli.excerpt_module,
-        "generate_short_excerpt",
+        "pick_short_chapter",
         AsyncMock(
-            return_value=ShortExcerpt(
+            return_value=ShortPick(
                 chapter_index=2,
                 hook_text="CÔ ẤY BIẾT HẾT RỒI",
-                excerpt_text="Sao? Không! Đừng nói vậy. Cô ấy biết rồi. Anh im đi. Muộn rồi.",
+                chapter_text="Sao? Không! Đừng nói vậy. Cô ấy biết rồi. Anh im đi. Muộn rồi.",
                 short_title="Tiêu đề short",
                 short_description="Nghe full trên kênh. #shorts",
             )

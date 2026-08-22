@@ -6,9 +6,12 @@ from gemini_webapi.exceptions import APIError
 
 from scripts.models import Chapter, Script
 from shorts.excerpt import (
+    MAX_CHAPTER_WORDS,
+    RESERVED_ENDING_CHAPTERS,
     ShortExcerptError,
     build_excerpt_prompt,
-    generate_short_excerpt,
+    eligible_chapters,
+    pick_short_chapter,
     split_sentences,
 )
 
@@ -21,94 +24,98 @@ def _make_fake_client(response_text: str):
     return fake_client
 
 
+def _chapter(index: int, word_count: int, heading: str | None = None) -> Chapter:
+    return Chapter(
+        index=index,
+        heading=heading or f"Chương {index}",
+        text=" ".join(["từ"] * word_count),
+    )
+
+
 def _sample_script() -> Script:
+    # 4 chương, đều đủ ngắn (<= MAX_CHAPTER_WORDS); chương 4 là chương kết bị loại
+    # bởi RESERVED_ENDING_CHAPTERS=2 -> hợp lệ còn 1, 2.
     return Script(
         trope="trong_sinh_bao_thu",
         title="Trọng Sinh Báo Thù",
         chapters=[
-            Chapter(index=1, heading="Chương 1: Mở đầu", text="Câu chuyện bắt đầu."),
-            Chapter(index=2, heading="Chương 2: Cao trào", text="Mọi thứ vỡ vụn."),
+            _chapter(1, 50, "Chương 1: Mở đầu"),
+            _chapter(2, 60, "Chương 2: Cao trào"),
+            _chapter(3, 40, "Chương 3: Áp chót"),
+            _chapter(4, 30, "Chương 4: Kết"),
         ],
     )
 
 
-def _excerpt_of(word_count: int) -> str:
-    return " ".join(["từ"] * word_count)
-
-
-def _response(chapter: str = "2", excerpt_words: int = 150) -> str:
+def _response(chapter: str = "2") -> str:
     return (
         f"CHAPTER: {chapter}\n"
         "HOOK: CÔ ẤY BIẾT HẾT RỒI\n"
-        f"EXCERPT: {_excerpt_of(excerpt_words)}\n"
         "TITLE: Trọng sinh báo thù - đoạn gay cấn nhất\n"
         "DESCRIPTION: Nghe full trên kênh nhé. #shorts"
     )
 
 
-async def test_parse_day_du_nam_nhan():
+async def test_parse_day_du_bon_nhan():
     client = _make_fake_client(_response())
 
-    excerpt = await generate_short_excerpt(_sample_script(), client=client)
+    pick = await pick_short_chapter(_sample_script(), client=client)
 
-    assert excerpt.chapter_index == 2
-    assert excerpt.hook_text == "CÔ ẤY BIẾT HẾT RỒI"
-    assert len(excerpt.excerpt_text.split()) == 150
-    assert excerpt.short_title == "Trọng sinh báo thù - đoạn gay cấn nhất"
-    assert excerpt.short_description == "Nghe full trên kênh nhé. #shorts"
+    assert pick.chapter_index == 2
+    assert pick.hook_text == "CÔ ẤY BIẾT HẾT RỒI"
+    assert pick.short_title == "Trọng sinh báo thù - đoạn gay cấn nhất"
+    assert pick.short_description == "Nghe full trên kênh nhé. #shorts"
+
+
+async def test_chapter_text_lay_nguyen_van_tu_kich_ban_khong_phai_tu_gemini():
+    # Nội dung đọc phải đến từ text thật của chương trong kịch bản — chứng minh
+    # bằng cách khẳng định nó khớp hệt Chapter.text, dù Gemini không hề trả về nó.
+    script = _sample_script()
+    client = _make_fake_client(_response(chapter="2"))
+
+    pick = await pick_short_chapter(script, client=client)
+
+    expected = next(c for c in script.chapters if c.index == 2).text
+    assert pick.chapter_text == expected
 
 
 async def test_thieu_nhan_thi_bao_loi():
     client = _make_fake_client("HOOK: CHỈ CÓ HOOK THÔI")
 
     with pytest.raises(ShortExcerptError, match="CHAPTER"):
-        await generate_short_excerpt(_sample_script(), client=client)
+        await pick_short_chapter(_sample_script(), client=client)
 
 
-async def test_chapter_ngoai_pham_vi_thi_bao_loi():
-    client = _make_fake_client(_response(chapter="9"))
+async def test_chapter_ngoai_danh_sach_hop_le_thi_bao_loi():
+    client = _make_fake_client(_response(chapter="4"))
 
-    with pytest.raises(ShortExcerptError, match="chương 9"):
-        await generate_short_excerpt(_sample_script(), client=client)
+    with pytest.raises(ShortExcerptError, match="chương 4"):
+        await pick_short_chapter(_sample_script(), client=client)
+
+
+async def test_chapter_ton_tai_trong_kich_ban_nhung_khong_hop_le_van_bao_loi():
+    # Chương 4 tồn tại trong kịch bản (kể cả nằm trong khoảng 1..4) nhưng bị loại
+    # vì là chương kết -> vẫn phải báo lỗi, không được chỉ kiểm tra "có trong kịch bản".
+    script = _sample_script()
+    assert 4 in {c.index for c in script.chapters}
+    client = _make_fake_client(_response(chapter="4"))
+
+    with pytest.raises(ShortExcerptError):
+        await pick_short_chapter(script, client=client)
 
 
 async def test_chapter_khong_phai_so_thi_bao_loi():
     client = _make_fake_client(_response(chapter="chương hai"))
 
     with pytest.raises(ShortExcerptError, match="số chương"):
-        await generate_short_excerpt(_sample_script(), client=client)
+        await pick_short_chapter(_sample_script(), client=client)
 
 
-@pytest.mark.parametrize("word_count", [119, 321])
-async def test_doan_trich_sai_do_dai_thi_bao_loi(word_count):
-    client = _make_fake_client(_response(excerpt_words=word_count))
-
-    with pytest.raises(ShortExcerptError, match="120-320"):
-        await generate_short_excerpt(_sample_script(), client=client)
-
-    assert client.generate_content.await_count == 2
-
-
-async def test_doan_trich_sai_do_dai_lan_dau_thu_lai_thanh_cong():
-    lan_dau = MagicMock()
-    lan_dau.text = _response(excerpt_words=400)
-    lan_hai = MagicMock()
-    lan_hai.text = _response(excerpt_words=150)
-
-    client = MagicMock()
-    client.generate_content = AsyncMock(side_effect=[lan_dau, lan_hai])
-
-    excerpt = await generate_short_excerpt(_sample_script(), client=client)
-
-    assert len(excerpt.excerpt_text.split()) == 150
-    assert client.generate_content.await_count == 2
-
-
-async def test_thieu_nhan_thi_khong_thu_lai():
+async def test_khong_thu_lai_khi_loi_phan_tich_nhan():
     client = _make_fake_client("HOOK: CHỈ CÓ HOOK THÔI")
 
     with pytest.raises(ShortExcerptError, match="CHAPTER"):
-        await generate_short_excerpt(_sample_script(), client=client)
+        await pick_short_chapter(_sample_script(), client=client)
 
     assert client.generate_content.await_count == 1
 
@@ -118,15 +125,89 @@ async def test_gemini_loi_thi_boc_thanh_loi_cua_module():
     fake_client.generate_content = AsyncMock(side_effect=APIError("hỏng"))
 
     with pytest.raises(ShortExcerptError, match="Gemini"):
-        await generate_short_excerpt(_sample_script(), client=fake_client)
+        await pick_short_chapter(_sample_script(), client=fake_client)
+
+    assert fake_client.generate_content.await_count == 1
 
 
-def test_prompt_chua_noi_dung_tung_chuong():
+def test_prompt_chua_noi_dung_tung_chuong_hop_le():
     prompt = build_excerpt_prompt(_sample_script())
 
-    assert "Câu chuyện bắt đầu." in prompt
-    assert "Mọi thứ vỡ vụn." in prompt
+    assert "[Chương 1]" in prompt
+    assert "Chương 1: Mở đầu" in prompt
     assert "[Chương 2]" in prompt
+    assert "Chương 2: Cao trào" in prompt
+
+
+def test_prompt_khong_liet_ke_chuong_ket():
+    prompt = build_excerpt_prompt(_sample_script())
+
+    assert "[Chương 4]" not in prompt
+
+
+def test_prompt_bat_buoc_chon_trong_danh_sach_hop_le():
+    prompt = build_excerpt_prompt(_sample_script())
+
+    assert "1, 2" in prompt
+
+
+def test_eligible_chapters_loc_theo_so_tu_va_bo_chuong_ket():
+    script = _sample_script()
+
+    eligible = eligible_chapters(script)
+
+    assert [c.index for c in eligible] == [1, 2]
+
+
+def test_eligible_chapters_loai_chuong_qua_dai():
+    script = Script(
+        trope="t",
+        title="T",
+        chapters=[
+            _chapter(1, MAX_CHAPTER_WORDS + 1),
+            _chapter(2, MAX_CHAPTER_WORDS),
+            _chapter(3, 10),
+            _chapter(4, 10),
+        ],
+    )
+
+    eligible = eligible_chapters(script)
+
+    assert [c.index for c in eligible] == [2]
+
+
+def test_eligible_chapters_rong_thi_bao_loi_neu_khong_chuong_nao_du_ngan():
+    script = Script(
+        trope="t",
+        title="T",
+        chapters=[
+            _chapter(1, MAX_CHAPTER_WORDS + 100),
+            _chapter(2, MAX_CHAPTER_WORDS + 1),
+            _chapter(3, 10),
+            _chapter(4, 10),
+        ],
+    )
+
+    with pytest.raises(ShortExcerptError, match=str(MAX_CHAPTER_WORDS + 1)):
+        eligible_chapters(script)
+
+
+def test_eligible_chapters_rong_khi_kich_ban_qua_it_chuong():
+    # Chỉ 2 chương -> cả hai đều là chương kết theo RESERVED_ENDING_CHAPTERS=2,
+    # không còn chương nào để xét -> phải báo lỗi, không được âm thầm quay lại
+    # dùng chương kết.
+    script = Script(
+        trope="t",
+        title="T",
+        chapters=[_chapter(1, 10), _chapter(2, 10)],
+    )
+
+    with pytest.raises(ShortExcerptError, match="không đủ"):
+        eligible_chapters(script)
+
+
+def test_reserved_ending_chapters_la_hai():
+    assert RESERVED_ENDING_CHAPTERS == 2
 
 
 def test_tach_cau_theo_dau_ket_cau():
