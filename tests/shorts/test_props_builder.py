@@ -3,49 +3,36 @@ from pathlib import Path
 
 import pytest
 
-from scripts.models import Chapter, Script
-from shorts.excerpt import ShortPick
+from shorts.planner import PartCaption, ShortPart
 from shorts.props_builder import ShortPropsBuildError, build_short_props
-from tts.audio_postprocess import ChapterTiming
+
+TROPE = "trong_sinh_bao_thu"
+TITLE = "Trọng Sinh Báo Thù"
 
 
-def _script() -> Script:
-    return Script(
-        trope="trong_sinh_bao_thu",
-        title="Trọng Sinh Báo Thù",
-        chapters=[
-            Chapter(index=1, heading="Chương 1", text="..."),
-            Chapter(index=2, heading="Chương 2", text="..."),
+def _part(number: int = 2, chapter_index: int = 2) -> ShortPart:
+    return ShortPart(
+        number=number,
+        chapter_index=chapter_index,
+        heading="Chương 2: Cao trào",
+        source_start_seconds=90.0,
+        source_end_seconds=95.5,
+        captions=[
+            PartCaption(text="Cô ấy đến.", start_seconds=0.0, end_seconds=2.5),
+            PartCaption(text="Trời mưa.", start_seconds=2.65, end_seconds=5.5),
         ],
-    )
-
-
-def _pick() -> ShortPick:
-    return ShortPick(
-        chapter_index=2,
-        hook_text="CÔ ẤY BIẾT HẾT RỒI",
-        chapter_text="Cô ấy đến. Trời mưa.",
-        short_title="Tiêu đề short",
-        short_description="Mô tả short #shorts",
     )
 
 
 def _images_metadata() -> dict:
     return {
-        "trope": "trong_sinh_bao_thu",
-        "title": "Trọng Sinh Báo Thù",
+        "trope": TROPE,
+        "title": TITLE,
         "chapters": [
             {"index": 1, "filename": "anh-1.png", "scene_description": "..."},
             {"index": 2, "filename": "anh-2.png", "scene_description": "..."},
         ],
     }
-
-
-def _timings() -> list[ChapterTiming]:
-    return [
-        ChapterTiming(index=1, heading="Câu 1", start_seconds=0.0, end_seconds=2.5),
-        ChapterTiming(index=2, heading="Câu 2", start_seconds=2.65, end_seconds=5.0),
-    ]
 
 
 def _setup_repo(tmp_path: Path) -> tuple[Path, Path, Path]:
@@ -57,87 +44,81 @@ def _setup_repo(tmp_path: Path) -> tuple[Path, Path, Path]:
 
     audio_dir = repo_root / "output" / "shorts"
     audio_dir.mkdir(parents=True)
-    audio_path = audio_dir / "trong_sinh_bao_thu-20260822T010000Z.wav"
+    audio_path = audio_dir / f"{TROPE}-20260822T010000Z-part-02.wav"
     audio_path.write_bytes(b"x")
 
     return repo_root, images_dir, audio_path
 
 
-def test_props_dung_anh_cua_chuong_duoc_chon(tmp_path: Path):
+def _build(
+    tmp_path: Path,
+    part: ShortPart | None = None,
+    total_parts: int = 5,
+    images_metadata: dict | None = None,
+) -> dict:
     repo_root, images_dir, audio_path = _setup_repo(tmp_path)
-
-    props = build_short_props(
-        script=_script(),
-        pick=_pick(),
-        sentences=["Cô ấy đến.", "Trời mưa."],
-        timings=_timings(),
-        images_metadata=_images_metadata(),
+    return build_short_props(
+        part=part or _part(),
+        total_parts=total_parts,
+        episode_title=TITLE,
+        trope=TROPE,
+        images_metadata=images_metadata or _images_metadata(),
         audio_path=audio_path,
         images_dir=images_dir,
         repo_root=repo_root,
     )
+
+
+def test_props_dung_anh_cua_chuong_chua_phan(tmp_path: Path):
+    props = _build(tmp_path)
 
     assert props["imagePath"] == "output/images/anh-2.png"
-    assert props["audioPath"] == "output/shorts/trong_sinh_bao_thu-20260822T010000Z.wav"
-    assert props["hookText"] == "CÔ ẤY BIẾT HẾT RỒI"
-    assert props["title"] == "Trọng Sinh Báo Thù"
-    assert props["trope"] == "trong_sinh_bao_thu"
+    assert props["audioPath"] == "output/shorts/trong_sinh_bao_thu-20260822T010000Z-part-02.wav"
+    assert props["hookText"] == "Chương 2: Cao trào"
+    assert props["title"] == TITLE
+    assert props["trope"] == TROPE
 
 
-def test_moi_cau_giu_dung_moc_thoi_gian_that(tmp_path: Path):
-    repo_root, images_dir, audio_path = _setup_repo(tmp_path)
-
-    props = build_short_props(
-        script=_script(),
-        pick=_pick(),
-        sentences=["Cô ấy đến.", "Trời mưa."],
-        timings=_timings(),
-        images_metadata=_images_metadata(),
-        audio_path=audio_path,
-        images_dir=images_dir,
-        repo_root=repo_root,
-    )
+def test_captions_lay_thang_tu_part_captions(tmp_path: Path):
+    props = _build(tmp_path)
 
     assert props["captions"] == [
         {"text": "Cô ấy đến.", "startSeconds": 0.0, "endSeconds": 2.5},
-        {"text": "Trời mưa.", "startSeconds": 2.65, "endSeconds": 5.0},
+        {"text": "Trời mưa.", "startSeconds": 2.65, "endSeconds": 5.5},
     ]
-    assert props["audioDurationSeconds"] == 5.0
+    assert props["audioDurationSeconds"] == pytest.approx(5.5)
     assert props["ctaSeconds"] == 4.0
 
 
-def test_lech_so_cau_va_so_moc_thi_bao_loi(tmp_path: Path):
-    repo_root, images_dir, audio_path = _setup_repo(tmp_path)
+def test_cta_text_phan_giua_moi_sang_phan_ke_tiep(tmp_path: Path):
+    part = _part(number=2)
+    props = _build(tmp_path, part=part, total_parts=5)
 
-    with pytest.raises(ShortPropsBuildError, match="không khớp"):
-        build_short_props(
-            script=_script(),
-            pick=_pick(),
-            sentences=["Chỉ một câu."],
-            timings=_timings(),
-            images_metadata=_images_metadata(),
-            audio_path=audio_path,
-            images_dir=images_dir,
-            repo_root=repo_root,
-        )
+    assert props["ctaText"] == "Xem phần 3"
+
+
+def test_cta_text_phan_cuoi_moi_nghe_full(tmp_path: Path):
+    part = _part(number=5)
+    props = _build(tmp_path, part=part, total_parts=5)
+
+    assert props["ctaText"] == "Nghe full trên kênh"
+
+
+def test_phan_duy_nhat_cua_tap_cung_la_phan_cuoi(tmp_path: Path):
+    # total_parts == 1 và number == 1 -- phần duy nhất của tập cũng phải coi là
+    # phần cuối, không được lỡ tay chào "Xem phần 2" (không tồn tại).
+    part = _part(number=1)
+    props = _build(tmp_path, part=part, total_parts=1)
+
+    assert props["ctaText"] == "Nghe full trên kênh"
 
 
 def test_khong_co_anh_cho_chuong_do_thi_bao_loi(tmp_path: Path):
-    repo_root, images_dir, audio_path = _setup_repo(tmp_path)
     images_metadata = _images_metadata()
     images_metadata["chapters"] = [images_metadata["chapters"][0]]
 
     with pytest.raises(ShortPropsBuildError, match="chương 2"):
-        build_short_props(
-            script=_script(),
-            pick=_pick(),
-            sentences=["Cô ấy đến.", "Trời mưa."],
-            timings=_timings(),
-            images_metadata=images_metadata,
-            audio_path=audio_path,
-            images_dir=images_dir,
-            repo_root=repo_root,
-        )
+        _build(tmp_path, images_metadata=images_metadata)
 
 
 def test_file_anh_khong_ton_tai_thi_bao_loi(tmp_path: Path):
@@ -146,49 +127,11 @@ def test_file_anh_khong_ton_tai_thi_bao_loi(tmp_path: Path):
 
     with pytest.raises(ShortPropsBuildError, match="Không tìm thấy file ảnh"):
         build_short_props(
-            script=_script(),
-            pick=_pick(),
-            sentences=["Cô ấy đến.", "Trời mưa."],
-            timings=_timings(),
+            part=_part(),
+            total_parts=5,
+            episode_title=TITLE,
+            trope=TROPE,
             images_metadata=_images_metadata(),
-            audio_path=audio_path,
-            images_dir=images_dir,
-            repo_root=repo_root,
-        )
-
-
-def test_images_metadata_khac_trope_thi_bao_loi(tmp_path: Path):
-    repo_root, images_dir, audio_path = _setup_repo(tmp_path)
-    images_metadata = _images_metadata()
-    images_metadata["trope"] = "trope_khac"
-
-    with pytest.raises(ShortPropsBuildError, match="trope/title"):
-        build_short_props(
-            script=_script(),
-            pick=_pick(),
-            sentences=["Cô ấy đến.", "Trời mưa."],
-            timings=_timings(),
-            images_metadata=images_metadata,
-            audio_path=audio_path,
-            images_dir=images_dir,
-            repo_root=repo_root,
-        )
-
-
-def test_images_metadata_khac_title_thi_bao_loi(tmp_path: Path):
-    # Chương 9 có thể tồn tại ở cả hai tập — chỉ khớp index không đủ, phải khớp
-    # cả title thì mới chắc images_metadata cùng tập với script.
-    repo_root, images_dir, audio_path = _setup_repo(tmp_path)
-    images_metadata = _images_metadata()
-    images_metadata["title"] = "Một Tập Truyện Khác"
-
-    with pytest.raises(ShortPropsBuildError, match="trope/title"):
-        build_short_props(
-            script=_script(),
-            pick=_pick(),
-            sentences=["Cô ấy đến.", "Trời mưa."],
-            timings=_timings(),
-            images_metadata=images_metadata,
             audio_path=audio_path,
             images_dir=images_dir,
             repo_root=repo_root,
@@ -197,7 +140,7 @@ def test_images_metadata_khac_title_thi_bao_loi(tmp_path: Path):
 
 def test_anh_ngoai_repo_root_bao_loi_dung_kieu_khong_phai_valueerror(tmp_path: Path):
     # image_path.relative_to(repo_root) tự nhiên bắn ValueError khi images_dir nằm
-    # ngoài repo_root — phải bọc lại thành ShortPropsBuildError của module này.
+    # ngoài repo_root -- phải bọc lại thành ShortPropsBuildError của module này.
     repo_root = tmp_path / "repo"
     repo_root.mkdir()
 
@@ -208,31 +151,15 @@ def test_anh_ngoai_repo_root_bao_loi_dung_kieu_khong_phai_valueerror(tmp_path: P
 
     audio_dir = repo_root / "output" / "shorts"
     audio_dir.mkdir(parents=True)
-    audio_path = audio_dir / "trong_sinh_bao_thu-20260822T010000Z.wav"
+    audio_path = audio_dir / f"{TROPE}-20260822T010000Z-part-02.wav"
     audio_path.write_bytes(b"x")
 
     with pytest.raises(ShortPropsBuildError, match="nằm ngoài repo"):
         build_short_props(
-            script=_script(),
-            pick=_pick(),
-            sentences=["Cô ấy đến.", "Trời mưa."],
-            timings=_timings(),
-            images_metadata=_images_metadata(),
-            audio_path=audio_path,
-            images_dir=images_dir,
-            repo_root=repo_root,
-        )
-
-
-def test_khong_co_cau_nao_thi_bao_loi(tmp_path: Path):
-    repo_root, images_dir, audio_path = _setup_repo(tmp_path)
-
-    with pytest.raises(ShortPropsBuildError, match="Không có câu nào"):
-        build_short_props(
-            script=_script(),
-            pick=_pick(),
-            sentences=[],
-            timings=[],
+            part=_part(),
+            total_parts=5,
+            episode_title=TITLE,
+            trope=TROPE,
             images_metadata=_images_metadata(),
             audio_path=audio_path,
             images_dir=images_dir,

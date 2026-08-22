@@ -49,6 +49,7 @@ const defaultShortProps: CompositionShortProps = {
   captions: [],
   audioDurationSeconds: 0,
   ctaSeconds: 4,
+  ctaText: "",
 };
 
 export const RemotionRoot: React.FC = () => {

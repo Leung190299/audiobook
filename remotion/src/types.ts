@@ -30,4 +30,5 @@ export interface ShortProps {
   captions: ShortCaption[];
   audioDurationSeconds: number;
   ctaSeconds: number;
+  ctaText: string;
 }

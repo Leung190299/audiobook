@@ -71,7 +71,7 @@ Một chương ~800 từ (186 giây) vì thế tách thành 2 phần ~93 giây; 
 <trope>-<ts>-part-01.txt
 ```
 
-`shorts.cli` nhận **ba** đường dẫn: script JSON, TTS metadata JSON, images metadata JSON — cùng thứ tự như `video.cli`. stdout in một dòng cho mỗi phần, theo đúng thứ tự phần:
+`shorts.cli` nhận **hai** đường dẫn: TTS metadata JSON và images metadata JSON. Không cần script JSON — metadata TTS đã chứa `trope`, `title`, heading từng chương và text từng câu, nên truyền thêm script chỉ tạo thêm một chỗ để truyền nhầm. stdout in một dòng cho mỗi phần, theo đúng thứ tự phần:
 
 ```
 Đã render short: output/shorts/<trope>-<ts>-part-01.mp4

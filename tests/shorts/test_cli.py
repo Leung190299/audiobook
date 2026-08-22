@@ -2,84 +2,99 @@
 import json
 import subprocess
 from pathlib import Path
-from unittest.mock import AsyncMock
 
 import numpy as np
 import pytest
+import soundfile as sf
 
 from shorts import cli as shorts_cli
-from shorts.excerpt import ShortPick
+
+TROPE = "trong_sinh_bao_thu"
+TITLE = "Trọng Sinh Báo Thù"
+SAMPLE_RATE = 24000
 
 
-def _pick() -> ShortPick:
-    return ShortPick(
-        chapter_index=2,
-        hook_text="CÔ ẤY BIẾT HẾT RỒI",
-        chapter_text="Cô ấy bước vào phòng khách. Trời đổ mưa rất to.",
-        short_title="Tiêu đề short",
-        short_description="Nghe full trên kênh. #shorts",
-    )
+def _sentence(chapter_index: int, index: int, start: float, end: float) -> dict:
+    return {
+        "chapter_index": chapter_index,
+        "index": index,
+        "text": f"Câu {chapter_index}.{index}.",
+        "start_seconds": start,
+        "end_seconds": end,
+    }
 
 
-class _FakeModel:
-    """Trả về 0.5 giây âm thanh cho mỗi câu, đủ để tính mốc thời gian.
-
-    Phải là sóng có biên độ thật chứ không phải toàn số 0: chuẩn hoá độ ồn của
-    im lặng tuyệt đối cho ra NaN, khiến pyloudnorm bắn RuntimeWarning.
-    """
-
-    def infer(self, **kwargs):
-        t = np.arange(12000, dtype=np.float32) / 24000
-        return (0.1 * np.sin(2 * np.pi * 220 * t)).astype(np.float32)
+def _make_sentences(chapter_index: int, count: int, sentence_seconds: float, t0: float) -> list[dict]:
+    out = []
+    t = t0
+    for i in range(1, count + 1):
+        out.append(_sentence(chapter_index, i, t, t + sentence_seconds))
+        t += sentence_seconds
+    return out
 
 
-class _FakeModelCauNgan(_FakeModel):
-    """Trả về 0.1 giây âm thanh (2400 sample ở 24000Hz) cho mỗi câu — ngắn hơn hẳn
-    0.4s, block size tối thiểu của pyloudnorm. Câu thoại một từ như "Sao?" hay
-    "Không!" synthesize ra đúng cỡ này ngoài đời thật."""
-
-    def infer(self, **kwargs):
-        t = np.arange(2400, dtype=np.float32) / 24000
-        return (0.1 * np.sin(2 * np.pi * 220 * t)).astype(np.float32)
+def _tts_metadata(chapters_and_sentences: list[tuple[str, list[dict]]]) -> dict:
+    chapters = []
+    sentences = []
+    for chapter_index, (heading, chapter_sentences) in enumerate(
+        chapters_and_sentences, start=1
+    ):
+        chapters.append(
+            {
+                "index": chapter_index,
+                "heading": heading,
+                "start_seconds": chapter_sentences[0]["start_seconds"],
+                "end_seconds": chapter_sentences[-1]["end_seconds"],
+            }
+        )
+        sentences.extend(chapter_sentences)
+    return {
+        "trope": TROPE,
+        "title": TITLE,
+        "sample_rate": SAMPLE_RATE,
+        "chapters": chapters,
+        "sentences": sentences,
+    }
 
 
 @pytest.fixture
 def sandbox(tmp_path: Path, monkeypatch):
     repo_root = tmp_path
-    (repo_root / "config").mkdir()
-    (repo_root / "config" / "voice.yaml").write_text(
-        "voice: 'Thục Đoan'\nstyle: 'normal'\ntarget_lufs: -16.0\n"
-        "sample_rate: 24000\ngap_seconds: 0.5\n",
-        encoding="utf-8",
+
+    # Hai chương ngắn -> plan_parts ra đúng 2 phần, mỗi chương một phần (không
+    # bắc cầu qua ranh giới chương, xem shorts/planner.py).
+    c1_sentences = _make_sentences(1, 3, sentence_seconds=3.0, t0=0.0)
+    c2_sentences = _make_sentences(2, 3, sentence_seconds=3.0, t0=10.0)
+    tts_metadata = _tts_metadata(
+        [("Chương 1: Mở đầu", c1_sentences), ("Chương 2: Cao trào", c2_sentences)]
     )
 
-    scripts_dir = repo_root / "output" / "scripts"
-    scripts_dir.mkdir(parents=True)
-    script_path = scripts_dir / "trong_sinh_bao_thu-20260822T000000Z.json"
-    script_path.write_text(
-        json.dumps(
-            {
-                "trope": "trong_sinh_bao_thu",
-                "title": "Trọng Sinh Báo Thù",
-                "chapters": [
-                    {"index": 1, "heading": "Chương 1", "text": "..."},
-                    {"index": 2, "heading": "Chương 2", "text": "..."},
-                ],
-            },
-            ensure_ascii=False,
-        ),
-        encoding="utf-8",
+    audio_dir = repo_root / "output" / "audio"
+    audio_dir.mkdir(parents=True)
+    tts_metadata_path = audio_dir / f"{TROPE}-20260822T000000Z.json"
+    tts_metadata_path.write_text(
+        json.dumps(tts_metadata, ensure_ascii=False), encoding="utf-8"
     )
+
+    # File wav nguồn phải đủ dài để chứa mốc thời gian lớn nhất trong metadata
+    # (chương 2 kết thúc ở 19s) -- suy ra từ .with_suffix(".wav") của đường dẫn
+    # metadata, giống hệt video/cli.py.
+    source_wav = tts_metadata_path.with_suffix(".wav")
+    total_seconds = 20.0
+    t = np.arange(int(total_seconds * SAMPLE_RATE), dtype=np.float32) / SAMPLE_RATE
+    audio = (0.1 * np.sin(2 * np.pi * 220 * t)).astype(np.float32)
+    sf.write(source_wav, audio, SAMPLE_RATE)
 
     images_dir = repo_root / "output" / "images"
     images_dir.mkdir(parents=True)
+    (images_dir / "anh-1.png").write_bytes(b"x")
     (images_dir / "anh-2.png").write_bytes(b"x")
-    images_path = images_dir / "trong_sinh_bao_thu-20260822T000500Z.json"
-    images_path.write_text(
+    images_metadata_path = images_dir / f"{TROPE}-20260822T000500Z.json"
+    images_metadata_path.write_text(
         json.dumps(
             {
-                "trope": "trong_sinh_bao_thu",
-                "title": "Trọng Sinh Báo Thù",
+                "trope": TROPE,
+                "title": TITLE,
                 "chapters": [
                     {"index": 1, "filename": "anh-1.png", "scene_description": "..."},
                     {"index": 2, "filename": "anh-2.png", "scene_description": "..."},
@@ -94,12 +109,8 @@ def sandbox(tmp_path: Path, monkeypatch):
 
     monkeypatch.setattr(shorts_cli, "REPO_ROOT", repo_root)
     monkeypatch.setattr(shorts_cli, "OUTPUT_DIR", output_dir)
-    monkeypatch.setattr(shorts_cli, "VOICE_CONFIG_PATH", repo_root / "config" / "voice.yaml")
-    monkeypatch.setattr(
-        shorts_cli.excerpt_module, "pick_short_chapter", AsyncMock(return_value=_pick())
-    )
 
-    return script_path, images_path, output_dir
+    return tts_metadata_path, images_metadata_path, output_dir
 
 
 def _fake_render_ok():
@@ -111,104 +122,101 @@ def _fake_render_ok():
     return _run
 
 
-async def test_chay_tron_ven_sinh_du_bon_file(sandbox, monkeypatch, capsys):
-    script_path, images_path, output_dir = sandbox
+def test_render_du_bon_file_cho_moi_phan(sandbox, monkeypatch):
+    tts_path, images_path, output_dir = sandbox
     monkeypatch.setattr(subprocess, "run", _fake_render_ok())
 
-    await shorts_cli._run(script_path, images_path, model=_FakeModel())
+    shorts_cli._run(tts_path, images_path)
 
-    suffixes = sorted(p.suffix for p in output_dir.iterdir())
-    assert suffixes == [".json", ".mp4", ".txt", ".wav"]
+    for n in ("01", "02"):
+        stem = f"{TROPE}-"  # timestamp sinh động, chỉ kiểm tra hậu tố
+        matches = list(output_dir.glob(f"*-part-{n}.wav"))
+        assert len(matches) == 1
+        assert list(output_dir.glob(f"*-part-{n}.mp4"))
+        assert list(output_dir.glob(f"*-part-{n}-props.json"))
+        assert list(output_dir.glob(f"*-part-{n}.txt"))
+
+
+def test_in_dung_hai_dong_cho_moi_phan_va_dong_tong_ket(sandbox, monkeypatch, capsys):
+    tts_path, images_path, output_dir = sandbox
+    monkeypatch.setattr(subprocess, "run", _fake_render_ok())
+
+    shorts_cli._run(tts_path, images_path)
 
     out = capsys.readouterr().out
-    assert "Đã render short: " in out
-    assert "Metadata short: " in out
+    lines = out.strip().splitlines()
+
+    render_lines = [l for l in lines if l.startswith("Đã render short: ")]
+    metadata_lines = [l for l in lines if l.startswith("Metadata short: ")]
+    assert len(render_lines) == 2
+    assert len(metadata_lines) == 2
+    # Thứ tự: render rồi metadata cho từng phần, không dồn lại cuối cùng.
+    assert lines[0].startswith("Đã render short: ")
+    assert lines[1].startswith("Metadata short: ")
+    assert lines[2].startswith("Đã render short: ")
+    assert lines[3].startswith("Metadata short: ")
+    assert lines[-1] == "Đã render 2 short vào output/shorts"
 
 
-async def test_goi_remotion_dung_composition_shortvideo(sandbox, monkeypatch):
-    script_path, images_path, output_dir = sandbox
-    seen = {}
+def test_goi_remotion_dung_composition_shortvideo_cho_moi_phan(sandbox, monkeypatch):
+    tts_path, images_path, output_dir = sandbox
+    seen_cmds = []
 
     def _capture(cmd, **kwargs):
-        seen["cmd"] = cmd
+        seen_cmds.append(cmd)
         mp4 = [c for c in cmd if str(c).endswith(".mp4")][0]
         Path(mp4).write_bytes(b"fake mp4")
         return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
 
     monkeypatch.setattr(subprocess, "run", _capture)
 
-    await shorts_cli._run(script_path, images_path, model=_FakeModel())
+    shorts_cli._run(tts_path, images_path)
 
-    assert "ShortVideo" in seen["cmd"]
-    assert any(str(c).startswith("--public-dir=") for c in seen["cmd"])
+    assert len(seen_cmds) == 2
+    for cmd in seen_cmds:
+        assert "ShortVideo" in cmd
+        assert any(str(c).startswith("--public-dir=") for c in cmd)
 
 
-async def test_remotion_loi_thi_bao_loi(sandbox, monkeypatch):
-    script_path, images_path, _ = sandbox
+def test_trope_title_lech_giua_hai_metadata_thi_bao_loi(sandbox, monkeypatch):
+    tts_path, images_path, _ = sandbox
+    images_metadata = json.loads(images_path.read_text(encoding="utf-8"))
+    images_metadata["title"] = "Một Tập Khác"
+    images_path.write_text(json.dumps(images_metadata, ensure_ascii=False), encoding="utf-8")
 
-    def _fail(cmd, **kwargs):
+    with pytest.raises(shorts_cli.ShortRenderError, match=TITLE):
+        shorts_cli._run(tts_path, images_path)
+
+
+def test_remotion_loi_thi_bao_loi_neu_ro_so_phan(sandbox, monkeypatch):
+    tts_path, images_path, _ = sandbox
+    calls = {"n": 0}
+
+    def _fail_second(cmd, **kwargs):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            mp4 = [c for c in cmd if str(c).endswith(".mp4")][0]
+            Path(mp4).write_bytes(b"fake mp4")
+            return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
         return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="remotion hỏng")
 
-    monkeypatch.setattr(subprocess, "run", _fail)
+    monkeypatch.setattr(subprocess, "run", _fail_second)
 
-    with pytest.raises(shorts_cli.ShortRenderError, match="remotion hỏng"):
-        await shorts_cli._run(script_path, images_path, model=_FakeModel())
+    with pytest.raises(shorts_cli.ShortRenderError, match="phần 2") as exc_info:
+        shorts_cli._run(tts_path, images_path)
+    assert "remotion hỏng" in str(exc_info.value)
 
 
-async def test_remotion_bao_thanh_cong_nhung_khong_co_file(sandbox, monkeypatch):
-    script_path, images_path, _ = sandbox
+def test_remotion_bao_thanh_cong_nhung_khong_co_file_thi_bao_loi_ro_so_phan(
+    sandbox, monkeypatch
+):
+    tts_path, images_path, _ = sandbox
 
     def _lie(cmd, **kwargs):
         return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
 
     monkeypatch.setattr(subprocess, "run", _lie)
 
-    with pytest.raises(shorts_cli.ShortRenderError, match="không có file"):
-        await shorts_cli._run(script_path, images_path, model=_FakeModel())
-
-
-async def test_moi_cau_duoc_doc_rieng(sandbox, monkeypatch):
-    script_path, images_path, output_dir = sandbox
-    monkeypatch.setattr(subprocess, "run", _fake_render_ok())
-
-    calls = []
-
-    class _CountingModel(_FakeModel):
-        def infer(self, **kwargs):
-            calls.append(kwargs.get("text"))
-            return super().infer(**kwargs)
-
-    await shorts_cli._run(script_path, images_path, model=_CountingModel())
-
-    # Chương được chọn có đúng 2 câu -> 2 lần gọi TTS, không phải 1 lần cho cả chương.
-    assert calls == ["Cô ấy bước vào phòng khách.", "Trời đổ mưa rất to."]
-
-
-async def test_cau_ngan_duoi_0_4s_khong_lam_vo_chuan_hoa_do_on(sandbox, monkeypatch):
-    # Câu thoại một từ ("Sao?", "Không!") synthesize ra dưới 0.4s — block size tối
-    # thiểu của pyloudnorm — nên từng câu riêng lẻ đều dưới ngưỡng đó. Một chương
-    # thật luôn có nhiều câu nên cả chương ghép lại luôn dài hơn 0.4s; dựng chương
-    # giả có 6 câu ngắn để mô phỏng đúng hình dạng đó thay vì chương 2 câu quá
-    # ngắn của sandbox mặc định. Chuẩn hoá độ ồn phải chạy trên cả chương đã ghép,
-    # không phải trên từng câu riêng, nếu không pyloudnorm bắn ValueError và stage
-    # chết.
-    script_path, images_path, output_dir = sandbox
-    monkeypatch.setattr(subprocess, "run", _fake_render_ok())
-    monkeypatch.setattr(
-        shorts_cli.excerpt_module,
-        "pick_short_chapter",
-        AsyncMock(
-            return_value=ShortPick(
-                chapter_index=2,
-                hook_text="CÔ ẤY BIẾT HẾT RỒI",
-                chapter_text="Sao? Không! Đừng nói vậy. Cô ấy biết rồi. Anh im đi. Muộn rồi.",
-                short_title="Tiêu đề short",
-                short_description="Nghe full trên kênh. #shorts",
-            )
-        ),
-    )
-
-    await shorts_cli._run(script_path, images_path, model=_FakeModelCauNgan())
-
-    suffixes = sorted(p.suffix for p in output_dir.iterdir())
-    assert suffixes == [".json", ".mp4", ".txt", ".wav"]
+    with pytest.raises(shorts_cli.ShortRenderError, match="phần 1") as exc_info:
+        shorts_cli._run(tts_path, images_path)
+    assert "không có file" in str(exc_info.value)

@@ -47,6 +47,7 @@ export const ShortVideo: React.FC<ShortProps> = ({
   hookText,
   captions,
   audioDurationSeconds,
+  ctaText,
 }) => {
   useBeVietnamPro();
 
@@ -159,7 +160,7 @@ export const ShortVideo: React.FC<ShortProps> = ({
               textAlign: "center",
             }}
           >
-            Nghe full trên kênh
+            {ctaText}
           </div>
         </AbsoluteFill>
       ) : null}
