@@ -12,7 +12,6 @@ from shorts.excerpt import (
     build_excerpt_prompt,
     eligible_chapters,
     pick_short_chapter,
-    split_sentences,
 )
 
 
@@ -208,23 +207,3 @@ def test_eligible_chapters_rong_khi_kich_ban_qua_it_chuong():
 
 def test_reserved_ending_chapters_la_hai():
     assert RESERVED_ENDING_CHAPTERS == 2
-
-
-def test_tach_cau_theo_dau_ket_cau():
-    assert split_sentences("Cô ấy đến. Trời mưa! Anh biết chứ?") == [
-        "Cô ấy đến.",
-        "Trời mưa!",
-        "Anh biết chứ?",
-    ]
-
-
-def test_cau_ngan_giu_tach_biet():
-    assert split_sentences("Không. Dừng lại. Sao?") == [
-        "Không.",
-        "Dừng lại.",
-        "Sao?",
-    ]
-
-
-def test_tach_cau_chuoi_rong():
-    assert split_sentences("   ") == []

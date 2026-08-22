@@ -20,6 +20,9 @@ from gemini_webapi import GeminiClient
 from gemini_webapi.exceptions import APIError, AuthError, GeminiError
 
 from scripts.models import Chapter, Script
+# Tách câu đã chuyển hẳn sang tts/sentences.py để stage 2 và stage 7 dùng
+# chung; import lại ở đây để chỗ gọi excerpt_module.split_sentences không đổi.
+from tts.sentences import split_sentences
 
 
 class ShortExcerptError(Exception):
@@ -45,7 +48,6 @@ MAX_CHAPTER_WORDS = 700
 RESERVED_ENDING_CHAPTERS = 2
 
 _LABELS = ("CHAPTER", "HOOK", "TITLE", "DESCRIPTION")
-_SENTENCE_END = re.compile(r"(?<=[.!?…])\s+")
 
 
 def eligible_chapters(script: Script) -> list[Chapter]:
@@ -96,10 +98,6 @@ def build_excerpt_prompt(script: Script, chapters: list[Chapter] | None = None) 
         "DESCRIPTION: <mô tả 2-3 câu, có kêu gọi nghe full trên kênh, "
         "kết thúc bằng #shorts>"
     )
-
-
-def split_sentences(text: str) -> list[str]:
-    return [p.strip() for p in _SENTENCE_END.split(text.strip()) if p.strip()]
 
 
 def _parse_label(text: str, label: str) -> str:

@@ -11,6 +11,7 @@ class VoiceProfile:
     target_lufs: float
     sample_rate: int
     gap_seconds: float
+    sentence_gap_seconds: float = 0.15
     ref_audio_path: Path | None = None
 
 
@@ -31,5 +32,7 @@ def load_voice_profile(path: Path) -> VoiceProfile:
         target_lufs=data["target_lufs"],
         sample_rate=data["sample_rate"],
         gap_seconds=data["gap_seconds"],
+        # data.get, không phải data[...]: cấu hình cũ chưa có trường này vẫn nạp được.
+        sentence_gap_seconds=data.get("sentence_gap_seconds", 0.15),
         ref_audio_path=ref_audio_path,
     )
