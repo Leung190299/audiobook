@@ -12,6 +12,7 @@ ranh giới chương — mỗi phần dùng ảnh nền của đúng một chư�
 """
 
 import itertools
+import math
 from dataclasses import dataclass
 
 MAX_PART_SECONDS = 165.0
@@ -93,28 +94,55 @@ def plan_parts(tts_metadata: dict) -> list[ShortPart]:
     return parts
 
 
-def _pack_chapter(chapter_sentences: list[dict]) -> list[list[dict]]:
-    """Gói các câu liên tiếp trong một chương thành các lô, mỗi lô <= ngân sách.
+def _split_into(chapter_sentences: list[dict], count: int) -> list[list[dict]]:
+    """Chia các câu thành đúng `count` lô có thời lượng gần bằng nhau."""
+    start = chapter_sentences[0]["start_seconds"]
+    total = chapter_sentences[-1]["end_seconds"] - start
+    target = total / count
 
-    Một câu tự nó dài hơn ngân sách vẫn tạo thành một lô riêng (không cắt nhỏ
-    hơn câu), để không bao giờ treo hay bỏ sót câu.
-    """
     batches: list[list[dict]] = []
-    current_batch: list[dict] = []
+    current: list[dict] = []
 
     for sentence in chapter_sentences:
-        if current_batch:
-            batch_start = current_batch[0]["start_seconds"]
-            candidate_duration = sentence["end_seconds"] - batch_start
-            if candidate_duration > MAX_PART_SECONDS:
-                batches.append(current_batch)
-                current_batch = []
-        current_batch.append(sentence)
+        current.append(sentence)
+        remaining_after_this = count - len(batches) - 1
+        if remaining_after_this <= 0:
+            continue
+        # Còn đủ câu cho các lô sau mới được đóng lô hiện tại.
+        if len(chapter_sentences) - chapter_sentences.index(sentence) - 1 < remaining_after_this:
+            continue
+        if sentence["end_seconds"] - current[0]["start_seconds"] >= target:
+            batches.append(current)
+            current = []
 
-    if current_batch:
-        batches.append(current_batch)
-
+    if current:
+        batches.append(current)
     return batches
+
+
+def _pack_chapter(chapter_sentences: list[dict]) -> list[list[dict]]:
+    """Chia các câu của một chương thành các lô gần đều nhau, mỗi lô <= ngân sách.
+
+    Cố tình KHÔNG dùng kiểu tham lam "nhồi đầy 165 giây rồi mở lô mới": chương
+    190 giây khi đó ra 160 + 30, tức một short tử tế kèm một mẩu 30 giây gần như
+    chỉ có card hook và card CTA. Chia đều cho ra 95 + 95, hai short xem được.
+
+    Một câu tự nó dài hơn ngân sách vẫn thành một lô riêng (không cắt nhỏ hơn
+    câu), nên hàm luôn dừng.
+    """
+    total = chapter_sentences[-1]["end_seconds"] - chapter_sentences[0]["start_seconds"]
+    count = max(1, math.ceil(total / MAX_PART_SECONDS))
+
+    while count < len(chapter_sentences):
+        batches = _split_into(chapter_sentences, count)
+        if all(
+            b[-1]["end_seconds"] - b[0]["start_seconds"] <= MAX_PART_SECONDS for b in batches
+        ):
+            return batches
+        count += 1
+
+    # Mỗi câu một lô: không chia nhỏ hơn được nữa.
+    return [[sentence] for sentence in chapter_sentences]
 
 
 def _build_part(number: int, chapter_index: int, heading: str, batch: list[dict]) -> ShortPart:

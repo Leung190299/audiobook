@@ -219,3 +219,28 @@ def test_chuong_thieu_trong_mang_chapters_thi_bao_loi():
 
     with pytest.raises(ShortPlanError, match="chương 2"):
         plan_parts(metadata)
+
+
+def test_chuong_dai_chia_deu_khong_de_lai_mau_vun():
+    # Kiểu tham lam "nhồi đầy 165s rồi mở lô mới" cho ra 160s + 30s: một short tử
+    # tế kèm một mẩu gần như chỉ có card hook và card CTA. Phải chia đều.
+    sentences = []
+    t = 0.0
+    for i in range(1, 39):  # 38 câu x 5s = 190s
+        sentences.append({
+            "chapter_index": 1, "index": i, "text": f"Câu {i}.",
+            "start_seconds": t, "end_seconds": t + 5.0,
+        })
+        t += 5.0
+    metadata = {
+        "chapters": [{"index": 1, "heading": "Chương 1", "start_seconds": 0.0, "end_seconds": t}],
+        "sentences": sentences,
+    }
+
+    parts = plan_parts(metadata)
+
+    assert len(parts) == 2
+    durations = [p.duration_seconds for p in parts]
+    assert all(d <= MAX_PART_SECONDS for d in durations)
+    # Hai phần không được lệch nhau quá 20% — đây mới là điều test cũ bỏ sót.
+    assert max(durations) - min(durations) <= 0.2 * max(durations), durations
