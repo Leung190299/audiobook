@@ -114,7 +114,7 @@ def test_mac_dinh_dung_video_khong_dang_youtube(tmp_path: Path):
     assert not run.called("upload.cli")
 
 
-def test_co_co_upload_thi_chay_them_stage_7(tmp_path: Path):
+def test_co_co_upload_thi_chay_them_stage_8(tmp_path: Path):
     run = _run(tmp_path, ["--upload"])
     assert run.exit_code == 0, run.proc.stderr
     assert run.called("upload.cli")
@@ -162,6 +162,18 @@ def test_short_van_chay_khi_khong_dang_youtube(tmp_path: Path):
     run = _run(tmp_path)
     assert run.exit_code == 0
     assert run.called("shorts.cli")
+
+
+def test_duong_dan_short_duoc_ghi_vao_log(tmp_path: Path):
+    # Chứng minh run_daily.sh đã parse đúng đường dẫn short từ stdout stage 7
+    # và ghi vào run.log. Hồi regex sai sẽ không có test nào phát hiện.
+    run = _run(tmp_path)
+    assert run.exit_code == 0
+    log_dirs = list((run.root / "output" / "daily").iterdir())
+    assert len(log_dirs) == 1
+
+    run_log = (log_dirs[0] / "run.log").read_text(encoding="utf-8")
+    assert EXPECTED_SHORT in run_log
 
 
 def test_stage_8_upload_ten_video_da_doi_chu_khong_phai_ten_goc(tmp_path: Path):
@@ -286,6 +298,22 @@ def test_stage_7_short_output_la_khong_lam_dung_luot_chay(tmp_path: Path):
     run = _run(tmp_path, FAKE_GARBAGE_MODULE="shorts.cli")
     assert run.exit_code == 0, run.proc.stderr
 
+    assert not any(c.startswith("notify.cli failure") for c in run.calls)
+    assert any(c.startswith("notify.cli success") for c in run.calls)
+
+
+def test_co_upload_va_short_hong_thi_van_chay_stage_8(tmp_path: Path):
+    # Stage 7 non-fatal: nếu short hỏng nhưng có --upload, stage 8 phải chạy.
+    # Đây là test cho commit design này — short hỏng không được dừng toàn bộ
+    # vì video dài, thumbnail, metadata đã xong.
+    run = _run(tmp_path, ["--upload"], FAKE_FAIL_MODULE="shorts.cli")
+    assert run.exit_code == 0, run.proc.stderr
+    assert "Stage 7" in run.stdout
+    assert "CẢNH BÁO" in run.stdout
+
+    # Upload phải chạy dù short hỏng.
+    assert run.called("upload.cli")
+    # Báo thành công, không báo lỗi.
     assert not any(c.startswith("notify.cli failure") for c in run.calls)
     assert any(c.startswith("notify.cli success") for c in run.calls)
 
