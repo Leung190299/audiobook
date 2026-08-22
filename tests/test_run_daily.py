@@ -173,7 +173,10 @@ def test_duong_dan_short_duoc_ghi_vao_log(tmp_path: Path):
     assert len(log_dirs) == 1
 
     run_log = (log_dirs[0] / "run.log").read_text(encoding="utf-8")
-    assert EXPECTED_SHORT in run_log
+    # Phải khớp đúng dòng `log "  Short: $SHORT_PATH"`, không phải chỉ tìm đường dẫn
+    # trong run.log: log của stage 7 được cat nguyên vào run.log trước khi extract
+    # chạy, nên tìm chuỗi trần vẫn khớp kể cả khi regex parse hỏng hoàn toàn.
+    assert f"Short: {EXPECTED_SHORT}" in run_log
 
 
 def test_stage_8_upload_ten_video_da_doi_chu_khong_phai_ten_goc(tmp_path: Path):
