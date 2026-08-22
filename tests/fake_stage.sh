@@ -52,6 +52,10 @@ case "$module" in
     [[ -z "${FAKE_NO_RENAME:-}" ]] && \
       echo "Video đã đổi tên: output/video/me-chong-giau-so-do-truyen-audio.mp4"
     ;;
+  shorts.cli)
+    echo "Đã render short: output/shorts/me_chong_giau_cua-20260813T015300Z.mp4"
+    echo "Metadata short: output/shorts/me_chong_giau_cua-20260813T015300Z.txt"
+    ;;
   upload.cli)
     echo "Đã upload: https://youtu.be/FAKE12345"
     echo "Video ID: FAKE12345"

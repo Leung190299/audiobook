@@ -1,13 +1,16 @@
 #!/bin/bash
-# Dựng trọn một tập truyện audio mỗi ngày: bắt trend -> 6 stage -> báo khi xong.
+# Dựng trọn một tập truyện audio mỗi ngày: bắt trend -> 7 stage -> báo khi xong.
 # Mặc định KHÔNG đăng lên YouTube — bạn tự up. Thêm --upload nếu muốn tự động đăng.
 #
 #   ./run_daily.sh                              # chủ đề bắt trend (mặc định)
 #   ./run_daily.sh --trope trong_sinh_bao_thu   # bỏ qua trend, dùng trope có sẵn
 #   ./run_daily.sh --upload                     # dựng xong đăng luôn lên YouTube
 #
+# Mỗi lượt dựng 1 video dài + 1 thumbnail + 1 video ngắn (Shorts) + metadata SEO.
+#
 # Mỗi lượt ghi log vào output/daily/<ngày>/. Lỗi ở bất kỳ stage nào cũng dừng ngay
-# và bắn Telegram kèm phần cuối log của stage đó.
+# và bắn Telegram kèm phần cuối log của stage đó — trừ Stage 7 (short), stage này
+# hỏng không được làm cả lượt chạy báo thất bại (xem chú thích ở Stage 7).
 
 set -uo pipefail
 
@@ -148,9 +151,31 @@ FINAL_VIDEO="$(extract 'Video đã đổi tên: ([^[:space:]]+\.mp4)' "$META_LOG
 
 TITLE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["title"])' "$METADATA_JSON")"
 
+# --- Stage 7: video ngắn (không chặn lượt chạy nếu hỏng) ----------------------
+# Lúc này video dài, thumbnail và metadata SEO đã dựng xong hết. Short phụ thuộc
+# Gemini trả về đoạn trích dùng được — vốn dễ hỏng vặt hơn các stage khác — nên
+# một short hỏng không được làm một tập đã thành công báo thành lượt chạy thất
+# bại. Vì vậy stage này KHÔNG dùng run_stage/require: lỗi chỉ ghi log cảnh báo,
+# không gọi notify_failure, không exit.
+SHORT_LOG="$LOG_DIR/07-short.log"
+SHORT_PATH=""
+log "▶ Stage 7: Short"
+if $RUNNER shorts.cli "$SCRIPT_PATH" "$IMAGES_JSON" >"$SHORT_LOG" 2>&1; then
+  cat "$SHORT_LOG" >>"$LOG_FILE"
+  SHORT_PATH="$(extract 'Đã render short: ([^[:space:]]+\.mp4)' "$SHORT_LOG")"
+  if [[ -z "$SHORT_PATH" ]]; then
+    log "CẢNH BÁO: Stage 7: Short chạy xong nhưng không đọc được đường dẫn kết quả. Xem $SHORT_LOG"
+  fi
+else
+  cat "$SHORT_LOG" >>"$LOG_FILE"
+  log "CẢNH BÁO: Stage 7: Short THẤT BẠI, nhưng video dài vẫn ổn, không dừng lượt chạy. Xem $SHORT_LOG"
+  log "  Dựng lại tay: $RUNNER shorts.cli \"$SCRIPT_PATH\" \"$IMAGES_JSON\""
+fi
+
 if [[ "$DO_UPLOAD" -eq 0 ]]; then
   DURATION="$(human_duration $(($(date +%s) - START_TS)))"
   log "✔ Đã dựng xong sau $DURATION. Video: $FINAL_VIDEO"
+  log "  Short: $SHORT_PATH"
   $RUNNER notify.cli success \
     --title "$TITLE" \
     --video "$FINAL_VIDEO" \
@@ -160,12 +185,12 @@ if [[ "$DO_UPLOAD" -eq 0 ]]; then
   exit 0
 fi
 
-# --- Stage 7: upload YouTube (chỉ khi có --upload) ---------------------------
-UPLOAD_LOG="$LOG_DIR/07-upload.log"
-run_stage "Stage 7: Upload YouTube" "$UPLOAD_LOG" \
+# --- Stage 8: upload YouTube (chỉ khi có --upload) ---------------------------
+UPLOAD_LOG="$LOG_DIR/08-upload.log"
+run_stage "Stage 8: Upload YouTube" "$UPLOAD_LOG" \
   $RUNNER upload.cli "$FINAL_VIDEO" "$METADATA_JSON" --thumbnail "$THUMBNAIL_PATH"
 VIDEO_URL="$(extract 'Đã upload: ([^[:space:]]+)' "$UPLOAD_LOG")"
-require "$VIDEO_URL" "Stage 7: Upload YouTube" "$UPLOAD_LOG"
+require "$VIDEO_URL" "Stage 8: Upload YouTube" "$UPLOAD_LOG"
 
 DURATION="$(human_duration $(($(date +%s) - START_TS)))"
 log "✔ Hoàn thành: $VIDEO_URL ($DURATION)"

@@ -31,6 +31,7 @@ EXPECTED_VIDEO = "output/video/me_chong_giau_cua-20260813T015000Z.mp4"
 EXPECTED_RENAMED = "output/video/me-chong-giau-so-do-truyen-audio.mp4"
 EXPECTED_THUMBNAIL = "output/thumbnails/me_chong_giau_cua-20260813T015100Z.png"
 EXPECTED_METADATA_JSON = "output/metadata/me_chong_giau_cua-20260813T015200Z.json"
+EXPECTED_SHORT = "output/shorts/me_chong_giau_cua-20260813T015300Z.mp4"
 
 
 class Run:
@@ -106,7 +107,7 @@ def test_mac_dinh_dung_video_khong_dang_youtube(tmp_path: Path):
     assert run.exit_code == 0, run.proc.stderr
     for module in [
         "trend.cli", "scripts.cli", "tts.cli", "images.cli",
-        "video.cli", "thumbnail.cli", "metadata.cli",
+        "video.cli", "thumbnail.cli", "metadata.cli", "shorts.cli",
     ]:
         assert run.called(module), f"chưa gọi {module}\n{run.calls}"
     # Đăng YouTube phải là việc tự chọn, không được tự động chạy.
@@ -148,7 +149,22 @@ def test_stage_6_nhan_video_goc_chu_khong_phai_ten_da_doi(tmp_path: Path):
     )
 
 
-def test_stage_7_upload_ten_video_da_doi_chu_khong_phai_ten_goc(tmp_path: Path):
+def test_stage_7_short_nhan_script_va_images_json(tmp_path: Path):
+    # Short chỉ cần output stage 1 và stage 3 — không cần audio hay video.
+    run = _run(tmp_path)
+    assert run.call_for("shorts.cli") == (
+        f"shorts.cli {EXPECTED_SCRIPT} {EXPECTED_IMAGES_JSON}"
+    )
+
+
+def test_short_van_chay_khi_khong_dang_youtube(tmp_path: Path):
+    # Nhánh thoát sớm của --no-upload không được nhảy qua stage short.
+    run = _run(tmp_path)
+    assert run.exit_code == 0
+    assert run.called("shorts.cli")
+
+
+def test_stage_8_upload_ten_video_da_doi_chu_khong_phai_ten_goc(tmp_path: Path):
     # Tên gốc không còn tồn tại sau stage 6 — dùng nhầm là upload file không có thật.
     run = _run(tmp_path, ["--upload"])
     call = run.call_for("upload.cli")
@@ -211,7 +227,7 @@ def test_tham_so_la_thi_bao_loi_ngay(tmp_path: Path):
         ("scripts.cli", "Stage 1"),
         ("tts.cli", "Stage 2"),
         ("video.cli", "Stage 4"),
-        ("upload.cli", "Stage 7"),
+        ("upload.cli", "Stage 8"),
     ],
 )
 def test_stage_hong_thi_dung_ngay_va_bao_ngay(tmp_path: Path, module, stage_name):
@@ -233,7 +249,7 @@ def test_stage_hong_thi_dung_ngay_va_bao_ngay(tmp_path: Path, module, stage_name
 
     # Không được chạy tiếp stage sau khi đã hỏng.
     order = ["trend.cli", "scripts.cli", "tts.cli", "images.cli",
-             "video.cli", "thumbnail.cli", "metadata.cli", "upload.cli"]
+             "video.cli", "thumbnail.cli", "metadata.cli", "shorts.cli", "upload.cli"]
     for later in order[order.index(module) + 1:]:
         assert not run.called(later), f"vẫn chạy {later} sau khi {module} hỏng"
 
@@ -251,6 +267,29 @@ def test_stage_chay_xong_nhung_in_output_la_thi_van_dung_lai(tmp_path: Path):
     assert "không parse được output" in failure_call
 
 
+def test_stage_7_short_hong_khong_lam_dung_luot_chay(tmp_path: Path):
+    # Short phụ thuộc Gemini trả đoạn trích dùng được — dễ hỏng vặt. Video dài,
+    # thumbnail, metadata SEO đã xong hết trước đó nên short hỏng không được
+    # làm cả lượt chạy báo thất bại.
+    run = _run(tmp_path, FAKE_FAIL_MODULE="shorts.cli")
+    assert run.exit_code == 0, run.proc.stderr
+    assert "Stage 7" in run.stdout
+    assert "CẢNH BÁO" in run.stdout
+
+    assert not any(c.startswith("notify.cli failure") for c in run.calls)
+    assert any(c.startswith("notify.cli success") for c in run.calls)
+
+
+def test_stage_7_short_output_la_khong_lam_dung_luot_chay(tmp_path: Path):
+    # Kiểu hỏng âm thầm của stage 7 (exit 0, output không parse được) cũng
+    # không được chặn lượt chạy — khác hẳn quy tắc của các stage khác.
+    run = _run(tmp_path, FAKE_GARBAGE_MODULE="shorts.cli")
+    assert run.exit_code == 0, run.proc.stderr
+
+    assert not any(c.startswith("notify.cli failure") for c in run.calls)
+    assert any(c.startswith("notify.cli success") for c in run.calls)
+
+
 # --- log ----------------------------------------------------------------------
 
 
@@ -262,7 +301,8 @@ def test_moi_stage_ghi_log_rieng_de_lan_lai_khi_hong(tmp_path: Path):
     files = sorted(p.name for p in log_dirs[0].iterdir())
     assert files == [
         "00-trend.log", "01-script.log", "02-tts.log", "03-images.log",
-        "04-video.log", "05-thumbnail.log", "06-metadata.log", "run.log",
+        "04-video.log", "05-thumbnail.log", "06-metadata.log", "07-short.log",
+        "run.log",
     ]
 
     run_log = (log_dirs[0] / "run.log").read_text(encoding="utf-8")
