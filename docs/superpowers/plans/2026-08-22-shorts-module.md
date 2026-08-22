@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Mỗi tập truyện dài sinh thêm một video dọc 1080×1920 dài 60-80 giây, trích chương gay cấn nhất, kết bằng card kêu gọi nghe trọn tập trên kênh.
+**Goal:** Mỗi tập truyện dài sinh thêm một video dọc 1080×1920 dài khoảng 35-90 giây (tuỳ độ dài đoạn trích Gemini chọn, luôn nằm trong giới hạn 3 phút của YouTube Shorts), trích chương gay cấn nhất, kết bằng card kêu gọi nghe trọn tập trên kênh.
 
 **Architecture:** Một stage độc lập `shorts/` chỉ đọc output của stage 1 (kịch bản) và stage 3 (ảnh nền), nên chạy được cả cho tập cũ. Gemini chọn chương và trích đoạn; đoạn trích được tách thành câu và đọc từng câu một để lấy mốc thời gian thật cho phụ đề; Remotion render composition dọc mới.
 
@@ -242,7 +242,8 @@ def build_excerpt_prompt(script: Script) -> str:
     return (
         "Bạn là biên tập viên video ngắn cho kênh truyện audio tiếng Việt. "
         "Nhiệm vụ: chọn đoạn kịch tính nhất trong truyện dưới đây để dựng một video "
-        "Shorts dài khoảng 60-80 giây, mục đích kéo người xem về nghe trọn tập.\n\n"
+        "Shorts dài khoảng nửa phút đến hơn một phút, mục đích kéo người xem về nghe "
+        "trọn tập.\n\n"
         f"Tiêu đề truyện: {script.title}\n\n"
         f"Nội dung các chương:\n{chapters_block}\n\n"
         "Yêu cầu:\n"

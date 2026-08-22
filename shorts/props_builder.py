@@ -32,6 +32,16 @@ def build_short_props(
             f"Số câu ({len(sentences)}) không khớp số mốc thời gian ({len(timings)})"
         )
 
+    if (
+        images_metadata["trope"] != script.trope
+        or images_metadata["title"] != script.title
+    ):
+        raise ShortPropsBuildError(
+            f"trope/title của images_metadata không khớp với script "
+            f"(script: {script.trope!r}/{script.title!r}, "
+            f"images: {images_metadata['trope']!r}/{images_metadata['title']!r})"
+        )
+
     images_by_index = {c["index"]: c for c in images_metadata["chapters"]}
     image_chapter = images_by_index.get(excerpt.chapter_index)
     if image_chapter is None:
@@ -52,11 +62,19 @@ def build_short_props(
         for sentence, timing in zip(sentences, timings)
     ]
 
+    try:
+        image_path_relative = image_path.relative_to(repo_root)
+    except ValueError as exc:
+        raise ShortPropsBuildError(
+            f"File ảnh {image_path} nằm ngoài repo ({repo_root}) — "
+            "images_dir phải là thư mục con của repo_root"
+        ) from exc
+
     return {
         "trope": script.trope,
         "title": script.title,
         "audioPath": str(audio_path.relative_to(repo_root)),
-        "imagePath": str(image_path.relative_to(repo_root)),
+        "imagePath": str(image_path_relative),
         "hookText": excerpt.hook_text,
         "captions": captions,
         "audioDurationSeconds": timings[-1].end_seconds,

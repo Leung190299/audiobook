@@ -5,7 +5,7 @@
 
 ## Bối cảnh & mục tiêu
 
-Pipeline hiện dựng ra một tập dài ~50 phút mỗi lượt chạy, nhưng không có gì kéo người xem mới đến kênh. Module này lấp khoảng trống đó: **mỗi tập dài sinh thêm 1 video dọc 1080×1920 dài khoảng 60-80 giây**, trích đúng chương gay cấn nhất, kết bằng card kêu gọi nghe trọn tập trên kênh.
+Pipeline hiện dựng ra một tập dài ~50 phút mỗi lượt chạy, nhưng không có gì kéo người xem mới đến kênh. Module này lấp khoảng trống đó: **mỗi tập dài sinh thêm 1 video dọc 1080×1920 dài khoảng 35-90 giây** (tuỳ độ dài đoạn trích Gemini chọn), trích đúng chương gay cấn nhất, kết bằng card kêu gọi nghe trọn tập trên kênh. Biên độ này vẫn nằm trọn trong giới hạn 3 phút của YouTube Shorts nên chấp nhận được.
 
 Mục tiêu là dẫn lưu lượng từ Shorts về video dài, nên short **không kể trọn câu chuyện** — nó cắt ở cao trào.
 

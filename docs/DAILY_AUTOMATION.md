@@ -6,7 +6,8 @@ Pipeline gốc có 6 stage và dừng ở chỗ sinh metadata SEO. Bản này th
 |---|---|---|
 | 0 | `trend/` | Đọc tín hiệu xu hướng từ RSS công khai, sinh ý tưởng truyện gốc cho hôm nay |
 | 1–6 | (như cũ) | Kịch bản → TTS → ảnh → video → thumbnail → SEO |
-| 7 | `upload/` | **Tuỳ chọn.** Đăng lên YouTube — mặc định tắt, bạn tự up |
+| 7 | `shorts/` | Dựng video ngắn (Shorts) dọc 1080×1920 từ chương gay cấn nhất, chỉ cần output stage 1+3. Hỏng không làm dừng lượt chạy |
+| 8 | `upload/` | **Tuỳ chọn.** Đăng lên YouTube — mặc định tắt, bạn tự up |
 | — | `notify/` | Báo khi dựng xong hoặc khi lỗi (thông báo macOS, hoặc Telegram) |
 
 `run_daily.sh` xâu tất cả lại. `launchd/com.lee.audiobook.daily.plist` đặt lịch chạy.
@@ -58,10 +59,13 @@ Một lượt:
 ├─ Stage 3  images.cli         ~10m   → output/images/<slug>-<ts>.json + 16 png
 ├─ Stage 4  video.cli          ~15m   → output/video/<slug>-<ts>.mp4
 ├─ Stage 5  thumbnail.cli      ~1m    → output/thumbnails/<slug>-<ts>.png
-└─ Stage 6  metadata.cli       ~30s   → output/metadata/<slug>-<ts>.txt + .json
+├─ Stage 6  metadata.cli       ~30s   → output/metadata/<slug>-<ts>.txt + .json
+└─ Stage 7  shorts.cli         ~2m    → output/shorts/<slug>-<ts>.mp4 + .txt
 ```
 
-Tổng khoảng **45–50 phút**. Xong thì hiện thông báo trên màn hình.
+Tổng khoảng **45–50 phút**. Xong thì hiện thông báo trên màn hình. Stage 7 (short)
+hỏng không làm lượt chạy báo thất bại — video dài, thumbnail, metadata đã xong hết
+trước đó rồi.
 
 Sản phẩm cần cho việc đăng tay:
 
@@ -69,6 +73,8 @@ Sản phẩm cần cho việc đăng tay:
 - Thumbnail: `output/thumbnails/<slug>-<ts>.png` (1280×720)
 - Tiêu đề + mô tả + tag + mốc chương: `output/metadata/<slug>-<ts>.txt`, dán thẳng
   vào YouTube Studio
+- Video ngắn (Shorts): `output/shorts/<slug>-<ts>.mp4`
+- Tiêu đề + mô tả short: `output/shorts/<slug>-<ts>.txt`, dán thẳng vào YouTube Studio
 
 Log cả lượt ở `output/daily/<ngày>/run.log`, log riêng từng stage ở
 `output/daily/<ngày>/0N-<stage>.log`.

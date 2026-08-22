@@ -175,7 +175,7 @@ fi
 if [[ "$DO_UPLOAD" -eq 0 ]]; then
   DURATION="$(human_duration $(($(date +%s) - START_TS)))"
   log "✔ Đã dựng xong sau $DURATION. Video: $FINAL_VIDEO"
-  log "  Short: $SHORT_PATH"
+  [[ -n "$SHORT_PATH" ]] && log "  Short: $SHORT_PATH"
   $RUNNER notify.cli success \
     --title "$TITLE" \
     --video "$FINAL_VIDEO" \

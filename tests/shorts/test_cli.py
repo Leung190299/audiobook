@@ -2,7 +2,7 @@
 import json
 import subprocess
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 import numpy as np
 import pytest
@@ -30,6 +30,16 @@ class _FakeModel:
 
     def infer(self, **kwargs):
         t = np.arange(12000, dtype=np.float32) / 24000
+        return (0.1 * np.sin(2 * np.pi * 220 * t)).astype(np.float32)
+
+
+class _FakeModelCauNgan(_FakeModel):
+    """Trả về 0.1 giây âm thanh (2400 sample ở 24000Hz) cho mỗi câu — ngắn hơn hẳn
+    0.4s, block size tối thiểu của pyloudnorm. Câu thoại một từ như "Sao?" hay
+    "Không!" synthesize ra đúng cỡ này ngoài đời thật."""
+
+    def infer(self, **kwargs):
+        t = np.arange(2400, dtype=np.float32) / 24000
         return (0.1 * np.sin(2 * np.pi * 220 * t)).astype(np.float32)
 
 
@@ -172,3 +182,33 @@ async def test_moi_cau_duoc_doc_rieng(sandbox, monkeypatch):
 
     # Đoạn trích có đúng 2 câu -> 2 lần gọi TTS, không phải 1 lần cho cả đoạn.
     assert calls == ["Cô ấy bước vào phòng khách.", "Trời đổ mưa rất to."]
+
+
+async def test_cau_ngan_duoi_0_4s_khong_lam_vo_chuan_hoa_do_on(sandbox, monkeypatch):
+    # Câu thoại một từ ("Sao?", "Không!") synthesize ra dưới 0.4s — block size tối
+    # thiểu của pyloudnorm — nên từng câu riêng lẻ đều dưới ngưỡng đó. Đoạn trích
+    # thật luôn có nhiều câu (tối thiểu MIN_EXCERPT_WORDS từ) nên cả đoạn ghép lại
+    # luôn dài hơn 0.4s; dựng excerpt giả có 6 câu ngắn để mô phỏng đúng hình dạng
+    # đó thay vì đoạn trích 2 câu quá ngắn của sandbox mặc định. Chuẩn hoá độ ồn
+    # phải chạy trên cả đoạn đã ghép, không phải trên từng câu riêng, nếu không
+    # pyloudnorm bắn ValueError và stage chết.
+    script_path, images_path, output_dir = sandbox
+    monkeypatch.setattr(subprocess, "run", _fake_render_ok())
+    monkeypatch.setattr(
+        shorts_cli.excerpt_module,
+        "generate_short_excerpt",
+        AsyncMock(
+            return_value=ShortExcerpt(
+                chapter_index=2,
+                hook_text="CÔ ẤY BIẾT HẾT RỒI",
+                excerpt_text="Sao? Không! Đừng nói vậy. Cô ấy biết rồi. Anh im đi. Muộn rồi.",
+                short_title="Tiêu đề short",
+                short_description="Nghe full trên kênh. #shorts",
+            )
+        ),
+    )
+
+    await shorts_cli._run(script_path, images_path, model=_FakeModelCauNgan())
+
+    suffixes = sorted(p.suffix for p in output_dir.iterdir())
+    assert suffixes == [".json", ".mp4", ".txt", ".wav"]

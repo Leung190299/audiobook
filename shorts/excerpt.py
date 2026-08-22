@@ -47,7 +47,8 @@ def build_excerpt_prompt(script: Script) -> str:
     return (
         "Bạn là biên tập viên video ngắn cho kênh truyện audio tiếng Việt. "
         "Nhiệm vụ: chọn đoạn kịch tính nhất trong truyện dưới đây để dựng một video "
-        "Shorts dài khoảng 60-80 giây, mục đích kéo người xem về nghe trọn tập.\n\n"
+        "Shorts dài khoảng nửa phút đến hơn một phút, mục đích kéo người xem về nghe "
+        "trọn tập.\n\n"
         f"Tiêu đề truyện: {script.title}\n\n"
         f"Nội dung các chương:\n{chapters_block}\n\n"
         "Yêu cầu:\n"

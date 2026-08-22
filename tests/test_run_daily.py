@@ -72,7 +72,8 @@ def _run(tmp_path: Path, args: list[str] | None = None, **env_overrides) -> Run:
     shutil.copy(RUN_DAILY, root / "run_daily.sh")
     (root / "run_daily.sh").chmod(0o755)
 
-    # Stage 7 đọc title từ file metadata JSON thật, nên phải dựng sẵn file đó.
+    # TITLE= đọc title từ file metadata JSON thật (dùng cho notify.cli), nên phải
+    # dựng sẵn file đó.
     metadata_path = root / EXPECTED_METADATA_JSON
     metadata_path.parent.mkdir(parents=True, exist_ok=True)
     metadata_path.write_text(

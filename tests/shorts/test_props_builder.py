@@ -157,6 +157,73 @@ def test_file_anh_khong_ton_tai_thi_bao_loi(tmp_path: Path):
         )
 
 
+def test_images_metadata_khac_trope_thi_bao_loi(tmp_path: Path):
+    repo_root, images_dir, audio_path = _setup_repo(tmp_path)
+    images_metadata = _images_metadata()
+    images_metadata["trope"] = "trope_khac"
+
+    with pytest.raises(ShortPropsBuildError, match="trope/title"):
+        build_short_props(
+            script=_script(),
+            excerpt=_excerpt(),
+            sentences=["Cô ấy đến.", "Trời mưa."],
+            timings=_timings(),
+            images_metadata=images_metadata,
+            audio_path=audio_path,
+            images_dir=images_dir,
+            repo_root=repo_root,
+        )
+
+
+def test_images_metadata_khac_title_thi_bao_loi(tmp_path: Path):
+    # Chương 9 có thể tồn tại ở cả hai tập — chỉ khớp index không đủ, phải khớp
+    # cả title thì mới chắc images_metadata cùng tập với script.
+    repo_root, images_dir, audio_path = _setup_repo(tmp_path)
+    images_metadata = _images_metadata()
+    images_metadata["title"] = "Một Tập Truyện Khác"
+
+    with pytest.raises(ShortPropsBuildError, match="trope/title"):
+        build_short_props(
+            script=_script(),
+            excerpt=_excerpt(),
+            sentences=["Cô ấy đến.", "Trời mưa."],
+            timings=_timings(),
+            images_metadata=images_metadata,
+            audio_path=audio_path,
+            images_dir=images_dir,
+            repo_root=repo_root,
+        )
+
+
+def test_anh_ngoai_repo_root_bao_loi_dung_kieu_khong_phai_valueerror(tmp_path: Path):
+    # image_path.relative_to(repo_root) tự nhiên bắn ValueError khi images_dir nằm
+    # ngoài repo_root — phải bọc lại thành ShortPropsBuildError của module này.
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+
+    images_dir = tmp_path / "ngoai_repo" / "images"
+    images_dir.mkdir(parents=True)
+    (images_dir / "anh-1.png").write_bytes(b"x")
+    (images_dir / "anh-2.png").write_bytes(b"x")
+
+    audio_dir = repo_root / "output" / "shorts"
+    audio_dir.mkdir(parents=True)
+    audio_path = audio_dir / "trong_sinh_bao_thu-20260822T010000Z.wav"
+    audio_path.write_bytes(b"x")
+
+    with pytest.raises(ShortPropsBuildError, match="nằm ngoài repo"):
+        build_short_props(
+            script=_script(),
+            excerpt=_excerpt(),
+            sentences=["Cô ấy đến.", "Trời mưa."],
+            timings=_timings(),
+            images_metadata=_images_metadata(),
+            audio_path=audio_path,
+            images_dir=images_dir,
+            repo_root=repo_root,
+        )
+
+
 def test_khong_co_cau_nao_thi_bao_loi(tmp_path: Path):
     repo_root, images_dir, audio_path = _setup_repo(tmp_path)
 

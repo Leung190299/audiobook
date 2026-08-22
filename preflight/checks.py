@@ -1,7 +1,7 @@
 """Kiểm tra điều kiện chạy trước khi bật lịch tự động.
 
 Mục đích: bắt lỗi cấu hình trong 10 giây thay vì để lượt chạy hỏng ở phút thứ 50
-(stage 7 hỏng vì token hết hạn là tốn nhất — cả tiếng render coi như phí).
+(stage 8 hỏng vì token hết hạn là tốn nhất — cả tiếng render coi như phí).
 
 Mỗi check trả về một `Check`. Check nào cần gọi mạng thì chỉ chạy khi `deep=True`.
 """

@@ -74,25 +74,28 @@ async def _run(
 
     # Đọc từng câu một để lấy mốc thời gian thật cho phụ đề. Chapter ở đây chỉ là
     # vỏ bọc cho synthesize_chapter — index/heading chỉ dùng trong thông báo lỗi.
+    #
+    # KHÔNG chuẩn hoá độ ồn từng câu riêng lẻ: một câu thoại một từ ("Sao?", "Không!")
+    # ngắn hơn 0.4s làm pyloudnorm bắn ValueError (block size), và kể cả khi không
+    # crash thì LUFS đo trên vài trăm ms cũng vô nghĩa, khiến âm lượng nhảy giữa các
+    # câu. Ghép âm thanh thô trước, chuẩn hoá một lần trên cả đoạn — giống cách
+    # tts/cli.py chuẩn hoá theo cả chương chứ không theo câu.
     pieces = []
     for i, sentence in enumerate(sentences, start=1):
         audio = synthesize_chapter(
             Chapter(index=i, heading=f"Câu {i}", text=sentence), model, voice_profile
         )
-        pieces.append(
-            (
-                i,
-                sentence,
-                normalize_loudness(
-                    audio, voice_profile.sample_rate, voice_profile.target_lufs
-                ),
-            )
-        )
+        pieces.append((i, sentence, audio))
 
-    full_audio, timings = concatenate_chapters(
+    raw_audio, timings = concatenate_chapters(
         pieces,
         sample_rate=voice_profile.sample_rate,
         gap_seconds=SENTENCE_GAP_SECONDS,
+    )
+    # concatenate_chapters chỉ nối mảng, không đổi số sample -> mốc thời gian trong
+    # timings vẫn đúng sau khi chuẩn hoá độ ồn trên full_audio bên dưới.
+    full_audio = normalize_loudness(
+        raw_audio, voice_profile.sample_rate, voice_profile.target_lufs
     )
 
     stem = make_stem(script.trope)
