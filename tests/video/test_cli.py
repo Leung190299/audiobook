@@ -33,6 +33,15 @@ def _write_fixture_inputs(tmp_path: Path) -> tuple[Path, Path, Path]:
             "chapters": [
                 {"index": 1, "heading": "C1", "start_seconds": 0.0, "end_seconds": 2.0}
             ],
+            "sentences": [
+                {
+                    "chapter_index": 1,
+                    "index": 1,
+                    "text": "Noi dung",
+                    "start_seconds": 0.0,
+                    "end_seconds": 2.0,
+                }
+            ],
         },
     )
     (tmp_path / "tts.wav").write_bytes(b"fake wav")

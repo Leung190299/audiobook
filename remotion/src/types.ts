@@ -5,6 +5,9 @@ export interface ChapterProps {
   startSeconds: number;
   endSeconds: number;
   imagePath: string;
+  // Mốc câu giữ nguyên trục thời gian toàn tập (không quy về gốc chương) --
+  // xem Caption.tsx, nơi so trực tiếp với `seconds` toàn cục.
+  sentences: { text: string; startSeconds: number; endSeconds: number }[];
 }
 
 export interface VideoProps {
