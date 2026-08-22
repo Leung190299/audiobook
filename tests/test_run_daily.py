@@ -31,7 +31,7 @@ EXPECTED_VIDEO = "output/video/me_chong_giau_cua-20260813T015000Z.mp4"
 EXPECTED_RENAMED = "output/video/me-chong-giau-so-do-truyen-audio.mp4"
 EXPECTED_THUMBNAIL = "output/thumbnails/me_chong_giau_cua-20260813T015100Z.png"
 EXPECTED_METADATA_JSON = "output/metadata/me_chong_giau_cua-20260813T015200Z.json"
-EXPECTED_SHORT = "output/shorts/me_chong_giau_cua-20260813T015300Z.mp4"
+EXPECTED_SHORT_COUNT = "2"
 
 
 class Run:
@@ -150,11 +150,11 @@ def test_stage_6_nhan_video_goc_chu_khong_phai_ten_da_doi(tmp_path: Path):
     )
 
 
-def test_stage_7_short_nhan_script_va_images_json(tmp_path: Path):
-    # Short chỉ cần output stage 1 và stage 3 — không cần audio hay video.
+def test_stage_7_short_nhan_audio_va_images_json(tmp_path: Path):
+    # Short cắt theo mốc câu trong audio JSON của stage 2, không cần script hay video.
     run = _run(tmp_path)
     assert run.call_for("shorts.cli") == (
-        f"shorts.cli {EXPECTED_SCRIPT} {EXPECTED_IMAGES_JSON}"
+        f"shorts.cli {EXPECTED_AUDIO_JSON} {EXPECTED_IMAGES_JSON}"
     )
 
 
@@ -165,8 +165,8 @@ def test_short_van_chay_khi_khong_dang_youtube(tmp_path: Path):
     assert run.called("shorts.cli")
 
 
-def test_duong_dan_short_duoc_ghi_vao_log(tmp_path: Path):
-    # Chứng minh run_daily.sh đã parse đúng đường dẫn short từ stdout stage 7
+def test_so_phan_short_duoc_ghi_vao_log(tmp_path: Path):
+    # Chứng minh run_daily.sh đã parse đúng số phần từ dòng tổng kết của stage 7
     # và ghi vào run.log. Hồi regex sai sẽ không có test nào phát hiện.
     run = _run(tmp_path)
     assert run.exit_code == 0
@@ -174,10 +174,14 @@ def test_duong_dan_short_duoc_ghi_vao_log(tmp_path: Path):
     assert len(log_dirs) == 1
 
     run_log = (log_dirs[0] / "run.log").read_text(encoding="utf-8")
-    # Phải khớp đúng dòng `log "  Short: $SHORT_PATH"`, không phải chỉ tìm đường dẫn
-    # trong run.log: log của stage 7 được cat nguyên vào run.log trước khi extract
-    # chạy, nên tìm chuỗi trần vẫn khớp kể cả khi regex parse hỏng hoàn toàn.
-    assert f"Short: {EXPECTED_SHORT}" in run_log
+    # Phải khớp đúng dòng `log "  Short: $SHORT_COUNT phần trong output/shorts"` do
+    # run_daily.sh tự ghép từ biến đã parse — không phải chỉ tìm chuỗi trong
+    # run.log: log riêng của stage 7 (chứa nguyên văn "Đã render 2 short vào
+    # output/shorts") được cat vào run.log trước khi extract chạy, nên tìm đúng
+    # chuỗi đó vẫn khớp kể cả khi regex parse hỏng hoàn toàn. Dòng tóm tắt do
+    # run_daily.sh tự ghi ("Short: 2 phần trong ...") không trùng với dòng thô đó,
+    # nên assert này chỉ pass khi SHORT_COUNT thật sự được parse ra "2".
+    assert f"Short: {EXPECTED_SHORT_COUNT} phần trong output/shorts" in run_log
 
 
 def test_stage_8_upload_ten_video_da_doi_chu_khong_phai_ten_goc(tmp_path: Path):
@@ -284,13 +288,16 @@ def test_stage_chay_xong_nhung_in_output_la_thi_van_dung_lai(tmp_path: Path):
 
 
 def test_stage_7_short_hong_khong_lam_dung_luot_chay(tmp_path: Path):
-    # Short phụ thuộc Gemini trả đoạn trích dùng được — dễ hỏng vặt. Video dài,
+    # Stage 7 giờ là tính toán thuần (cắt file theo mốc câu, không gọi Gemini)
+    # nhưng vẫn có thể hỏng vì lý do khác (Remotion, props sai...). Video dài,
     # thumbnail, metadata SEO đã xong hết trước đó nên short hỏng không được
     # làm cả lượt chạy báo thất bại.
     run = _run(tmp_path, FAKE_FAIL_MODULE="shorts.cli")
     assert run.exit_code == 0, run.proc.stderr
     assert "Stage 7" in run.stdout
     assert "CẢNH BÁO" in run.stdout
+    # Lệnh dựng lại tay phải dùng audio JSON của stage 2, không phải script JSON.
+    assert f"shorts.cli \"{EXPECTED_AUDIO_JSON}\"" in run.stdout
 
     assert not any(c.startswith("notify.cli failure") for c in run.calls)
     assert any(c.startswith("notify.cli success") for c in run.calls)

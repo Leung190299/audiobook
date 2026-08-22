@@ -151,31 +151,32 @@ FINAL_VIDEO="$(extract 'Video đã đổi tên: ([^[:space:]]+\.mp4)' "$META_LOG
 
 TITLE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["title"])' "$METADATA_JSON")"
 
-# --- Stage 7: video ngắn (không chặn lượt chạy nếu hỏng) ----------------------
-# Lúc này video dài, thumbnail và metadata SEO đã dựng xong hết. Short phụ thuộc
-# Gemini trả về đoạn trích dùng được — vốn dễ hỏng vặt hơn các stage khác — nên
-# một short hỏng không được làm một tập đã thành công báo thành lượt chạy thất
-# bại. Vì vậy stage này KHÔNG dùng run_stage/require: lỗi chỉ ghi log cảnh báo,
-# không gọi notify_failure, không exit.
+# --- Stage 7: series short (không chặn lượt chạy nếu hỏng) --------------------
+# Lúc này video dài, thumbnail và metadata SEO đã dựng xong hết. Stage này chỉ
+# cắt file audio đã có sẵn theo mốc câu (không gọi Gemini, không TTS lại), nhưng
+# vẫn có thể hỏng vì lý do khác (Remotion, props sai...) — một short hỏng không
+# được làm một tập đã thành công báo thành lượt chạy thất bại. Vì vậy stage này
+# KHÔNG dùng run_stage/require: lỗi chỉ ghi log cảnh báo, không gọi
+# notify_failure, không exit.
 SHORT_LOG="$LOG_DIR/07-short.log"
-SHORT_PATH=""
+SHORT_COUNT=""
 log "▶ Stage 7: Short"
-if $RUNNER shorts.cli "$SCRIPT_PATH" "$IMAGES_JSON" >"$SHORT_LOG" 2>&1; then
+if $RUNNER shorts.cli "$AUDIO_JSON" "$IMAGES_JSON" >"$SHORT_LOG" 2>&1; then
   cat "$SHORT_LOG" >>"$LOG_FILE"
-  SHORT_PATH="$(extract 'Đã render short: ([^[:space:]]+\.mp4)' "$SHORT_LOG")"
-  if [[ -z "$SHORT_PATH" ]]; then
-    log "CẢNH BÁO: Stage 7: Short chạy xong nhưng không đọc được đường dẫn kết quả. Xem $SHORT_LOG"
+  SHORT_COUNT="$(extract 'Đã render ([0-9]+) short vào .+' "$SHORT_LOG")"
+  if [[ -z "$SHORT_COUNT" ]]; then
+    log "CẢNH BÁO: Stage 7: Short chạy xong nhưng không đọc được số phần kết quả. Xem $SHORT_LOG"
   fi
 else
   cat "$SHORT_LOG" >>"$LOG_FILE"
   log "CẢNH BÁO: Stage 7: Short THẤT BẠI, nhưng video dài vẫn ổn, không dừng lượt chạy. Xem $SHORT_LOG"
-  log "  Dựng lại tay: $RUNNER shorts.cli \"$SCRIPT_PATH\" \"$IMAGES_JSON\""
+  log "  Dựng lại tay: $RUNNER shorts.cli \"$AUDIO_JSON\" \"$IMAGES_JSON\""
 fi
 
 if [[ "$DO_UPLOAD" -eq 0 ]]; then
   DURATION="$(human_duration $(($(date +%s) - START_TS)))"
   log "✔ Đã dựng xong sau $DURATION. Video: $FINAL_VIDEO"
-  [[ -n "$SHORT_PATH" ]] && log "  Short: $SHORT_PATH"
+  [[ -n "$SHORT_COUNT" ]] && log "  Short: $SHORT_COUNT phần trong output/shorts"
   $RUNNER notify.cli success \
     --title "$TITLE" \
     --video "$FINAL_VIDEO" \

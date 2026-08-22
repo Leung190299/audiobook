@@ -226,10 +226,10 @@
         0
       ],
       "parameters": {
-        "command": "=cd /Users/lee/Project/Apps/audiobook && uv run python -m shorts.cli {{ $json.script_path }} {{ $json.images_json }}"
+        "command": "=cd /Users/lee/Project/Apps/audiobook && uv run python -m shorts.cli {{ $json.audio_json }} {{ $json.images_json }}"
       },
       "onError": "continueRegularOutput",
-      "notes": "Dựng video ngắn từ chương gay cấn nhất. Chỉ cần output stage 1 và stage 3. Giống run_daily.sh: stage này KHÔNG được chặn lượt chạy — video dài, thumbnail, metadata SEO đã dựng xong hết rồi, short hỏng chỉ đáng ghi nhận chứ không đáng huỷ cả tập. \"onError\": \"continueRegularOutput\" làm node này lỗi vẫn cho luồng đi tiếp (n8n truyền nguyên item đầu vào — tức output Parse Stage 6 — sang node kế, không có stdout)."
+      "notes": "Cắt cả tập thành series ~30 short đánh số, gói theo mốc câu (từ stage 2) không bắc cầu qua chương. Cần audio_json (mốc câu từ Parse Stage 2, đã đi theo suốt chuỗi) và images_json — không cần script_path nữa. Giống run_daily.sh: stage này KHÔNG được chặn lượt chạy — video dài, thumbnail, metadata SEO đã dựng xong hết rồi, short hỏng chỉ đáng ghi nhận chứ không đáng huỷ cả tập. \"onError\": \"continueRegularOutput\" làm node này lỗi vẫn cho luồng đi tiếp (n8n truyền nguyên item đầu vào — tức output Parse Stage 6 — sang node kế, không có stdout)."
     },
     {
       "id": "parse-7-short",
@@ -241,10 +241,10 @@
         0
       ],
       "parameters": {
-        "jsCode": "const stdout = $input.item.json.stdout || '';\nconst mp4 = stdout.match(/Đã render short: (\\S+\\.mp4)/);\nconst txt = stdout.match(/Metadata short: (\\S+\\.txt)/);\nif (!mp4 || !txt) {\n  throw new Error('Không parse được output short:\\n' + stdout + '\\n' + ($input.item.json.stderr || ''));\n}\nreturn [{\n  json: {\n    ...$('Parse Stage 6').item.json,\n    short_path: mp4[1],\n    short_metadata_txt: txt[1],\n  }\n}];"
+        "jsCode": "const stdout = $input.item.json.stdout || '';\nconst m = stdout.match(/Đã render ([0-9]+) short vào (\\S+)/);\nif (!m) {\n  throw new Error('Không parse được output short:\\n' + stdout + '\\n' + ($input.item.json.stderr || ''));\n}\nreturn [{\n  json: {\n    ...$('Parse Stage 6').item.json,\n    short_count: m[1],\n  }\n}];"
       },
       "onError": "continueRegularOutput",
-      "notes": "Nếu Stage 7: Short lỗi hoặc không parse được output, node này ném lỗi như bình thường, nhưng \"onError\": \"continueRegularOutput\" khiến n8n không dừng workflow — truyền nguyên item đầu vào (vẫn còn đủ script_path, final_video_path, metadata_json, thumbnail_path từ Parse Stage 6) sang Stage 8, y hệt cách run_daily.sh chỉ cảnh báo rồi đi tiếp khi Stage 7 hỏng."
+      "notes": "Parse dòng tổng kết cuối stdout (\"Đã render <N> short vào ...\") lấy số phần đã render vào short_count — không còn bắt từng cặp .mp4/.txt vì stage 7 in một cặp cho mỗi phần trong ~30 phần. Nếu Stage 7: Short lỗi hoặc không parse được output, node này ném lỗi như bình thường, nhưng \"onError\": \"continueRegularOutput\" khiến n8n không dừng workflow — truyền nguyên item đầu vào (vẫn còn đủ script_path, final_video_path, metadata_json, thumbnail_path từ Parse Stage 6) sang Stage 8, y hệt cách run_daily.sh chỉ cảnh báo rồi đi tiếp khi Stage 7 hỏng."
     },
     {
       "id": "exec-7",

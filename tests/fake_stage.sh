@@ -53,8 +53,11 @@ case "$module" in
       echo "Video đã đổi tên: output/video/me-chong-giau-so-do-truyen-audio.mp4"
     ;;
   shorts.cli)
-    echo "Đã render short: output/shorts/me_chong_giau_cua-20260813T015300Z.mp4"
-    echo "Metadata short: output/shorts/me_chong_giau_cua-20260813T015300Z.txt"
+    echo "Đã render short: output/shorts/me_chong_giau_cua-20260813T015300Z-part-01.mp4"
+    echo "Metadata short: output/shorts/me_chong_giau_cua-20260813T015300Z-part-01.txt"
+    echo "Đã render short: output/shorts/me_chong_giau_cua-20260813T015300Z-part-02.mp4"
+    echo "Metadata short: output/shorts/me_chong_giau_cua-20260813T015300Z-part-02.txt"
+    echo "Đã render 2 short vào output/shorts"
     ;;
   upload.cli)
     echo "Đã upload: https://youtu.be/FAKE12345"

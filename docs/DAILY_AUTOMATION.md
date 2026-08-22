@@ -6,7 +6,7 @@ Pipeline gốc có 6 stage và dừng ở chỗ sinh metadata SEO. Bản này th
 |---|---|---|
 | 0 | `trend/` | Đọc tín hiệu xu hướng từ RSS công khai, sinh ý tưởng truyện gốc cho hôm nay |
 | 1–6 | (như cũ) | Kịch bản → TTS → ảnh → video → thumbnail → SEO |
-| 7 | `shorts/` | Dựng video ngắn (Shorts) dọc 1080×1920, đọc trọn chương gay cấn nhất (không phải đoạn trích), chỉ cần output stage 1+3. Hỏng không làm dừng lượt chạy |
+| 7 | `shorts/` | Cắt cả tập thành series ~30 video ngắn (Shorts) dọc 1080×1920 đánh số liên tục, gói theo mốc câu từ stage 2, không bắc cầu qua chương. Cần output stage 2+3 — **không chạy được cho tập dựng trước khi stage 2 biết ghi mốc câu** (chỉ có mốc chương). Hỏng không làm dừng lượt chạy |
 | 8 | `upload/` | **Tuỳ chọn.** Đăng lên YouTube — mặc định tắt, bạn tự up |
 | — | `notify/` | Báo khi dựng xong hoặc khi lỗi (thông báo macOS, hoặc Telegram) |
 
@@ -60,12 +60,17 @@ Một lượt:
 ├─ Stage 4  video.cli          ~15m   → output/video/<slug>-<ts>.mp4
 ├─ Stage 5  thumbnail.cli      ~1m    → output/thumbnails/<slug>-<ts>.png
 ├─ Stage 6  metadata.cli       ~30s   → output/metadata/<slug>-<ts>.txt + .json
-└─ Stage 7  shorts.cli         ~5m    → output/shorts/<slug>-<ts>.mp4 + .txt
+└─ Stage 7  shorts.cli         chưa đo → output/shorts/<slug>-<ts>-part-NN.mp4 + .txt (~30 phần)
 ```
 
-Tổng khoảng **45–53 phút**. Xong thì hiện thông báo trên màn hình. Stage 7 (short)
+Tổng khoảng **45–53 phút** cộng thời gian Stage 7 — bản mới dựng ~30 short thay vì 1,
+mỗi phần vẫn cần một lượt render Remotion riêng nên thời gian tăng theo số phần;
+chưa đo thực tế cho bản mới, xem `output/daily/<ngày>/07-short.log` để biết thời
+gian lượt chạy gần nhất. Xong thì hiện thông báo trên màn hình. Stage 7 (short)
 hỏng không làm lượt chạy báo thất bại — video dài, thumbnail, metadata đã xong hết
-trước đó rồi.
+trước đó rồi. Stage 7 nay phụ thuộc **stage 2** (mốc câu), không phải stage 1 —
+vì vậy không dựng được short cho tập đã dựng trước khi stage 2 biết ghi mốc câu;
+muốn có short cho tập cũ phải chạy lại stage 2 cho tập đó trước.
 
 Sản phẩm cần cho việc đăng tay:
 
@@ -73,8 +78,9 @@ Sản phẩm cần cho việc đăng tay:
 - Thumbnail: `output/thumbnails/<slug>-<ts>.png` (1280×720)
 - Tiêu đề + mô tả + tag + mốc chương: `output/metadata/<slug>-<ts>.txt`, dán thẳng
   vào YouTube Studio
-- Video ngắn (Shorts): `output/shorts/<slug>-<ts>.mp4`
-- Tiêu đề + mô tả short: `output/shorts/<slug>-<ts>.txt`, dán thẳng vào YouTube Studio
+- Video ngắn (Shorts, ~30 phần mỗi tập): `output/shorts/<slug>-<ts>-part-NN.mp4`
+- Tiêu đề + mô tả từng phần: `output/shorts/<slug>-<ts>-part-NN.txt`, dán thẳng
+  vào YouTube Studio cho từng phần
 
 Log cả lượt ở `output/daily/<ngày>/run.log`, log riêng từng stage ở
 `output/daily/<ngày>/0N-<stage>.log`.
