@@ -29,7 +29,8 @@ def synthesize_chapter(chapter: Chapter, model, voice_profile: VoiceProfile) -> 
 
     if audio is None or not hasattr(audio, "__len__"):
         raise SynthesisError(
-            f"Kết quả VieNeu-TTS cho chương {chapter.index} không đúng định dạng mong đợi"
+            f"Kết quả VieNeu-TTS cho chương {chapter.index} ({chapter.heading}) "
+            "không đúng định dạng mong đợi"
         )
 
     if len(audio) == 0:
