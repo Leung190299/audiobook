@@ -62,7 +62,7 @@ export const ShortVideo: React.FC<ShortProps> = ({
 
   const inCta = seconds >= audioDurationSeconds;
   // Giữ nguyên phụ đề của câu trước trong khoảng nghỉ 0.15s giữa hai câu (xem
-  // SENTENCE_GAP_SECONDS ở shorts/cli.py) thay vì tắt hẳn: dùng "startSeconds gần
+  // sentence_gap_seconds ở config/voice.yaml) thay vì tắt hẳn: dùng "startSeconds gần
   // nhất đã qua" chứ không so cả startSeconds lẫn endSeconds, nếu không chữ sẽ
   // chớp tắt khoảng chục lần mỗi short. inCta ở trên đã lo việc ẩn phụ đề khi
   // sang card CTA.

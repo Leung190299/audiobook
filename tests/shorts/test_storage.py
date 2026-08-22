@@ -3,6 +3,8 @@ import json
 import re
 from pathlib import Path
 
+import pytest
+
 from shorts.storage import (
     make_stem,
     part_stem,
@@ -90,3 +92,12 @@ def test_tu_tao_thu_muc_neu_chua_co(tmp_path: Path):
     path = save_short_props("abc-20260822T010000Z-part-01", {}, output_dir)
 
     assert path.exists()
+
+
+def test_so_phan_ngoai_khoang_1_99_thi_bao_loi():
+    # Từ phần 100 trở đi, "part-100" sắp trước "part-99" theo thứ tự chữ cái.
+    with pytest.raises(ValueError, match="1-99"):
+        part_stem("abc-20260823T010000Z", 100)
+
+    with pytest.raises(ValueError, match="1-99"):
+        part_stem("abc-20260823T010000Z", 0)

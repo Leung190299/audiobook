@@ -23,6 +23,11 @@ def make_stem(trope: str) -> str:
 
 
 def part_stem(stem: str, number: int) -> str:
+    # Đệm cứng hai chữ số: từ phần 100 trở đi thì "part-100" sắp trước "part-99"
+    # theo thứ tự chữ cái, làm rối cả thư mục. Một tập ra ~30 phần, chạm 100 nghĩa
+    # là có gì đó sai từ trước — dừng lại còn hơn đẻ ra đống file xếp sai.
+    if not 1 <= number <= 99:
+        raise ValueError(f"Số phần phải nằm trong khoảng 1-99, nhận được {number}")
     return f"{stem}-part-{number:02d}"
 
 
