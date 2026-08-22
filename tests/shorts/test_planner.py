@@ -204,3 +204,18 @@ def test_quy_mo_thuc_te_mot_tap_50_phut_ra_so_phan_hop_ly():
 
     assert 45 * 60 <= total_seconds <= 55 * 60
     assert 20 <= len(parts) <= 35
+
+
+def test_chuong_thieu_trong_mang_chapters_thi_bao_loi():
+    # Hai mảng lệch nhau là dấu hiệu metadata hỏng. Trả heading rỗng thì short ra
+    # đời với hook trống mà không ai biết — thà dừng lại và nói rõ.
+    metadata = {
+        "chapters": [{"index": 1, "heading": "Chương 1", "start_seconds": 0.0, "end_seconds": 5.0}],
+        "sentences": [
+            {"chapter_index": 1, "index": 1, "text": "Câu một.", "start_seconds": 0.0, "end_seconds": 5.0},
+            {"chapter_index": 2, "index": 1, "text": "Câu hai.", "start_seconds": 5.5, "end_seconds": 9.0},
+        ],
+    }
+
+    with pytest.raises(ShortPlanError, match="chương 2"):
+        plan_parts(metadata)

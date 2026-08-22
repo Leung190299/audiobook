@@ -69,7 +69,13 @@ def plan_parts(tts_metadata: dict) -> list[ShortPart]:
 
     for chapter_index, group in itertools.groupby(sentences, key=lambda s: s["chapter_index"]):
         chapter_sentences = list(group)
-        heading = headings_by_chapter.get(chapter_index, "")
+        if chapter_index not in headings_by_chapter:
+            raise ShortPlanError(
+                f"Metadata TTS có câu thuộc chương {chapter_index} nhưng mảng "
+                "'chapters' không có chương đó — hai mảng lệch nhau, file metadata "
+                "hỏng. Chạy lại stage 2 cho tập này."
+            )
+        heading = headings_by_chapter[chapter_index]
 
         for prev, curr in zip(chapter_sentences, chapter_sentences[1:]):
             if curr["start_seconds"] <= prev["start_seconds"]:
