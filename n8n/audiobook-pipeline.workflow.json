@@ -270,7 +270,7 @@
         0
       ],
       "parameters": {
-        "jsCode": "const stdout = $input.item.json.stdout || '';\nconst url = stdout.match(/Đã upload: (\\S+)/);\nconst privacy = stdout.match(/Trạng thái: (.+)/);\nif (!url) {\n  throw new Error('Không parse được output upload:\\n' + stdout + '\\n' + ($input.item.json.stderr || ''));\n}\nreturn [{\n  json: {\n    ...$('Parse Stage 6').item.json,\n    video_url: url[1],\n    privacy_status: privacy ? privacy[1].trim() : 'unknown',\n    thumbnail_set: /Thumbnail: đã đặt/.test(stdout),\n  }\n}];"
+        "jsCode": "const stdout = $input.item.json.stdout || '';\nconst url = stdout.match(/Đã upload: (\\S+)/);\nconst privacy = stdout.match(/Trạng thái: (.+)/);\nif (!url) {\n  throw new Error('Không parse được output upload:\\n' + stdout + '\\n' + ($input.item.json.stderr || ''));\n}\nreturn [{\n  json: {\n    ...$('Parse Stage 7').item.json,\n    video_url: url[1],\n    privacy_status: privacy ? privacy[1].trim() : 'unknown',\n    thumbnail_set: /Thumbnail: đã đặt/.test(stdout),\n  }\n}];"
       }
     },
     {
