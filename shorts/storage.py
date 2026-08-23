@@ -50,22 +50,62 @@ def short_thumbnail_path(part_stem: str, output_dir: Path) -> Path:
     return output_dir / f"{part_stem}.png"
 
 
+# Tags cố định, giống nhau cho mọi phần của mọi series -- một series thì tính
+# nhất quán quan trọng hơn tối ưu SEO từng phần riêng lẻ. upload/series_cli.py
+# đọc thẳng danh sách này qua .json, không cần đoán hay tự sinh tag.
+SHORT_TAGS = [
+    "truyện audio",
+    "truyện trọng sinh",
+    "nghe truyện",
+    "shorts",
+    "truyện đêm khuya",
+]
+
+
 def save_short_metadata(
     part_stem: str,
+    trope: str,
     episode_title: str,
     number: int,
     total: int,
     output_dir: Path,
-) -> Path:
+) -> tuple[Path, Path]:
+    """Ghi cả `.txt` (đọc tay) lẫn `.json` (upload/series_cli.py đọc máy) cho
+    một phần, cùng nội dung tiêu đề/mô tả. Trả về (txt_path, json_path)."""
     output_dir.mkdir(parents=True, exist_ok=True)
-    path = output_dir / f"{part_stem}.txt"
     part_label = f"Phần {number}/{total}"
-    path.write_text(
-        f"TIÊU ĐỀ:\n{episode_title} — {part_label}\n\n"
-        f"MÔ TẢ:\n{episode_title} — {part_label}.\n"
+    title = f"{episode_title} — {part_label}"
+    description = (
+        f"{title}.\n"
         "Nghe trọn tập trên kênh, hoặc theo dõi series để xem tiếp phần sau.\n"
-        "#shorts #TruyenAudio\n\n"
-        f"TÊN FILE VIDEO:\n{part_stem}.mp4\n",
+        "#shorts #TruyenAudio"
+    )
+    video_filename = f"{part_stem}.mp4"
+
+    txt_path = output_dir / f"{part_stem}.txt"
+    txt_path.write_text(
+        f"TIÊU ĐỀ:\n{title}\n\n"
+        f"MÔ TẢ:\n{description}\n\n"
+        f"TÊN FILE VIDEO:\n{video_filename}\n",
         encoding="utf-8",
     )
-    return path
+
+    json_path = output_dir / f"{part_stem}.json"
+    json_path.write_text(
+        json.dumps(
+            {
+                "trope": trope,
+                "title": title,
+                "description": description,
+                "tags": SHORT_TAGS,
+                "part_number": number,
+                "total_parts": total,
+                "video_filename": video_filename,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    return txt_path, json_path

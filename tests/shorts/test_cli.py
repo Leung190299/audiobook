@@ -140,6 +140,7 @@ def test_render_du_nam_file_cho_moi_phan(sandbox, monkeypatch):
         assert list(output_dir.glob(f"*-part-{n}.mp4"))
         assert list(output_dir.glob(f"*-part-{n}-props.json"))
         assert list(output_dir.glob(f"*-part-{n}.txt"))
+        assert list(output_dir.glob(f"*-part-{n}.json"))
         assert list(output_dir.glob(f"*-part-{n}.png"))
 
 
@@ -154,17 +155,23 @@ def test_in_du_ba_dong_cho_moi_phan_va_dong_tong_ket(sandbox, monkeypatch, capsy
 
     render_lines = [l for l in lines if l.startswith("Đã render short: ")]
     metadata_lines = [l for l in lines if l.startswith("Metadata short: ")]
+    metadata_json_lines = [l for l in lines if l.startswith("Metadata JSON short: ")]
     thumbnail_lines = [l for l in lines if l.startswith("Ảnh bìa short: ")]
     assert len(render_lines) == 2
     assert len(metadata_lines) == 2
+    assert len(metadata_json_lines) == 2
     assert len(thumbnail_lines) == 2
-    # Thứ tự trong mỗi phần: render, metadata rồi ảnh bìa -- không dồn lại cuối.
+    # Thứ tự trong mỗi phần: render, metadata, metadata JSON rồi ảnh bìa --
+    # không dồn lại cuối. Hai dòng đầu (render, metadata) là hợp đồng với
+    # run_daily.sh/n8n, dòng metadata JSON thêm ngay sau đó.
     assert lines[0].startswith("Đã render short: ")
     assert lines[1].startswith("Metadata short: ")
-    assert lines[2].startswith("Ảnh bìa short: ")
-    assert lines[3].startswith("Đã render short: ")
-    assert lines[4].startswith("Metadata short: ")
-    assert lines[5].startswith("Ảnh bìa short: ")
+    assert lines[2].startswith("Metadata JSON short: ")
+    assert lines[3].startswith("Ảnh bìa short: ")
+    assert lines[4].startswith("Đã render short: ")
+    assert lines[5].startswith("Metadata short: ")
+    assert lines[6].startswith("Metadata JSON short: ")
+    assert lines[7].startswith("Ảnh bìa short: ")
     assert lines[-1] == "Đã render 2 short vào output/shorts"
 
 
@@ -294,12 +301,14 @@ def test_phan_loi_bi_xoa_file_do_dang_con_phan_da_xong_thi_giu_nguyen(sandbox, m
     assert list(output_dir.glob("*-part-01.mp4"))
     assert list(output_dir.glob("*-part-01-props.json"))
     assert list(output_dir.glob("*-part-01.txt"))
+    assert list(output_dir.glob("*-part-01.json"))
     assert list(output_dir.glob("*-part-01.png"))
 
     assert not list(output_dir.glob("*-part-02.wav"))
     assert not list(output_dir.glob("*-part-02.mp4"))
     assert not list(output_dir.glob("*-part-02-props.json"))
     assert not list(output_dir.glob("*-part-02.txt"))
+    assert not list(output_dir.glob("*-part-02.json"))
     assert not list(output_dir.glob("*-part-02.png"))
 
 
@@ -319,6 +328,7 @@ def test_anh_bia_loi_thi_don_ca_mp4_lan_png_va_neu_so_phan_da_xong(sandbox, monk
     assert not list(output_dir.glob("*-part-01.wav"))
     assert not list(output_dir.glob("*-part-01-props.json"))
     assert not list(output_dir.glob("*-part-01.txt"))
+    assert not list(output_dir.glob("*-part-01.json"))
 
 
 def test_qua_99_phan_thi_bao_loi_ngay_khong_render_gi(sandbox, monkeypatch):

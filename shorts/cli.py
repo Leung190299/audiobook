@@ -177,16 +177,17 @@ def _run(tts_metadata_path: Path, images_metadata_path: Path) -> None:
                     leftover.unlink()
             raise
 
-        metadata_path = save_short_metadata(
-            this_part_stem, episode_title, part.number, total_parts, OUTPUT_DIR
+        metadata_path, metadata_json_path = save_short_metadata(
+            this_part_stem, trope, episode_title, part.number, total_parts, OUTPUT_DIR
         )
 
         # In ngay sau khi mỗi phần xong, không dồn đến cuối -- một tập ra ~30
         # phần mất khá lâu, người vận hành cần thấy tiến độ trong log. Hai chuỗi
-        # đầu là hợp đồng với run_daily.sh và n8n, không đổi chữ; dòng ảnh bìa
-        # thêm sau cùng không nằm trong hợp đồng đó.
+        # đầu là hợp đồng với run_daily.sh và n8n, không đổi chữ; các dòng thêm
+        # sau (metadata JSON, ảnh bìa) không nằm trong hợp đồng đó.
         print(f"Đã render short: {output_path}")
         print(f"Metadata short: {metadata_path}")
+        print(f"Metadata JSON short: {metadata_json_path}")
         print(f"Ảnh bìa short: {thumbnail_path}")
         completed_parts += 1
 

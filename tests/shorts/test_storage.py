@@ -64,16 +64,18 @@ def test_luu_props_giu_nguyen_tieng_viet(tmp_path: Path):
 def test_file_metadata_du_bon_muc_va_dung_phan_n_tren_tong(tmp_path: Path):
     stem = part_stem("abc-20260822T010000Z", 7)
 
-    path = save_short_metadata(
+    txt_path, json_path = save_short_metadata(
         stem,
+        trope="trong_sinh_bao_thu",
         episode_title="Trọng Sinh Báo Thù",
         number=7,
         total=30,
         output_dir=tmp_path,
     )
 
-    content = path.read_text(encoding="utf-8")
-    assert path.name == f"{stem}.txt"
+    content = txt_path.read_text(encoding="utf-8")
+    assert txt_path.name == f"{stem}.txt"
+    assert json_path.name == f"{stem}.json"
     assert "TIÊU ĐỀ:\nTrọng Sinh Báo Thù — Phần 7/30" in content
     assert "MÔ TẢ:\nTrọng Sinh Báo Thù — Phần 7/30." in content
     assert "Nghe trọn tập trên kênh, hoặc theo dõi series để xem tiếp phần sau." in content
@@ -85,15 +87,60 @@ def test_file_metadata_phan_khac_nhau_ra_so_khac_nhau(tmp_path: Path):
     stem_1 = part_stem("abc-20260822T010000Z", 1)
     stem_2 = part_stem("abc-20260822T010000Z", 2)
 
-    path_1 = save_short_metadata(
-        stem_1, episode_title="Tên Tập", number=1, total=12, output_dir=tmp_path
+    txt_path_1, _ = save_short_metadata(
+        stem_1, trope="abc", episode_title="Tên Tập", number=1, total=12, output_dir=tmp_path
     )
-    path_2 = save_short_metadata(
-        stem_2, episode_title="Tên Tập", number=2, total=12, output_dir=tmp_path
+    txt_path_2, _ = save_short_metadata(
+        stem_2, trope="abc", episode_title="Tên Tập", number=2, total=12, output_dir=tmp_path
     )
 
-    assert "Phần 1/12" in path_1.read_text(encoding="utf-8")
-    assert "Phần 2/12" in path_2.read_text(encoding="utf-8")
+    assert "Phần 1/12" in txt_path_1.read_text(encoding="utf-8")
+    assert "Phần 2/12" in txt_path_2.read_text(encoding="utf-8")
+
+
+def test_file_metadata_json_du_khoa_upload_cli_can(tmp_path: Path):
+    stem = part_stem("trong_sinh_bao_thu-20260822T010000Z", 7)
+
+    txt_path, json_path = save_short_metadata(
+        stem,
+        trope="trong_sinh_bao_thu",
+        episode_title="Trọng Sinh Báo Thù",
+        number=7,
+        total=30,
+        output_dir=tmp_path,
+    )
+
+    data = json.loads(json_path.read_text(encoding="utf-8"))
+    txt_content = txt_path.read_text(encoding="utf-8")
+
+    assert data["trope"] == "trong_sinh_bao_thu"
+    assert data["title"] == "Trọng Sinh Báo Thù — Phần 7/30"
+    assert data["part_number"] == 7
+    assert data["total_parts"] == 30
+    assert data["video_filename"] == f"{stem}.mp4"
+    assert isinstance(data["tags"], list) and data["tags"]
+
+    # description trong .json phải khớp đúng phần MÔ TẢ trong .txt (giữa "MÔ
+    # TẢ:\n" và "\n\nTÊN FILE VIDEO:") -- upload/cli.py đọc "description" thẳng
+    # từ .json, không được lệch với bản .txt cho người đọc tay.
+    mo_ta_section = txt_content.split("MÔ TẢ:\n", 1)[1].split("\n\nTÊN FILE VIDEO:", 1)[0]
+    assert data["description"] == mo_ta_section
+
+
+def test_file_metadata_json_tags_giong_nhau_giua_cac_phan(tmp_path: Path):
+    stem_1 = part_stem("abc-20260822T010000Z", 1)
+    stem_2 = part_stem("abc-20260822T010000Z", 2)
+
+    _, json_path_1 = save_short_metadata(
+        stem_1, trope="abc", episode_title="Tên Tập", number=1, total=12, output_dir=tmp_path
+    )
+    _, json_path_2 = save_short_metadata(
+        stem_2, trope="abc", episode_title="Tên Tập", number=2, total=12, output_dir=tmp_path
+    )
+
+    data_1 = json.loads(json_path_1.read_text(encoding="utf-8"))
+    data_2 = json.loads(json_path_2.read_text(encoding="utf-8"))
+    assert data_1["tags"] == data_2["tags"]
 
 
 def test_tu_tao_thu_muc_neu_chua_co(tmp_path: Path):
