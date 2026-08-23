@@ -46,6 +46,10 @@ def short_video_path(part_stem: str, output_dir: Path) -> Path:
     return output_dir / f"{part_stem}.mp4"
 
 
+def short_thumbnail_path(part_stem: str, output_dir: Path) -> Path:
+    return output_dir / f"{part_stem}.png"
+
+
 def save_short_metadata(
     part_stem: str,
     episode_title: str,

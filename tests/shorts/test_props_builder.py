@@ -104,6 +104,27 @@ def test_cta_text_phan_cuoi_moi_nghe_full(tmp_path: Path):
     assert props["ctaText"] == "Nghe full trên kênh"
 
 
+def test_part_label_dinh_dang_phan_dau(tmp_path: Path):
+    part = _part(number=1)
+    props = _build(tmp_path, part=part, total_parts=30)
+
+    assert props["partLabel"] == "PHẦN 1/30"
+
+
+def test_part_label_dinh_dang_phan_giua(tmp_path: Path):
+    part = _part(number=15)
+    props = _build(tmp_path, part=part, total_parts=30)
+
+    assert props["partLabel"] == "PHẦN 15/30"
+
+
+def test_part_label_dinh_dang_phan_cuoi(tmp_path: Path):
+    part = _part(number=30)
+    props = _build(tmp_path, part=part, total_parts=30)
+
+    assert props["partLabel"] == "PHẦN 30/30"
+
+
 def test_phan_duy_nhat_cua_tap_cung_la_phan_cuoi(tmp_path: Path):
     # total_parts == 1 và number == 1 -- phần duy nhất của tập cũng phải coi là
     # phần cuối, không được lỡ tay chào "Xem phần 2" (không tồn tại).

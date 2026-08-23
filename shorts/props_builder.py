@@ -69,6 +69,7 @@ def build_short_props(
         "audioPath": str(audio_path.relative_to(repo_root)),
         "imagePath": str(image_path_relative),
         "hookText": part.heading,
+        "partLabel": f"PHẦN {part.number}/{total_parts}",
         "captions": captions,
         "audioDurationSeconds": part.duration_seconds,
         "ctaSeconds": cta_seconds,

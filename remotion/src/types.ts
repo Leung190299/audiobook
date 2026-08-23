@@ -29,6 +29,7 @@ export interface ShortProps {
   audioPath: string;
   imagePath: string;
   hookText: string;
+  partLabel: string; // ví dụ "PHẦN 7/32", hiển thị trên ảnh bìa
   captions: ShortCaption[];
   audioDurationSeconds: number;
   ctaSeconds: number;

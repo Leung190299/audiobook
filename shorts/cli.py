@@ -29,6 +29,7 @@ from shorts.storage import (
     save_short_metadata,
     save_short_props,
     short_audio_path,
+    short_thumbnail_path,
     short_video_path,
 )
 
@@ -92,6 +93,7 @@ def _run(tts_metadata_path: Path, images_metadata_path: Path) -> None:
         audio_path = short_audio_path(this_part_stem, OUTPUT_DIR)
         props_path = None
         output_path = short_video_path(this_part_stem, OUTPUT_DIR)
+        thumbnail_path = short_thumbnail_path(this_part_stem, OUTPUT_DIR)
 
         try:
             cut_wav(source_wav, part.source_start_seconds, part.source_end_seconds, audio_path)
@@ -132,14 +134,45 @@ def _run(tts_metadata_path: Path, images_metadata_path: Path) -> None:
                     f"{part.number}/{total_parts} tại {output_path} "
                     f"({completed_parts} phần trước đó đã render xong, vẫn giữ nguyên trên đĩa)"
                 )
+
+            # YouTube Shorts tự lấy khung hình trong video làm ảnh bìa, không nhận
+            # ảnh tải lên -- ảnh tĩnh này chỉ phục vụ việc chọn khung thủ công,
+            # đăng chéo sang nền tảng khác, và trường hợp một phần bị xếp thành
+            # video thường. Render sau khi .mp4 đã xong để dùng chung props.json.
+            cmd_thumbnail = [
+                "npx",
+                "remotion",
+                "still",
+                "src/index.ts",
+                "ShortThumbnail",
+                str(thumbnail_path),
+                f"--props={props_path}",
+                f"--public-dir={REPO_ROOT}",
+            ]
+            result = subprocess.run(
+                cmd_thumbnail, capture_output=True, text=True, cwd=REMOTION_DIR
+            )
+
+            if result.returncode != 0:
+                raise ShortRenderError(
+                    f"Lỗi khi render ảnh bìa short phần {part.number}/{total_parts} bằng "
+                    f"Remotion: {result.stderr or result.stdout} "
+                    f"({completed_parts} phần trước đó đã render xong, vẫn giữ nguyên trên đĩa)"
+                )
+            if not thumbnail_path.exists():
+                raise ShortRenderError(
+                    f"Remotion trả về mã thành công nhưng không có ảnh bìa short phần "
+                    f"{part.number}/{total_parts} tại {thumbnail_path} "
+                    f"({completed_parts} phần trước đó đã render xong, vẫn giữ nguyên trên đĩa)"
+                )
         except Exception:
             # Phần đang làm dở lỗi giữa chừng: dọn sạch file rời của riêng phần
-            # này (wav cắt sẵn, props.json, mp4 dở nếu Remotion kịp tạo) rồi mới
-            # bắn lỗi lên, để một lượt chạy hỏng không để lại rác chờ lượt sau
-            # (đánh timestamp mới) ghi đè lẫn. KHÔNG đụng các phần đã xong trước
-            # đó -- chúng vẫn dùng được và cố tình được giữ lại để nhận diện một
-            # lượt chạy dở dang.
-            for leftover in (audio_path, props_path, output_path):
+            # này (wav cắt sẵn, props.json, mp4 dở và png dở nếu Remotion kịp
+            # tạo) rồi mới bắn lỗi lên, để một lượt chạy hỏng không để lại rác
+            # chờ lượt sau (đánh timestamp mới) ghi đè lẫn. KHÔNG đụng các phần
+            # đã xong trước đó -- chúng vẫn dùng được và cố tình được giữ lại để
+            # nhận diện một lượt chạy dở dang.
+            for leftover in (audio_path, props_path, output_path, thumbnail_path):
                 if leftover is not None and leftover.exists():
                     leftover.unlink()
             raise
@@ -150,9 +183,11 @@ def _run(tts_metadata_path: Path, images_metadata_path: Path) -> None:
 
         # In ngay sau khi mỗi phần xong, không dồn đến cuối -- một tập ra ~30
         # phần mất khá lâu, người vận hành cần thấy tiến độ trong log. Hai chuỗi
-        # dưới đây là hợp đồng với run_daily.sh và n8n, không đổi chữ.
+        # đầu là hợp đồng với run_daily.sh và n8n, không đổi chữ; dòng ảnh bìa
+        # thêm sau cùng không nằm trong hợp đồng đó.
         print(f"Đã render short: {output_path}")
         print(f"Metadata short: {metadata_path}")
+        print(f"Ảnh bìa short: {thumbnail_path}")
         completed_parts += 1
 
     print(f"Đã render {total_parts} short vào {OUTPUT_DIR.relative_to(REPO_ROOT)}")

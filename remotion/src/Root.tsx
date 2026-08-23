@@ -2,6 +2,7 @@ import React from "react";
 import { Composition } from "remotion";
 import type { AnyZodObject } from "remotion";
 import { MainVideo } from "./MainVideo";
+import { ShortThumbnail } from "./ShortThumbnail";
 import { ShortVideo } from "./ShortVideo";
 import type { ShortProps, VideoProps } from "./types";
 
@@ -46,6 +47,7 @@ const defaultShortProps: CompositionShortProps = {
   audioPath: "",
   imagePath: "",
   hookText: "",
+  partLabel: "",
   captions: [],
   audioDurationSeconds: 0,
   ctaSeconds: 4,
@@ -73,6 +75,15 @@ export const RemotionRoot: React.FC = () => {
         height={SHORT_HEIGHT}
         durationInFrames={1}
         calculateMetadata={calculateShortMetadata}
+        defaultProps={defaultShortProps}
+      />
+      <Composition<AnyZodObject, CompositionShortProps>
+        id="ShortThumbnail"
+        component={ShortThumbnail}
+        fps={FPS}
+        width={SHORT_WIDTH}
+        height={SHORT_HEIGHT}
+        durationInFrames={1}
         defaultProps={defaultShortProps}
       />
     </>

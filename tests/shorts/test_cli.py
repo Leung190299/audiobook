@@ -115,14 +115,19 @@ def sandbox(tmp_path: Path, monkeypatch):
 
 def _fake_render_ok():
     def _run(cmd, **kwargs):
-        mp4 = [c for c in cmd if str(c).endswith(".mp4")][0]
-        Path(mp4).write_bytes(b"fake mp4")
+        # Cả lệnh render (.mp4) lẫn lệnh still (.png) đều đi qua đây -- ghi ra
+        # đúng file mà lệnh đó nhắm tới, suy từ đuôi file trong cmd.
+        for suffix in (".mp4", ".png"):
+            matches = [c for c in cmd if str(c).endswith(suffix)]
+            if matches:
+                Path(matches[0]).write_bytes(f"fake {suffix}".encode())
+                break
         return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
 
     return _run
 
 
-def test_render_du_bon_file_cho_moi_phan(sandbox, monkeypatch):
+def test_render_du_nam_file_cho_moi_phan(sandbox, monkeypatch):
     tts_path, images_path, output_dir = sandbox
     monkeypatch.setattr(subprocess, "run", _fake_render_ok())
 
@@ -135,9 +140,10 @@ def test_render_du_bon_file_cho_moi_phan(sandbox, monkeypatch):
         assert list(output_dir.glob(f"*-part-{n}.mp4"))
         assert list(output_dir.glob(f"*-part-{n}-props.json"))
         assert list(output_dir.glob(f"*-part-{n}.txt"))
+        assert list(output_dir.glob(f"*-part-{n}.png"))
 
 
-def test_in_dung_hai_dong_cho_moi_phan_va_dong_tong_ket(sandbox, monkeypatch, capsys):
+def test_in_du_ba_dong_cho_moi_phan_va_dong_tong_ket(sandbox, monkeypatch, capsys):
     tts_path, images_path, output_dir = sandbox
     monkeypatch.setattr(subprocess, "run", _fake_render_ok())
 
@@ -148,33 +154,47 @@ def test_in_dung_hai_dong_cho_moi_phan_va_dong_tong_ket(sandbox, monkeypatch, ca
 
     render_lines = [l for l in lines if l.startswith("Đã render short: ")]
     metadata_lines = [l for l in lines if l.startswith("Metadata short: ")]
+    thumbnail_lines = [l for l in lines if l.startswith("Ảnh bìa short: ")]
     assert len(render_lines) == 2
     assert len(metadata_lines) == 2
-    # Thứ tự: render rồi metadata cho từng phần, không dồn lại cuối cùng.
+    assert len(thumbnail_lines) == 2
+    # Thứ tự trong mỗi phần: render, metadata rồi ảnh bìa -- không dồn lại cuối.
     assert lines[0].startswith("Đã render short: ")
     assert lines[1].startswith("Metadata short: ")
-    assert lines[2].startswith("Đã render short: ")
-    assert lines[3].startswith("Metadata short: ")
+    assert lines[2].startswith("Ảnh bìa short: ")
+    assert lines[3].startswith("Đã render short: ")
+    assert lines[4].startswith("Metadata short: ")
+    assert lines[5].startswith("Ảnh bìa short: ")
     assert lines[-1] == "Đã render 2 short vào output/shorts"
 
 
-def test_goi_remotion_dung_composition_shortvideo_cho_moi_phan(sandbox, monkeypatch):
+def test_goi_remotion_hai_lan_moi_phan_render_roi_still(sandbox, monkeypatch):
     tts_path, images_path, output_dir = sandbox
     seen_cmds = []
 
     def _capture(cmd, **kwargs):
         seen_cmds.append(cmd)
-        mp4 = [c for c in cmd if str(c).endswith(".mp4")][0]
-        Path(mp4).write_bytes(b"fake mp4")
+        for suffix in (".mp4", ".png"):
+            matches = [c for c in cmd if str(c).endswith(suffix)]
+            if matches:
+                Path(matches[0]).write_bytes(f"fake {suffix}".encode())
+                break
         return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
 
     monkeypatch.setattr(subprocess, "run", _capture)
 
     shorts_cli._run(tts_path, images_path)
 
-    assert len(seen_cmds) == 2
-    for cmd in seen_cmds:
+    # Mỗi phần gọi đúng hai lệnh Remotion: render (.mp4, ShortVideo) rồi still
+    # (.png, ShortThumbnail), theo đúng thứ tự đó.
+    assert len(seen_cmds) == 4
+    for cmd in (seen_cmds[0], seen_cmds[2]):
+        assert "render" in cmd
         assert "ShortVideo" in cmd
+        assert any(str(c).startswith("--public-dir=") for c in cmd)
+    for cmd in (seen_cmds[1], seen_cmds[3]):
+        assert "still" in cmd
+        assert "ShortThumbnail" in cmd
         assert any(str(c).startswith("--public-dir=") for c in cmd)
 
 
@@ -188,19 +208,31 @@ def test_trope_title_lech_giua_hai_metadata_thi_bao_loi(sandbox, monkeypatch):
         shorts_cli._run(tts_path, images_path)
 
 
-def test_remotion_loi_thi_bao_loi_neu_ro_so_phan(sandbox, monkeypatch):
-    tts_path, images_path, _ = sandbox
+def _fail_on_call(n_target: int, stderr: str):
+    """Hai lệnh Remotion mỗi phần (render rồi still) -- lệnh thứ `n_target`
+    tính trên toàn bộ các lượt gọi subprocess.run sẽ báo lỗi, các lệnh trước đó
+    thành công và ghi file như thật."""
     calls = {"n": 0}
 
-    def _fail_second(cmd, **kwargs):
+    def _run(cmd, **kwargs):
         calls["n"] += 1
-        if calls["n"] == 1:
-            mp4 = [c for c in cmd if str(c).endswith(".mp4")][0]
-            Path(mp4).write_bytes(b"fake mp4")
-            return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
-        return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="remotion hỏng")
+        if calls["n"] == n_target:
+            return subprocess.CompletedProcess(cmd, 1, stdout="", stderr=stderr)
+        for suffix in (".mp4", ".png"):
+            matches = [c for c in cmd if str(c).endswith(suffix)]
+            if matches:
+                Path(matches[0]).write_bytes(f"fake {suffix}".encode())
+                break
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
 
-    monkeypatch.setattr(subprocess, "run", _fail_second)
+    return _run
+
+
+def test_remotion_loi_thi_bao_loi_neu_ro_so_phan(sandbox, monkeypatch):
+    tts_path, images_path, _ = sandbox
+    # Lệnh thứ 3 (render .mp4 của phần 2 -- phần 1 đã xong cả render lẫn still)
+    # báo lỗi.
+    monkeypatch.setattr(subprocess, "run", _fail_on_call(3, "remotion hỏng"))
 
     with pytest.raises(shorts_cli.ShortRenderError, match="phần 2") as exc_info:
         shorts_cli._run(tts_path, images_path)
@@ -224,39 +256,36 @@ def test_remotion_bao_thanh_cong_nhung_khong_co_file_thi_bao_loi_ro_so_phan(
 
 def test_loi_neu_thong_bao_ro_so_phan_da_hoan_tat_truoc_do(sandbox, monkeypatch):
     tts_path, images_path, _ = sandbox
-    calls = {"n": 0}
-
-    def _fail_second(cmd, **kwargs):
-        calls["n"] += 1
-        if calls["n"] == 1:
-            mp4 = [c for c in cmd if str(c).endswith(".mp4")][0]
-            Path(mp4).write_bytes(b"fake mp4")
-            return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
-        return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="remotion hỏng")
-
-    monkeypatch.setattr(subprocess, "run", _fail_second)
+    # Lệnh thứ 3 (render .mp4 của phần 2) báo lỗi -- phần 1 đã hoàn tất trọn
+    # vẹn (render + still + in log) trước đó.
+    monkeypatch.setattr(subprocess, "run", _fail_on_call(3, "remotion hỏng"))
 
     with pytest.raises(shorts_cli.ShortRenderError, match="1 phần trước đó"):
         shorts_cli._run(tts_path, images_path)
 
 
 def test_phan_loi_bi_xoa_file_do_dang_con_phan_da_xong_thi_giu_nguyen(sandbox, monkeypatch):
-    # Phần 1 render trót lọt, phần 2 lỗi giữa chừng nhưng kịp để lại wav đã cắt,
-    # props.json đã lưu, và (mô phỏng Remotion crash giữa chừng) một mp4 dở
-    # dang -- cả ba phải bị dọn sạch, còn 4 file của phần 1 phải nguyên vẹn.
+    # Phần 1 render trót lọt cả mp4 lẫn ảnh bìa. Phần 2 lỗi giữa chừng ở bước
+    # render mp4 nhưng kịp để lại wav đã cắt, props.json đã lưu, và (mô phỏng
+    # Remotion crash giữa chừng) một mp4 dở dang -- cả ba phải bị dọn sạch, còn
+    # 5 file của phần 1 (gồm cả ảnh bìa) phải nguyên vẹn.
     tts_path, images_path, output_dir = sandbox
     calls = {"n": 0}
 
-    def _fail_second_leaves_partial_mp4(cmd, **kwargs):
+    def _fail_third_leaves_partial_mp4(cmd, **kwargs):
         calls["n"] += 1
-        mp4 = [c for c in cmd if str(c).endswith(".mp4")][0]
-        if calls["n"] == 1:
-            Path(mp4).write_bytes(b"fake mp4")
+        if calls["n"] in (1, 2):
+            for suffix in (".mp4", ".png"):
+                matches = [c for c in cmd if str(c).endswith(suffix)]
+                if matches:
+                    Path(matches[0]).write_bytes(f"fake {suffix}".encode())
+                    break
             return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+        mp4 = [c for c in cmd if str(c).endswith(".mp4")][0]
         Path(mp4).write_bytes(b"mp4 do dang")
         return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="remotion crash")
 
-    monkeypatch.setattr(subprocess, "run", _fail_second_leaves_partial_mp4)
+    monkeypatch.setattr(subprocess, "run", _fail_third_leaves_partial_mp4)
 
     with pytest.raises(shorts_cli.ShortRenderError):
         shorts_cli._run(tts_path, images_path)
@@ -265,11 +294,31 @@ def test_phan_loi_bi_xoa_file_do_dang_con_phan_da_xong_thi_giu_nguyen(sandbox, m
     assert list(output_dir.glob("*-part-01.mp4"))
     assert list(output_dir.glob("*-part-01-props.json"))
     assert list(output_dir.glob("*-part-01.txt"))
+    assert list(output_dir.glob("*-part-01.png"))
 
     assert not list(output_dir.glob("*-part-02.wav"))
     assert not list(output_dir.glob("*-part-02.mp4"))
     assert not list(output_dir.glob("*-part-02-props.json"))
     assert not list(output_dir.glob("*-part-02.txt"))
+    assert not list(output_dir.glob("*-part-02.png"))
+
+
+def test_anh_bia_loi_thi_don_ca_mp4_lan_png_va_neu_so_phan_da_xong(sandbox, monkeypatch):
+    # Phần 1 render mp4 trót lọt nhưng lỗi ngay ở bước render ảnh bìa -- mp4 đã
+    # tạo ra của chính phần đó cũng phải bị dọn, không chỉ ảnh bìa dở dang.
+    tts_path, images_path, output_dir = sandbox
+    monkeypatch.setattr(subprocess, "run", _fail_on_call(2, "remotion still hỏng"))
+
+    with pytest.raises(shorts_cli.ShortRenderError, match="phần 1") as exc_info:
+        shorts_cli._run(tts_path, images_path)
+    assert "remotion still hỏng" in str(exc_info.value)
+    assert "0 phần trước đó" in str(exc_info.value)
+
+    assert not list(output_dir.glob("*-part-01.mp4"))
+    assert not list(output_dir.glob("*-part-01.png"))
+    assert not list(output_dir.glob("*-part-01.wav"))
+    assert not list(output_dir.glob("*-part-01-props.json"))
+    assert not list(output_dir.glob("*-part-01.txt"))
 
 
 def test_qua_99_phan_thi_bao_loi_ngay_khong_render_gi(sandbox, monkeypatch):

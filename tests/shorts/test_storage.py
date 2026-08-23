@@ -11,6 +11,7 @@ from shorts.storage import (
     save_short_metadata,
     save_short_props,
     short_audio_path,
+    short_thumbnail_path,
     short_video_path,
 )
 
@@ -39,6 +40,15 @@ def test_moi_file_cua_mot_phan_dung_chung_part_stem(tmp_path: Path):
     assert props_path.name == f"{stem}-props.json"
     assert audio_path.name == f"{stem}.wav"
     assert video_path.name == f"{stem}.mp4"
+
+
+def test_short_thumbnail_path_dat_ten_dung_quy_tac(tmp_path: Path):
+    stem = part_stem("trong_sinh_bao_thu-20260822T010000Z", 7)
+
+    thumbnail_path = short_thumbnail_path(stem, tmp_path)
+
+    assert thumbnail_path.name == f"{stem}.png"
+    assert thumbnail_path.parent == tmp_path
 
 
 def test_luu_props_giu_nguyen_tieng_viet(tmp_path: Path):
