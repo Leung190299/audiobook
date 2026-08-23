@@ -47,7 +47,7 @@ def test_short_thumbnail_path_dat_ten_dung_quy_tac(tmp_path: Path):
 
     thumbnail_path = short_thumbnail_path(stem, tmp_path)
 
-    assert thumbnail_path.name == f"{stem}.png"
+    assert thumbnail_path.name == f"{stem}.jpg"
     assert thumbnail_path.parent == tmp_path
 
 

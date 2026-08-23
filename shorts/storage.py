@@ -47,7 +47,10 @@ def short_video_path(part_stem: str, output_dir: Path) -> Path:
 
 
 def short_thumbnail_path(part_stem: str, output_dir: Path) -> Path:
-    return output_dir / f"{part_stem}.png"
+    # JPEG chứ không PNG: YouTube từ chối thumbnail lớn hơn 2MB, mà PNG của một
+    # khung 1080x1920 kiểu tranh vẽ luôn nặng 2.2-2.3MB. Đo thật ở series đầu
+    # tiên: cả 6 phần đều bị bỏ qua thumbnail vì lý do đó.
+    return output_dir / f"{part_stem}.jpg"
 
 
 # Tags cố định, giống nhau cho mọi phần của mọi series -- một series thì tính

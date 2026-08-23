@@ -115,9 +115,9 @@ def sandbox(tmp_path: Path, monkeypatch):
 
 def _fake_render_ok():
     def _run(cmd, **kwargs):
-        # Cả lệnh render (.mp4) lẫn lệnh still (.png) đều đi qua đây -- ghi ra
+        # Cả lệnh render (.mp4) lẫn lệnh still (.jpg) đều đi qua đây -- ghi ra
         # đúng file mà lệnh đó nhắm tới, suy từ đuôi file trong cmd.
-        for suffix in (".mp4", ".png"):
+        for suffix in (".mp4", ".jpg"):
             matches = [c for c in cmd if str(c).endswith(suffix)]
             if matches:
                 Path(matches[0]).write_bytes(f"fake {suffix}".encode())
@@ -141,7 +141,7 @@ def test_render_du_nam_file_cho_moi_phan(sandbox, monkeypatch):
         assert list(output_dir.glob(f"*-part-{n}-props.json"))
         assert list(output_dir.glob(f"*-part-{n}.txt"))
         assert list(output_dir.glob(f"*-part-{n}.json"))
-        assert list(output_dir.glob(f"*-part-{n}.png"))
+        assert list(output_dir.glob(f"*-part-{n}.jpg"))
 
 
 def test_in_du_ba_dong_cho_moi_phan_va_dong_tong_ket(sandbox, monkeypatch, capsys):
@@ -181,7 +181,7 @@ def test_goi_remotion_hai_lan_moi_phan_render_roi_still(sandbox, monkeypatch):
 
     def _capture(cmd, **kwargs):
         seen_cmds.append(cmd)
-        for suffix in (".mp4", ".png"):
+        for suffix in (".mp4", ".jpg"):
             matches = [c for c in cmd if str(c).endswith(suffix)]
             if matches:
                 Path(matches[0]).write_bytes(f"fake {suffix}".encode())
@@ -193,7 +193,7 @@ def test_goi_remotion_hai_lan_moi_phan_render_roi_still(sandbox, monkeypatch):
     shorts_cli._run(tts_path, images_path)
 
     # Mỗi phần gọi đúng hai lệnh Remotion: render (.mp4, ShortVideo) rồi still
-    # (.png, ShortThumbnail), theo đúng thứ tự đó.
+    # (.jpg, ShortThumbnail), theo đúng thứ tự đó.
     assert len(seen_cmds) == 4
     for cmd in (seen_cmds[0], seen_cmds[2]):
         assert "render" in cmd
@@ -225,7 +225,7 @@ def _fail_on_call(n_target: int, stderr: str):
         calls["n"] += 1
         if calls["n"] == n_target:
             return subprocess.CompletedProcess(cmd, 1, stdout="", stderr=stderr)
-        for suffix in (".mp4", ".png"):
+        for suffix in (".mp4", ".jpg"):
             matches = [c for c in cmd if str(c).endswith(suffix)]
             if matches:
                 Path(matches[0]).write_bytes(f"fake {suffix}".encode())
@@ -282,7 +282,7 @@ def test_phan_loi_bi_xoa_file_do_dang_con_phan_da_xong_thi_giu_nguyen(sandbox, m
     def _fail_third_leaves_partial_mp4(cmd, **kwargs):
         calls["n"] += 1
         if calls["n"] in (1, 2):
-            for suffix in (".mp4", ".png"):
+            for suffix in (".mp4", ".jpg"):
                 matches = [c for c in cmd if str(c).endswith(suffix)]
                 if matches:
                     Path(matches[0]).write_bytes(f"fake {suffix}".encode())
@@ -302,14 +302,14 @@ def test_phan_loi_bi_xoa_file_do_dang_con_phan_da_xong_thi_giu_nguyen(sandbox, m
     assert list(output_dir.glob("*-part-01-props.json"))
     assert list(output_dir.glob("*-part-01.txt"))
     assert list(output_dir.glob("*-part-01.json"))
-    assert list(output_dir.glob("*-part-01.png"))
+    assert list(output_dir.glob("*-part-01.jpg"))
 
     assert not list(output_dir.glob("*-part-02.wav"))
     assert not list(output_dir.glob("*-part-02.mp4"))
     assert not list(output_dir.glob("*-part-02-props.json"))
     assert not list(output_dir.glob("*-part-02.txt"))
     assert not list(output_dir.glob("*-part-02.json"))
-    assert not list(output_dir.glob("*-part-02.png"))
+    assert not list(output_dir.glob("*-part-02.jpg"))
 
 
 def test_anh_bia_loi_thi_don_ca_mp4_lan_png_va_neu_so_phan_da_xong(sandbox, monkeypatch):
@@ -324,7 +324,7 @@ def test_anh_bia_loi_thi_don_ca_mp4_lan_png_va_neu_so_phan_da_xong(sandbox, monk
     assert "0 phần trước đó" in str(exc_info.value)
 
     assert not list(output_dir.glob("*-part-01.mp4"))
-    assert not list(output_dir.glob("*-part-01.png"))
+    assert not list(output_dir.glob("*-part-01.jpg"))
     assert not list(output_dir.glob("*-part-01.wav"))
     assert not list(output_dir.glob("*-part-01-props.json"))
     assert not list(output_dir.glob("*-part-01.txt"))

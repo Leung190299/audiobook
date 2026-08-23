@@ -40,6 +40,11 @@ REMOTION_DIR = REPO_ROOT / "remotion"
 OUTPUT_DIR = REPO_ROOT / "output" / "shorts"
 
 
+# Chất lượng JPEG cho ảnh bìa. 85 cho ra ~400-600KB ở 1080x1920, thừa sức dưới
+# trần 2MB của YouTube mà mắt thường không phân biệt được với PNG.
+THUMBNAIL_JPEG_QUALITY = 85
+
+
 class ShortRenderError(Exception):
     pass
 
@@ -148,6 +153,8 @@ def _run(tts_metadata_path: Path, images_metadata_path: Path) -> None:
                 str(thumbnail_path),
                 f"--props={props_path}",
                 f"--public-dir={REPO_ROOT}",
+                "--image-format=jpeg",
+                f"--jpeg-quality={THUMBNAIL_JPEG_QUALITY}",
             ]
             result = subprocess.run(
                 cmd_thumbnail, capture_output=True, text=True, cwd=REMOTION_DIR
