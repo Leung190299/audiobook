@@ -4,7 +4,11 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from gemini_webapi.exceptions import APIError
 
-from scripts.generator import ScriptGenerationError, generate_script
+from scripts.generator import (
+    OUTLINE_ATTEMPTS,
+    ScriptGenerationError,
+    generate_script,
+)
 
 
 def _outline_json(num_chapters: int) -> str:
@@ -15,8 +19,15 @@ def _outline_json(num_chapters: int) -> str:
     return f'{{"title": "Tiêu đề test", "chapters": [{chapters}]}}'
 
 
-def _make_fake_client(outline_text: str, chapter_texts: list[str]):
-    responses = [MagicMock(text=outline_text)] + [MagicMock(text=t) for t in chapter_texts]
+def _make_fake_client(
+    outline_text: str, chapter_texts: list[str], outline_repeats: int = 1
+):
+    # outline_repeats > 1 cho các test cố tình đưa dàn ý hỏng: generate_script hỏi lại
+    # tới OUTLINE_ATTEMPTS lần, cấp thiếu phản hồi thì test chết vì hết side_effect
+    # chứ không phải vì lý do nó muốn kiểm tra.
+    responses = [MagicMock(text=outline_text)] * outline_repeats + [
+        MagicMock(text=t) for t in chapter_texts
+    ]
     fake_chat = MagicMock()
     fake_chat.send_message = AsyncMock(side_effect=responses)
     fake_client = MagicMock()
@@ -60,7 +71,9 @@ async def test_generate_script_strips_markdown_fence_from_outline():
 
 
 async def test_generate_script_raises_on_invalid_outline_json():
-    fake_client, _ = _make_fake_client("Xin lỗi, tôi không thể giúp việc này.", [])
+    fake_client, _ = _make_fake_client(
+        "Xin lỗi, tôi không thể giúp việc này.", [], outline_repeats=OUTLINE_ATTEMPTS
+    )
 
     with pytest.raises(ScriptGenerationError):
         await generate_script("id", "name", "desc", client=fake_client)
@@ -103,3 +116,42 @@ async def test_generate_script_wraps_api_error_from_chapter():
 
     with pytest.raises(ScriptGenerationError, match="chương 1"):
         await generate_script("id", "name", "desc", client=fake_client)
+
+
+async def test_dan_y_json_hong_thi_hoi_lai_gemini():
+    # Gemini trả JSON hỏng ở lần đầu (nháy kép không escape trong summary), lần hai
+    # trả đúng. Hỏng ở đây là mất trắng cả lượt chạy, nên phải thử lại chứ không
+    # được ném ngay.
+    hong = MagicMock()
+    hong.text = '{"title": "T", "chapters": [{"heading": "A", "summary": "có "nháy" lọt"}]}'
+    tot = MagicMock()
+    tot.text = '{"title": "T", "chapters": [{"heading": "A", "summary": "sạch"}]}'
+    chuong = MagicMock()
+    chuong.text = "Nội dung chương."
+
+    chat = MagicMock()
+    chat.send_message = AsyncMock(side_effect=[hong, tot, chuong])
+    client = MagicMock()
+    client.start_chat = MagicMock(return_value=chat)
+
+    script = await generate_script("t", "Tên", "Mô tả", client=client)
+
+    assert script.title == "T"
+    assert len(script.chapters) == 1
+    # 2 lần cho dàn ý + 1 lần cho chương.
+    assert chat.send_message.await_count == 3
+
+
+async def test_dan_y_hong_lien_tuc_thi_bao_loi():
+    hong = MagicMock()
+    hong.text = "{ hỏng hoàn toàn"
+
+    chat = MagicMock()
+    chat.send_message = AsyncMock(return_value=hong)
+    client = MagicMock()
+    client.start_chat = MagicMock(return_value=chat)
+
+    with pytest.raises(ScriptGenerationError, match="Không parse được JSON"):
+        await generate_script("t", "Tên", "Mô tả", client=client)
+
+    assert chat.send_message.await_count == OUTLINE_ATTEMPTS

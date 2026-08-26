@@ -43,6 +43,10 @@ nào khác), mỗi object chỉ có đúng 2 field "heading" và "summary" dạn
     {{"heading": "<tiêu đề chương 2>", "summary": "<tóm tắt chương 2>"}}
   ]
 }}
+
+TUYỆT ĐỐI KHÔNG dùng dấu nháy kép bên trong nội dung của "heading" hay "summary" —
+muốn nhấn mạnh hay trích lời thoại thì dùng nháy đơn. Một dấu nháy kép lọt vào giữa
+chuỗi sẽ đóng chuỗi sớm và làm hỏng cả khối JSON.
 """
 
 

@@ -9,6 +9,10 @@ from scripts.models import Chapter, Script
 from scripts.prompts import build_chapter_prompt, build_outline_prompt
 
 
+# Số lần hỏi Gemini cho dàn ý trước khi bỏ cuộc. Xem lý do ở generate_script().
+OUTLINE_ATTEMPTS = 3
+
+
 class ScriptGenerationError(Exception):
     pass
 
@@ -28,14 +32,26 @@ async def generate_script(
 
     chat = client.start_chat()
 
-    try:
-        outline_response = await chat.send_message(
-            build_outline_prompt(trope_name, trope_description)
-        )
-    except (GeminiError, APIError, AuthError) as exc:
-        raise ScriptGenerationError(f"Gemini lỗi khi sinh dàn ý: {exc}") from exc
+    # Gemini thỉnh thoảng trả JSON hỏng ở dàn ý — hay gặp nhất là một dấu nháy kép
+    # không escape lọt vào giữa summary của chương cuối, đóng chuỗi sớm và làm vỡ cả
+    # khối. Đo thực tế: hỏng 2 lần trong cùng một ngày, cùng vị trí. Prompt đã cấm
+    # nháy kép, nhưng cấm không bằng thử lại: hỏng ở đây là mất trắng cả lượt chạy
+    # một tiếng rưỡi. Chỉ thử lại lỗi parse; lỗi API thì ném ngay vì nó không tự khỏi.
+    outline = None
+    for attempt in range(OUTLINE_ATTEMPTS):
+        try:
+            outline_response = await chat.send_message(
+                build_outline_prompt(trope_name, trope_description)
+            )
+        except (GeminiError, APIError, AuthError) as exc:
+            raise ScriptGenerationError(f"Gemini lỗi khi sinh dàn ý: {exc}") from exc
 
-    outline = _parse_json_response(outline_response.text)
+        try:
+            outline = _parse_json_response(outline_response.text)
+            break
+        except ScriptGenerationError:
+            if attempt == OUTLINE_ATTEMPTS - 1:
+                raise
     try:
         title = outline["title"]
         chapter_plans = [(plan["heading"], plan["summary"]) for plan in outline["chapters"]]
