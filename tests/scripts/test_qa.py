@@ -1,7 +1,7 @@
 import pytest
 
 from scripts.models import Chapter, Script
-from scripts.qa import ScriptQAError, validate_script
+from scripts.qa import MAX_WORDS, ScriptQAError, validate_script
 
 
 def _make_script(word_count: int, num_chapters: int, extra_text: str = "") -> Script:
@@ -56,13 +56,15 @@ def test_validate_script_passes_at_exact_minimum_boundaries():
 
 
 def test_validate_script_passes_at_exact_maximum_boundaries():
-    # 14000 // 18 = 777, 777 * 18 = 13986, so add 14 extra words to reach exactly 14000
+    # Bám theo MAX_WORDS thay vì đóng cứng con số: trần đã phải nới một lần vì
+    # kịch bản thật chạm nóc, và hai test biên khi đó lệch theo.
+    chapters = 18
     script = _make_script(
-        word_count=14000,
-        num_chapters=18,
-        extra_text="từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+        word_count=MAX_WORDS,
+        num_chapters=chapters,
+        extra_text=" ".join(["từ"] * (MAX_WORDS - (MAX_WORDS // chapters) * chapters)),
     )
-    assert script.word_count == 14000  # exactly MAX_WORDS
+    assert script.word_count == MAX_WORDS
     assert len(script.chapters) == 18  # exactly MAX_CHAPTERS
     validate_script(script)  # không raise
 
@@ -76,9 +78,14 @@ def test_validate_script_raises_just_below_minimum_words():
 
 
 def test_validate_script_raises_just_above_maximum_words():
-    # 14001 // 16 = 875, 875 * 16 = 14000, so add 1 extra word to reach exactly 14001
-    script = _make_script(word_count=14001, num_chapters=16, extra_text="từ")
-    assert script.word_count == 14001  # one word above MAX_WORDS
+    chapters = 16
+    over = MAX_WORDS + 1
+    script = _make_script(
+        word_count=over,
+        num_chapters=chapters,
+        extra_text=" ".join(["từ"] * (over - (over // chapters) * chapters)),
+    )
+    assert script.word_count == over  # đúng một từ trên MAX_WORDS
     with pytest.raises(ScriptQAError, match="Độ dài"):
         validate_script(script)
 
