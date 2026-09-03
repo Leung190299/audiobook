@@ -1,4 +1,5 @@
 # scripts/generator.py
+import asyncio
 import json
 import os
 
@@ -11,6 +12,8 @@ from scripts.prompts import build_chapter_prompt, build_outline_prompt
 
 # Số lần hỏi Gemini cho dàn ý trước khi bỏ cuộc. Xem lý do ở generate_script().
 OUTLINE_ATTEMPTS = 3
+# Giây chờ trước lần thử lại đầu tiên; lần sau nhân đôi, nhân ba.
+RETRY_DELAY_SECONDS = 5
 
 
 class ScriptGenerationError(Exception):
@@ -52,6 +55,10 @@ async def generate_script(
         except ScriptGenerationError:
             if attempt == OUTLINE_ATTEMPTS - 1:
                 raise
+            # Chờ trước khi hỏi lại. Một lượt hỏng ngày 03/09 nhận ba phản hồi RỖNG
+            # liên tiếp trong chưa đầy hai phút — hỏi lại tức thì chỉ lặp lại đúng
+            # trạng thái đó. Chờ vài giây cho Gemini qua cơn.
+            await asyncio.sleep(RETRY_DELAY_SECONDS * (attempt + 1))
     try:
         title = outline["title"]
         chapter_plans = [(plan["heading"], plan["summary"]) for plan in outline["chapters"]]
@@ -88,7 +95,10 @@ def _parse_json_response(raw_text: str) -> dict:
         if text.lower().startswith("json"):
             text = text[len("json") :].strip()
     try:
-        return json.loads(text)
+        # strict=False: Gemini hay nhét ký tự xuống dòng thô vào giữa chuỗi, mà
+        # json.loads mặc định từ chối ký tự điều khiển trong chuỗi. Đo thực tế:
+        # lỗi "Invalid control character" làm hỏng một lượt chạy ngày 03/09.
+        return json.loads(text, strict=False)
     except json.JSONDecodeError as exc:
         raise ScriptGenerationError(
             f"Không parse được JSON từ phản hồi Gemini: {exc}"

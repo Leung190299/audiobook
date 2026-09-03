@@ -19,6 +19,13 @@ def _outline_json(num_chapters: int) -> str:
     return f'{{"title": "Tiêu đề test", "chapters": [{chapters}]}}'
 
 
+@pytest.fixture(autouse=True)
+def _no_retry_delay(monkeypatch):
+    """Bỏ khoảng chờ giữa các lần thử lại: nó có ích khi chạy thật, nhưng làm bộ
+    test chậm gấp trăm lần mà không kiểm chứng thêm điều gì."""
+    monkeypatch.setattr("scripts.generator.RETRY_DELAY_SECONDS", 0)
+
+
 def _make_fake_client(
     outline_text: str, chapter_texts: list[str], outline_repeats: int = 1
 ):
