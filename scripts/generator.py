@@ -100,6 +100,14 @@ def _parse_json_response(raw_text: str) -> dict:
         # lỗi "Invalid control character" làm hỏng một lượt chạy ngày 03/09.
         return json.loads(text, strict=False)
     except json.JSONDecodeError as exc:
+        # Gemini từ chối nội dung thì trả văn bản thường, không phải JSON hỏng.
+        # Báo đúng loại lỗi kèm nguyên văn: một lượt ngày 03/09 mất bốn lần chạy
+        # và ba bản vá nhầm chỗ chỉ vì thông báo cũ nói "không parse được JSON".
+        if not text.lstrip().startswith(("{", "[")):
+            raise ScriptGenerationError(
+                "Gemini không trả về JSON mà trả văn bản thường — nhiều khả năng "
+                f"là lời từ chối nội dung. Nguyên văn: {text[:300]!r}"
+            ) from exc
         raise ScriptGenerationError(
             f"Không parse được JSON từ phản hồi Gemini: {exc}"
         ) from exc

@@ -162,3 +162,18 @@ async def test_dan_y_hong_lien_tuc_thi_bao_loi():
         await generate_script("t", "Tên", "Mô tả", client=client)
 
     assert chat.send_message.await_count == OUTLINE_ATTEMPTS
+
+
+async def test_gemini_tu_choi_thi_bao_dung_loai_loi():
+    # Từ chối trả văn bản thường, không phải JSON hỏng. Thông báo cũ nói "không
+    # parse được JSON" khiến người sửa đi vá nhầm chỗ.
+    tu_choi = MagicMock()
+    tu_choi.text = "Là một mô hình ngôn ngữ, tôi không được thiết kế để trợ giúp về điều đó."
+
+    chat = MagicMock()
+    chat.send_message = AsyncMock(return_value=tu_choi)
+    client = MagicMock()
+    client.start_chat = MagicMock(return_value=chat)
+
+    with pytest.raises(ScriptGenerationError, match="từ chối nội dung"):
+        await generate_script("t", "Tên", "Mô tả", client=client)
