@@ -22,7 +22,14 @@ async def _run(trope_id: str | None, idea_file: Path | None, label: str | None) 
         # `label` chỉ đặt tên file/nhãn thể loại — nội dung truyện vẫn lấy từ idea.
         # Không có label thì mọi lượt chạy từ ý tưởng đều ra file "idea-<ts>.json",
         # rất khó lần lại tập nào là tập nào khi chạy tự động hằng ngày.
-        script = await generate_script(label or "idea", idea, idea)
+        # File ý tưởng của stage 0 có dạng "<tiêu đề gợi ý>\n\n<nội dung>", đúng
+        # khuôn tên + mô tả mà nhánh trope dùng. Trước đây chỗ này truyền nguyên
+        # văn ý tưởng vào CẢ HAI vị trí, khiến prompt chứa cùng một đoạn 1.800 ký
+        # tự hai lần (5.644 ký tự thay vì 3.818) và dòng "Motif:" dài cả đoạn văn.
+        title_hint, _, body = idea.partition("\n\n")
+        script = await generate_script(
+            label or "idea", title_hint.strip(), (body or idea).strip()
+        )
     else:
         trope = get_trope(CONFIG_PATH, trope_id)
         script = await generate_script(trope.id, trope.name, trope.description)
