@@ -24,6 +24,27 @@ export LANG="${LANG:-en_US.UTF-8}"
 export LC_ALL="${LC_ALL:-en_US.UTF-8}"
 export PYTHONIOENCODING=utf-8
 
+# nvm cài node ngoài mọi thư mục hệ thống, và launchd không nạp shell profile — nên
+# `npx` biến mất và Stage 4 chết khi gọi Remotion. Đã xảy ra thật: lượt hẹn giờ đầu
+# tiên (09:00 ngày 04/09) chạy hết 61 phút TTS + ảnh rồi mới đổ ở stage 4 vì
+# FileNotFoundError: 'npx'. Nạp nvm thay vì ghi cứng số hiệu bản node, để nâng cấp
+# node không làm hỏng lịch chạy.
+if ! command -v npx >/dev/null 2>&1 && [[ -s "$HOME/.nvm/nvm.sh" ]]; then
+  # shellcheck source=/dev/null
+  . "$HOME/.nvm/nvm.sh" --no-use >/dev/null 2>&1 || true
+  nvm use default >/dev/null 2>&1 || true
+fi
+
+# Thiếu lệnh nào thì dừng NGAY, đừng đốt một tiếng đồng hồ rồi mới báo. Đây chính
+# là bài học của lượt hỏng nói trên: lỗi nằm ở dòng đầu tiên nhưng lộ ra ở phút 61.
+for _cmd in uv npx; do
+  if ! command -v "$_cmd" >/dev/null 2>&1; then
+    echo "Không tìm thấy lệnh '$_cmd' trong PATH. Lượt chạy dừng trước khi bắt đầu." >&2
+    echo "PATH hiện tại: $PATH" >&2
+    exit 3
+  fi
+done
+
 # Cách gọi từng stage. Test tích hợp thay biến này bằng stage giả để kiểm tra
 # dây chuyền parse stdout mà không phải chạy thật 50 phút.
 RUNNER="${AUDIOBOOK_RUNNER:-uv run python -m}"
