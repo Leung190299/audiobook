@@ -12,6 +12,7 @@ from googleapiclient.errors import HttpError
 
 from upload import series_cli
 from upload.auth import YouTubeAuthError, load_credentials
+from shorts.storage import short_thumbnail_path
 from upload.uploader import UploadResult
 
 PREFIX_NAME = "vo_doi_tra_trung-20260822T182521Z"
@@ -37,7 +38,11 @@ def _write_part(directory: Path, prefix_name: str, number: int, with_thumbnail: 
         encoding="utf-8",
     )
     if with_thumbnail:
-        (directory / f"{stem}.png").write_bytes(b"fake png")
+        # Đuôi lấy từ chính hàm stage 7 dùng để ghi ảnh bìa. Fixture ghi cứng
+        # ".png" trong khi stage 7 đã chuyển sang JPEG là thứ đã che lỗi: test
+        # dựng sẵn đúng cái đuôi mà code hỏng đang tìm, nên cả hai cùng sai mà
+        # vẫn xanh.
+        short_thumbnail_path(stem, directory).write_bytes(b"fake jpg")
 
 
 def _make_series(tmp_path: Path, numbers: list[int], with_thumbnail: bool = True) -> Path:
@@ -315,6 +320,43 @@ def test_khong_co_thumbnail_van_dang_duoc_voi_thumbnail_path_none(tmp_path):
     )
 
     assert uploader.calls[0]["thumbnail_path"] is None
+
+
+def test_co_anh_bia_thi_dinh_kem_khi_dang(tmp_path):
+    """Ảnh bìa có trên đĩa thì phải được truyền vào uploader.
+
+    Không có test này thì đuôi file mà series_cli tìm có thể trôi khỏi đuôi mà
+    stage 7 ghi ra, và mọi short vẫn đăng trót lọt -- chỉ là không có ảnh bìa
+    nào cả. Đúng chuyện đã xảy ra khi ảnh bìa đổi từ PNG sang JPEG."""
+    prefix = _make_series(tmp_path, [1])
+    uploader = FakeUploader()
+
+    series_cli.run(
+        prefix,
+        limit=10,
+        uploader=uploader,
+        credentials_loader=_fake_credentials,
+    )
+
+    passed = uploader.calls[0]["thumbnail_path"]
+    assert passed is not None, "ảnh bìa có trên đĩa nhưng không được đính kèm"
+    assert passed.exists()
+    assert passed.name == f"{PREFIX_NAME}-part-01.jpg"
+
+
+def test_thieu_anh_bia_thi_canh_bao_ra_stdout(tmp_path, capsys):
+    """Thiếu ảnh bìa vẫn đăng, nhưng phải nói ra. Im lặng là cách lỗi đuôi file
+    tự giấu mình suốt nhiều lượt đăng thật."""
+    prefix = _make_series(tmp_path, [1], with_thumbnail=False)
+
+    series_cli.run(
+        prefix,
+        limit=10,
+        uploader=FakeUploader(),
+        credentials_loader=_fake_credentials,
+    )
+
+    assert "CẢNH BÁO" in capsys.readouterr().out
 
 
 def test_in_thong_bao_so_phan_tieu_de_url_sau_moi_phan(tmp_path, capsys):

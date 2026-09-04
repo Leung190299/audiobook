@@ -35,6 +35,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from googleapiclient.errors import HttpError
 
+from shorts.storage import short_thumbnail_path
 from upload.auth import YouTubeAuthError, load_credentials
 from upload.uploader import upload_video
 
@@ -101,7 +102,13 @@ def discover_parts(series_prefix: Path) -> list[SeriesPart]:
                 number=number,
                 video_path=directory / f"{stem}.mp4",
                 metadata_path=directory / f"{stem}.json",
-                thumbnail_path=directory / f"{stem}.png",
+                # Lấy đường dẫn từ chính hàm mà stage 7 dùng để GHI ảnh bìa,
+                # chứ không ghi cứng đuôi file ở đây. Ghi cứng ".png" đã hỏng
+                # một lần: stage 7 đổi sang JPEG cho lọt trần 2MB của YouTube,
+                # chỗ này không đổi theo, và vì thiếu file thì bị bỏ qua trong
+                # im lặng nên mọi short đăng lên đều không có ảnh bìa mà không
+                # ai báo gì.
+                thumbnail_path=short_thumbnail_path(stem, directory),
             )
         )
     return parts
@@ -183,7 +190,15 @@ def run(
     uploaded_this_run = 0
     for part in candidates:
         metadata = json.loads(part.metadata_path.read_text(encoding="utf-8"))
-        thumbnail_path = part.thumbnail_path if part.thumbnail_path.exists() else None
+        thumbnail_path = part.thumbnail_path
+        if not thumbnail_path.exists():
+            # Vẫn đăng, nhưng phải nói ra. Thiếu ảnh bìa trong im lặng là cách
+            # lỗi trên tự giấu mình suốt nhiều lượt đăng.
+            print(
+                f"CẢNH BÁO: phần {part.number} không có ảnh bìa "
+                f"{thumbnail_path.name}, đăng không kèm ảnh."
+            )
+            thumbnail_path = None
 
         try:
             result = uploader(
@@ -254,7 +269,7 @@ def main() -> None:
         type=Path,
         help=(
             "Phần chung của series, vd output/shorts/vo_doi_tra_trung-20260822T182521Z "
-            "-- khớp mọi <prefix>-part-NN.mp4 cùng .json/.png đi kèm"
+            "-- khớp mọi <prefix>-part-NN.mp4 cùng .json/.jpg đi kèm"
         ),
     )
     parser.add_argument(
