@@ -56,13 +56,30 @@ def build_video_props(
                 f"Chương {chapter.index} không có câu nào trong metadata TTS — tập này "
                 "dựng trước khi stage 2 biết ghi mốc câu. Muốn render lại, hãy chạy lại stage 2."
             )
+        image_scenes = image_chapter.get("scenes")
+        if not image_scenes:
+            raise PropsBuildError(
+                f"Metadata ảnh của chương {chapter.index} không có mảng 'scenes' — tập này "
+                "dựng trước khi stage 3 biết chia cảnh. Muốn render lại, hãy chạy lại stage 3."
+            )
         chapters.append(
             {
                 "index": chapter.index,
                 "heading": chapter.heading,
                 "startSeconds": tts_chapter["start_seconds"],
                 "endSeconds": tts_chapter["end_seconds"],
-                "imagePath": str((images_dir / image_chapter["filename"]).relative_to(repo_root)),
+                # Mốc cảnh giữ trục toàn tập, cùng lý do với mốc câu bên dưới.
+                "scenes": [
+                    {
+                        "number": scene["number"],
+                        "startSeconds": scene["start_seconds"],
+                        "endSeconds": scene["end_seconds"],
+                        "imagePath": str(
+                            (images_dir / scene["filename"]).relative_to(repo_root)
+                        ),
+                    }
+                    for scene in image_scenes
+                ],
                 "sentences": [
                     {
                         "text": s["text"],

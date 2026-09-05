@@ -53,7 +53,18 @@ def _write_fixture_inputs(tmp_path: Path) -> tuple[Path, Path, Path]:
             "trope": "demo",
             "title": "T",
             "chapters": [
-                {"index": 1, "filename": "demo-chapter-1.png", "scene_description": "a"}
+                {
+                    "index": 1,
+                    "scenes": [
+                        {
+                            "number": 1,
+                            "start_seconds": 0.0,
+                            "end_seconds": 2.0,
+                            "filename": "demo-chapter-1.png",
+                            "scene_description": "a",
+                        }
+                    ],
+                }
             ],
         },
     )
@@ -91,7 +102,7 @@ def test_run_builds_props_and_renders_video(tmp_path, monkeypatch):
     props_path = Path(cmd[6].removeprefix("--props="))
     saved_props = json.loads(props_path.read_text(encoding="utf-8"))
     assert saved_props["audioPath"] == "tts.wav"
-    assert saved_props["chapters"][0]["imagePath"] == "demo-chapter-1.png"
+    assert saved_props["chapters"][0]["scenes"][0]["imagePath"] == "demo-chapter-1.png"
 
 
 def test_run_resolves_relative_input_paths(tmp_path, monkeypatch):

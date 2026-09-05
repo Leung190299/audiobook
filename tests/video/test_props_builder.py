@@ -27,6 +27,18 @@ def _sentence(chapter_index, index, text, start, end):
     }
 
 
+def _image_chapter(index, *scenes):
+    # scenes: (number, start, end, filename)
+    return {
+        "index": index,
+        "scenes": [
+            {"number": n, "start_seconds": s, "end_seconds": e,
+             "filename": f, "scene_description": "..."}
+            for n, s, e, f in scenes
+        ],
+    }
+
+
 def test_build_video_props_joins_all_sources():
     script = _make_script()
     tts_metadata = {
@@ -47,8 +59,8 @@ def test_build_video_props_joins_all_sources():
         "trope": "demo",
         "title": "Tieu de demo",
         "chapters": [
-            {"index": 1, "filename": "demo-chapter-1.png", "scene_description": "a"},
-            {"index": 2, "filename": "demo-chapter-2.png", "scene_description": "b"},
+            _image_chapter(1, (1, 0.0, 1.0, "demo-c1-s1.png"), (2, 1.0, 2.0, "demo-c1-s2.png")),
+            _image_chapter(2, (1, 2.5, 4.5, "demo-c2-s1.png")),
         ],
     }
 
@@ -72,13 +84,18 @@ def test_build_video_props_joins_all_sources():
         "heading": "Chuong 1",
         "startSeconds": 0.0,
         "endSeconds": 2.0,
-        "imagePath": str(Path("output/images/demo-chapter-1.png")),
+        "scenes": [
+            {"number": 1, "startSeconds": 0.0, "endSeconds": 1.0,
+             "imagePath": str(Path("output/images/demo-c1-s1.png"))},
+            {"number": 2, "startSeconds": 1.0, "endSeconds": 2.0,
+             "imagePath": str(Path("output/images/demo-c1-s2.png"))},
+        ],
         "sentences": [
             {"text": "Cau mot.", "startSeconds": 0.0, "endSeconds": 1.0},
             {"text": "Cau hai.", "startSeconds": 1.0, "endSeconds": 2.0},
         ],
     }
-    assert props["chapters"][1]["imagePath"] == str(Path("output/images/demo-chapter-2.png"))
+    assert props["chapters"][1]["scenes"][0]["imagePath"] == str(Path("output/images/demo-c2-s1.png"))
     assert props["chapters"][1]["sentences"] == [
         {"text": "Cau ba.", "startSeconds": 2.5, "endSeconds": 4.5},
     ]
@@ -105,8 +122,8 @@ def test_build_video_props_keeps_sentences_on_whole_episode_timeline():
         "trope": "demo",
         "title": "Tieu de demo",
         "chapters": [
-            {"index": 1, "filename": "a.png", "scene_description": "a"},
-            {"index": 2, "filename": "b.png", "scene_description": "b"},
+            _image_chapter(1, (1, 0.0, 100.0, "a.png")),
+            _image_chapter(2, (1, 100.0, 110.0, "b.png")),
         ],
     }
 
@@ -140,8 +157,8 @@ def test_build_video_props_raises_on_missing_sentences_key():
         "trope": "demo",
         "title": "Tieu de demo",
         "chapters": [
-            {"index": 1, "filename": "a.png", "scene_description": "a"},
-            {"index": 2, "filename": "b.png", "scene_description": "b"},
+            _image_chapter(1, (1, 0.0, 2.0, "a.png")),
+            _image_chapter(2, (1, 2.5, 4.5, "b.png")),
         ],
     }
 
@@ -175,8 +192,8 @@ def test_build_video_props_raises_on_chapter_without_sentences():
         "trope": "demo",
         "title": "Tieu de demo",
         "chapters": [
-            {"index": 1, "filename": "a.png", "scene_description": "a"},
-            {"index": 2, "filename": "b.png", "scene_description": "b"},
+            _image_chapter(1, (1, 0.0, 2.0, "a.png")),
+            _image_chapter(2, (1, 2.5, 4.5, "b.png")),
         ],
     }
 
@@ -228,8 +245,8 @@ def test_build_video_props_raises_on_missing_chapter():
         "trope": "demo",
         "title": "Tieu de demo",
         "chapters": [
-            {"index": 1, "filename": "a.png", "scene_description": "a"},
-            {"index": 2, "filename": "b.png", "scene_description": "b"},
+            _image_chapter(1, (1, 0.0, 2.0, "a.png")),
+            _image_chapter(2, (1, 2.5, 4.5, "b.png")),
         ],
     }
 
@@ -241,4 +258,30 @@ def test_build_video_props_raises_on_missing_chapter():
             audio_path=Path("/repo/a.wav"),
             images_dir=Path("/repo/images"),
             repo_root=Path("/repo"),
+        )
+
+
+def test_build_video_props_raises_on_images_without_scenes():
+    script = _make_script()
+    tts_metadata = {
+        "trope": "demo", "title": "Tieu de demo", "sample_rate": 24000,
+        "chapters": [
+            {"index": 1, "heading": "Chuong 1", "start_seconds": 0.0, "end_seconds": 2.0},
+            {"index": 2, "heading": "Chuong 2", "start_seconds": 2.5, "end_seconds": 4.5},
+        ],
+        "sentences": [_sentence(1, 1, "Cau mot.", 0.0, 2.0), _sentence(2, 1, "Cau ba.", 2.5, 4.5)],
+    }
+    # Định dạng cũ: một filename mỗi chương, không có scenes.
+    images_metadata = {
+        "trope": "demo", "title": "Tieu de demo",
+        "chapters": [
+            {"index": 1, "filename": "a.png", "scene_description": "a"},
+            {"index": 2, "filename": "b.png", "scene_description": "b"},
+        ],
+    }
+
+    with pytest.raises(PropsBuildError, match="chạy lại stage 3"):
+        build_video_props(
+            script, tts_metadata, images_metadata,
+            audio_path=Path("/repo/a.wav"), images_dir=Path("/repo/images"), repo_root=Path("/repo"),
         )
