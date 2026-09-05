@@ -63,7 +63,7 @@ Một lượt:
 └─ Stage 7  shorts.cli         chưa đo → output/shorts/<slug>-<ts>-part-NN.mp4 + .txt (~30 phần)
 ```
 
-Tổng khoảng **45–53 phút** cộng thời gian Stage 7 — bản mới dựng ~30 short thay vì 1,
+Tổng khoảng **85–93 phút** cộng thời gian Stage 7 — bản mới dựng ~30 short thay vì 1,
 mỗi phần vẫn cần một lượt render Remotion riêng nên thời gian tăng theo số phần;
 chưa đo thực tế cho bản mới, xem `output/daily/<ngày>/07-short.log` để biết thời
 gian lượt chạy gần nhất. Xong thì hiện thông báo trên màn hình. Stage 7 (short)
@@ -188,7 +188,7 @@ hơn cả quy trình audit.
 | `KeyError: 'SECURE_1PSID'` | `.env` thiếu cookie Gemini, hoặc cookie hết hạn — lấy lại từ trình duyệt |
 | Stage 0 báo không lấy được tín hiệu nào | Mất mạng, hoặc báo đổi đường dẫn RSS — chạy tạm `--trope <id>` |
 | Không thấy thông báo macOS | System Settings → Notifications → bật cho Terminal (hoặc app chạy lệnh) |
-| Stage 3 tưởng như treo 10 phút | Bình thường: ~64 ảnh, mflux nạp lại model cho từng ảnh |
+| Stage 3 tưởng như treo ~50 phút | Bình thường: ~64 ảnh, mflux nạp lại model cho từng ảnh |
 | Chạy tay ổn nhưng launchd fail | PATH/locale — `run_daily.sh` đã tự set, xem `output/daily/launchd.err.log` |
 | Video lên nhưng ở chế độ private | OAuth project chưa qua audit — hành vi bình thường của YouTube |
 | Không rõ hỏng ở đâu | `uv run python -m preflight.cli --deep` chỉ đúng mục thiếu |
