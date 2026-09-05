@@ -3,8 +3,6 @@ import os
 from gemini_webapi import GeminiClient
 from gemini_webapi.exceptions import APIError, AuthError, GeminiError
 
-from scripts.models import Chapter
-
 
 class ScenePromptError(Exception):
     pass
@@ -39,8 +37,14 @@ def build_scene_prompt_request(chapter_text: str) -> str:
 
 
 async def generate_scene_description(
-    chapter: Chapter, client: "GeminiClient | None" = None
+    chapter_index: int,
+    scene_number: int,
+    text: str,
+    client: "GeminiClient | None" = None,
 ) -> str:
+    # Nhận đoạn văn của MỘT cảnh chứ không phải cả chương: chương 3-4 phút có
+    # nhiều bối cảnh, còn một cảnh ~50s thường chỉ có một -- hợp với quy tắc
+    # "đúng một địa điểm" trong prompt.
     if client is None:
         client = GeminiClient(
             os.environ["SECURE_1PSID"],
@@ -48,17 +52,14 @@ async def generate_scene_description(
         )
         await client.init(timeout=30, auto_close=False, close_delay=300, auto_refresh=True)
 
+    where = f"chương {chapter_index} cảnh {scene_number}"
     try:
-        response = await client.generate_content(build_scene_prompt_request(chapter.text))
+        response = await client.generate_content(build_scene_prompt_request(text))
     except (GeminiError, APIError, AuthError) as exc:
-        raise ScenePromptError(
-            f"Gemini lỗi khi tạo mô tả cảnh cho chương {chapter.index}: {exc}"
-        ) from exc
+        raise ScenePromptError(f"Gemini lỗi khi tạo mô tả cảnh cho {where}: {exc}") from exc
 
     description = response.text.strip().strip('"').strip()
     if not description:
-        raise ScenePromptError(
-            f"Gemini trả về mô tả cảnh rỗng cho chương {chapter.index}"
-        )
+        raise ScenePromptError(f"Gemini trả về mô tả cảnh rỗng cho {where}")
 
     return description

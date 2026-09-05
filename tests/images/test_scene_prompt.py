@@ -8,7 +8,6 @@ from images.scene_prompt import (
     build_scene_prompt_request,
     generate_scene_description,
 )
-from scripts.models import Chapter
 
 
 def _make_fake_client(response_text: str):
@@ -23,31 +22,28 @@ async def test_generate_scene_description_returns_cleaned_text():
     fake_client = _make_fake_client('"cozy living room at dusk"')
 
     description = await generate_scene_description(
-        Chapter(index=1, heading="Chương 1", text="Nội dung chương một."),
-        client=fake_client,
+        1, 1, "Nội dung cảnh một.", client=fake_client
     )
 
     assert description == "cozy living room at dusk"
     fake_client.generate_content.assert_called_once()
+    request = fake_client.generate_content.call_args.args[0]
+    assert "Nội dung cảnh một." in request
 
 
 async def test_generate_scene_description_raises_on_empty_response():
     fake_client = _make_fake_client("   ")
 
-    with pytest.raises(ScenePromptError):
-        await generate_scene_description(
-            Chapter(index=2, heading="Chương 2", text="Nội dung."), client=fake_client
-        )
+    with pytest.raises(ScenePromptError, match="chương 2 cảnh 3"):
+        await generate_scene_description(2, 3, "Nội dung.", client=fake_client)
 
 
 async def test_generate_scene_description_wraps_api_error():
     fake_client = MagicMock()
     fake_client.generate_content = AsyncMock(side_effect=APIError("boom"))
 
-    with pytest.raises(ScenePromptError, match="chương 3"):
-        await generate_scene_description(
-            Chapter(index=3, heading="Chương 3", text="Nội dung."), client=fake_client
-        )
+    with pytest.raises(ScenePromptError, match="chương 3 cảnh 1"):
+        await generate_scene_description(3, 1, "Nội dung.", client=fake_client)
 
 
 def test_build_scene_prompt_request_ep_mot_dia_diem_va_canh_trong():
