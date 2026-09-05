@@ -1,7 +1,13 @@
 import pytest
 
 from scripts.models import Chapter, Script
-from scripts.qa import MAX_WORDS, ScriptQAError, validate_script
+from scripts.qa import (
+    MAX_WORDS,
+    MIN_CHAPTER_WORDS,
+    ScriptQAError,
+    looks_like_refusal,
+    validate_script,
+)
 
 
 def _make_script(word_count: int, num_chapters: int, extra_text: str = "") -> Script:
@@ -118,3 +124,31 @@ def test_validate_script_aggregates_multiple_failures_in_one_message():
     message = str(exc_info.value)
     assert "Độ dài" in message
     assert "Số chương" in message
+
+
+def test_validate_script_bat_chuong_qua_ngan_du_tong_tu_du():
+    # Tổng 11.200 từ vẫn đạt, nhưng chương 4 chỉ còn 29 từ: đúng dạng lỗi
+    # tập 05/09 lọt qua QA cũ.
+    script = _make_script(word_count=11200, num_chapters=16)
+    script.chapters[3].text = " ".join(["từ"] * 29)
+
+    with pytest.raises(ScriptQAError, match="Chương 4"):
+        validate_script(script)
+
+
+def test_validate_script_bat_chuong_la_loi_tu_choi():
+    script = _make_script(word_count=11200, num_chapters=16)
+    script.chapters[3].text = (
+        "Tôi không thể giúp bạn việc đó, vì tôi chỉ là một mô hình ngôn ngữ "
+        + " ".join(["từ"] * MIN_CHAPTER_WORDS)
+    )
+
+    with pytest.raises(ScriptQAError, match="Chương 4.*từ chối"):
+        validate_script(script)
+
+
+def test_looks_like_refusal():
+    assert looks_like_refusal("Tôi không thể giúp bạn việc đó, vì tôi chỉ là một mô hình ngôn ngữ.")
+    assert looks_like_refusal("Xin lỗi, tôi không thể tạo nội dung này.")
+    assert looks_like_refusal("I can't help with that request.")
+    assert not looks_like_refusal("Tôi không thể tin nổi, cô ta dám cầm sổ đỏ đi thế chấp.")

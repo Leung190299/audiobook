@@ -7,6 +7,11 @@ MIN_WORDS = 9000
 # trong tầm bình thường của video dài.
 MAX_WORDS = 15000
 MIN_CHAPTERS = 14
+# Sàn độ dài MỖI chương. Tổng từ không đủ để bắt lỗi: tập 05/09 có chương 4 chỉ
+# 29 từ — nguyên văn lời từ chối của Gemini — mà tổng vẫn hơn 12.000 nên QA cũ
+# cho qua, và TTS đọc luôn câu "tôi chỉ là một mô hình ngôn ngữ" vào tập.
+# Chương thật đo được 740-1.170 từ; 300 chặn được cả từ chối lẫn chương cụt.
+MIN_CHAPTER_WORDS = 300
 MAX_CHAPTERS = 18
 
 BANNED_TERMS = [
@@ -14,8 +19,31 @@ BANNED_TERMS = [
 ]
 
 
+# Câu mở đầu điển hình của lời từ chối. Chỉ xét phần đầu văn bản để "tôi không
+# thể tin nổi" giữa truyện không bị bắt nhầm.
+REFUSAL_MARKERS = (
+    "mô hình ngôn ngữ",
+    "language model",
+    "tôi không thể giúp",
+    "tôi không thể tạo",
+    "tôi không thể hỗ trợ",
+    "tôi không thể đáp ứng",
+    "xin lỗi, tôi không thể",
+    "i can't help",
+    "i cannot help",
+    "i can't assist",
+    "i'm unable to",
+    "i am unable to",
+)
+
+
 class ScriptQAError(Exception):
     pass
+
+
+def looks_like_refusal(text: str) -> bool:
+    head = text.strip().lower()[:200]
+    return any(marker in head for marker in REFUSAL_MARKERS)
 
 
 def validate_script(script: Script) -> None:
@@ -30,6 +58,16 @@ def validate_script(script: Script) -> None:
         errors.append(
             f"Số chương {len(script.chapters)} nằm ngoài khoảng {MIN_CHAPTERS}-{MAX_CHAPTERS}."
         )
+
+    for chapter in script.chapters:
+        if looks_like_refusal(chapter.text):
+            errors.append(
+                f"Chương {chapter.index} là lời từ chối của Gemini, không phải nội dung truyện."
+            )
+        elif chapter.word_count < MIN_CHAPTER_WORDS:
+            errors.append(
+                f"Chương {chapter.index} chỉ có {chapter.word_count} từ, dưới sàn {MIN_CHAPTER_WORDS}."
+            )
 
     lowered_text = script.full_text.lower()
     for term in BANNED_TERMS:

@@ -8,12 +8,18 @@ from gemini_webapi.exceptions import APIError, AuthError, GeminiError
 
 from scripts.models import Chapter, Script
 from scripts.prompts import build_chapter_prompt, build_outline_prompt
+from scripts.qa import MIN_CHAPTER_WORDS, looks_like_refusal
 
 
 # Số lần hỏi Gemini cho dàn ý trước khi bỏ cuộc. Xem lý do ở generate_script().
 OUTLINE_ATTEMPTS = 3
 # Giây chờ trước lần thử lại đầu tiên; lần sau nhân đôi, nhân ba.
 RETRY_DELAY_SECONDS = 5
+# Số lần hỏi lại MỘT chương khi Gemini trả lời từ chối hoặc chương cụt. Tập
+# 05/09: chương 4 về là nguyên văn "tôi chỉ là một mô hình ngôn ngữ", 29 từ, và
+# được nhận như nội dung thật. Hỏi lại trong cùng chat thường ra chương bình
+# thường; hết lượt thì ném lỗi, không bao giờ để chương từ chối lọt xuống TTS.
+CHAPTER_ATTEMPTS = 3
 
 
 class ScriptGenerationError(Exception):
@@ -72,20 +78,41 @@ async def generate_script(
     chapters = []
     for i, (heading, summary) in enumerate(chapter_plans):
         chapter_number = i + 1
-        try:
-            chapter_response = await chat.send_message(
-                build_chapter_prompt(chapter_number, total_chapters, heading, summary)
-            )
-        except (GeminiError, APIError, AuthError) as exc:
-            raise ScriptGenerationError(
-                f"Gemini lỗi khi sinh chương {chapter_number}: {exc}"
-            ) from exc
+        for attempt in range(CHAPTER_ATTEMPTS):
+            try:
+                chapter_response = await chat.send_message(
+                    build_chapter_prompt(chapter_number, total_chapters, heading, summary)
+                )
+            except (GeminiError, APIError, AuthError) as exc:
+                raise ScriptGenerationError(
+                    f"Gemini lỗi khi sinh chương {chapter_number}: {exc}"
+                ) from exc
 
-        chapters.append(
-            Chapter(index=chapter_number, heading=heading, text=chapter_response.text.strip())
-        )
+            text = chapter_response.text.strip()
+            problem = _chapter_problem(text)
+            if problem is None:
+                break
+            if attempt == CHAPTER_ATTEMPTS - 1:
+                raise ScriptGenerationError(
+                    f"Gemini không sinh được chương {chapter_number} sau "
+                    f"{CHAPTER_ATTEMPTS} lần: {problem}. Nguyên văn: {text[:200]!r}"
+                )
+            await asyncio.sleep(RETRY_DELAY_SECONDS * (attempt + 1))
+
+        chapters.append(Chapter(index=chapter_number, heading=heading, text=text))
 
     return Script(trope=trope_id, title=title, chapters=chapters)
+
+
+def _chapter_problem(text: str) -> "str | None":
+    """Lý do một chương không dùng được, hoặc None nếu ổn. Cùng hai tiêu chí với
+    scripts/qa.py -- QA là lưới thứ hai cho trường hợp hàm này bị bỏ qua."""
+    if looks_like_refusal(text):
+        return "lời từ chối của Gemini"
+    words = len(text.split())
+    if words < MIN_CHAPTER_WORDS:
+        return f"chỉ {words} từ, dưới sàn {MIN_CHAPTER_WORDS}"
+    return None
 
 
 def _parse_json_response(raw_text: str) -> dict:

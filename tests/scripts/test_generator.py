@@ -5,6 +5,7 @@ import pytest
 from gemini_webapi.exceptions import APIError
 
 from scripts.generator import (
+    CHAPTER_ATTEMPTS,
     OUTLINE_ATTEMPTS,
     ScriptGenerationError,
     generate_script,
@@ -24,6 +25,9 @@ def _no_retry_delay(monkeypatch):
     """Bỏ khoảng chờ giữa các lần thử lại: nó có ích khi chạy thật, nhưng làm bộ
     test chậm gấp trăm lần mà không kiểm chứng thêm điều gì."""
     monkeypatch.setattr("scripts.generator.RETRY_DELAY_SECONDS", 0)
+    # Sàn độ dài chương chỉ có nghĩa với văn thật; các test ở đây dùng chương
+    # vài chữ, nên tắt sàn — test riêng cho sàn tự đặt lại giá trị.
+    monkeypatch.setattr("scripts.generator.MIN_CHAPTER_WORDS", 0)
 
 
 def _make_fake_client(
@@ -177,3 +181,44 @@ async def test_gemini_tu_choi_thi_bao_dung_loai_loi():
 
     with pytest.raises(ScriptGenerationError, match="từ chối nội dung"):
         await generate_script("t", "Tên", "Mô tả", client=client)
+
+
+REFUSAL = "Tôi không thể giúp bạn việc đó, vì tôi chỉ là một mô hình ngôn ngữ."
+
+
+async def test_chuong_bi_tu_choi_thi_hoi_lai_va_lay_ban_sau():
+    # Tập 05/09 thật: chương 4 là nguyên văn lời từ chối của Gemini, 29 từ, và
+    # đi thẳng vào TTS. Chương từ chối phải bị hỏi lại, không được nhận.
+    outline_text = _outline_json(2)
+    fake_client, fake_chat = _make_fake_client(
+        outline_text, ["Chương một thật.", REFUSAL, "Chương hai thật."]
+    )
+
+    script = await generate_script("t", "T", "mô tả", client=fake_client)
+
+    assert [c.text for c in script.chapters] == ["Chương một thật.", "Chương hai thật."]
+    assert fake_chat.send_message.await_count == 1 + 3  # dàn ý + 3 lượt chương
+
+
+async def test_chuong_tu_choi_het_luot_thi_nem_loi_neu_so_chuong():
+    outline_text = _outline_json(2)
+    fake_client, fake_chat = _make_fake_client(
+        outline_text, ["Chương một thật."] + [REFUSAL] * CHAPTER_ATTEMPTS
+    )
+
+    with pytest.raises(ScriptGenerationError, match="chương 2"):
+        await generate_script("t", "T", "mô tả", client=fake_client)
+
+    assert fake_chat.send_message.await_count == 1 + 1 + CHAPTER_ATTEMPTS
+
+
+async def test_chuong_qua_ngan_cung_bi_hoi_lai(monkeypatch):
+    monkeypatch.setattr("scripts.generator.MIN_CHAPTER_WORDS", 5)
+    outline_text = _outline_json(1)
+    fake_client, _ = _make_fake_client(
+        outline_text, ["Cụt lủn.", "Một chương đủ năm từ trở lên đây."]
+    )
+
+    script = await generate_script("t", "T", "mô tả", client=fake_client)
+
+    assert script.chapters[0].text == "Một chương đủ năm từ trở lên đây."
