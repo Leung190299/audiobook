@@ -13,3 +13,7 @@ config/youtube_token.json
 .DS_Store
 _to_delete/
 .superpowers/
+
+# Sản phẩm của `npx remotion bundle`; render không cần. Đã từng phình 89GB vì
+# public-dir là repo root nên mỗi lần bundle lại lồng chính nó vào trong.
+remotion/build/
