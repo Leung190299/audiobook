@@ -1,6 +1,7 @@
 export interface SceneProps {
   number: number;
-  // Trục thời gian toàn tập, giống mốc câu.
+  // Trục thời gian do bên dùng quyết định: ChapterProps.scenes giữ trục toàn tập
+  // (giống mốc câu), ShortProps.scenes quy về gốc phần -- xem comment ở hai chỗ đó.
   startSeconds: number;
   endSeconds: number;
   imagePath: string;

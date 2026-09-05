@@ -103,7 +103,7 @@ def build_short_props(
         "trope": trope,
         "title": episode_title,
         "audioPath": str(audio_path.relative_to(repo_root)),
-        "imagePath": str(image_path_relative),
+        "imagePath": image_path_relative,
         "scenes": scene_props,
         "hookText": part.heading,
         "partLabel": f"PHẦN {part.number}/{total_parts}",
