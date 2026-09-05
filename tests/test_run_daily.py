@@ -139,7 +139,7 @@ def test_stage_4_nhan_dung_3_duong_dan_theo_dung_thu_tu(tmp_path: Path):
 def test_stage_2_va_3_deu_nhan_script_cua_stage_1_khong_nham_lan_metadata(tmp_path: Path):
     run = _run(tmp_path)
     assert run.call_for("tts.cli") == f"tts.cli {EXPECTED_SCRIPT}"
-    assert run.call_for("images.cli") == f"images.cli {EXPECTED_SCRIPT}"
+    assert run.call_for("images.cli") == f"images.cli {EXPECTED_SCRIPT} {EXPECTED_AUDIO_JSON}"
 
 
 def test_stage_6_nhan_video_goc_chu_khong_phai_ten_da_doi(tmp_path: Path):

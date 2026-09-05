@@ -37,7 +37,7 @@ case "$module" in
     echo "Metadata: output/audio/me_chong_giau_cua-20260813T012500Z.json"
     ;;
   images.cli)
-    echo "Đã lưu 16 ảnh vào output/images"
+    echo "Đã lưu 64 ảnh vào output/images"
     echo "Metadata: output/images/me_chong_giau_cua-20260813T013500Z.json"
     ;;
   video.cli)

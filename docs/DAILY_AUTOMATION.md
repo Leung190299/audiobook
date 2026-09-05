@@ -56,7 +56,7 @@ Một lượt:
 ├─ Stage 0  trend.cli          ~30s   → output/ideas/<slug>-<ts>.txt
 ├─ Stage 1  scripts.cli        ~5m    → output/scripts/<slug>-<ts>.json
 ├─ Stage 2  tts.cli            ~14m   → output/audio/<slug>-<ts>.wav + .json
-├─ Stage 3  images.cli         ~10m   → output/images/<slug>-<ts>.json + 16 png
+├─ Stage 3  images.cli         ~50m   → output/images/<slug>-<ts>.json + ~64 png
 ├─ Stage 4  video.cli          ~15m   → output/video/<slug>-<ts>.mp4
 ├─ Stage 5  thumbnail.cli      ~1m    → output/thumbnails/<slug>-<ts>.png
 ├─ Stage 6  metadata.cli       ~30s   → output/metadata/<slug>-<ts>.txt + .json
@@ -188,7 +188,7 @@ hơn cả quy trình audit.
 | `KeyError: 'SECURE_1PSID'` | `.env` thiếu cookie Gemini, hoặc cookie hết hạn — lấy lại từ trình duyệt |
 | Stage 0 báo không lấy được tín hiệu nào | Mất mạng, hoặc báo đổi đường dẫn RSS — chạy tạm `--trope <id>` |
 | Không thấy thông báo macOS | System Settings → Notifications → bật cho Terminal (hoặc app chạy lệnh) |
-| Stage 3 tưởng như treo 10 phút | Bình thường: mflux nạp lại model cho từng chương |
+| Stage 3 tưởng như treo 10 phút | Bình thường: ~64 ảnh, mflux nạp lại model cho từng ảnh |
 | Chạy tay ổn nhưng launchd fail | PATH/locale — `run_daily.sh` đã tự set, xem `output/daily/launchd.err.log` |
 | Video lên nhưng ở chế độ private | OAuth project chưa qua audit — hành vi bình thường của YouTube |
 | Không rõ hỏng ở đâu | `uv run python -m preflight.cli --deep` chỉ đúng mục thiếu |

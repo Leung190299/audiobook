@@ -143,7 +143,8 @@ require "$AUDIO_JSON" "Stage 2: TTS" "$TTS_LOG"
 
 # --- Stage 3: ảnh nền ---------------------------------------------------------
 IMAGES_LOG="$LOG_DIR/03-images.log"
-run_stage "Stage 3: Ảnh nền" "$IMAGES_LOG" $RUNNER images.cli "$SCRIPT_PATH"
+# Stage 3 cần mốc câu của stage 2 để chia mỗi chương thành cảnh ~50s.
+run_stage "Stage 3: Ảnh nền" "$IMAGES_LOG" $RUNNER images.cli "$SCRIPT_PATH" "$AUDIO_JSON"
 IMAGES_JSON="$(extract 'Metadata: ([^[:space:]]+\.json)' "$IMAGES_LOG")"
 require "$IMAGES_JSON" "Stage 3: Ảnh nền" "$IMAGES_LOG"
 

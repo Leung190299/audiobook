@@ -29,7 +29,7 @@ Chains this repo's pipeline modules — `trend` → `scripts` → `tts` → `ima
 
 (`uv run` auto-syncs the Python venv itself on first use — no separate `uv sync` step needed.)
 
-**Stage 3 (images) runs `mflux-generate-flux2` locally on-device** (FLUX.2 Klein 4B, quantized) — no `TOGETHER_API_KEY` or any API key required. First run on a machine downloads ~4.3GB of weights (`Runpod/FLUX.2-klein-4B-mflux-4bit`) from HuggingFace — no `HF_TOKEN` needed, this repo isn't gated. Every run (including after the weights are cached) reloads the model from scratch **per chapter** (16×), so stage 3 takes roughly 10 minutes for a full 16-chapter script — this is normal, not a hang. (Measured 2026-07-22: 8 images took ~5 minutes, so ~40s per image. An earlier version of this doc claimed 20-25 minutes for 8 images; that was an estimate, never a measurement, and it was wrong by ~4×.)
+**Stage 3 (images) runs `mflux-generate-flux2` locally on-device** (FLUX.2 Klein 4B, quantized) — no `TOGETHER_API_KEY` or any API key required. First run on a machine downloads ~4.3GB of weights (`Runpod/FLUX.2-klein-4B-mflux-4bit`) from HuggingFace — no `HF_TOKEN` needed, this repo isn't gated. It now takes stage 2's TTS metadata JSON as a second argument and uses its per-sentence marks to cut each chapter into ~50s scenes, so **stage 3 depends on stage 2** and can't run for a script stage 2 hasn't processed yet. Every run (including after the weights are cached) reloads the model from scratch **per scene** (~64× for a 16-chapter script), so stage 3 now takes roughly **~50 minutes** — this is normal, not a hang. (Measured 2026-09-05: ~64 images at ~44s per image. An earlier measurement of ~40s/image, from before stage 3 split chapters into scenes, generated only one image per chapter.)
 
 If `.env` is missing, stop and tell the user to create it from `.env.example` with real cookie values — don't guess credentials or silently skip the stage.
 
@@ -42,7 +42,7 @@ Run from the repo root. Each command prints the path(s) it wrote — capture tho
 | 0 | `uv run python -m trend.cli` | `config/trend.yaml` (RSS báo + Google Trends, no keys) | `output/ideas/<slug>-<ts>.txt` (path after "Đã lưu ý tưởng:", slug after "Slug:") |
 | 1 | `uv run python -m scripts.cli <trope_id>` *or* `--idea-file <txt> --label <slug>` | `config/tropes.yaml` or stage 0's `.txt` | `output/scripts/<trope>-<ts>.json` |
 | 2 | `uv run python -m tts.cli <script_path>` | stage 1's JSON | `output/audio/<trope>-<ts>.wav` + `.json` (line 2 of stdout, after "Metadata:") |
-| 3 | `uv run python -m images.cli <script_path>` | stage 1's JSON | `output/images/<trope>-<ts>.json` + 8 `.png` (metadata path after "Metadata:") |
+| 3 | `uv run python -m images.cli <script_path> <tts_metadata_path>` | stage 1 + 2's JSON | `output/images/<trope>-<ts>.json` + ~64 `.png`, một ảnh cho mỗi cảnh ~50s (metadata path after "Metadata:") |
 | 4 | `uv run python -m video.cli <script_path> <tts_metadata_path> <images_metadata_path>` | stage 1 + 2 + 3's JSON | `output/video/<trope>-<ts>.mp4` |
 | 5 | `uv run python -m thumbnail.cli <script_path>` | stage 1's JSON only | `output/thumbnails/<trope>-<ts>.png` |
 | 6 | `uv run python -m metadata.cli <script_path> <tts_metadata_path> <video_path>` | stage 1 + 2 + 4's output | `output/metadata/<trope>-<ts>.txt` + `.json`; also renames stage 4's `.mp4` in place to an SEO slug |
@@ -84,8 +84,8 @@ uv run python -m tts.cli output/scripts/trong_sinh_bao_thu-20260722T090000Z.json
 # Đã lưu audio: output/audio/trong_sinh_bao_thu-20260722T091500Z.wav (...)
 # Metadata: output/audio/trong_sinh_bao_thu-20260722T091500Z.json
 
-uv run python -m images.cli output/scripts/trong_sinh_bao_thu-20260722T090000Z.json
-# Đã lưu 8 ảnh vào output/images
+uv run python -m images.cli output/scripts/trong_sinh_bao_thu-20260722T090000Z.json output/audio/trong_sinh_bao_thu-20260722T091500Z.json
+# Đã lưu 64 ảnh vào output/images
 # Metadata: output/images/trong_sinh_bao_thu-20260722T093000Z.json
 
 uv run python -m video.cli \
@@ -116,7 +116,8 @@ Scheduling is `launchd/com.lee.audiobook.daily.plist` (09:00 daily). The n8n wor
 
 - **Assuming timestamps match across stages.** They don't — always read the printed path, never construct one from a previous stage's timestamp.
 - **Passing the wrong JSON to `video.cli`.** It takes 3 paths in this order: script, TTS metadata, images metadata — not the `.wav`/`.png` files themselves.
-- **Expecting this to be fast.** A full 16-chapter run still takes tens of minutes, now dominated by stage 3 (images) and stage 4 (video render), not stage 2 (TTS with VieNeu-TTS measured at ~14 minutes for a full 16-chapter script, vs ~3.2 hours for the old OmniVoice engine). Image generation reloads the mflux model from scratch per chapter (~10 min total for stage 3's 16 images, more on the very first run while weights download) — don't assume a hang is a failure.
+- **Expecting this to be fast.** A full 16-chapter run now takes about an hour, dominated by stage 3 (images, ~50 min) and stage 4 (video render), not stage 2 (TTS with VieNeu-TTS measured at ~14 minutes for a full 16-chapter script, vs ~3.2 hours for the old OmniVoice engine). Image generation reloads the mflux model from scratch per scene (~50 min total for stage 3's ~64 images — one per ~50s scene, not one per chapter anymore — more on the very first run while weights download) — don't assume a hang is a failure. Stage 3 also **depends on stage 2** now, since it needs stage 2's per-sentence marks to cut each chapter into scenes.
+- **`video.cli`/`shorts.cli` báo "chạy lại stage 3".** Metadata ảnh là định dạng cũ (một ảnh mỗi chương), phải chạy lại stage 3 với TTS JSON.
 - **Running without a real `.env`.** `scripts`/`images` call Gemini via cookie auth; without real `SECURE_1PSID`/`SECURE_1PSIDTS` they crash with a raw `KeyError` traceback (not a clean error message) — check `.env` exists before starting, don't wait for the crash to notice.
 - **Using the Agent/subagent tool to run a long image/video job in the background.** Subagents that start a `run_in_background: true` Bash command and then end their own turn cause that background job to vanish silently sometime later — no traceback, no exit code, no crash report. Launch these jobs directly from the main session's own `Bash` tool with `run_in_background: true` instead — that has run reliably for every long job in this project (image generation, video rendering).
 - **Running stage 6 (metadata) before stage 4.** It needs the actual rendered `.mp4` path to rename, and the real TTS metadata for chapter timestamps — both only exist after stages 2 and 4 finish. Stage 5 (thumbnail) has no such ordering requirement — it only needs stage 1's script JSON.

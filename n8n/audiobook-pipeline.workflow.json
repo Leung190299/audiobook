@@ -122,7 +122,7 @@
         0
       ],
       "parameters": {
-        "command": "=cd /Users/lee/Project/Apps/audiobook && uv run python -m images.cli {{ $json.script_path }}"
+        "command": "=cd /Users/lee/Project/Apps/audiobook && uv run python -m images.cli {{ $json.script_path }} {{ $json.audio_json }}"
       }
     },
     {
