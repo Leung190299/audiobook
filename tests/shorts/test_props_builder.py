@@ -221,3 +221,58 @@ def test_anh_ngoai_repo_root_bao_loi_dung_kieu_khong_phai_valueerror(tmp_path: P
             images_dir=images_dir,
             repo_root=repo_root,
         )
+
+
+def test_scenes_quy_ve_goc_phan_khi_phan_trai_qua_hai_canh(tmp_path):
+    # Phần 30s-80s của chương 1 giao với cảnh 1 (0-50) và cảnh 2 (50-100).
+    # Mốc quy về gốc phần: cảnh 1 chiếu 0-20, cảnh 2 chiếu 20-50.
+    props = _build(
+        tmp_path,
+        part=_part(chapter_index=1, source_start_seconds=30.0, source_end_seconds=80.0),
+    )
+
+    assert props["scenes"] == [
+        {"number": 1, "startSeconds": 0.0, "endSeconds": 20.0,
+         "imagePath": "output/images/anh-1-1.png"},
+        {"number": 2, "startSeconds": 20.0, "endSeconds": 50.0,
+         "imagePath": "output/images/anh-1-2.png"},
+    ]
+    assert props["imagePath"] == "output/images/anh-1-1.png"
+
+
+def test_scenes_mot_canh_phu_tron_phan(tmp_path):
+    # Phần 110s-115.5s nằm gọn trong cảnh 1 chương 2 (100-150).
+    props = _build(tmp_path)
+
+    assert props["scenes"] == [
+        {"number": 1, "startSeconds": 0.0, "endSeconds": 5.5,
+         "imagePath": "output/images/anh-2-1.png"},
+    ]
+
+
+def test_scenes_khong_lay_canh_ket_thuc_dung_luc_phan_bat_dau(tmp_path):
+    # Phần bắt đầu đúng giây 50 = lúc cảnh 1 kết thúc: chỉ lấy cảnh 2.
+    props = _build(
+        tmp_path,
+        part=_part(chapter_index=1, source_start_seconds=50.0, source_end_seconds=60.0),
+    )
+
+    assert [s["number"] for s in props["scenes"]] == [2]
+    assert props["imagePath"] == "output/images/anh-1-2.png"
+
+
+def test_thieu_file_anh_cua_canh_thu_hai_thi_bao_loi(tmp_path):
+    repo_root, images_dir, audio_path = _setup_repo(tmp_path)
+    (images_dir / "anh-1-2.png").unlink()
+
+    with pytest.raises(ShortPropsBuildError, match="anh-1-2.png"):
+        build_short_props(
+            part=_part(chapter_index=1, source_start_seconds=30.0, source_end_seconds=80.0),
+            total_parts=5,
+            episode_title=TITLE,
+            trope=TROPE,
+            images_metadata=_images_metadata(),
+            audio_path=audio_path,
+            images_dir=images_dir,
+            repo_root=repo_root,
+        )
