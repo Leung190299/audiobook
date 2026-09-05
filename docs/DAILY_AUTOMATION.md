@@ -72,6 +72,17 @@ trước đó rồi. Stage 7 nay phụ thuộc **stage 2** (mốc câu), không 
 vì vậy không dựng được short cho tập đã dựng trước khi stage 2 biết ghi mốc câu;
 muốn có short cho tập cũ phải chạy lại stage 2 cho tập đó trước.
 
+Stage 3 nay cũng phụ thuộc **stage 2** (cần `sentences` để chia mỗi chương thành
+cảnh ~50s), không chỉ nhận mình script như bản cũ. Dựng lại một tập cũ thì thứ
+tự bắt buộc là: chạy lại stage 2 nếu metadata TTS chưa có mốc câu → chạy lại
+stage 3 với đúng JSON đó → chạy lại stage 4/6/7 với cặp JSON (TTS + ảnh) mới:
+
+```bash
+uv run python -m tts.cli output/scripts/<trope>-<ts>.json
+uv run python -m images.cli output/scripts/<trope>-<ts>.json output/audio/<trope>-<ts-moi>.json
+uv run python -m video.cli output/scripts/<trope>-<ts>.json output/audio/<trope>-<ts-moi>.json output/images/<trope>-<ts-moi>.json
+```
+
 Sản phẩm cần cho việc đăng tay:
 
 - Video: `output/video/<tên-slug-SEO>.mp4` (stage 6 đã đổi sang tên thân thiện SEO)
