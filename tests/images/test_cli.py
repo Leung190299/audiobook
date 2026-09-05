@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from images import cli
+from images.scene_prompt import ScenePromptError
 from scripts.models import Chapter, Script
 
 
@@ -70,6 +71,50 @@ async def test_run_chia_canh_ta_canh_ve_anh_va_luu(tmp_path, monkeypatch, capsys
     assert "Cảnh 1/3: chương 1 cảnh 1 (00:00–00:50)" in out
     assert "Đã lưu 3 ảnh vào" in out
     assert "Metadata: " in out
+
+
+async def test_run_thu_lai_khi_gemini_loi_thoang_qua(tmp_path, monkeypatch):
+    script_path, tts_path = _write_inputs(tmp_path)
+    monkeypatch.setattr(cli, "OUTPUT_DIR", tmp_path / "output")
+    monkeypatch.setattr(cli, "RETRY_DELAY_SECONDS", 0)
+    calls = []
+
+    async def fake_generate_scene_description(chapter_index, scene_number, text, client):
+        calls.append((chapter_index, scene_number))
+        if len(calls) == 1:
+            raise ScenePromptError("lỗi thoáng qua")
+        return f"scene {chapter_index}.{scene_number}"
+
+    monkeypatch.setattr(cli, "generate_scene_description", fake_generate_scene_description)
+    monkeypatch.setattr(
+        cli, "generate_background_image", lambda description: description.encode("utf-8")
+    )
+
+    await cli._run(script_path, tts_path, gemini_client=object())
+
+    # Lần đầu hỏng, lần hai mới thành công cho cảnh 1 -- vẫn được gọi lại đúng
+    # cảnh đó, không bỏ qua hay lặp sang cảnh khác.
+    assert calls == [(1, 1), (1, 1), (1, 2), (2, 1)]
+
+
+async def test_run_het_luot_thu_van_loi_thi_nem_ngoai(tmp_path, monkeypatch):
+    script_path, tts_path = _write_inputs(tmp_path)
+    monkeypatch.setattr(cli, "OUTPUT_DIR", tmp_path / "output")
+    monkeypatch.setattr(cli, "RETRY_DELAY_SECONDS", 0)
+    calls = []
+
+    async def always_fails(chapter_index, scene_number, text, client):
+        calls.append((chapter_index, scene_number))
+        raise ScenePromptError("lỗi dai dẳng")
+
+    monkeypatch.setattr(cli, "generate_scene_description", always_fails)
+
+    with pytest.raises(ScenePromptError, match="lỗi dai dẳng"):
+        await cli._run(script_path, tts_path, gemini_client=object())
+
+    # Đúng SCENE_ATTEMPTS lần cho cảnh đầu tiên rồi ném ra ngoài, không thử
+    # sang cảnh kế tiếp.
+    assert calls == [(1, 1)] * cli.SCENE_ATTEMPTS
 
 
 async def test_run_tu_choi_khi_tts_khong_khop_script(tmp_path, monkeypatch):

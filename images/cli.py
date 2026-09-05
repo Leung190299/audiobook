@@ -7,15 +7,21 @@ from pathlib import Path
 from dotenv import load_dotenv
 from gemini_webapi import GeminiClient
 
-from images.generator import generate_background_image
+from images.generator import ImageGenerationError, generate_background_image
 from images.scene_planner import plan_scenes
-from images.scene_prompt import generate_scene_description
+from images.scene_prompt import ScenePromptError, generate_scene_description
 from images.storage import save_scene_images
 from scripts.models import Script
 
 load_dotenv()
 
 OUTPUT_DIR = Path(__file__).resolve().parent.parent / "output" / "images"
+
+# Stage 3 chạy ~64 cảnh trong ~50 phút, giữ hết ảnh trong bộ nhớ tới cuối lượt --
+# một lỗi thoáng qua của Gemini hay mflux ở cảnh 60 mà không thử lại là mất
+# trắng cả 50 phút đã chạy. Thử lại 3 lần, giống OUTLINE_ATTEMPTS ở generator.py.
+SCENE_ATTEMPTS = 3
+RETRY_DELAY_SECONDS = 5
 
 
 async def _load_gemini_client() -> GeminiClient:
@@ -63,10 +69,36 @@ async def _run(
             f"cảnh {scene.number} ({_mmss(scene.start_seconds)}–{_mmss(scene.end_seconds)})",
             flush=True,
         )
-        description = await generate_scene_description(
-            scene.chapter_index, scene.number, scene.text, gemini_client
-        )
-        image_bytes = generate_background_image(description)
+        description = None
+        for attempt_number in range(1, SCENE_ATTEMPTS + 1):
+            try:
+                description = await generate_scene_description(
+                    scene.chapter_index, scene.number, scene.text, gemini_client
+                )
+                break
+            except ScenePromptError as exc:
+                if attempt_number == SCENE_ATTEMPTS:
+                    raise
+                print(
+                    f"Thử lại cảnh {position} (lần {attempt_number}/{SCENE_ATTEMPTS}): {exc}",
+                    flush=True,
+                )
+                await asyncio.sleep(RETRY_DELAY_SECONDS * attempt_number)
+
+        image_bytes = None
+        for attempt_number in range(1, SCENE_ATTEMPTS + 1):
+            try:
+                image_bytes = generate_background_image(description)
+                break
+            except ImageGenerationError as exc:
+                if attempt_number == SCENE_ATTEMPTS:
+                    raise
+                print(
+                    f"Thử lại cảnh {position} (lần {attempt_number}/{SCENE_ATTEMPTS}): {exc}",
+                    flush=True,
+                )
+                await asyncio.sleep(RETRY_DELAY_SECONDS * attempt_number)
+
         images.append((scene, description, image_bytes))
 
     image_paths, metadata_path = save_scene_images(
