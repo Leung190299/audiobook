@@ -13,8 +13,8 @@ TITLE = "Trọng Sinh Báo Thù"
 def _part(
     number: int = 2,
     chapter_index: int = 2,
-    source_start_seconds: float = 90.0,
-    source_end_seconds: float = 95.5,
+    source_start_seconds: float = 110.0,
+    source_end_seconds: float = 115.5,
 ) -> ShortPart:
     return ShortPart(
         number=number,
