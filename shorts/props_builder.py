@@ -34,8 +34,22 @@ def build_short_props(
         raise ShortPropsBuildError(
             f"Metadata ảnh không có chương {part.chapter_index}"
         )
+    scenes = image_chapter.get("scenes")
+    if not scenes:
+        raise ShortPropsBuildError(
+            f"Metadata ảnh của chương {part.chapter_index} không có mảng 'scenes' -- "
+            "tập này dựng trước khi stage 3 biết chia cảnh. Hãy chạy lại stage 3."
+        )
 
-    image_path = images_dir / image_chapter["filename"]
+    # Lấy cảnh đang chiếu lúc phần bắt đầu: cảnh cuối cùng có start <= mốc đầu
+    # phần. Cùng cách chọn "mốc gần nhất đã qua" như phụ đề, và cùng lý do:
+    # không cần so cả hai đầu, chỉ cần biết đã đi qua ranh giới nào.
+    scene = scenes[0]
+    for candidate in scenes:
+        if candidate["start_seconds"] <= part.source_start_seconds:
+            scene = candidate
+
+    image_path = images_dir / scene["filename"]
     if not image_path.exists():
         raise ShortPropsBuildError(f"Không tìm thấy file ảnh: {image_path}")
 

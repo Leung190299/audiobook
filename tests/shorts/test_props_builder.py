@@ -10,13 +10,18 @@ TROPE = "trong_sinh_bao_thu"
 TITLE = "Trọng Sinh Báo Thù"
 
 
-def _part(number: int = 2, chapter_index: int = 2) -> ShortPart:
+def _part(
+    number: int = 2,
+    chapter_index: int = 2,
+    source_start_seconds: float = 90.0,
+    source_end_seconds: float = 95.5,
+) -> ShortPart:
     return ShortPart(
         number=number,
         chapter_index=chapter_index,
         heading="Chương 2: Cao trào",
-        source_start_seconds=90.0,
-        source_end_seconds=95.5,
+        source_start_seconds=source_start_seconds,
+        source_end_seconds=source_end_seconds,
         captions=[
             PartCaption(text="Cô ấy đến.", start_seconds=0.0, end_seconds=2.5),
             PartCaption(text="Trời mưa.", start_seconds=2.65, end_seconds=5.5),
@@ -29,8 +34,16 @@ def _images_metadata() -> dict:
         "trope": TROPE,
         "title": TITLE,
         "chapters": [
-            {"index": 1, "filename": "anh-1.png", "scene_description": "..."},
-            {"index": 2, "filename": "anh-2.png", "scene_description": "..."},
+            {"index": 1, "scenes": [
+                {"number": 1, "start_seconds": 0.0, "end_seconds": 50.0,
+                 "filename": "anh-1-1.png", "scene_description": "..."},
+                {"number": 2, "start_seconds": 50.0, "end_seconds": 100.0,
+                 "filename": "anh-1-2.png", "scene_description": "..."},
+            ]},
+            {"index": 2, "scenes": [
+                {"number": 1, "start_seconds": 100.0, "end_seconds": 150.0,
+                 "filename": "anh-2-1.png", "scene_description": "..."},
+            ]},
         ],
     }
 
@@ -39,8 +52,9 @@ def _setup_repo(tmp_path: Path) -> tuple[Path, Path, Path]:
     repo_root = tmp_path
     images_dir = repo_root / "output" / "images"
     images_dir.mkdir(parents=True)
-    (images_dir / "anh-1.png").write_bytes(b"x")
-    (images_dir / "anh-2.png").write_bytes(b"x")
+    (images_dir / "anh-1-1.png").write_bytes(b"x")
+    (images_dir / "anh-1-2.png").write_bytes(b"x")
+    (images_dir / "anh-2-1.png").write_bytes(b"x")
 
     audio_dir = repo_root / "output" / "shorts"
     audio_dir.mkdir(parents=True)
@@ -72,11 +86,31 @@ def _build(
 def test_props_dung_anh_cua_chuong_chua_phan(tmp_path: Path):
     props = _build(tmp_path)
 
-    assert props["imagePath"] == "output/images/anh-2.png"
+    assert props["imagePath"] == "output/images/anh-2-1.png"
     assert props["audioPath"] == "output/shorts/trong_sinh_bao_thu-20260822T010000Z-part-02.wav"
     assert props["hookText"] == "Chương 2: Cao trào"
     assert props["title"] == TITLE
     assert props["trope"] == TROPE
+
+
+def test_phan_bat_dau_giua_chuong_lay_canh_dang_chieu(tmp_path):
+    # Phần bắt đầu ở giây 70 của chương 1 -> cảnh 2 (50s-100s), không phải cảnh 1.
+    props = _build(
+        tmp_path,
+        part=_part(chapter_index=1, source_start_seconds=70.0, source_end_seconds=95.0),
+    )
+
+    assert props["imagePath"] == "output/images/anh-1-2.png"
+
+
+def test_metadata_anh_khong_co_scenes_thi_bao_chay_lai_stage_3(tmp_path):
+    images_metadata = _images_metadata()
+    images_metadata["chapters"][0] = {"index": 1, "filename": "anh-1.png", "scene_description": "..."}
+
+    # Phần mặc định nằm ở chương 2 (còn nguyên "scenes") -- phải trỏ phần vào
+    # đúng chương 1 vừa bị hỏng thì mới chạm nhánh lỗi đang kiểm tra.
+    with pytest.raises(ShortPropsBuildError, match="chạy lại stage 3"):
+        _build(tmp_path, part=_part(chapter_index=1), images_metadata=images_metadata)
 
 
 def test_captions_lay_thang_tu_part_captions(tmp_path: Path):
@@ -144,7 +178,7 @@ def test_khong_co_anh_cho_chuong_do_thi_bao_loi(tmp_path: Path):
 
 def test_file_anh_khong_ton_tai_thi_bao_loi(tmp_path: Path):
     repo_root, images_dir, audio_path = _setup_repo(tmp_path)
-    (images_dir / "anh-2.png").unlink()
+    (images_dir / "anh-2-1.png").unlink()
 
     with pytest.raises(ShortPropsBuildError, match="Không tìm thấy file ảnh"):
         build_short_props(
@@ -167,8 +201,9 @@ def test_anh_ngoai_repo_root_bao_loi_dung_kieu_khong_phai_valueerror(tmp_path: P
 
     images_dir = tmp_path / "ngoai_repo" / "images"
     images_dir.mkdir(parents=True)
-    (images_dir / "anh-1.png").write_bytes(b"x")
-    (images_dir / "anh-2.png").write_bytes(b"x")
+    (images_dir / "anh-1-1.png").write_bytes(b"x")
+    (images_dir / "anh-1-2.png").write_bytes(b"x")
+    (images_dir / "anh-2-1.png").write_bytes(b"x")
 
     audio_dir = repo_root / "output" / "shorts"
     audio_dir.mkdir(parents=True)

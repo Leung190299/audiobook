@@ -87,8 +87,8 @@ def sandbox(tmp_path: Path, monkeypatch):
 
     images_dir = repo_root / "output" / "images"
     images_dir.mkdir(parents=True)
-    (images_dir / "anh-1.png").write_bytes(b"x")
-    (images_dir / "anh-2.png").write_bytes(b"x")
+    (images_dir / "anh-1-1.png").write_bytes(b"x")
+    (images_dir / "anh-2-1.png").write_bytes(b"x")
     images_metadata_path = images_dir / f"{TROPE}-20260822T000500Z.json"
     images_metadata_path.write_text(
         json.dumps(
@@ -96,8 +96,14 @@ def sandbox(tmp_path: Path, monkeypatch):
                 "trope": TROPE,
                 "title": TITLE,
                 "chapters": [
-                    {"index": 1, "filename": "anh-1.png", "scene_description": "..."},
-                    {"index": 2, "filename": "anh-2.png", "scene_description": "..."},
+                    {"index": 1, "scenes": [
+                        {"number": 1, "start_seconds": 0.0, "end_seconds": 9.0,
+                         "filename": "anh-1-1.png", "scene_description": "..."},
+                    ]},
+                    {"index": 2, "scenes": [
+                        {"number": 1, "start_seconds": 10.0, "end_seconds": 19.0,
+                         "filename": "anh-2-1.png", "scene_description": "..."},
+                    ]},
                 ],
             },
             ensure_ascii=False,
