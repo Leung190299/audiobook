@@ -37,6 +37,9 @@ export interface ShortProps {
   title: string;
   audioPath: string;
   imagePath: string;
+  // Cảnh giao với phần, mốc QUY VỀ GỐC PHẦN (audio short đã cắt). Cảnh đầu
+  // startSeconds = 0. Khác ChapterProps.scenes của video dài (trục toàn tập).
+  scenes: SceneProps[];
   hookText: string;
   partLabel: string; // ví dụ "PHẦN 7/32", hiển thị trên ảnh bìa
   captions: ShortCaption[];

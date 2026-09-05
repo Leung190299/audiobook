@@ -46,6 +46,7 @@ const defaultShortProps: CompositionShortProps = {
   title: "",
   audioPath: "",
   imagePath: "",
+  scenes: [],
   hookText: "",
   partLabel: "",
   captions: [],

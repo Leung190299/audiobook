@@ -2,19 +2,20 @@ import React, { useEffect, useState } from "react";
 import {
   AbsoluteFill,
   Audio,
-  Img,
   continueRender,
   delayRender,
-  interpolate,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { SceneBackground } from "./SceneBackground";
 import type { ShortProps } from "./types";
 
 // Hook chỉ hiện ở đầu video — sau đó nhường chỗ cho phụ đề.
 const HOOK_SECONDS = 3;
 const FONT_FAMILY = "BeVietnamPro, sans-serif";
+// Dissolve giữa hai cảnh, cùng giá trị với MainVideo.tsx.
+const CROSSFADE_SECONDS = 1.0;
 
 // Font đóng gói trong repo, nạp qua FontFace API. Phải chặn render bằng
 // delayRender cho tới khi font sẵn sàng, nếu không khung hình đầu sẽ render
@@ -43,7 +44,7 @@ const useBeVietnamPro = () => {
 export const ShortVideo: React.FC<ShortProps> = ({
   title,
   audioPath,
-  imagePath,
+  scenes,
   hookText,
   captions,
   audioDurationSeconds,
@@ -54,11 +55,7 @@ export const ShortVideo: React.FC<ShortProps> = ({
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
   const seconds = frame / fps;
-
-  const zoom = interpolate(frame, [0, durationInFrames], [1, 1.08], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
+  const crossfadeFrames = Math.round(CROSSFADE_SECONDS * fps);
 
   const inCta = seconds >= audioDurationSeconds;
   // Giữ nguyên phụ đề của câu trước trong khoảng nghỉ 0.15s giữa hai câu (xem
@@ -73,15 +70,24 @@ export const ShortVideo: React.FC<ShortProps> = ({
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       <AbsoluteFill style={{ overflow: "hidden" }}>
-        <Img
-          src={staticFile(imagePath)}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            transform: `scale(${zoom})`,
-          }}
-        />
+        {scenes.map((scene, i) => {
+          const next = scenes[i + 1];
+          // Cảnh cuối kéo dài hết composition: nền vẫn còn dưới card CTA thay
+          // vì tắt đen đúng lúc audio hết. Mốc cảnh đã quy về gốc phần.
+          const endFrame = next
+            ? Math.round(next.startSeconds * fps)
+            : durationInFrames;
+          return (
+            <SceneBackground
+              key={scene.number}
+              scene={scene}
+              startFrame={Math.round(scene.startSeconds * fps)}
+              endFrame={endFrame}
+              crossfadeFrames={crossfadeFrames}
+              motionIndex={i}
+            />
+          );
+        })}
       </AbsoluteFill>
 
       <AbsoluteFill
