@@ -38,7 +38,11 @@ export const SceneBackground: React.FC<SceneBackgroundProps> = ({
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
 
-  // Scale tối thiểu 1,06 để pan ±2,5% không bao giờ lộ mép đen.
+  // Scale tối thiểu 1,06 để pan ±2,5% không bao giờ lộ mép đen: ở scale 1,06
+  // ảnh tràn 3% mỗi bên (30,72px trên 1024px), còn translateX tính trên khung
+  // CHƯA scale nên ±2,5% = 25,6px -- dư đúng 5,12px (0,5%). Mọi pattern trong
+  // MOTIONS đều chạm mốc 1,06 này ở một đầu, nên tăng panX quá 3% hoặc hạ scale
+  // dưới 1,05 là lộ mép đen.
   const scale = interpolate(frame, [startFrame, endFrame], [...motion.scale], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
@@ -47,6 +51,12 @@ export const SceneBackground: React.FC<SceneBackgroundProps> = ({
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
+
+  // Ngoài cửa sổ hiện/mờ thì không dựng gì: opacity đã là 0, nhưng <Img> vẫn
+  // giữ delayRender và ~2,4MB bitmap cho mỗi cảnh — 64 cảnh là ~150MB mỗi worker.
+  if (frame < startFrame - crossfadeFrames || frame > endFrame + crossfadeFrames) {
+    return null;
+  }
 
   return (
     <AbsoluteFill style={{ opacity, overflow: "hidden" }}>

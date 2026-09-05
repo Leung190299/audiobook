@@ -29,16 +29,27 @@ export const MainVideo: React.FC<VideoProps> = ({ audioPath, chapters }) => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
-      {scenes.map(({ chapterIndex, scene }, i) => (
-        <SceneBackground
-          key={`${chapterIndex}-${scene.number}`}
-          scene={scene}
-          startFrame={Math.round(scene.startSeconds * fps)}
-          endFrame={Math.round(scene.endSeconds * fps)}
-          crossfadeFrames={crossfadeFrames}
-          motionIndex={i}
-        />
-      ))}
+      {scenes.map(({ chapterIndex, scene }, i) => {
+        // Lấy mốc bắt đầu của cảnh KẾ TIẾP làm endFrame, không phải endSeconds
+        // của chính cảnh này: giữa hai chương có khoảng nghỉ tiếng 0,5s (scene
+        // N kết thúc ở T, scene N+1 bắt đầu ở T+0,5), nên với endFrame cũ cả
+        // hai lớp đều mờ nửa chừng quanh T+0,25 (~6% đen lộ ra). Giữ lớp trước
+        // đục kín qua hết khoảng nghỉ đó; cảnh cuối cùng của tập không có cảnh
+        // kế tiếp nên vẫn dùng endSeconds của chính nó. Kéo dài pan/zoom thêm
+        // 0,5s trên một cảnh ~50s là không nhận ra bằng mắt.
+        const next = scenes[i + 1];
+        const endSeconds = next ? next.scene.startSeconds : scene.endSeconds;
+        return (
+          <SceneBackground
+            key={`${chapterIndex}-${scene.number}`}
+            scene={scene}
+            startFrame={Math.round(scene.startSeconds * fps)}
+            endFrame={Math.round(endSeconds * fps)}
+            crossfadeFrames={crossfadeFrames}
+            motionIndex={i}
+          />
+        );
+      })}
       {/* Vignette tĩnh: tối nhẹ bốn góc để ảnh có chiều sâu và chữ dễ đọc hơn. */}
       <AbsoluteFill
         style={{
