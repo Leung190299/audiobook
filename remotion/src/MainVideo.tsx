@@ -2,12 +2,14 @@ import React from "react";
 import { AbsoluteFill, Audio, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import type { VideoProps } from "./types";
 import { Avatar } from "./Avatar";
-import { ChapterBackground } from "./ChapterBackground";
+import { SceneBackground } from "./SceneBackground";
 import { Waveform } from "./Waveform";
 import { Caption } from "./Caption";
 
-// Must match gap_seconds in config/voice.yaml; audio chapter gaps depend on this.
-const CROSSFADE_SECONDS = 0.5;
+// Dissolve giữa hai cảnh. Dài hơn khoảng nghỉ 0,5s giữa chương (gap_seconds ở
+// config/voice.yaml) là cố ý: ảnh tan dần qua ranh giới chương nhìn mềm hơn
+// là cắt đúng lúc tiếng ngắt.
+const CROSSFADE_SECONDS = 1.0;
 
 export const MainVideo: React.FC<VideoProps> = ({ audioPath, chapters }) => {
   const frame = useCurrentFrame();
@@ -19,18 +21,32 @@ export const MainVideo: React.FC<VideoProps> = ({ audioPath, chapters }) => {
     (c) => seconds >= c.startSeconds && seconds < c.endSeconds
   );
 
+  // Trải mọi cảnh của mọi chương thành một dãy, đánh số liên tục để chọn kiểu
+  // chuyển động luân phiên trên toàn tập chứ không reset mỗi chương.
+  const scenes = chapters.flatMap((chapter) =>
+    chapter.scenes.map((scene) => ({ chapterIndex: chapter.index, scene }))
+  );
+
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
-      {chapters.map((chapter, i) => (
-        <ChapterBackground
-          key={chapter.index}
-          chapter={chapter}
-          startFrame={Math.round(chapter.startSeconds * fps)}
-          endFrame={Math.round(chapter.endSeconds * fps)}
+      {scenes.map(({ chapterIndex, scene }, i) => (
+        <SceneBackground
+          key={`${chapterIndex}-${scene.number}`}
+          scene={scene}
+          startFrame={Math.round(scene.startSeconds * fps)}
+          endFrame={Math.round(scene.endSeconds * fps)}
           crossfadeFrames={crossfadeFrames}
-          panDirection={i % 2 === 0 ? "in" : "out"}
+          motionIndex={i}
         />
       ))}
+      {/* Vignette tĩnh: tối nhẹ bốn góc để ảnh có chiều sâu và chữ dễ đọc hơn. */}
+      <AbsoluteFill
+        style={{
+          background:
+            "radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 100%)",
+          pointerEvents: "none",
+        }}
+      />
       <Avatar />
       {audioPath ? <Waveform audioPath={audioPath} /> : null}
       {currentChapter ? (

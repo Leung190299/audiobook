@@ -1,9 +1,18 @@
+export interface SceneProps {
+  number: number;
+  // Trục thời gian toàn tập, giống mốc câu.
+  startSeconds: number;
+  endSeconds: number;
+  imagePath: string;
+}
+
 export interface ChapterProps {
   index: number;
   heading: string;
   startSeconds: number;
   endSeconds: number;
-  imagePath: string;
+  // Mỗi chương nhiều cảnh ~50s, phủ kín chương (stage 3 đảm bảo).
+  scenes: SceneProps[];
   // Mốc câu giữ nguyên trục thời gian toàn tập (không quy về gốc chương) --
   // xem Caption.tsx, nơi so trực tiếp với `seconds` toàn cục.
   sentences: { text: string; startSeconds: number; endSeconds: number }[];
