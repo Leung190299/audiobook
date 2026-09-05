@@ -56,14 +56,14 @@ Một lượt:
 ├─ Stage 0  trend.cli          ~30s   → output/ideas/<slug>-<ts>.txt
 ├─ Stage 1  scripts.cli        ~5m    → output/scripts/<slug>-<ts>.json
 ├─ Stage 2  tts.cli            ~14m   → output/audio/<slug>-<ts>.wav + .json
-├─ Stage 3  images.cli         ~50m   → output/images/<slug>-<ts>.json + ~64 png
+├─ Stage 3  images.cli         ~46m (đo 05/09: 66 ảnh)   → output/images/<slug>-<ts>.json + ~64 png
 ├─ Stage 4  video.cli          ~15m   → output/video/<slug>-<ts>.mp4
 ├─ Stage 5  thumbnail.cli      ~1m    → output/thumbnails/<slug>-<ts>.png
 ├─ Stage 6  metadata.cli       ~30s   → output/metadata/<slug>-<ts>.txt + .json
 └─ Stage 7  shorts.cli         chưa đo → output/shorts/<slug>-<ts>-part-NN.mp4 + .txt (~30 phần)
 ```
 
-Tổng khoảng **85–93 phút** cộng thời gian Stage 7 — bản mới dựng ~30 short thay vì 1,
+Tổng khoảng **81–89 phút (đo 05/09: stage 3 46 phút, stage 4 25,5 phút)** cộng thời gian Stage 7 — bản mới dựng ~30 short thay vì 1,
 mỗi phần vẫn cần một lượt render Remotion riêng nên thời gian tăng theo số phần;
 chưa đo thực tế cho bản mới, xem `output/daily/<ngày>/07-short.log` để biết thời
 gian lượt chạy gần nhất. Xong thì hiện thông báo trên màn hình. Stage 7 (short)
