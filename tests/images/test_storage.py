@@ -47,3 +47,18 @@ def test_save_scene_images_tao_thu_muc_neu_chua_co(tmp_path):
     )
 
     assert image_paths[0].exists()
+
+
+def test_save_scene_images_sap_chuong_va_canh_theo_thu_tu_du_dau_vao_lon_xon(tmp_path):
+    # Vẽ song song có thể trả kết quả theo thứ tự hoàn thành, không theo kịch bản.
+    images = [
+        (_scene(2, 1, 100.0, 140.0), "b", b"2.1"),
+        (_scene(1, 2, 50.0, 100.0), "a2", b"1.2"),
+        (_scene(1, 1, 0.0, 50.0), "a1", b"1.1"),
+    ]
+
+    _, metadata_path = save_scene_images(trope="t", title="T", images=images, output_dir=tmp_path)
+
+    data = json.loads(metadata_path.read_text(encoding="utf-8"))
+    assert [c["index"] for c in data["chapters"]] == [1, 2]
+    assert [s["number"] for s in data["chapters"][0]["scenes"]] == [1, 2]

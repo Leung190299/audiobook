@@ -40,11 +40,13 @@ def save_scene_images(
         )
 
     metadata_path = output_dir / f"{trope}-{timestamp}.json"
+    # Thứ tự metadata không được phụ thuộc vào thứ tự ảnh được đưa vào, vì vẽ song song sau này có thể trả về theo thứ tự hoàn thành.
     metadata = {
         "trope": trope,
         "title": title,
         "chapters": [
-            {"index": index, "scenes": scenes} for index, scenes in chapters.items()
+            {"index": index, "scenes": sorted(scenes, key=lambda s: s["number"])}
+            for index, scenes in sorted(chapters.items())
         ],
     }
     metadata_path.write_text(
