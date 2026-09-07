@@ -35,8 +35,11 @@
   <!-- Lượt chạy kéo dài hơn một tiếng; không để macOS giết tiến trình giữa chừng. -->
   <key>ExitTimeOut</key>
   <integer>0</integer>
+  <!-- KHÔNG dùng Background: macOS bóp CPU tiến trình nền, đo 06-07/09 cả lượt
+       mất 9h24m-10h54m (stage 4 render 4h13m thay vì 21 phút, stage 7 5h thay
+       vì 36 phút). Interactive chạy đúng tốc độ như khi gọi tay: ~1h50. -->
   <key>ProcessType</key>
-  <string>Background</string>
+  <string>Interactive</string>
 
   <key>RunAtLoad</key>
   <false/>
