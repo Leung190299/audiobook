@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -45,12 +46,26 @@ def load_credentials(
     if credentials and credentials.valid:
         return credentials
 
+    refresh_failed = None
     if credentials and credentials.expired and credentials.refresh_token:
-        credentials.refresh(Request())
-        _save(credentials, token_path)
-        return credentials
+        try:
+            credentials.refresh(Request())
+            _save(credentials, token_path)
+            return credentials
+        except RefreshError as exc:
+            # OAuth project ở chế độ "Testing" bị Google thu hồi refresh token sau
+            # 7 ngày (invalid_grant). Đây là lỗi thường gặp nhất: 31/08 cấp quyền,
+            # 07/09 chết. Không được ném lỗi thô ở đây -- chạy tay thì đi tiếp
+            # xuống bước xin quyền mới, chạy tự động thì nói rõ việc cần làm.
+            refresh_failed = exc
 
     if not interactive:
+        if refresh_failed is not None:
+            raise YouTubeAuthError(
+                f"Token YouTube tại {token_path} đã hết hạn hoặc bị thu hồi "
+                f"({refresh_failed}). Project OAuth ở chế độ Testing chỉ giữ token "
+                "7 ngày. Chạy `uv run python -m upload.auth` để cấp quyền lại."
+            ) from refresh_failed
         raise YouTubeAuthError(
             f"Chưa có token YouTube hợp lệ tại {token_path}. "
             "Chạy `uv run python -m upload.auth` một lần trên máy có trình duyệt "
