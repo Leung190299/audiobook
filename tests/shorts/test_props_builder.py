@@ -124,48 +124,20 @@ def test_captions_lay_thang_tu_part_captions(tmp_path: Path):
     assert props["ctaSeconds"] == 4.0
 
 
-def test_cta_text_phan_giua_moi_sang_phan_ke_tiep(tmp_path: Path):
-    part = _part(number=2)
-    props = _build(tmp_path, part=part, total_parts=5)
+def test_moi_trich_doan_deu_moi_ve_video_dai(tmp_path: Path):
+    # Không còn "Xem phần N+1": short nay là mồi, đích duy nhất là tập đầy đủ.
+    # Kiểm cả trích đoạn đầu, giữa và cuối để chắc không sót nhánh nào.
+    for number in (1, 3, 5):
+        props = _build(tmp_path / f"n{number}", part=_part(number=number), total_parts=5)
 
-    assert props["ctaText"] == "Xem phần 3"
-
-
-def test_cta_text_phan_cuoi_moi_nghe_full(tmp_path: Path):
-    part = _part(number=5)
-    props = _build(tmp_path, part=part, total_parts=5)
-
-    assert props["ctaText"] == "Nghe full trên kênh"
+        assert props["ctaText"] == "Nghe full trên kênh"
 
 
-def test_part_label_dinh_dang_phan_dau(tmp_path: Path):
-    part = _part(number=1)
-    props = _build(tmp_path, part=part, total_parts=30)
+def test_part_label_dinh_dang_trich_doan(tmp_path: Path):
+    for number in (1, 3, 5):
+        props = _build(tmp_path / f"n{number}", part=_part(number=number), total_parts=5)
 
-    assert props["partLabel"] == "PHẦN 1/30"
-
-
-def test_part_label_dinh_dang_phan_giua(tmp_path: Path):
-    part = _part(number=15)
-    props = _build(tmp_path, part=part, total_parts=30)
-
-    assert props["partLabel"] == "PHẦN 15/30"
-
-
-def test_part_label_dinh_dang_phan_cuoi(tmp_path: Path):
-    part = _part(number=30)
-    props = _build(tmp_path, part=part, total_parts=30)
-
-    assert props["partLabel"] == "PHẦN 30/30"
-
-
-def test_phan_duy_nhat_cua_tap_cung_la_phan_cuoi(tmp_path: Path):
-    # total_parts == 1 và number == 1 -- phần duy nhất của tập cũng phải coi là
-    # phần cuối, không được lỡ tay chào "Xem phần 2" (không tồn tại).
-    part = _part(number=1)
-    props = _build(tmp_path, part=part, total_parts=1)
-
-    assert props["ctaText"] == "Nghe full trên kênh"
+        assert props["partLabel"] == f"TRÍCH ĐOẠN {number}/5"
 
 
 def test_khong_co_anh_cho_chuong_do_thi_bao_loi(tmp_path: Path):

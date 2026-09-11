@@ -76,11 +76,11 @@ def save_short_metadata(
     """Ghi cả `.txt` (đọc tay) lẫn `.json` (upload/series_cli.py đọc máy) cho
     một phần, cùng nội dung tiêu đề/mô tả. Trả về (txt_path, json_path)."""
     output_dir.mkdir(parents=True, exist_ok=True)
-    part_label = f"Phần {number}/{total}"
+    part_label = f"Trích đoạn {number}/{total}"
     title = f"{episode_title} — {part_label}"
     description = (
         f"{title}.\n"
-        "Nghe trọn tập trên kênh, hoặc theo dõi series để xem tiếp phần sau.\n"
+        "Nghe trọn tập trên kênh — link ở phần mô tả kênh.\n"
         "#shorts #TruyenAudio"
     )
     video_filename = f"{part_stem}.mp4"

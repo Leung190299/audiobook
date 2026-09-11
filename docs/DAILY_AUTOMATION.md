@@ -6,7 +6,7 @@ Pipeline gốc có 6 stage và dừng ở chỗ sinh metadata SEO. Bản này th
 |---|---|---|
 | 0 | `trend/` | Đọc tín hiệu xu hướng từ RSS công khai, sinh ý tưởng truyện gốc cho hôm nay |
 | 1–6 | (như cũ) | Kịch bản → TTS → ảnh → video → thumbnail → SEO |
-| 7 | `shorts/` | Cắt cả tập thành series ~30 video ngắn (Shorts) dọc 1080×1920 đánh số liên tục, gói theo mốc câu từ stage 2, không bắc cầu qua chương. Cần output stage 2+3 — **không chạy được cho tập dựng trước khi stage 2 biết ghi mốc câu** (chỉ có mốc chương). Hỏng không làm dừng lượt chạy |
+| 7 | `shorts/` | Dựng **5 trích đoạn** ngắn (Shorts) dọc 1080×1920 rải đều cả tập (mốc 5/25/45/65/85%), mỗi cái mời nghe trọn tập trên kênh. Gói theo mốc câu từ stage 2, không bắc cầu qua chương, không lấy đoạn kết. Cần output stage 2+3 — **không chạy được cho tập dựng trước khi stage 2 biết ghi mốc câu** (chỉ có mốc chương). Hỏng không làm dừng lượt chạy |
 | 8 | `upload/` | **Tuỳ chọn.** Đăng lên YouTube — mặc định tắt, bạn tự up |
 | — | `notify/` | Báo khi dựng xong hoặc khi lỗi (thông báo macOS, hoặc Telegram) |
 
@@ -60,10 +60,10 @@ Một lượt:
 ├─ Stage 4  video.cli          ~15m   → output/video/<slug>-<ts>.mp4
 ├─ Stage 5  thumbnail.cli      ~1m    → output/thumbnails/<slug>-<ts>.png
 ├─ Stage 6  metadata.cli       ~30s   → output/metadata/<slug>-<ts>.txt + .json
-└─ Stage 7  shorts.cli         chưa đo → output/shorts/<slug>-<ts>-part-NN.mp4 + .txt (~30 phần)
+└─ Stage 7  shorts.cli         ~6m    → output/shorts/<slug>-<ts>-part-NN.mp4 + .txt (5 trích đoạn)
 ```
 
-Tổng khoảng **81–89 phút (đo 05/09: stage 3 46 phút, stage 4 25,5 phút)** cộng thời gian Stage 7 — bản mới dựng ~30 short thay vì 1,
+Tổng khoảng **81–89 phút (đo 05/09: stage 3 46 phút, stage 4 25,5 phút)** cộng ~6 phút Stage 7 (5 trích đoạn),
 mỗi phần vẫn cần một lượt render Remotion riêng nên thời gian tăng theo số phần;
 chưa đo thực tế cho bản mới, xem `output/daily/<ngày>/07-short.log` để biết thời
 gian lượt chạy gần nhất. Xong thì hiện thông báo trên màn hình. Stage 7 (short)
@@ -89,7 +89,7 @@ Sản phẩm cần cho việc đăng tay:
 - Thumbnail: `output/thumbnails/<slug>-<ts>.png` (1280×720)
 - Tiêu đề + mô tả + tag + mốc chương: `output/metadata/<slug>-<ts>.txt`, dán thẳng
   vào YouTube Studio
-- Video ngắn (Shorts, ~30 phần mỗi tập): `output/shorts/<slug>-<ts>-part-NN.mp4`
+- Video ngắn (Shorts, 5 trích đoạn mỗi tập): `output/shorts/<slug>-<ts>-part-NN.mp4`
 - Tiêu đề + mô tả từng phần: `output/shorts/<slug>-<ts>-part-NN.txt`, dán thẳng
   vào YouTube Studio cho từng phần
 

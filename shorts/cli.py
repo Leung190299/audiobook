@@ -21,7 +21,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from shorts.audio_cut import cut_wav
-from shorts.planner import plan_parts
+from shorts.planner import plan_teasers
 from shorts.props_builder import build_short_props
 from shorts.storage import (
     make_stem,
@@ -78,7 +78,8 @@ def _run(tts_metadata_path: Path, images_metadata_path: Path) -> None:
         )
     images_dir = images_metadata_path.parent
 
-    parts = plan_parts(tts_metadata)
+    # Trích đoạn mời nghe, không phải series nối tiếp: 5 đoạn rải đều cả tập.
+    parts = plan_teasers(tts_metadata)
     total_parts = len(parts)
     if not 1 <= total_parts <= 99:
         raise ShortRenderError(

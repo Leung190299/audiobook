@@ -76,9 +76,9 @@ def test_file_metadata_du_bon_muc_va_dung_phan_n_tren_tong(tmp_path: Path):
     content = txt_path.read_text(encoding="utf-8")
     assert txt_path.name == f"{stem}.txt"
     assert json_path.name == f"{stem}.json"
-    assert "TIÊU ĐỀ:\nTrọng Sinh Báo Thù — Phần 7/30" in content
-    assert "MÔ TẢ:\nTrọng Sinh Báo Thù — Phần 7/30." in content
-    assert "Nghe trọn tập trên kênh, hoặc theo dõi series để xem tiếp phần sau." in content
+    assert "TIÊU ĐỀ:\nTrọng Sinh Báo Thù — Trích đoạn 7/30" in content
+    assert "MÔ TẢ:\nTrọng Sinh Báo Thù — Trích đoạn 7/30." in content
+    assert "Nghe trọn tập trên kênh — link ở phần mô tả kênh." in content
     assert "#shorts #TruyenAudio" in content
     assert f"TÊN FILE VIDEO:\n{stem}.mp4" in content
 
@@ -94,8 +94,8 @@ def test_file_metadata_phan_khac_nhau_ra_so_khac_nhau(tmp_path: Path):
         stem_2, trope="abc", episode_title="Tên Tập", number=2, total=12, output_dir=tmp_path
     )
 
-    assert "Phần 1/12" in txt_path_1.read_text(encoding="utf-8")
-    assert "Phần 2/12" in txt_path_2.read_text(encoding="utf-8")
+    assert "Trích đoạn 1/12" in txt_path_1.read_text(encoding="utf-8")
+    assert "Trích đoạn 2/12" in txt_path_2.read_text(encoding="utf-8")
 
 
 def test_file_metadata_json_du_khoa_upload_cli_can(tmp_path: Path):
@@ -114,7 +114,7 @@ def test_file_metadata_json_du_khoa_upload_cli_can(tmp_path: Path):
     txt_content = txt_path.read_text(encoding="utf-8")
 
     assert data["trope"] == "trong_sinh_bao_thu"
-    assert data["title"] == "Trọng Sinh Báo Thù — Phần 7/30"
+    assert data["title"] == "Trọng Sinh Báo Thù — Trích đoạn 7/30"
     assert data["part_number"] == 7
     assert data["total_parts"] == 30
     assert data["video_filename"] == f"{stem}.mp4"

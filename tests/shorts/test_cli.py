@@ -61,7 +61,7 @@ def _tts_metadata(chapters_and_sentences: list[tuple[str, list[dict]]]) -> dict:
 def sandbox(tmp_path: Path, monkeypatch):
     repo_root = tmp_path
 
-    # Hai chương ngắn -> plan_parts ra đúng 2 phần, mỗi chương một phần (không
+    # Hai chương ngắn -> plan_teasers ra đúng 2 phần, mỗi chương một phần (không
     # bắc cầu qua ranh giới chương, xem shorts/planner.py).
     c1_sentences = _make_sentences(1, 3, sentence_seconds=3.0, t0=0.0)
     c2_sentences = _make_sentences(2, 3, sentence_seconds=3.0, t0=10.0)
@@ -342,7 +342,7 @@ def test_qua_99_phan_thi_bao_loi_ngay_khong_render_gi(sandbox, monkeypatch):
     # là sau khi đã lỡ render một mớ phần trước đó. Kiểm tra số phần ngay từ
     # đầu để không phí công render rồi mới vỡ giữa chừng.
     tts_path, images_path, output_dir = sandbox
-    monkeypatch.setattr(shorts_cli, "plan_parts", lambda tts_metadata: [object()] * 100)
+    monkeypatch.setattr(shorts_cli, "plan_teasers", lambda tts_metadata: [object()] * 100)
 
     render_calls = []
     monkeypatch.setattr(subprocess, "run", lambda *a, **k: render_calls.append(1))

@@ -13,9 +13,19 @@ ranh giới chương — mỗi phần dùng ảnh nền của đúng một chư�
 
 import itertools
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 MAX_PART_SECONDS = 165.0
+
+# Số trích đoạn ngắn dựng cho mỗi tập. Trước đây stage 7 cắt trọn tập thành ~31
+# phần nối tiếp; nay short chỉ còn là mồi kéo người nghe về video dài, nên 5 cái
+# rải đều có sức mời tốt hơn 31 cái kể hết câu chuyện.
+TEASER_COUNT = 5
+
+# Vị trí (theo tỉ lệ thời lượng tập) của từng trích đoạn. Bắt đầu sớm ở 5% để
+# lấy được cú hook mở đầu, dừng ở 85% để chừa hẳn đoạn kết -- trích đoạn để mời
+# nghe, không phải để kể nốt.
+TEASER_POSITIONS = (0.05, 0.25, 0.45, 0.65, 0.85)
 
 
 class ShortPlanError(Exception):
@@ -92,6 +102,55 @@ def plan_parts(tts_metadata: dict) -> list[ShortPart]:
             part_number += 1
 
     return parts
+
+
+def plan_teasers(tts_metadata: dict, count: int = TEASER_COUNT) -> list[ShortPart]:
+    """Chọn `count` phần rải đều cả tập để làm trích đoạn mời nghe.
+
+    Dùng lại nguyên `plan_parts()` để mỗi trích đoạn vẫn là một khoảng 85-165
+    giây không bắc cầu qua ranh giới chương, rồi chỉ giữ lại những phần nằm gần
+    các mốc trong `TEASER_POSITIONS`. Phần cuối tập bị loại khỏi danh sách ứng
+    viên: mời người ta nghe trọn tập mà lại chiếu sẵn cái kết là tự phá mục đích.
+
+    Đánh số lại từ 1 -- nhãn "TRÍCH ĐOẠN 3/5" phải đếm trong bộ trích đoạn, chứ
+    không phải số thứ tự cũ trong ~31 phần của cả tập.
+    """
+    parts = plan_parts(tts_metadata)
+    if len(parts) <= count:
+        return _renumber(parts)
+
+    candidates = parts[:-1]
+    if len(candidates) <= count:
+        return _renumber(candidates)
+
+    episode_end = parts[-1].source_end_seconds
+    chosen: list[int] = []
+    for fraction in _teaser_fractions(count):
+        target = fraction * episode_end
+        best = min(
+            (i for i in range(len(candidates)) if i not in chosen),
+            key=lambda i: abs(_midpoint(candidates[i]) - target),
+        )
+        chosen.append(best)
+
+    return _renumber([candidates[i] for i in sorted(chosen)])
+
+
+def _teaser_fractions(count: int) -> tuple[float, ...]:
+    if count == len(TEASER_POSITIONS):
+        return TEASER_POSITIONS
+    if count == 1:
+        return ((TEASER_POSITIONS[0] + TEASER_POSITIONS[-1]) / 2,)
+    step = (TEASER_POSITIONS[-1] - TEASER_POSITIONS[0]) / (count - 1)
+    return tuple(TEASER_POSITIONS[0] + i * step for i in range(count))
+
+
+def _midpoint(part: ShortPart) -> float:
+    return (part.source_start_seconds + part.source_end_seconds) / 2
+
+
+def _renumber(parts: list[ShortPart]) -> list[ShortPart]:
+    return [replace(part, number=i) for i, part in enumerate(parts, start=1)]
 
 
 def _split_into(chapter_sentences: list[dict], count: int) -> list[list[dict]]:

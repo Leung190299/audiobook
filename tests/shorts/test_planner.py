@@ -1,7 +1,14 @@
 # tests/shorts/test_planner.py
 import pytest
 
-from shorts.planner import MAX_PART_SECONDS, ShortPlanError, plan_parts
+from shorts.planner import (
+    MAX_PART_SECONDS,
+    TEASER_COUNT,
+    TEASER_POSITIONS,
+    ShortPlanError,
+    plan_parts,
+    plan_teasers,
+)
 
 
 def _sentence(chapter_index: int, index: int, start: float, end: float, text: str | None = None) -> dict:
@@ -244,3 +251,86 @@ def test_chuong_dai_chia_deu_khong_de_lai_mau_vun():
     assert all(d <= MAX_PART_SECONDS for d in durations)
     # Hai phần không được lệch nhau quá 20% — đây mới là điều test cũ bỏ sót.
     assert max(durations) - min(durations) <= 0.2 * max(durations), durations
+
+
+# --- Trích đoạn: 5 short rải đều cả tập, dùng để kéo người xem về video dài ---
+
+
+def _episode(chapter_count: int = 16, sentences_per_chapter: int = 60,
+             sentence_seconds: float = 3.0, chapter_gap: float = 0.5) -> dict:
+    """Tập nhiều chương trên MỘT trục thời gian liên tục, giống metadata thật."""
+    sentences: list[dict] = []
+    chapters: list[dict] = []
+    t = 0.0
+    for c in range(1, chapter_count + 1):
+        chapter_start = t
+        for i in range(1, sentences_per_chapter + 1):
+            sentences.append(_sentence(c, i, t, t + sentence_seconds))
+            t += sentence_seconds
+        chapters.append(
+            {"index": c, "heading": f"Chương {c}",
+             "start_seconds": chapter_start, "end_seconds": t}
+        )
+        t += chapter_gap
+    return _metadata(sentences, chapters)
+
+
+def test_plan_teasers_tra_dung_5_phan_danh_so_lai_tu_1():
+    teasers = plan_teasers(_episode())
+
+    assert len(teasers) == TEASER_COUNT
+    assert [t.number for t in teasers] == [1, 2, 3, 4, 5]
+
+
+def test_plan_teasers_rai_deu_ca_tap_theo_dung_moc_mong_muon():
+    metadata = _episode()
+    episode_end = metadata["sentences"][-1]["end_seconds"]
+
+    teasers = plan_teasers(metadata)
+
+    # Mỗi trích đoạn phải nằm gần mốc của nó; sai số cho phép nửa khoảng cách
+    # giữa hai mốc liền nhau, đủ rộng để không phụ thuộc cách chia phần.
+    tolerance = 0.10 * episode_end
+    for teaser, fraction in zip(teasers, TEASER_POSITIONS):
+        midpoint = (teaser.source_start_seconds + teaser.source_end_seconds) / 2
+        assert abs(midpoint - fraction * episode_end) <= tolerance, (
+            f"trích đoạn {teaser.number} ở {midpoint:.0f}s, lệch quá xa mốc "
+            f"{fraction:.0%} ({fraction * episode_end:.0f}s)"
+        )
+
+
+def test_plan_teasers_theo_thu_tu_thoi_gian_va_khong_trung_nhau():
+    teasers = plan_teasers(_episode())
+
+    starts = [t.source_start_seconds for t in teasers]
+    assert starts == sorted(starts)
+    assert len(set(starts)) == len(starts)
+
+
+def test_plan_teasers_khong_bao_gio_lay_doan_ket_thuc_tap():
+    # Mốc cuối 85%: cố ý chừa đoạn kết để short không tiết lộ cái kết.
+    metadata = _episode()
+    episode_end = metadata["sentences"][-1]["end_seconds"]
+
+    teasers = plan_teasers(metadata)
+
+    assert teasers[-1].source_end_seconds < episode_end
+
+
+def test_plan_teasers_tap_it_phan_hon_5_thi_lay_het():
+    # Tập ngắn chỉ chia được 2 phần: trả cả hai, không bịa thêm.
+    metadata = _episode(chapter_count=2, sentences_per_chapter=20)
+    assert len(plan_parts(metadata)) < TEASER_COUNT
+
+    teasers = plan_teasers(metadata)
+
+    assert len(teasers) == len(plan_parts(metadata))
+    assert [t.number for t in teasers] == list(range(1, len(teasers) + 1))
+
+
+def test_plan_teasers_giu_nguyen_moc_caption_quy_ve_goc_phan():
+    teasers = plan_teasers(_episode())
+
+    for teaser in teasers:
+        assert teaser.captions[0].start_seconds == 0.0
+        assert teaser.captions[-1].end_seconds <= teaser.duration_seconds + 0.01

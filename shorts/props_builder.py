@@ -83,12 +83,10 @@ def build_short_props(
     # Ảnh bìa (ShortThumbnail) vẫn là cảnh đang chiếu lúc phần bắt đầu.
     image_path_relative = scene_props[0]["imagePath"]
 
-    # Phần cuối cùng của tập không có "phần kế tiếp" để mời xem -- mời nghe trọn
-    # tập trên kênh thay vào đó.
-    if part.number >= total_parts:
-        cta_text = "Nghe full trên kênh"
-    else:
-        cta_text = f"Xem phần {part.number + 1}"
+    # Mọi trích đoạn đều mời về video dài. Trước đây card cuối ghi "Xem phần N+1"
+    # vì short là một series nối tiếp; nay short chỉ là mồi, nên chỉ có một đích
+    # duy nhất đáng dẫn tới là tập đầy đủ trên kênh.
+    cta_text = "Nghe full trên kênh"
 
     captions = [
         {
@@ -106,7 +104,7 @@ def build_short_props(
         "imagePath": image_path_relative,
         "scenes": scene_props,
         "hookText": part.heading,
-        "partLabel": f"PHẦN {part.number}/{total_parts}",
+        "partLabel": f"TRÍCH ĐOẠN {part.number}/{total_parts}",
         "captions": captions,
         "audioDurationSeconds": part.duration_seconds,
         "ctaSeconds": cta_seconds,
