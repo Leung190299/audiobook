@@ -52,54 +52,158 @@ def slugify(raw: str, fallback: str = "trend") -> str:
     return slug[:MAX_SLUG_CHARS].rstrip("_") or fallback
 
 
+# Các khuôn kể chuyện kênh dùng được. Liệt kê ra để Gemini CHỌN có ý thức thay vì
+# mặc định trọng sinh: 22/22 tập từ 08/08 đến 13/09 đều mở đầu "Trọng sinh tôi mặc
+# kệ…", trong khi 8 kênh đối thủ đo ngày 07/09 đang chạy thiên kim thật, trà xanh,
+# tiếng lòng, mỏ hỗn/cá mặn -- không kênh nào lấy trọng sinh làm khuôn chính.
+STORY_FRAMES = [
+    "Thiên kim thật trở về: con gái bị tráo/thất lạc về nhà giàu, lột mặt con nuôi trà xanh",
+    "Vả mặt trà xanh/tiểu tam: kẻ giả tạo chọc nhầm người, bị lật mặt trước cả nhà",
+    "Tiếng lòng bị nghe thấy: cả nhà nghe được suy nghĩ thật của nữ chính, quay xe",
+    "Mỏ hỗn / cá mặn: nữ chính bốp chát, lười biếng nhưng lại được cả hào môn cưng",
+    "Hợp đồng hôn nhân / gả thay / hôn ước từ bé: cưới vì điều kiện, yêu vì bất ngờ",
+    "Ly hôn xong mới phất: bị coi thường, rời đi, thành công, chồng cũ hối hận",
+    "Hào môn sủng vợ: thái tử gia/sếp tổng lạnh lùng với đời, nghiện vợ",
+    "Hiện thực gia đình không kỳ ảo: mẹ chồng, tài sản, ngoại tình -- thắng bằng mưu trí",
+    "Trọng sinh / xuyên không: sống lại hoặc xuyên về, biết trước mà lật ngược thế cờ",
+]
+
+# Tên khuôn xuyên không dùng trong thông báo cấm -- phải khớp đúng một mục ở trên.
+TIME_TRAVEL_FRAME = STORY_FRAMES[-1]
+
+# Từ khoá nhận diện khuôn xuyên không trong tiêu đề đã làm (lịch sử chỉ lưu tiêu
+# đề, không lưu khuôn, nên phải đoán từ chữ).
+TIME_TRAVEL_MARKERS = (
+    "trọng sinh", "xuyên không", "xuyên về", "sống lại", "trở về quá khứ",
+    "quay về quá khứ", "kiếp trước", "một đời nữa",
+)
+
+# Số tập gần nhất xét khi cấm: 3 => khuôn xuyên không tối đa 1 trong 4 tập.
+BAN_WINDOW = 3
+
+
+def uses_time_travel(title: str) -> bool:
+    lowered = title.lower()
+    return any(marker in lowered for marker in TIME_TRAVEL_MARKERS)
+
+
+def banned_frames(recent_titles: list[str], window: int = BAN_WINDOW) -> list[str]:
+    """Khuôn nào đã dùng trong `window` tập gần nhất thì hôm nay cấm.
+
+    Chỉ áp cho xuyên không vì đó là khuôn duy nhất bị lạm dụng tới mức 22/22.
+    Cấm theo cửa sổ trượt chứ không cấm hẳn: người dùng muốn "ít" chứ không
+    phải "không bao giờ".
+    """
+    if any(uses_time_travel(t) for t in recent_titles[-window:]):
+        return [TIME_TRAVEL_FRAME]
+    return []
+
+
+def clean_title(raw: str) -> str:
+    """Bóc vỏ bọc kiểu kênh đối thủ khỏi tiêu đề.
+
+    Khi prompt bắt đầu cho Gemini xem tiêu đề kênh đối thủ để học khuôn, nó chép
+    luôn cả cách đóng gói: "[Truyện Audio Full] | ... | Vả Mặt Audio". Lên kênh
+    mình thì thành quảng cáo cho đối thủ. Tách theo "|" hoặc "||", bỏ các mảnh
+    là nhãn chung hoặc tên kênh, giữ mảnh dài nhất -- chính là câu hook.
+    """
+    pieces = [piece.strip() for piece in re.split(r"\|{1,2}", raw) if piece.strip()]
+    if len(pieces) <= 1:
+        return raw.strip()
+    def is_wrapper(piece: str) -> bool:
+        lowered = piece.lower().strip("[] ")
+        return (
+            lowered.startswith("truyện audio")
+            or lowered.endswith("audio")
+            or lowered in {"truyện full", "audio full"}
+        )
+    content = [piece for piece in pieces if not is_wrapper(piece)]
+    return max(content or pieces, key=len).strip("[] ").strip()
+
+
 def build_idea_prompt(signals: TrendSignals, recent_titles: list[str]) -> str:
-    feed_blocks = []
+    # Tách kênh YouTube khỏi báo: hai nguồn này trả lời hai câu hỏi khác nhau.
+    # Báo cho biết XUNG ĐỘT nào đang được bàn; kênh đối thủ cho biết KHUÔN kể
+    # chuyện nào đang kéo view. Trước đây gộp chung và bảo "chỉ mượn dạng xung
+    # đột", nên khuôn đang hot chưa bao giờ được dùng làm khuôn.
+    news_blocks, channel_blocks = [], []
     for name, titles in signals.feeds.items():
         lines = "\n".join(f"- {t}" for t in titles)
-        feed_blocks.append(f"### {name}\n{lines}")
-    feeds_text = "\n\n".join(feed_blocks) or "(không lấy được nguồn nào)"
+        block = f"### {name}\n{lines}"
+        (channel_blocks if name.startswith("Kênh YouTube") else news_blocks).append(block)
+    news_text = "\n\n".join(news_blocks) or "(không lấy được nguồn nào)"
+    channels_text = "\n\n".join(channel_blocks) or "(không lấy được kênh nào)"
 
     trends_text = "\n".join(f"- {t}" for t in signals.google_trends) or "(không có dữ liệu)"
-    avoid_text = "\n".join(f"- {t}" for t in recent_titles) or "(chưa có)"
+
+    # Chỉ đưa 8 tiêu đề gần nhất. Đưa 15 cái cùng một mở đầu là dạy mẫu cho
+    # Gemini bắt chước, dù có ghi "tránh" bên trên.
+    avoid_text = "\n".join(f"- {t}" for t in recent_titles[-8:]) or "(chưa có)"
+
+    frames_text = "\n".join(f"{i}. {f}" for i, f in enumerate(STORY_FRAMES, start=1))
+    banned = banned_frames(recent_titles)
+    if banned:
+        ban_text = "CẤM hôm nay (đã dùng trong 3 tập gần nhất):\n" + "\n".join(
+            f"- {f}" for f in banned
+        )
+    else:
+        ban_text = "Hôm nay KHÔNG bị cấm khuôn nào -- nhưng vẫn phải khác 8 tập gần nhất."
 
     return f"""Bạn là biên tập nội dung cho một kênh YouTube truyện audio tiếng Việt
-(thể loại: trọng sinh, báo thù, vả mặt, tâm lý gia đình, drama hôn nhân — khán giả
-nữ 25-55 tuổi, nghe khi làm việc nhà hoặc trước khi ngủ).
+(drama gia đình và ngôn tình hiện đại -- khán giả nữ 25-55 tuổi, nghe khi làm việc
+nhà hoặc trước khi ngủ).
 
 Dưới đây là tín hiệu hôm nay.
 
-[A] TIÊU ĐỀ BÁO MỚI NHẤT ở các mục tâm sự / đời sống / pháp luật — nguồn chính:
+[A] TIÊU ĐỀ BÁO MỚI NHẤT ở các mục tâm sự / đời sống / pháp luật -- cho biết
+XUNG ĐỘT nào đang được người Việt bàn tán:
 
-{feeds_text}
+{news_text}
 
-[B] Từ khoá đang lên trên Google Trends Việt Nam — chỉ là chất liệu phụ:
+[B] TIÊU ĐỀ MỚI NHẤT của các kênh truyện audio đang kéo view -- cho biết KHUÔN kể
+chuyện và cách đặt tiêu đề nào đang hợp thị hiếu. Mượn khuôn và giọng tiêu đề,
+KHÔNG mượn cốt truyện:
+
+{channels_text}
+
+[C] Từ khoá Google Trends -- chất liệu phụ, phần lớn không dùng được:
 {trends_text}
 
-[C] Các truyện kênh đã làm gần đây — TUYỆT ĐỐI không lặp lại motif, tên nhân vật,
-hay cấu trúc twist của những truyện này:
+[D] 8 tập gần nhất kênh đã làm. Chúng mở đầu gần giống nhau -- đó là LỖI đang cần
+sửa, không phải phong cách để noi theo:
 {avoid_text}
+
+KHUÔN KỂ CHUYỆN có thể chọn (chọn đúng MỘT):
+{frames_text}
+
+{ban_text}
 
 NHIỆM VỤ: Đề xuất MỘT ý tưởng truyện HOÀN TOÀN HƯ CẤU cho tập hôm nay.
 
 RÀNG BUỘC BẮT BUỘC:
-- Nhóm [A] là tín hiệu quan trọng nhất. Đọc để nhận ra dạng xung đột nào đang được
-  người Việt quan tâm lúc này (mâu thuẫn mẹ chồng nàng dâu, tranh chấp tài sản,
-  ngoại tình, lừa đảo, bất công nơi làm việc...) rồi xây một câu chuyện MỚI quanh
-  dạng xung đột đó.
-- TUYỆT ĐỐI KHÔNG kể lại, không phóng tác, không dựa vào bất kỳ vụ việc cụ thể nào
-  trong [A]. Chỉ mượn DẠNG xung đột, không mượn tình tiết. Không dùng người thật,
-  tên thật, địa danh gắn với vụ việc thật, hay thương hiệu thật.
-- Nhóm [B] phần lớn là thể thao và tin quốc tế, không dùng được — cứ bỏ qua, đừng
-  cố nhét vào.
+- Chọn khuôn từ danh sách trên, ưu tiên khuôn đang thấy nhiều trong [B]; không
+  được chọn khuôn bị cấm.
+- Lấy XUNG ĐỘT từ [A]: đọc để nhận ra dạng mâu thuẫn đang được quan tâm (mẹ chồng
+  nàng dâu, tranh chấp tài sản, ngoại tình, lừa đảo, bất công nơi làm việc...)
+  rồi xây câu chuyện MỚI quanh dạng xung đột đó, đặt trong khuôn đã chọn.
+- TUYỆT ĐỐI KHÔNG kể lại, phóng tác, hay dựa vào bất kỳ vụ việc cụ thể nào trong
+  [A]. Chỉ mượn DẠNG xung đột. Không dùng người thật, tên thật, địa danh gắn với
+  vụ việc thật, thương hiệu thật.
+- Tiêu đề KHÔNG ĐƯỢC BẮT ĐẦU BẰNG "Trọng sinh", "Xuyên không", hay 3 từ đầu của
+  bất kỳ tiêu đề nào trong [D]. Hook phải là TÌNH HUỐNG (ai làm gì, bị gì), không
+  phải nhãn thể loại.
+- Tiêu đề là văn bản thuần: KHÔNG chép vỏ bọc của kênh khác như
+  "[Truyện Audio Full]", "Truyện Audio ||", dấu "|" -- và TUYỆT ĐỐI không có
+  tên kênh nào.
 - Không chuyển thể, dịch, hay mô phỏng sát nội dung tiểu thuyết/phim đã có.
-- Ý tưởng phải đủ sức kéo dài 16 chương (10.000-13.000 từ): có tuyến nhân vật phản
-  diện rõ, ít nhất hai lần lật kèo, và một kết thúc thoả mãn.
+- Ý tưởng phải đủ sức kéo dài 16 chương (10.000-13.000 từ): có tuyến phản diện
+  rõ, ít nhất hai lần lật kèo, và một kết thúc thoả mãn.
 
 Chỉ trả về DUY NHẤT một khối JSON hợp lệ, không kèm giải thích nào khác:
 {{
-  "slug": "<định danh ngắn không dấu, chữ thường, dùng gạch dưới, tối đa 4 từ, ví dụ: me_chong_giau_cua>",
-  "title_hint": "<tiêu đề gợi ý dạng câu hook giật, tiếng Việt có dấu>",
-  "trend_hook": "<1-2 câu: bám vào dạng xung đột nào và vì sao hợp thời điểm hiện tại>",
+  "slug": "<định danh ngắn không dấu, chữ thường, dùng gạch dưới, tối đa 4 từ, ví dụ: thien_kim_lang_chai>",
+  "title_hint": "<tiêu đề dạng câu hook giật, tiếng Việt có dấu, mở đầu bằng tình huống>",
+  "trend_hook": "<1-2 câu: chọn khuôn nào, bám dạng xung đột nào trong [A], vì sao hợp lúc này>",
   "idea": "<8-12 câu mô tả trọn vẹn: bối cảnh, nhân vật chính và động cơ, phản diện, mâu thuẫn mở màn, hai cú lật kèo, cao trào, và kết thúc>"
 }}"""
 
@@ -193,7 +297,7 @@ async def generate_idea(
         )
     try:
         idea_text = data["idea"].strip()
-        title_hint = data["title_hint"].strip()
+        title_hint = clean_title(data["title_hint"])
     except (KeyError, AttributeError, TypeError) as exc:
         raise IdeaGenerationError(
             f"Ý tưởng thiếu field bắt buộc: {exc}\nDữ liệu nhận được: {data!r}"
