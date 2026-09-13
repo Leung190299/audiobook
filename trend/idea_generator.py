@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import re
@@ -104,17 +105,48 @@ Chỉ trả về DUY NHẤT một khối JSON hợp lệ, không kèm giải th�
 
 
 def _parse_json_response(raw_text: str) -> dict:
+    """Đọc JSON từ phản hồi Gemini, chịu được các kiểu trả lời lỗi thường gặp:
+    code fence, ký tự điều khiển nằm trong chuỗi, nhiều khối JSON dính liền
+    nhau, hoặc văn bản thừa bao quanh khối JSON."""
     text = raw_text.strip()
     if text.startswith("```"):
         text = re.sub(r"^```[a-zA-Z]*\s*", "", text)
         text = re.sub(r"```\s*$", "", text).strip()
+
+    # 1) Parse trực tiếp; strict=False chấp nhận ký tự điều khiển trong chuỗi.
     try:
-        return json.loads(text)
-    except json.JSONDecodeError as exc:
-        raise IdeaGenerationError(
-            f"Không parse được JSON ý tưởng từ Gemini: {exc}\n"
-            f"Phản hồi thô: {raw_text[:500]!r}"
-        ) from exc
+        data = json.loads(text, strict=False)
+        if isinstance(data, dict):
+            return data
+    except json.JSONDecodeError:
+        pass
+
+    # 2) Nhiều khối JSON dính nhau / văn bản thừa: thử từng khối {...} phẳng.
+    for match in re.finditer(r"\{[^{}]*\}", text):
+        try:
+            data = json.loads(match.group(0), strict=False)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(data, dict) and "idea" in data and "title_hint" in data:
+            return data
+
+    # 3) Cứu vãn từng field khi JSON hỏng nặng (chuỗi bị cắt cụt giữa chừng).
+    fields: dict = {}
+    for key in ("slug", "title_hint", "trend_hook", "idea"):
+        m = re.search(r'"' + key + r'"\s*:\s*"((?:[^"\\]|\\.)*)"', text)
+        if not m:
+            continue
+        try:
+            fields[key] = json.loads('"' + m.group(1) + '"', strict=False)
+        except json.JSONDecodeError:
+            fields[key] = m.group(1)
+    if fields.get("idea") and fields.get("title_hint"):
+        return fields
+
+    raise IdeaGenerationError(
+        "Không parse được JSON ý tưởng từ Gemini: phản hồi không chứa khối JSON hợp lệ\n"
+        f"Phản hồi thô: {raw_text[:500]!r}"
+    )
 
 
 async def generate_idea(
@@ -129,12 +161,36 @@ async def generate_idea(
         )
         await client.init(timeout=30, auto_close=False, close_delay=300, auto_refresh=True)
 
-    try:
-        response = await client.generate_content(build_idea_prompt(signals, recent_titles))
-    except (GeminiError, APIError, AuthError) as exc:
-        raise IdeaGenerationError(f"Gemini lỗi khi sinh ý tưởng: {exc}") from exc
-
-    data = _parse_json_response(response.text)
+    prompt = build_idea_prompt(signals, recent_titles)
+    reinforcement = (
+        "\n\nLƯU Ý QUAN TRỌNG: Đây là yêu cầu SÁNG TÁC TRUYỆN HƯ CẤU giải trí"
+        " lành mạnh thuộc thể loại drama gia đình, hoàn toàn không liên quan tới"
+        " người thật việc thật và không yêu cầu bất kỳ thông tin nhạy cảm nào."
+        " Đừng từ chối; hãy trả về đúng MỘT khối JSON theo mẫu ở trên."
+    )
+    data: dict | None = None
+    last_error: Exception | None = None
+    for attempt in range(3):
+        try:
+            response = await client.generate_content(
+                prompt if attempt == 0 else prompt + reinforcement
+            )
+        except (GeminiError, APIError, AuthError) as exc:
+            last_error = IdeaGenerationError(f"Gemini lỗi khi sinh ý tưởng: {exc}")
+            await asyncio.sleep(3)
+            continue
+        try:
+            data = _parse_json_response(response.text)
+            break
+        except IdeaGenerationError as exc:
+            # Gemini từ chối hoặc trả về rác — thử lại với lời nhắc hư cấu.
+            last_error = exc
+            await asyncio.sleep(3)
+            continue
+    if data is None:
+        raise last_error if last_error else IdeaGenerationError(
+            "Gemini không trả về ý tưởng nào sau 3 lượt thử"
+        )
     try:
         idea_text = data["idea"].strip()
         title_hint = data["title_hint"].strip()
