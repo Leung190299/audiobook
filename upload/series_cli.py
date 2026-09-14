@@ -35,7 +35,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from googleapiclient.errors import HttpError
 
-from shorts.storage import short_thumbnail_path
+from shorts.storage import FULL_EPISODE_PLACEHOLDER, short_thumbnail_path
 from upload.auth import YouTubeAuthError, load_credentials
 from upload.uploader import upload_video
 
@@ -146,6 +146,25 @@ def _is_quota_exceeded(exc: HttpError) -> bool:
     return False
 
 
+FULL_EPISODE_LINE = "Nghe trọn tập tại: {url}"
+
+
+def describe_with_link(description: str, long_video_url: str) -> str:
+    """Gắn link video dài vào mô tả short.
+
+    Thay đúng dòng giữ chỗ mà stage 7 ghi; mô tả không có dòng đó thì chèn
+    link thành dòng thứ hai -- YouTube chỉ hiện vài dòng đầu mô tả của Shorts,
+    để link ở cuối là gần như vô hình. Gọi hai lần không gắn hai link.
+    """
+    link_line = FULL_EPISODE_LINE.format(url=long_video_url)
+    if link_line in description:
+        return description
+    if FULL_EPISODE_PLACEHOLDER in description:
+        return description.replace(FULL_EPISODE_PLACEHOLDER, link_line)
+    lines = description.splitlines()
+    return "\n".join([*lines[:1], link_line, *lines[1:]])
+
+
 def run(
     series_prefix: Path,
     *,
@@ -156,6 +175,7 @@ def run(
     category_id: str = "24",
     uploader=upload_video,
     credentials_loader=load_credentials,
+    long_video_url: str | None = None,
 ) -> None:
     series_prefix = Path(series_prefix)
     state_path = _state_path(series_prefix)
@@ -190,6 +210,9 @@ def run(
     uploaded_this_run = 0
     for part in candidates:
         metadata = json.loads(part.metadata_path.read_text(encoding="utf-8"))
+        description = metadata["description"]
+        if long_video_url:
+            description = describe_with_link(description, long_video_url)
         thumbnail_path = part.thumbnail_path
         if not thumbnail_path.exists():
             # Vẫn đăng, nhưng phải nói ra. Thiếu ảnh bìa trong im lặng là cách
@@ -205,7 +228,7 @@ def run(
                 credentials,
                 video_path=part.video_path,
                 title=metadata["title"],
-                description=metadata["description"],
+                description=description,
                 tags=metadata.get("tags", []),
                 category_id=category_id,
                 privacy_status=privacy_status,
@@ -301,6 +324,11 @@ def main() -> None:
         help="Chỉ in ra các phần sẽ được đăng theo thứ tự nào rồi thoát, không gọi API",
     )
     parser.add_argument(
+        "--long-video-url",
+        default=None,
+        help="Link video dài của tập; gắn vào mô tả từng short thay dòng giữ chỗ",
+    )
+    parser.add_argument(
         "--category-id",
         default=os.getenv("YOUTUBE_CATEGORY_ID", "24"),
         help="24 = Entertainment, 22 = People & Blogs, 1 = Film & Animation",
@@ -315,6 +343,7 @@ def main() -> None:
             privacy_status=args.privacy,
             dry_run=args.dry_run,
             category_id=args.category_id,
+            long_video_url=args.long_video_url,
         )
     except (SeriesUploadError, YouTubeAuthError) as exc:
         raise SystemExit(str(exc))

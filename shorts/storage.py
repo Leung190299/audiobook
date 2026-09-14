@@ -56,6 +56,12 @@ def short_thumbnail_path(part_stem: str, output_dir: Path) -> Path:
 # Tags cố định, giống nhau cho mọi phần của mọi series -- một series thì tính
 # nhất quán quan trọng hơn tối ưu SEO từng phần riêng lẻ. upload/series_cli.py
 # đọc thẳng danh sách này qua .json, không cần đoán hay tự sinh tag.
+# Dòng giữ chỗ trong mô tả short. Stage 7 chạy trước khi video dài được đăng
+# nên chưa biết link; upload/series_cli.py thay đúng dòng này bằng link thật
+# khi đăng. Dùng chung một hằng số để hai bên không trôi nhau -- bài học từ
+# lần series_cli tìm .png còn storage ghi .jpg.
+FULL_EPISODE_PLACEHOLDER = "Nghe trọn tập trên kênh — link ở phần mô tả kênh."
+
 SHORT_TAGS = [
     "truyện audio",
     "truyện trọng sinh",
@@ -78,11 +84,7 @@ def save_short_metadata(
     output_dir.mkdir(parents=True, exist_ok=True)
     part_label = f"Trích đoạn {number}/{total}"
     title = f"{episode_title} — {part_label}"
-    description = (
-        f"{title}.\n"
-        "Nghe trọn tập trên kênh — link ở phần mô tả kênh.\n"
-        "#shorts #TruyenAudio"
-    )
+    description = f"{title}.\n{FULL_EPISODE_PLACEHOLDER}\n#shorts #TruyenAudio"
     video_filename = f"{part_stem}.mp4"
 
     txt_path = output_dir / f"{part_stem}.txt"

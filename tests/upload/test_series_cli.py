@@ -374,3 +374,58 @@ def test_in_thong_bao_so_phan_tieu_de_url_sau_moi_phan(tmp_path, capsys):
     assert "1" in out
     assert "Vô Đối Trả Thù — Phần 1/5" in out
     assert "https://youtu.be/vid1" in out
+
+
+# --- gắn link video dài vào mô tả short ---
+
+
+def test_describe_with_link_thay_dong_placeholder_bang_link_that():
+    from shorts.storage import FULL_EPISODE_PLACEHOLDER
+
+    desc = f"Tên tập — Trích đoạn 1/5.\n{FULL_EPISODE_PLACEHOLDER}\n#shorts #TruyenAudio"
+
+    out = series_cli.describe_with_link(desc, "https://youtu.be/abc123")
+
+    assert FULL_EPISODE_PLACEHOLDER not in out
+    assert "Nghe trọn tập tại: https://youtu.be/abc123" in out
+    assert out.splitlines()[0] == "Tên tập — Trích đoạn 1/5."
+    assert out.endswith("#shorts #TruyenAudio")
+
+
+def test_describe_with_link_khong_co_placeholder_thi_chen_sau_dong_dau():
+    out = series_cli.describe_with_link("Dòng đầu.\n#shorts", "https://youtu.be/x")
+
+    assert out.splitlines() == ["Dòng đầu.", "Nghe trọn tập tại: https://youtu.be/x", "#shorts"]
+
+
+def test_describe_with_link_khong_gan_hai_lan():
+    once = series_cli.describe_with_link("Dòng đầu.\n#shorts", "https://youtu.be/x")
+    twice = series_cli.describe_with_link(once, "https://youtu.be/x")
+
+    assert twice == once
+
+
+def test_run_voi_long_video_url_gan_link_vao_mo_ta_moi_phan(tmp_path):
+    prefix = _make_series(tmp_path, [1, 2])
+    uploader = FakeUploader()
+
+    series_cli.run(
+        prefix,
+        limit=10,
+        uploader=uploader,
+        credentials_loader=_fake_credentials,
+        long_video_url="https://youtu.be/LONG",
+    )
+
+    for call in uploader.calls:
+        assert "Nghe trọn tập tại: https://youtu.be/LONG" in call["description"]
+        assert call["description"].startswith("Mô tả phần")  # dòng đầu giữ nguyên
+
+
+def test_run_khong_co_long_video_url_thi_mo_ta_giu_nguyen(tmp_path):
+    prefix = _make_series(tmp_path, [1])
+    uploader = FakeUploader()
+
+    series_cli.run(prefix, limit=10, uploader=uploader, credentials_loader=_fake_credentials)
+
+    assert uploader.calls[0]["description"] == "Mô tả phần 1."
