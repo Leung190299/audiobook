@@ -7,9 +7,17 @@ from metadata.seo_generator import SeoCopy
 CHANNEL_CTA = "👉 Đăng ký kênh để không bỏ lỡ tập mới!"
 
 
-def build_full_description(description_draft: str, chapter_lines: list[str]) -> str:
+def build_full_description(
+    description_draft: str, chapter_lines: list[str], hashtags: list[str] | None = None
+) -> str:
+    # Hashtag ghép vào CUỐI mô tả: YouTube chỉ nhận hashtag nằm trong mô tả (hoặc
+    # tiêu đề), và tự hiện 3 cái đầu phía trên tiêu đề video. Trước 16/09 hashtag
+    # chỉ nằm ở trường riêng trong .json nên chưa bao giờ lên YouTube.
     chapters_block = "\n".join(chapter_lines)
-    return f"{description_draft}\n\n{CHANNEL_CTA}\n\nChương:\n{chapters_block}"
+    text = f"{description_draft}\n\n{CHANNEL_CTA}\n\nChương:\n{chapters_block}"
+    if hashtags:
+        text += "\n\n" + " ".join(hashtags)
+    return text
 
 
 def save_seo_metadata(
@@ -22,7 +30,9 @@ def save_seo_metadata(
     output_dir.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
-    full_description = build_full_description(seo_copy.description_draft, chapter_lines)
+    full_description = build_full_description(
+        seo_copy.description_draft, chapter_lines, seo_copy.hashtags
+    )
 
     txt_path = output_dir / f"{trope}-{timestamp}.txt"
     txt_content = (
