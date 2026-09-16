@@ -21,11 +21,15 @@ ROOT = Path(__file__).resolve().parent.parent
 CLIENT_SECRET_PATH = ROOT / "config" / "youtube_client_secret.json"
 TOKEN_PATH = ROOT / "config" / "youtube_token.json"
 
-# youtube.upload đủ để đăng video; youtube.readonly cần cho trend/sources.py
-# (search.list) và để đọc lại thông tin kênh.
+# youtube.upload đủ để đăng video; youtube.readonly để đọc lại thông tin kênh;
+# youtube.force-ssl để SỬA video đã đăng (videos.update) -- cần khi video dài
+# phải đăng lại và 5 short đang trỏ link cũ (16/09: bản 14/09 kẹt xử lý hai
+# ngày, đăng lại ra ID mới, mô tả short phải đổi theo). Đổi danh sách này thì
+# phải xoá config/youtube_token.json và cấp quyền lại.
 SCOPES = [
     "https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/youtube.readonly",
+    "https://www.googleapis.com/auth/youtube.force-ssl",
 ]
 
 

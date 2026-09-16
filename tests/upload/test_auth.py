@@ -65,3 +65,9 @@ def test_token_bi_thu_hoi_tuong_tac_thi_mo_lai_luong_cap_quyen(expired_token, tm
     assert creds.refresh_token == "moi"
     assert calls == [{"port": 0, "prompt": "consent"}]
     assert expired_token.read_text(encoding="utf-8") == '{"refresh_token": "moi"}'
+
+
+def test_scopes_co_quyen_sua_video_da_dang():
+    # Thiếu force-ssl thì videos.update trả 403 "insufficient authentication
+    # scopes" -- gặp thật 16/09 khi phải đổi link trong mô tả 5 short.
+    assert "https://www.googleapis.com/auth/youtube.force-ssl" in auth.SCOPES
