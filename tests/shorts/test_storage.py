@@ -79,7 +79,9 @@ def test_file_metadata_du_bon_muc_va_dung_phan_n_tren_tong(tmp_path: Path):
     assert "TIÊU ĐỀ:\nTrọng Sinh Báo Thù — Trích đoạn 7/30" in content
     assert "MÔ TẢ:\nTrọng Sinh Báo Thù — Trích đoạn 7/30." in content
     assert "Nghe trọn tập trên kênh — link ở phần mô tả kênh." in content
-    assert "#shorts #TruyenAudio" in content
+    # Không hashtag trong mô tả: YouTube xếp Shorts theo khung dọc và thời lượng,
+    # còn "#TruyenAudio" chỉ làm mô tả trông như spam. Yêu cầu của người dùng 16/09.
+    assert "#" not in content.split("MÔ TẢ:")[1].split("TÊN FILE VIDEO:")[0]
     assert f"TÊN FILE VIDEO:\n{stem}.mp4" in content
 
 

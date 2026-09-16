@@ -84,7 +84,9 @@ def save_short_metadata(
     output_dir.mkdir(parents=True, exist_ok=True)
     part_label = f"Trích đoạn {number}/{total}"
     title = f"{episode_title} — {part_label}"
-    description = f"{title}.\n{FULL_EPISODE_PLACEHOLDER}\n#shorts #TruyenAudio"
+    # Không hashtag: YouTube nhận diện Shorts qua khung 9:16 và thời lượng dưới
+    # 3 phút, "#shorts" không còn tác dụng; người dùng không muốn dấu # trong mô tả.
+    description = f"{title}.\n{FULL_EPISODE_PLACEHOLDER}"
     video_filename = f"{part_stem}.mp4"
 
     txt_path = output_dir / f"{part_stem}.txt"
