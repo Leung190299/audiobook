@@ -5,8 +5,13 @@
   <key>Label</key>
   <string>com.lee.audiobook.daily</string>
 
+  <!-- caffeinate -i: giữ máy thức chừng nào job còn chạy. Hai lượt (15/09 và
+       18/09) chết giữa stage 3-4 không lỗi, đúng kiểu máy ngủ khi rảnh tay.
+       Không chống được việc đóng nắp máy. -->
   <key>ProgramArguments</key>
   <array>
+    <string>/usr/bin/caffeinate</string>
+    <string>-i</string>
     <string>/bin/bash</string>
     <string>/Users/lee/Project/Apps/audiobook/run_daily.sh</string>
   </array>
