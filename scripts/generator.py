@@ -8,7 +8,7 @@ from gemini_webapi.exceptions import APIError, AuthError, GeminiError
 
 from scripts.models import Chapter, Script
 from scripts.prompts import build_chapter_prompt, build_outline_prompt
-from scripts.qa import MIN_CHAPTER_WORDS, looks_like_refusal
+from scripts.qa import MIN_CHAPTER_WORDS, looks_like_refusal, title_problem
 
 
 # Số lần hỏi Gemini cho dàn ý trước khi bỏ cuộc. Xem lý do ở generate_script().
@@ -57,6 +57,10 @@ async def generate_script(
 
         try:
             outline = _parse_json_response(outline_response.text)
+            # Tiêu đề tục coi như dàn ý hỏng: hỏi lại trong cùng chat. Tập 20/09
+            # phải dừng tay giữa TTS vì "Bà Chó Sủa…" lọt qua.
+            if isinstance(outline, dict) and (problem := title_problem(str(outline.get("title", "")))):
+                raise ScriptGenerationError(problem)
             break
         except ScriptGenerationError:
             if attempt == OUTLINE_ATTEMPTS - 1:

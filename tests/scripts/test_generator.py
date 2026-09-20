@@ -222,3 +222,17 @@ async def test_chuong_qua_ngan_cung_bi_hoi_lai(monkeypatch):
     script = await generate_script("t", "T", "mô tả", client=fake_client)
 
     assert script.chapters[0].text == "Một chương đủ năm từ trở lên đây."
+
+
+async def test_dan_y_co_tieu_de_tuc_thi_hoi_lai_dan_y():
+    # Tiêu đề tục coi như dàn ý hỏng: hỏi lại trong cùng chat, lấy bản sau.
+    bad = '{"title": "Bà Chó Sủa Mỏ Hỗn", "chapters": [{"heading": "C1", "summary": "s"}]}'
+    good = '{"title": "Mẹ Chồng Mỏ Hỗn", "chapters": [{"heading": "C1", "summary": "s"}]}'
+    responses = [MagicMock(text=bad), MagicMock(text=good), MagicMock(text="Nội dung chương.")]
+    fake_chat = MagicMock(); fake_chat.send_message = AsyncMock(side_effect=responses)
+    fake_client = MagicMock(); fake_client.start_chat.return_value = fake_chat
+
+    script = await generate_script("t", "T", "mô tả", client=fake_client)
+
+    assert script.title == "Mẹ Chồng Mỏ Hỗn"
+    assert fake_chat.send_message.await_count == 3

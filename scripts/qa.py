@@ -1,3 +1,5 @@
+import re
+
 from scripts.models import Script
 
 MIN_WORDS = 9000
@@ -13,6 +15,15 @@ MIN_CHAPTERS = 14
 # Chương thật đo được 740-1.170 từ; 300 chặn được cả từ chối lẫn chương cụt.
 MIN_CHAPTER_WORDS = 300
 MAX_CHAPTERS = 18
+
+# Từ tục / miệt thị không được xuất hiện trong TIÊU ĐỀ. Tập 20/09 thật: Gemini
+# đặt "Bà Chó Sủa Mỏ Hỗn Hóa Ra Lại Là Đồng Minh" -- thân truyện sạch, chỉ tiêu
+# đề hỏng, và tiêu đề in lên card cuối 5 short lẫn metadata. So khớp nguyên từ
+# (không lấy "chó" trong "chống") vì tiếng Việt có dấu, \b của regex vẫn đủ.
+OFFENSIVE_TITLE_TERMS = (
+    "chó", "đĩ", "điếm", "con hoang", "khốn nạn", "súc vật", "mặt lồn", "cặc",
+    "đụ", "địt", "ngu si", "đần độn", "thằng khốn", "con khốn",
+)
 
 BANNED_TERMS = [
     "phù mỏ audio",
@@ -46,8 +57,19 @@ def looks_like_refusal(text: str) -> bool:
     return any(marker in head for marker in REFUSAL_MARKERS)
 
 
+def title_problem(title: str) -> str | None:
+    lowered = title.lower()
+    for term in OFFENSIVE_TITLE_TERMS:
+        if re.search(rf"(?<![\w]){re.escape(term)}(?![\w])", lowered):
+            return f"Tiêu đề chứa từ không dùng được trên kênh: '{term}'."
+    return None
+
+
 def validate_script(script: Script) -> None:
     errors = []
+
+    if problem := title_problem(script.title):
+        errors.append(problem)
 
     if not (MIN_WORDS <= script.word_count <= MAX_WORDS):
         errors.append(

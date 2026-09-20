@@ -152,3 +152,30 @@ def test_looks_like_refusal():
     assert looks_like_refusal("Xin lỗi, tôi không thể tạo nội dung này.")
     assert looks_like_refusal("I can't help with that request.")
     assert not looks_like_refusal("Tôi không thể tin nổi, cô ta dám cầm sổ đỏ đi thế chấp.")
+
+
+# --- tiêu đề không được tục / miệt thị ---
+
+
+def test_title_problem_bat_tu_mieng_thi_trong_tieu_de():
+    from scripts.qa import title_problem
+
+    # Tập 20/09 thật: Gemini đặt "Bà Chó Sủa Mỏ Hỗn Hóa Ra Lại Là Đồng Minh".
+    assert title_problem("Bà Chó Sủa Mỏ Hỗn Hóa Ra Lại Là Đồng Minh") is not None
+    assert title_problem("Con Đĩ Trà Xanh Bị Vả Mặt") is not None
+
+
+def test_title_problem_khong_bat_nham_tu_lanh():
+    from scripts.qa import title_problem
+
+    assert title_problem("Mẹ Chồng Mỏ Hỗn Hóa Ra Là Đồng Minh") is None
+    assert title_problem("Chống Lại Cả Hào Môn, Tôi Thắng") is None  # "chống" ≠ "chó"
+    assert title_problem("Thiên Kim Thật Trở Về") is None
+
+
+def test_validate_script_chan_tieu_de_tuc():
+    script = _make_script(word_count=11200, num_chapters=16)
+    script.title = "Bà Chó Sủa Mỏ Hỗn Hóa Ra Lại Là Đồng Minh"
+
+    with pytest.raises(ScriptQAError, match="Tiêu đề"):
+        validate_script(script)
