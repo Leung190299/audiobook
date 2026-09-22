@@ -38,3 +38,24 @@ def test_script_to_dict_and_from_dict_round_trip():
     )
     restored = Script.from_dict(original.to_dict())
     assert restored == original
+
+
+def test_from_dict_chiu_duoc_kich_ban_cu_khong_co_hook():
+    script = Script.from_dict(
+        {"trope": "t", "title": "T", "chapters": [{"index": 1, "heading": "C1", "text": "x"}]}
+    )
+    assert script.hook == ""
+    assert script.comment_question == ""
+
+
+def test_hook_va_comment_question_round_trip():
+    original = Script(
+        trope="t",
+        title="T",
+        chapters=[Chapter(index=1, heading="C1", text="x")],
+        hook="Cô bị tráo phôi",
+        comment_question="Bạn sẽ tha thứ chứ?",
+    )
+    restored = Script.from_dict(original.to_dict())
+    assert restored == original
+    assert original.to_dict()["hook"] == "Cô bị tráo phôi"

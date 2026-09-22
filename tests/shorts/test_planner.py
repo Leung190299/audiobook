@@ -279,7 +279,7 @@ def test_plan_teasers_tra_dung_5_phan_danh_so_lai_tu_1():
     teasers = plan_teasers(_episode())
 
     assert len(teasers) == TEASER_COUNT
-    assert [t.number for t in teasers] == [1, 2, 3, 4, 5]
+    assert [t.number for t in teasers] == list(range(1, TEASER_COUNT + 1))
 
 
 def test_plan_teasers_rai_deu_ca_tap_theo_dung_moc_mong_muon():
@@ -290,8 +290,11 @@ def test_plan_teasers_rai_deu_ca_tap_theo_dung_moc_mong_muon():
 
     # Mỗi trích đoạn phải nằm gần mốc của nó; sai số cho phép nửa khoảng cách
     # giữa hai mốc liền nhau, đủ rộng để không phụ thuộc cách chia phần.
-    tolerance = 0.10 * episode_end
-    for teaser, fraction in zip(teasers, TEASER_POSITIONS):
+    from shorts.planner import _teaser_fractions
+
+    fractions = _teaser_fractions(TEASER_COUNT)
+    tolerance = (fractions[1] - fractions[0]) / 2 * episode_end
+    for teaser, fraction in zip(teasers, fractions):
         midpoint = (teaser.source_start_seconds + teaser.source_end_seconds) / 2
         assert abs(midpoint - fraction * episode_end) <= tolerance, (
             f"trích đoạn {teaser.number} ở {midpoint:.0f}s, lệch quá xa mốc "

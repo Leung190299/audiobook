@@ -5,9 +5,12 @@ Pipeline gốc có 6 stage và dừng ở chỗ sinh metadata SEO. Bản này th
 | Stage | Module | Việc |
 |---|---|---|
 | 0 | `trend/` | Đọc tín hiệu xu hướng từ RSS công khai, sinh ý tưởng truyện gốc cho hôm nay |
-| 1–6 | (như cũ) | Kịch bản → TTS → ảnh → video → thumbnail → SEO |
-| 7 | `shorts/` | Dựng **5 trích đoạn** ngắn (Shorts) dọc 1080×1920 rải đều cả tập (mốc 5/25/45/65/85%), mỗi cái mời nghe trọn tập trên kênh. Gói theo mốc câu từ stage 2, không bắc cầu qua chương, không lấy đoạn kết. Cần output stage 2+3 — **không chạy được cho tập dựng trước khi stage 2 biết ghi mốc câu** (chỉ có mốc chương). Hỏng không làm dừng lượt chạy |
-| 8 | `upload/` | **Tuỳ chọn.** Đăng lên YouTube — mặc định tắt, bạn tự up |
+| 1–3 | (như cũ) | Kịch bản (từ 22/09: cấu trúc 3 tập, cliffhanger ở chương 5 và 11, kèm `hook` + `comment_question`) → TTS → ảnh |
+| 4 | `episodes/` | **Từ 22/09/2026:** chia truyện thành **3 tập 15–20 phút** (5/6/5 chương, `episodes/plan.py`), mỗi tập mở bằng cold open (đoạn cao trào cắt từ chương cuối tập) và kết bằng card "Tập N+1 lên sóng 20h mai". Ghi manifest `<stem>-episodes.json` cho stage 5/6/8. `video.cli` (bản full 50 phút) vẫn chạy tay được nhưng không còn trong lịch. Xem `docs/superpowers/specs/2026-09-22-episodes-design.md` |
+| 5 | `thumbnail/` | 1 ảnh nền → ảnh truyện + 1 ảnh/tập có badge "TẬP N/3"; hook 2–4 từ, chữ to neo đáy trên dải tối |
+| 6 | `metadata/` | 1 lần Gemini cho truyện → tiêu đề/mô tả/bình luận ghim cho từng tập (mốc chương theo trục tập, câu hỏi bình luận, chỗ trống link tập sau/playlist); đổi tên mp4 thành `<slug>-tap-N.mp4`; ghi danh sách `output/metadata/<stem>-episodes.json` |
+| 7 | `shorts/` | Dựng **3 trích đoạn** ngắn (Shorts) dọc 1080×1920 rải đều cả truyện, mỗi cái mời nghe tập 1 trên kênh. Gói theo mốc câu từ stage 2, không bắc cầu qua chương, không lấy đoạn kết. Cần output stage 2+3 — **không chạy được cho tập dựng trước khi stage 2 biết ghi mốc câu** (chỉ có mốc chương). Hỏng không làm dừng lượt chạy |
+| 8 | `upload/` | **Tuỳ chọn.** `upload.episodes_cli`: tải cả 3 tập lên hẹn giờ 20h mỗi ngày một tập (private + publishAt; tập 1 tối nay nếu chạy trước 19h30), gắn link tập sau vào mô tả tập trước, đăng bình luận câu hỏi dưới mỗi tập (ghim làm tay), rồi 3 trích đoạn trỏ về tập 1. 3 + 3 = 9.600/10.000 đơn vị hạn mức/ngày. Mặc định tắt |
 | — | `notify/` | Báo khi dựng xong hoặc khi lỗi (thông báo macOS, hoặc Telegram) |
 
 `run_daily.sh` xâu tất cả lại. `launchd/com.lee.audiobook.daily.plist` đặt lịch chạy.
@@ -57,13 +60,13 @@ Một lượt:
 ├─ Stage 1  scripts.cli        ~5m    → output/scripts/<slug>-<ts>.json
 ├─ Stage 2  tts.cli            ~14m   → output/audio/<slug>-<ts>.wav + .json
 ├─ Stage 3  images.cli         ~46m (đo 05/09: 66 ảnh)   → output/images/<slug>-<ts>.json + ~64 png
-├─ Stage 4  video.cli          ~15m   → output/video/<slug>-<ts>.mp4
-├─ Stage 5  thumbnail.cli      ~1m    → output/thumbnails/<slug>-<ts>.png
-├─ Stage 6  metadata.cli       ~30s   → output/metadata/<slug>-<ts>.txt + .json
-└─ Stage 7  shorts.cli         ~6m    → output/shorts/<slug>-<ts>-part-NN.mp4 + .txt (5 trích đoạn)
+├─ Stage 4  episodes.cli       ~25m   → output/episodes/<slug>-<ts>-ep-0N.mp4 (3 tập) + <slug>-<ts>-episodes.json
+├─ Stage 5  thumbnail.cli      ~1m    → output/thumbnails/<slug>-<ts>.png + -ep-0N.png
+├─ Stage 6  metadata.cli       ~30s   → output/metadata/<slug>-<ts>-ep-0N.txt/.json + <slug>-<ts>-episodes.json
+└─ Stage 7  shorts.cli         ~4m    → output/shorts/<slug>-<ts>-part-NN.mp4 + .txt (3 trích đoạn)
 ```
 
-Tổng khoảng **81–89 phút (đo 05/09: stage 3 46 phút, stage 4 25,5 phút)** cộng ~6 phút Stage 7 (5 trích đoạn),
+Tổng khoảng **81–89 phút (đo 05/09: stage 3 46 phút, stage 4 25,5 phút cho bản full — 3 tập cộng lại xấp xỉ)** cộng ~4 phút Stage 7 (3 trích đoạn),
 mỗi phần vẫn cần một lượt render Remotion riêng nên thời gian tăng theo số phần;
 chưa đo thực tế cho bản mới, xem `output/daily/<ngày>/07-short.log` để biết thời
 gian lượt chạy gần nhất. Xong thì hiện thông báo trên màn hình. Stage 7 (short)
@@ -80,16 +83,18 @@ stage 3 với đúng JSON đó → chạy lại stage 4/6/7 với cặp JSON (TT
 ```bash
 uv run python -m tts.cli output/scripts/<trope>-<ts>.json
 uv run python -m images.cli output/scripts/<trope>-<ts>.json output/audio/<trope>-<ts-moi>.json
-uv run python -m video.cli output/scripts/<trope>-<ts>.json output/audio/<trope>-<ts-moi>.json output/images/<trope>-<ts-moi>.json
+uv run python -m episodes.cli output/scripts/<trope>-<ts>.json output/audio/<trope>-<ts-moi>.json output/images/<trope>-<ts-moi>.json
 ```
 
 Sản phẩm cần cho việc đăng tay:
 
-- Video: `output/video/<tên-slug-SEO>.mp4` (stage 6 đã đổi sang tên thân thiện SEO)
-- Thumbnail: `output/thumbnails/<slug>-<ts>.png` (1280×720)
-- Tiêu đề + mô tả + tag + mốc chương: `output/metadata/<slug>-<ts>.txt`, dán thẳng
-  vào YouTube Studio
-- Video ngắn (Shorts, 5 trích đoạn mỗi tập): `output/shorts/<slug>-<ts>-part-NN.mp4`
+- Video từng tập: `output/episodes/<slug-SEO>-tap-N.mp4` (stage 6 đã đổi tên)
+- Thumbnail từng tập: `output/thumbnails/<slug>-<ts>-ep-0N.png` (1280×720)
+- Tiêu đề + mô tả + tag + mốc chương + **bình luận ghim** từng tập:
+  `output/metadata/<slug>-<ts>-ep-0N.txt`, dán thẳng vào YouTube Studio. Đăng
+  tay thì: hẹn giờ 20h mỗi ngày một tập, dán bình luận ghim rồi bấm Ghim, sau khi
+  tập N+1 có link thì sửa dòng "▶️ Tập tiếp theo" trong mô tả tập N.
+- Video ngắn (Shorts, 3 trích đoạn mỗi truyện): `output/shorts/<slug>-<ts>-part-NN.mp4`
 - Tiêu đề + mô tả từng phần: `output/shorts/<slug>-<ts>-part-NN.txt`, dán thẳng
   vào YouTube Studio cho từng phần
 

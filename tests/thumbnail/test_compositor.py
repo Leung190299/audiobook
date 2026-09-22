@@ -39,6 +39,22 @@ def test_overlay_hook_text_uppercases_input():
     assert result_image.size == (1280, 720)
 
 
+def test_hook_dai_bi_cat_con_4_tu_va_co_badge_tap():
+    from thumbnail.compositor import clip_hook
+
+    assert clip_hook("mẹ chồng quỳ xin con dâu tha thứ") == "MẸ CHỒNG QUỲ XIN"
+    result = overlay_hook_text(_make_test_image_bytes(), "MẸ CHỒNG QUỲ XIN", episode_label="TẬP 2/3")
+    img = Image.open(io.BytesIO(result)).convert("RGB")
+    assert img.size == (1280, 720)
+    # Badge vàng ở góc trên trái.
+    assert img.getpixel((60, 60)) == (255, 216, 77)
+    # Dải tối: đáy ảnh tối hơn đỉnh ảnh (nền xám 128).
+    assert sum(img.getpixel((5, 715))) < sum(img.getpixel((5, 5)))
+    # Không badge thì góc vẫn xám gốc.
+    plain = Image.open(io.BytesIO(overlay_hook_text(_make_test_image_bytes(), "SỐC"))).convert("RGB")
+    assert plain.getpixel((60, 60)) == (128, 128, 128)
+
+
 def test_fit_font_uses_max_size_for_short_text():
     image = Image.new("RGB", (1280, 720), "gray")
     from PIL import ImageDraw
@@ -61,5 +77,8 @@ def test_fit_font_shrinks_long_text_to_fit_width():
 
     bbox = draw.textbbox((0, 0), long_hook, font=font, stroke_width=STROKE_WIDTH)
     text_width = bbox[2] - bbox[0]
-    assert text_width <= image.width * TEXT_WIDTH_RATIO
     assert font.size < MAX_FONT_SIZE
+    # Sàn 64pt được ưu tiên hơn việc vừa khít: hook thật đã bị cắt còn 4 từ
+    # trước khi tới đây (clip_hook), nên chỉ kiểm tra không nhỏ hơn sàn.
+    from thumbnail.compositor import MIN_FONT_SIZE
+    assert font.size >= MIN_FONT_SIZE

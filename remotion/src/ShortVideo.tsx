@@ -1,45 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   AbsoluteFill,
   Audio,
-  continueRender,
-  delayRender,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
 import { SceneBackground } from "./SceneBackground";
 import type { ShortProps } from "./types";
+import { FONT_FAMILY, useBeVietnamPro } from "./fonts";
 
 // Hook chỉ hiện ở đầu video — sau đó nhường chỗ cho phụ đề.
 const HOOK_SECONDS = 3;
-const FONT_FAMILY = "BeVietnamPro, sans-serif";
 // Dissolve giữa hai cảnh, cùng giá trị với MainVideo.tsx.
 const CROSSFADE_SECONDS = 1.0;
 
-// Font đóng gói trong repo, nạp qua FontFace API. Phải chặn render bằng
-// delayRender cho tới khi font sẵn sàng, nếu không khung hình đầu sẽ render
-// bằng font dự phòng rồi mới đổi giữa chừng.
-const useBeVietnamPro = () => {
-  const [handle] = useState(() => delayRender("Đang nạp font Be Vietnam Pro"));
-
-  useEffect(() => {
-    const font = new FontFace(
-      "BeVietnamPro",
-      `url(${staticFile("assets/fonts/BeVietnamPro-Black.ttf")}) format("truetype")`
-    );
-    font
-      .load()
-      .then((loaded) => {
-        document.fonts.add(loaded);
-        continueRender(handle);
-      })
-      .catch(() => {
-        // Thiếu font thì vẫn render bằng sans-serif, không làm hỏng cả lượt chạy.
-        continueRender(handle);
-      });
-  }, [handle]);
-};
 
 export const ShortVideo: React.FC<ShortProps> = ({
   title,

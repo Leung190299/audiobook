@@ -20,7 +20,9 @@ const SHORT_HEIGHT = 1920;
 
 const calculateMetadata = async ({ props }: { props: VideoProps }) => {
   const lastChapter = props.chapters[props.chapters.length - 1];
-  const durationInSeconds = lastChapter ? lastChapter.endSeconds : 0;
+  // Tập (episodes/) có thêm card kết sau khi hết chương; bản full không có.
+  const durationInSeconds =
+    (lastChapter ? lastChapter.endSeconds : 0) + (props.outroSeconds ?? 0);
   return {
     durationInFrames: Math.max(1, Math.round(durationInSeconds * FPS)),
   };

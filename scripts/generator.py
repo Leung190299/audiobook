@@ -7,7 +7,12 @@ from gemini_webapi import GeminiClient
 from gemini_webapi.exceptions import APIError, AuthError, GeminiError
 
 from scripts.models import Chapter, Script
-from scripts.prompts import build_chapter_prompt, build_outline_prompt
+from scripts.prompts import (
+    MAX_HOOK_WORDS,
+    MAX_QUESTION_WORDS,
+    build_chapter_prompt,
+    build_outline_prompt,
+)
 from scripts.qa import MIN_CHAPTER_WORDS, looks_like_refusal, title_problem
 
 
@@ -77,6 +82,13 @@ async def generate_script(
             f"Dữ liệu dàn ý không đúng cấu trúc mong đợi: {exc}\n"
             f"Phản hồi thô từ Gemini: {outline_response.text[:500]!r}"
         ) from exc
+    # Hai trường mới (22/09) không bắt buộc: Gemini thỉnh thoảng bỏ field phụ dù
+    # prompt yêu cầu, và một dàn ý thiếu câu hỏi bình luận không đáng để mất cả
+    # lượt chạy -- stage 6 tự thay bằng câu hỏi chung khi rỗng.
+    hook = _clip_words(str(outline.get("hook") or ""), MAX_HOOK_WORDS)
+    comment_question = _clip_words(
+        str(outline.get("comment_question") or ""), MAX_QUESTION_WORDS
+    )
 
     total_chapters = len(chapter_plans)
     chapters = []
@@ -105,7 +117,21 @@ async def generate_script(
 
         chapters.append(Chapter(index=chapter_number, heading=heading, text=text))
 
-    return Script(trope=trope_id, title=title, chapters=chapters)
+    return Script(
+        trope=trope_id,
+        title=title,
+        chapters=chapters,
+        hook=hook,
+        comment_question=comment_question,
+    )
+
+
+def _clip_words(text: str, max_words: int) -> str:
+    """Gọn một dòng, cắt theo số từ. Gemini hay vượt giới hạn từ vài chữ; cắt
+    còn hơn bỏ, vì hook 22 từ vẫn dùng được còn hook rỗng thì không."""
+    words = " ".join(text.split()).split(" ")
+    words = [w for w in words if w]
+    return " ".join(words[:max_words])
 
 
 def _chapter_problem(text: str) -> "str | None":

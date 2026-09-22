@@ -236,3 +236,35 @@ async def test_dan_y_co_tieu_de_tuc_thi_hoi_lai_dan_y():
 
     assert script.title == "Mẹ Chồng Mỏ Hỗn"
     assert fake_chat.send_message.await_count == 3
+
+
+async def test_dan_y_co_hook_va_cau_hoi_thi_vao_script():
+    outline_text = (
+        '{"title": "Tiêu đề", "hook": "Cô bị tráo phôi ngay trong đêm cưới", '
+        '"comment_question": "Bạn sẽ ký đơn hay tha thứ?", '
+        '"chapters": [{"heading": "C1", "summary": "S1"}]}'
+    )
+    fake_client, _ = _make_fake_client(outline_text, ["Chương một."])
+
+    script = await generate_script("t", "Tên", "Mô tả", client=fake_client)
+
+    assert script.hook == "Cô bị tráo phôi ngay trong đêm cưới"
+    assert script.comment_question == "Bạn sẽ ký đơn hay tha thứ?"
+
+
+async def test_dan_y_thieu_hook_thi_khong_loi_va_hook_rong():
+    fake_client, _ = _make_fake_client(_outline_json(1), ["Chương một."])
+    script = await generate_script("t", "Tên", "Mô tả", client=fake_client)
+    assert script.hook == ""
+    assert script.comment_question == ""
+
+
+async def test_hook_qua_dai_bi_cat_theo_so_tu():
+    long_hook = " ".join(f"tu{i}" for i in range(40))
+    outline_text = (
+        f'{{"title": "T", "hook": "{long_hook}", "comment_question": "",'
+        ' "chapters": [{"heading": "C1", "summary": "S1"}]}'
+    )
+    fake_client, _ = _make_fake_client(outline_text, ["Chương một."])
+    script = await generate_script("t", "Tên", "Mô tả", client=fake_client)
+    assert len(script.hook.split()) == 20

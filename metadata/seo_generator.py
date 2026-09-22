@@ -12,6 +12,22 @@ class SeoGenerationError(Exception):
     pass
 
 
+# Tiêu đề truyện tối đa để còn chỗ cho " | Tập N/3" (10 ký tự) trong 70 ký tự
+# hiển thị trọn trên mobile. Gemini vượt thì cắt ở ranh giới từ chứ không ném
+# lỗi -- một tiêu đề 65 ký tự không đáng mất lượt chạy.
+MAX_TITLE_CHARS = 60
+
+
+def clip_title(title: str, max_chars: int = MAX_TITLE_CHARS) -> str:
+    title = " ".join(title.split())
+    if len(title) <= max_chars:
+        return title
+    cut = title[:max_chars]
+    if " " in cut:
+        cut = cut[: cut.rfind(" ")]
+    return cut.rstrip(" ,.;:-–—|")
+
+
 @dataclass
 class SeoCopy:
     title: str
@@ -30,11 +46,14 @@ def build_seo_prompt(script: Script) -> str:
         "hãy sinh nội dung SEO cho video YouTube.\n\n"
         f"Tiêu đề truyện: {script.title}\n"
         f"Thể loại: {script.trope}\n"
-        f"Danh sách chương:\n{headings}\n\n"
+        + (f"Câu hook: {script.hook}\n" if script.hook else "")
+        + f"Danh sách chương:\n{headings}\n\n"
         "Trả lời CHÍNH XÁC theo format sau, mỗi nhãn bắt đầu một dòng mới, "
         "KHÔNG thêm giải thích nào khác:\n\n"
-        "TITLE: <tiêu đề video YouTube, tối đa 70 ký tự, chứa từ khóa chính trong "
-        "60 ký tự đầu, hấp dẫn nhưng không giật tít sai sự thật>\n"
+        "TITLE: <tiêu đề video YouTube, TỐI ĐA 60 KÝ TỰ (sẽ ghép thêm ' | Tập N/3' "
+        "phía sau nên không được dài hơn), bắt đầu bằng cú lật/nỗi oan cụ thể "
+        "(ví dụ 'Mẹ Chồng Quỳ Xin Con Dâu Trả Nợ'), KHÔNG mở bằng 'Truyện Audio:' "
+        "hay tên thể loại, hấp dẫn nhưng không giật tít sai sự thật>\n"
         "DESCRIPTION: <mô tả video 200-300 từ bằng tiếng Việt, câu đầu tiên (khoảng "
         "150 ký tự) chứa từ khóa chính, giới thiệu tự nhiên nội dung truyện, không kể "
         "hết cốt truyện>\n"
@@ -83,7 +102,7 @@ async def generate_seo_copy(
 
     text = response.text.strip()
 
-    title = _parse_label(text, "TITLE")
+    title = clip_title(_parse_label(text, "TITLE").strip().strip("'\""))
     description_draft = _parse_label(text, "DESCRIPTION")
     tags_raw = _parse_label(text, "TAGS")
     hashtags_raw = _parse_label(text, "HASHTAGS")

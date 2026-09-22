@@ -1,33 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { AbsoluteFill, Img, continueRender, delayRender, staticFile } from "remotion";
+import React from "react";
+import { AbsoluteFill, Img, staticFile } from "remotion";
 import type { ShortProps } from "./types";
-
-const FONT_FAMILY = "BeVietnamPro, sans-serif";
-
-// Font đóng gói trong repo, nạp qua FontFace API -- giống hệt ShortVideo.tsx.
-// Với ảnh tĩnh việc này còn quan trọng hơn cả video: video còn khung hình sau
-// để "cứu" nếu font tới trễ, ảnh tĩnh chỉ có đúng một khung, font sai thì cả
-// ảnh sai luôn, không có cơ hội sửa sau.
-const useBeVietnamPro = () => {
-  const [handle] = useState(() => delayRender("Đang nạp font Be Vietnam Pro"));
-
-  useEffect(() => {
-    const font = new FontFace(
-      "BeVietnamPro",
-      `url(${staticFile("assets/fonts/BeVietnamPro-Black.ttf")}) format("truetype")`
-    );
-    font
-      .load()
-      .then((loaded) => {
-        document.fonts.add(loaded);
-        continueRender(handle);
-      })
-      .catch(() => {
-        // Thiếu font thì vẫn render bằng sans-serif, không làm hỏng cả lượt chạy.
-        continueRender(handle);
-      });
-  }, [handle]);
-};
+import { FONT_FAMILY, useBeVietnamPro } from "./fonts";
 
 // Composition ảnh tĩnh cho ảnh bìa của từng phần short. YouTube Shorts tự lấy
 // khung hình trong video làm ảnh bìa, không nhận ảnh tải lên -- ảnh này phục

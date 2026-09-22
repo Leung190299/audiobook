@@ -20,11 +20,16 @@ MAX_PART_SECONDS = 165.0
 # Số trích đoạn ngắn dựng cho mỗi tập. Trước đây stage 7 cắt trọn tập thành ~31
 # phần nối tiếp; nay short chỉ còn là mồi kéo người nghe về video dài, nên 5 cái
 # rải đều có sức mời tốt hơn 31 cái kể hết câu chuyện.
-TEASER_COUNT = 5
+# 22/09/2026: xuống 3. Kênh đo được: trích đoạn 4/5 của một tập 1,2N view trong
+# khi 1/5 của chính tập đó 423 -- ba cái tốt hơn năm cái loãng; và hạn mức
+# YouTube Data API (10.000 đơn vị/ngày, 1.600/lần đăng) chỉ đủ 3 tập + 3 trích
+# đoạn trong một lượt đăng (xem upload/episodes_cli.py).
+TEASER_COUNT = 3
 
 # Vị trí (theo tỉ lệ thời lượng tập) của từng trích đoạn. Bắt đầu sớm ở 5% để
 # lấy được cú hook mở đầu, dừng ở 85% để chừa hẳn đoạn kết -- trích đoạn để mời
-# nghe, không phải để kể nốt.
+# nghe, không phải để kể nốt. Với count khác 5, _teaser_fractions rải đều trong
+# cùng khoảng 5%-85%.
 TEASER_POSITIONS = (0.05, 0.25, 0.45, 0.65, 0.85)
 
 

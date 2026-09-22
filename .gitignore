@@ -17,3 +17,4 @@ _to_delete/
 # Sản phẩm của `npx remotion bundle`; render không cần. Đã từng phình 89GB vì
 # public-dir là repo root nên mỗi lần bundle lại lồng chính nó vào trong.
 remotion/build/
+config/drive_token.json

@@ -61,6 +61,8 @@ def short_thumbnail_path(part_stem: str, output_dir: Path) -> Path:
 # khi đăng. Dùng chung một hằng số để hai bên không trôi nhau -- bài học từ
 # lần series_cli tìm .png còn storage ghi .jpg.
 FULL_EPISODE_PLACEHOLDER = "Nghe trọn tập trên kênh — link ở phần mô tả kênh."
+# Câu hỏi kéo bình luận cho short: ngắn, trả lời được một chữ.
+SHORT_COMMENT_HOOK = "Bạn đoán cô ấy làm gì tiếp? Comment nhé 👇"
 
 SHORT_TAGS = [
     "truyện audio",
@@ -86,7 +88,7 @@ def save_short_metadata(
     title = f"{episode_title} — {part_label}"
     # Không hashtag: YouTube nhận diện Shorts qua khung 9:16 và thời lượng dưới
     # 3 phút, "#shorts" không còn tác dụng; người dùng không muốn dấu # trong mô tả.
-    description = f"{title}.\n{FULL_EPISODE_PLACEHOLDER}"
+    description = f"{title}.\n{FULL_EPISODE_PLACEHOLDER}\n{SHORT_COMMENT_HOOK}"
     video_filename = f"{part_stem}.mp4"
 
     txt_path = output_dir / f"{part_stem}.txt"

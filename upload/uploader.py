@@ -10,6 +10,8 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
+from datetime import datetime
+
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
@@ -123,6 +125,7 @@ def upload_video(
     thumbnail_path: Path | None = None,
     made_for_kids: bool = False,
     default_language: str = "vi",
+    publish_at: "datetime | None" = None,
 ) -> UploadResult:
     if not video_path.exists():
         raise UploadError(f"Không tìm thấy file video: {video_path}")
@@ -143,6 +146,14 @@ def upload_video(
             "selfDeclaredMadeForKids": made_for_kids,
         },
     }
+    if publish_at is not None:
+        # Hẹn giờ công chiếu: YouTube bắt buộc privacyStatus=private kèm
+        # publishAt (ISO 8601, có múi giờ); tới giờ video tự chuyển public.
+        # Đây là cách đăng 3 tập một lượt mà vẫn lên sóng mỗi ngày một tập 20h.
+        if publish_at.tzinfo is None:
+            raise UploadError("publish_at phải có múi giờ (aware datetime).")
+        body["status"]["privacyStatus"] = "private"
+        body["status"]["publishAt"] = publish_at.isoformat()
 
     media = MediaFileUpload(
         str(video_path), chunksize=CHUNK_SIZE, resumable=True, mimetype="video/mp4"
@@ -190,4 +201,47 @@ def set_thumbnail(youtube, video_id: str, thumbnail_path: Path) -> bool:
     except HttpError as exc:
         # Kênh chưa xác minh số điện thoại thì không có quyền đặt thumbnail tuỳ chỉnh.
         print(f"[upload] Không đặt được thumbnail ({exc}). Đặt tay trong YouTube Studio.")
+        return False
+
+
+def post_comment(credentials, video_id: str, text: str) -> str | None:
+    """Đăng một bình luận cấp cao nhất dưới video (scope youtube.force-ssl).
+
+    Trả về id bình luận, hoặc None nếu hỏng -- video đã lên rồi, bình luận hỏng
+    thì dán tay. API không ghim được bình luận; việc ghim vẫn làm tay trong
+    Studio (bình luận của chủ kênh nằm trên cùng, chỉ cần bấm Ghim).
+    """
+    youtube = build("youtube", "v3", credentials=credentials, cache_discovery=False)
+    try:
+        response = youtube.commentThreads().insert(
+            part="snippet",
+            body={
+                "snippet": {
+                    "videoId": video_id,
+                    "topLevelComment": {"snippet": {"textOriginal": text[:9000]}},
+                }
+            },
+        ).execute()
+        return response.get("id")
+    except HttpError as exc:
+        print(f"[upload] Không đăng được bình luận ghim cho {video_id} ({exc}). Dán tay trong Studio.")
+        return None
+
+
+def update_description(credentials, video_id: str, description: str) -> bool:
+    """Đổi mô tả một video đã đăng, giữ nguyên các trường snippet còn lại.
+    videos.update đòi gửi cả snippet (title, categoryId...), nên phải đọc về trước."""
+    youtube = build("youtube", "v3", credentials=credentials, cache_discovery=False)
+    try:
+        current = youtube.videos().list(part="snippet", id=video_id).execute()
+        items = current.get("items") or []
+        if not items:
+            print(f"[upload] Không tìm thấy video {video_id} để cập nhật mô tả.")
+            return False
+        snippet = items[0]["snippet"]
+        snippet["description"] = sanitize_description(description)
+        youtube.videos().update(part="snippet", body={"id": video_id, "snippet": snippet}).execute()
+        return True
+    except HttpError as exc:
+        print(f"[upload] Không cập nhật được mô tả {video_id} ({exc}).")
         return False

@@ -25,6 +25,15 @@ export interface VideoProps {
   audioPath: string;
   sampleRate: number;
   chapters: ChapterProps[];
+  // Các trường dưới chỉ có khi props do episodes/props_builder.py dựng (một
+  // TẬP 15-20 phút). video/props_builder.py (bản full) không đặt -> undefined,
+  // MainVideo coi như 0/rỗng và render y như trước.
+  episodeLabel?: string; // "TẬP 1/3", góc trên bên phải
+  hookText?: string; // câu hook, hiện trong cold open
+  coldOpenSeconds?: number; // độ dài cold open ở đầu (chương giả index 0)
+  outroSeconds?: number; // card kết sau khi hết tiếng
+  outroTitle?: string;
+  outroText?: string;
 }
 
 export interface ShortCaption {

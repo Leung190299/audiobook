@@ -130,7 +130,7 @@ def test_moi_trich_doan_deu_moi_ve_video_dai(tmp_path: Path):
     for number in (1, 3, 5):
         props = _build(tmp_path / f"n{number}", part=_part(number=number), total_parts=5)
 
-        assert props["ctaText"] == "Nghe full trên kênh"
+        assert props["ctaText"] == "Nghe trọn tập 1 trên kênh"
 
 
 def test_part_label_dinh_dang_trich_doan(tmp_path: Path):

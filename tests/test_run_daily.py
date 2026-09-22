@@ -27,10 +27,11 @@ FAKE_STAGE = Path(__file__).resolve().parent / "fake_stage.sh"
 EXPECTED_SCRIPT = "output/scripts/me_chong_giau_cua-20260813T011000Z.json"
 EXPECTED_AUDIO_JSON = "output/audio/me_chong_giau_cua-20260813T012500Z.json"
 EXPECTED_IMAGES_JSON = "output/images/me_chong_giau_cua-20260813T013500Z.json"
-EXPECTED_VIDEO = "output/video/me_chong_giau_cua-20260813T015000Z.mp4"
-EXPECTED_RENAMED = "output/video/me-chong-giau-so-do-truyen-audio.mp4"
+EXPECTED_MANIFEST = "output/episodes/me_chong_giau_cua-20260813T015000Z-episodes.json"
+EXPECTED_RENAMED = "output/episodes/me-chong-giau-so-do-tap-1.mp4"
 EXPECTED_THUMBNAIL = "output/thumbnails/me_chong_giau_cua-20260813T015100Z.png"
-EXPECTED_METADATA_JSON = "output/metadata/me_chong_giau_cua-20260813T015200Z.json"
+EXPECTED_METADATA_INDEX = "output/metadata/me_chong_giau_cua-20260813T015000Z-episodes.json"
+EXPECTED_SHORTS_PREFIX = "output/shorts/me_chong_giau_cua-20260813T015300Z"
 EXPECTED_SHORT_COUNT = "2"
 
 
@@ -74,10 +75,11 @@ def _run(tmp_path: Path, args: list[str] | None = None, **env_overrides) -> Run:
 
     # TITLE= đọc title từ file metadata JSON thật (dùng cho notify.cli), nên phải
     # dựng sẵn file đó.
-    metadata_path = root / EXPECTED_METADATA_JSON
+    metadata_path = root / EXPECTED_METADATA_INDEX
     metadata_path.parent.mkdir(parents=True, exist_ok=True)
     metadata_path.write_text(
-        json.dumps({"title": "Mẹ chồng giấu sổ đỏ"}, ensure_ascii=False), encoding="utf-8"
+        json.dumps({"story_title": "Mẹ chồng giấu sổ đỏ", "episodes": []}, ensure_ascii=False),
+        encoding="utf-8",
     )
 
     calls_file = tmp_path / "calls.log"
@@ -108,17 +110,17 @@ def test_mac_dinh_dung_video_khong_dang_youtube(tmp_path: Path):
     assert run.exit_code == 0, run.proc.stderr
     for module in [
         "trend.cli", "scripts.cli", "tts.cli", "images.cli",
-        "video.cli", "thumbnail.cli", "metadata.cli", "shorts.cli",
+        "episodes.cli", "thumbnail.cli", "metadata.cli", "shorts.cli",
     ]:
         assert run.called(module), f"chưa gọi {module}\n{run.calls}"
     # Đăng YouTube phải là việc tự chọn, không được tự động chạy.
-    assert not run.called("upload.cli")
+    assert not run.called("upload.episodes_cli")
 
 
 def test_co_co_upload_thi_chay_them_stage_8(tmp_path: Path):
     run = _run(tmp_path, ["--upload"])
     assert run.exit_code == 0, run.proc.stderr
-    assert run.called("upload.cli")
+    assert run.called("upload.episodes_cli")
 
 
 def test_y_tuong_va_slug_tu_stage_0_duoc_truyen_sang_stage_1(tmp_path: Path):
@@ -131,8 +133,8 @@ def test_y_tuong_va_slug_tu_stage_0_duoc_truyen_sang_stage_1(tmp_path: Path):
 def test_stage_4_nhan_dung_3_duong_dan_theo_dung_thu_tu(tmp_path: Path):
     # Đây là chỗ dễ nhầm nhất: script JSON, TTS JSON, images JSON — không phải .wav/.png.
     run = _run(tmp_path)
-    assert run.call_for("video.cli") == (
-        f"video.cli {EXPECTED_SCRIPT} {EXPECTED_AUDIO_JSON} {EXPECTED_IMAGES_JSON}"
+    assert run.call_for("episodes.cli") == (
+        f"episodes.cli {EXPECTED_SCRIPT} {EXPECTED_AUDIO_JSON} {EXPECTED_IMAGES_JSON}"
     )
 
 
@@ -142,11 +144,13 @@ def test_stage_2_va_3_deu_nhan_script_cua_stage_1_khong_nham_lan_metadata(tmp_pa
     assert run.call_for("images.cli") == f"images.cli {EXPECTED_SCRIPT} {EXPECTED_AUDIO_JSON}"
 
 
-def test_stage_6_nhan_video_goc_chu_khong_phai_ten_da_doi(tmp_path: Path):
-    # Stage 6 mới là cái đổi tên, nên nó phải nhận tên gốc từ stage 4.
+def test_stage_5_va_6_nhan_manifest_cua_stage_4(tmp_path: Path):
     run = _run(tmp_path)
+    assert run.call_for("thumbnail.cli") == (
+        f"thumbnail.cli {EXPECTED_SCRIPT} --episodes {EXPECTED_MANIFEST}"
+    )
     assert run.call_for("metadata.cli") == (
-        f"metadata.cli {EXPECTED_SCRIPT} {EXPECTED_AUDIO_JSON} {EXPECTED_VIDEO}"
+        f"metadata.cli {EXPECTED_SCRIPT} --episodes {EXPECTED_MANIFEST}"
     )
 
 
@@ -181,16 +185,19 @@ def test_so_phan_short_duoc_ghi_vao_log(tmp_path: Path):
     # chuỗi đó vẫn khớp kể cả khi regex parse hỏng hoàn toàn. Dòng tóm tắt do
     # run_daily.sh tự ghi ("Short: 2 phần trong ...") không trùng với dòng thô đó,
     # nên assert này chỉ pass khi SHORT_COUNT thật sự được parse ra "2".
-    assert f"Short: {EXPECTED_SHORT_COUNT} phần trong output/shorts" in run_log
+    assert f"Short: {EXPECTED_SHORT_COUNT} trích đoạn trong output/shorts" in run_log
+    assert "Tập: 3 tập trong output/episodes" in run_log
 
 
-def test_stage_8_upload_ten_video_da_doi_chu_khong_phai_ten_goc(tmp_path: Path):
-    # Tên gốc không còn tồn tại sau stage 6 — dùng nhầm là upload file không có thật.
+def test_stage_8_upload_nhan_danh_sach_tap_va_prefix_short(tmp_path: Path):
     run = _run(tmp_path, ["--upload"])
-    call = run.call_for("upload.cli")
-    assert EXPECTED_RENAMED in call
-    assert EXPECTED_VIDEO not in call
-    assert f"--thumbnail {EXPECTED_THUMBNAIL}" in call
+    call = run.call_for("upload.episodes_cli")
+    assert call == f"upload.episodes_cli {EXPECTED_METADATA_INDEX} --shorts-prefix {EXPECTED_SHORTS_PREFIX}"
+
+
+def test_short_hong_thi_upload_khong_co_prefix_short(tmp_path: Path):
+    run = _run(tmp_path, ["--upload"], FAKE_FAIL_MODULE="shorts.cli")
+    assert run.call_for("upload.episodes_cli") == f"upload.episodes_cli {EXPECTED_METADATA_INDEX}"
 
 
 def test_thong_bao_khi_chi_dung_video_mang_ten_file_khong_mang_link(tmp_path: Path):
@@ -208,10 +215,11 @@ def test_thong_bao_khi_co_upload_mang_them_link_youtube(tmp_path: Path):
     assert "--url https://youtu.be/FAKE12345" in call
 
 
-def test_stage_6_khong_doi_ten_thi_dung_lai_ten_goc(tmp_path: Path):
+def test_stage_6_khong_doi_ten_thi_coi_nhu_hong(tmp_path: Path):
+    # Chế độ tập luôn đổi tên; thiếu dòng đó là stage 6 in sai định dạng.
     run = _run(tmp_path, ["--upload"], FAKE_NO_RENAME="1")
-    assert run.exit_code == 0
-    assert EXPECTED_VIDEO in run.call_for("upload.cli")
+    assert run.exit_code == 1
+    assert not run.called("upload.episodes_cli")
 
 
 # --- các nhánh rẽ -------------------------------------------------------------
@@ -228,7 +236,7 @@ def test_co_no_upload_cu_van_chay_duoc_cho_tuong_thich(tmp_path: Path):
     run = _run(tmp_path, ["--no-upload"])
     assert run.exit_code == 0
     assert run.called("metadata.cli")
-    assert not run.called("upload.cli")
+    assert not run.called("upload.episodes_cli")
 
 
 def test_tham_so_la_thi_bao_loi_ngay(tmp_path: Path):
@@ -246,12 +254,12 @@ def test_tham_so_la_thi_bao_loi_ngay(tmp_path: Path):
         ("trend.cli", "Stage 0"),
         ("scripts.cli", "Stage 1"),
         ("tts.cli", "Stage 2"),
-        ("video.cli", "Stage 4"),
-        ("upload.cli", "Stage 8"),
+        ("episodes.cli", "Stage 4"),
+        ("upload.episodes_cli", "Stage 8"),
     ],
 )
 def test_stage_hong_thi_dung_ngay_va_bao_ngay(tmp_path: Path, module, stage_name):
-    args = ["--upload"] if module == "upload.cli" else None
+    args = ["--upload"] if module == "upload.episodes_cli" else None
     run = _run(tmp_path, args, FAKE_FAIL_MODULE=module)
     assert run.exit_code == 1
     assert stage_name in run.stdout
@@ -269,7 +277,7 @@ def test_stage_hong_thi_dung_ngay_va_bao_ngay(tmp_path: Path, module, stage_name
 
     # Không được chạy tiếp stage sau khi đã hỏng.
     order = ["trend.cli", "scripts.cli", "tts.cli", "images.cli",
-             "video.cli", "thumbnail.cli", "metadata.cli", "shorts.cli", "upload.cli"]
+             "episodes.cli", "thumbnail.cli", "metadata.cli", "shorts.cli", "upload.episodes_cli"]
     for later in order[order.index(module) + 1:]:
         assert not run.called(later), f"vẫn chạy {later} sau khi {module} hỏng"
 
@@ -323,7 +331,7 @@ def test_co_upload_va_short_hong_thi_van_chay_stage_8(tmp_path: Path):
     assert "CẢNH BÁO" in run.stdout
 
     # Upload phải chạy dù short hỏng.
-    assert run.called("upload.cli")
+    assert run.called("upload.episodes_cli")
     # Báo thành công, không báo lỗi.
     assert not any(c.startswith("notify.cli failure") for c in run.calls)
     assert any(c.startswith("notify.cli success") for c in run.calls)
@@ -340,7 +348,7 @@ def test_moi_stage_ghi_log_rieng_de_lan_lai_khi_hong(tmp_path: Path):
     files = sorted(p.name for p in log_dirs[0].iterdir())
     assert files == [
         "00-trend.log", "01-script.log", "02-tts.log", "03-images.log",
-        "04-video.log", "05-thumbnail.log", "06-metadata.log", "07-short.log",
+        "04-episodes.log", "05-thumbnail.log", "06-metadata.log", "07-short.log",
         "run.log",
     ]
 

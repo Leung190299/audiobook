@@ -86,7 +86,7 @@ def build_short_props(
     # Mọi trích đoạn đều mời về video dài. Trước đây card cuối ghi "Xem phần N+1"
     # vì short là một series nối tiếp; nay short chỉ là mồi, nên chỉ có một đích
     # duy nhất đáng dẫn tới là tập đầy đủ trên kênh.
-    cta_text = "Nghe full trên kênh"
+    cta_text = "Nghe trọn tập 1 trên kênh"
 
     captions = [
         {

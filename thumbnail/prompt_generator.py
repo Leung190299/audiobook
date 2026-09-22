@@ -32,8 +32,10 @@ def build_thumbnail_prompt_request(script: Script) -> str:
         f"Danh sách chương:\n{headings}\n\n"
         "Trả lời CHÍNH XÁC theo format sau, mỗi nhãn bắt đầu một dòng mới, "
         "KHÔNG thêm giải thích nào khác:\n\n"
-        "HOOK: <câu hook 2-4 từ tiếng Việt, IN HOA, giật gân nhưng đúng nội dung "
-        "truyện, phù hợp làm chữ nổi bật trên thumbnail>\n"
+        "HOOK: <ĐÚNG 2-4 từ tiếng Việt, IN HOA, không dấu câu. Là cú lật hoặc nỗi "
+        "oan lớn nhất, đọc được trong 1 giây trên màn hình điện thoại. Ví dụ tốt: "
+        "'MẸ CHỒNG QUỲ XIN', 'TRÁO PHÔI 20 NĂM', 'KÝ ĐƠN RỒI LẬT'. Ví dụ xấu: câu "
+        "dài, từ nối, tiêu đề truyện>\n"
         "VISUAL: <mô tả bằng tiếng Anh, 1-2 câu, một cảnh cận cảnh nhân vật thể "
         "hiện cảm xúc chủ đạo/cao trào của truyện (ví dụ: shocked expression, "
         "triumphant smirk, tearful determination) - KHÔNG dùng tên riêng, KHÔNG "
@@ -85,7 +87,7 @@ async def generate_thumbnail_prompt(
 
     text = response.text.strip()
 
-    hook_text = _parse_label(text, "HOOK")
+    hook_text = _parse_label(text, "HOOK").strip().strip("'\"")
     visual_description = _parse_label(text, "VISUAL")
 
     return ThumbnailPrompt(hook_text=hook_text, visual_description=visual_description)

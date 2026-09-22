@@ -5,13 +5,24 @@ import { Avatar } from "./Avatar";
 import { SceneBackground } from "./SceneBackground";
 import { Waveform } from "./Waveform";
 import { Caption } from "./Caption";
+import { FONT_FAMILY, useBeVietnamPro } from "./fonts";
 
 // Dissolve giữa hai cảnh. Dài hơn khoảng nghỉ 0,5s giữa chương (gap_seconds ở
 // config/voice.yaml) là cố ý: ảnh tan dần qua ranh giới chương nhìn mềm hơn
 // là cắt đúng lúc tiếng ngắt.
 const CROSSFADE_SECONDS = 1.0;
 
-export const MainVideo: React.FC<VideoProps> = ({ audioPath, chapters }) => {
+export const MainVideo: React.FC<VideoProps> = ({
+  audioPath,
+  chapters,
+  episodeLabel,
+  hookText,
+  coldOpenSeconds = 0,
+  outroSeconds = 0,
+  outroTitle,
+  outroText,
+}) => {
+  useBeVietnamPro();
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const crossfadeFrames = Math.round(CROSSFADE_SECONDS * fps);
@@ -20,6 +31,10 @@ export const MainVideo: React.FC<VideoProps> = ({ audioPath, chapters }) => {
   const currentChapter = chapters.find(
     (c) => seconds >= c.startSeconds && seconds < c.endSeconds
   );
+  const lastChapter = chapters[chapters.length - 1];
+  const contentEnd = lastChapter ? lastChapter.endSeconds : 0;
+  const inColdOpen = coldOpenSeconds > 0 && seconds < coldOpenSeconds;
+  const inOutro = outroSeconds > 0 && seconds >= contentEnd;
 
   // Trải mọi cảnh của mọi chương thành một dãy, đánh số liên tục để chọn kiểu
   // chuyển động luân phiên trên toàn tập chứ không reset mỗi chương.
@@ -34,11 +49,12 @@ export const MainVideo: React.FC<VideoProps> = ({ audioPath, chapters }) => {
         // của chính cảnh này: giữa hai chương có khoảng nghỉ tiếng 0,5s (scene
         // N kết thúc ở T, scene N+1 bắt đầu ở T+0,5), nên với endFrame cũ cả
         // hai lớp đều mờ nửa chừng quanh T+0,25 (~6% đen lộ ra). Giữ lớp trước
-        // đục kín qua hết khoảng nghỉ đó; cảnh cuối cùng của tập không có cảnh
-        // kế tiếp nên vẫn dùng endSeconds của chính nó. Kéo dài pan/zoom thêm
-        // 0,5s trên một cảnh ~50s là không nhận ra bằng mắt.
+        // đục kín qua hết khoảng nghỉ đó; cảnh cuối cùng kéo qua cả card kết
+        // (nếu có) để nền vẫn còn dưới card thay vì tắt đen.
         const next = scenes[i + 1];
-        const endSeconds = next ? next.scene.startSeconds : scene.endSeconds;
+        const endSeconds = next
+          ? next.scene.startSeconds
+          : scene.endSeconds + outroSeconds;
         return (
           <SceneBackground
             key={`${chapterIndex}-${scene.number}`}
@@ -60,7 +76,7 @@ export const MainVideo: React.FC<VideoProps> = ({ audioPath, chapters }) => {
       />
       <Avatar />
       {audioPath ? <Waveform audioPath={audioPath} /> : null}
-      {currentChapter ? (
+      {currentChapter && !inColdOpen ? (
         <div
           style={{
             position: "absolute",
@@ -74,7 +90,84 @@ export const MainVideo: React.FC<VideoProps> = ({ audioPath, chapters }) => {
           {currentChapter.heading}
         </div>
       ) : null}
-      <Caption chapters={chapters} />
+      {episodeLabel ? (
+        <div
+          style={{
+            position: "absolute",
+            top: 20,
+            right: 24,
+            color: "#FFD84D",
+            fontFamily: FONT_FAMILY,
+            fontWeight: 900,
+            fontSize: 26,
+            letterSpacing: 2,
+            textShadow: "0 3px 10px rgba(0,0,0,0.85)",
+          }}
+        >
+          {episodeLabel}
+        </div>
+      ) : null}
+      {inColdOpen && hookText ? (
+        // Cold open: câu hook đè lên đoạn cao trào, người xem biết ngay truyện
+        // này về cái gì trước khi vào chương 1.
+        <div
+          style={{
+            position: "absolute",
+            top: 230,
+            left: "10%",
+            right: "10%",
+            textAlign: "center",
+            color: "#FFD84D",
+            fontFamily: FONT_FAMILY,
+            fontWeight: 900,
+            fontSize: 44,
+            lineHeight: 1.15,
+            textShadow: "0 4px 14px rgba(0,0,0,0.9)",
+          }}
+        >
+          {hookText}
+        </div>
+      ) : null}
+      {!inOutro ? <Caption chapters={chapters} /> : null}
+      {inOutro ? (
+        <AbsoluteFill
+          style={{
+            backgroundColor: "rgba(0,0,0,0.85)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 60,
+            gap: 28,
+          }}
+        >
+          <div
+            style={{
+              color: "#fff",
+              fontFamily: FONT_FAMILY,
+              fontWeight: 900,
+              fontSize: 40,
+              lineHeight: 1.2,
+              textAlign: "center",
+            }}
+          >
+            {outroTitle}
+          </div>
+          {(outroText ?? "").split("\n").map((line, i) => (
+            <div
+              key={i}
+              style={{
+                color: i === 0 && (outroText ?? "").includes("\n") ? "#fff" : "#FFD84D",
+                fontFamily: FONT_FAMILY,
+                fontWeight: 700,
+                fontSize: 30,
+                lineHeight: 1.3,
+                textAlign: "center",
+              }}
+            >
+              {line}
+            </div>
+          ))}
+        </AbsoluteFill>
+      ) : null}
       {audioPath ? <Audio src={staticFile(audioPath)} /> : null}
     </AbsoluteFill>
   );
