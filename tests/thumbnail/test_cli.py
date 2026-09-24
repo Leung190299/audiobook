@@ -1,3 +1,4 @@
+import pytest
 # tests/thumbnail/test_cli.py
 import json
 from pathlib import Path
@@ -100,3 +101,35 @@ async def test_run_voi_manifest_sinh_them_anh_moi_tap(tmp_path, monkeypatch, cap
     assert any(f.endswith("-ep-02.png") for f in files)
     out = capsys.readouterr().out
     assert "Đã lưu thumbnail:" in out and "Thumbnail tập 3/3:" in out
+
+
+# --- từ khoá không khớp tiêu đề thì báo lỗi, không tự đoán (spec 24/09 §4) ---
+
+
+def test_kiem_tra_tu_khoa_khong_khop_thi_bao_loi_neu_ro_tu_khoa():
+    from thumbnail.cli import ThumbnailInputError, check_thumb_keywords
+
+    with pytest.raises(ThumbnailInputError) as exc:
+        check_thumb_keywords("Bác Cả Đòi Chia Đất", ["Livestream Luôn"])
+
+    msg = str(exc.value)
+    assert "Livestream Luôn" in msg  # nêu đúng từ khoá hỏng
+    assert "Bác Cả Đòi Chia Đất" in msg  # và chữ trên thumbnail để đối chiếu
+
+
+def test_kiem_tra_tu_khoa_khop_thi_khong_sao():
+    from thumbnail.cli import check_thumb_keywords
+
+    check_thumb_keywords("Bác Cả Đòi Chia Đất", ["Chia Đất", "Bác Cả"])
+
+
+def test_kiem_tra_khong_phan_biet_hoa_thuong():
+    from thumbnail.cli import check_thumb_keywords
+
+    check_thumb_keywords("Bác Cả Đòi Chia Đất", ["chia đất"])
+
+
+def test_khong_co_tu_khoa_thi_bo_qua():
+    from thumbnail.cli import check_thumb_keywords
+
+    check_thumb_keywords("Bác Cả Đòi Chia Đất", [])

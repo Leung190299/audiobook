@@ -55,7 +55,31 @@ async def _load_gemini_client() -> GeminiClient:
     return client
 
 
+class ThumbnailInputError(Exception):
+    pass
+
+
+def check_thumb_keywords(thumb_text: str, keywords) -> None:
+    """Mọi từ khoá phải là chuỗi con của chữ trên thumbnail.
+
+    Nhánh --topic đã lọc sẵn qua clean_thumb_fields, nhưng nhánh kho lấy thẳng
+    thumb_keywords từ data/story_bank.json. Từ khoá không khớp thì trước đây
+    compose_sticker_thumbnail lặng lẽ bỏ tô màu, ra thumbnail nhạt nhoà mà không
+    ai biết -- spec 24/09 §4 yêu cầu báo lỗi rõ thay vì tự đoán.
+    """
+    lowered = " ".join((thumb_text or "").split()).lower()
+    missing = [k for k in (keywords or []) if k and k.lower() not in lowered]
+    if missing:
+        raise ThumbnailInputError(
+            "Từ khoá thumbnail không nằm trong chữ trên thumbnail: "
+            + ", ".join(repr(k) for k in missing)
+            + f". Chữ trên thumbnail: {thumb_text!r}. "
+            "Sửa thumb_keywords trong data/story_bank.json cho khớp tiêu đề."
+        )
+
+
 def _run_sticker(script: Script, manifest: dict | None) -> None:
+    check_thumb_keywords(script.thumb_text, script.thumb_keywords)
     topic = TOPICS.get(script.topic)
     palette = topic.thumb_palette if topic else FALLBACK_PALETTE
     poses = (topic.mascot_pose_hints if topic else ()) or FALLBACK_POSES
