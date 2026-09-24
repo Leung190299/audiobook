@@ -11,6 +11,8 @@
 #   FAKE_GARBAGE_MODULE module này exit 0 nhưng in output không parse được
 #   FAKE_NO_RENAME      metadata.cli không in dòng "Video tập N đã đổi tên"
 #   FAKE_NO_THUMB       upload.cli báo thumbnail chưa đặt
+#   FAKE_NO_STORY       scripts.story_bank --pick thoát 3 (kho hết truyện)
+#   FAKE_STORY_ID       id mà scripts.story_bank --pick in ra (mặc định 42)
 
 set -u
 
@@ -26,6 +28,22 @@ is_full=0
 [[ "$all_args" == *"--format full"* || "$all_args" == *"-full.json"* ]] && is_full=1
 
 case "$module" in
+  scripts.story_bank)
+    # --pick in đúng một id (hoặc thoát 3 khi kho hết); --upcoming in lịch.
+    if [[ " $* " == *" --pick "* ]]; then
+      [[ -n "${FAKE_NO_STORY:-}" ]] && exit 3
+      echo "${FAKE_STORY_ID:-42}"
+      exit 0
+    fi
+    days=7
+    for ((i = 1; i <= $#; i++)); do
+      [[ "${!i}" == "--upcoming" ]] && { j=$((i + 1)); days="${!j}"; }
+    done
+    for ((d = 1; d <= days; d++)); do
+      echo "2026-09-2$d      #$((40 + d))   A  ho_hang_viet       Truyện giả số $d"
+    done
+    exit 0
+    ;;
   trend.cli)
     echo "Đã lưu ý tưởng: output/ideas/me_chong_giau_cua-20260813T010000Z.txt"
     echo "JSON: output/ideas/me_chong_giau_cua-20260813T010000Z.json"
@@ -34,7 +52,7 @@ case "$module" in
     echo "Bám trend: chủ đề tranh chấp tài sản đang lên"
     ;;
   scripts.cli)
-    if [[ "$all_args" == *"--topic"* ]]; then
+    if [[ "$all_args" == *"--topic"* || "$all_args" == *"--story"* ]]; then
       echo "Chủ đề: ${FAKE_TOPIC:-ho_hang_viet}"
       echo "Bối cảnh: Tết về quê, cả họ tra hỏi lương thưởng"
     fi

@@ -382,11 +382,12 @@ def test_moi_stage_ghi_log_rieng_de_lan_lai_khi_hong(tmp_path: Path):
 # --- 24/09/2026: chủ đề + định dạng FULL (mặc định mới) ------------------------
 
 
-def test_mac_dinh_la_topic_auto_va_full_khong_bat_trend(tmp_path: Path):
+def test_mac_dinh_la_story_auto_va_full_khong_bat_trend(tmp_path: Path):
+    # Từ 24/09: không cờ nào -> lấy truyện từ kho, không còn --topic auto.
     run = _run(tmp_path, legacy=False)
     assert run.exit_code == 0, run.proc.stderr + run.stdout
     assert not run.called("trend.cli")
-    assert run.call_for("scripts.cli") == "scripts.cli --topic auto --format full"
+    assert run.call_for("scripts.cli") == "scripts.cli --story 42 --format full"
     assert run.call_for("episodes.cli") == (
         f"episodes.cli {EXPECTED_SCRIPT} {EXPECTED_AUDIO_JSON} {EXPECTED_IMAGES_JSON} --format full"
     )
@@ -420,8 +421,9 @@ def test_topic_chi_dinh_va_format_tu_env(tmp_path: Path):
     assert "--slug bo_me_trong_sinh" in run.call_for("notify.cli")
 
 
-def test_env_audiobook_topic_thay_auto(tmp_path: Path):
-    run = _run(tmp_path, legacy=False, AUDIOBOOK_TOPIC="nghe_la_hong_bien")
+def test_env_audiobook_topic_thay_auto_khi_kho_het_truyen(tmp_path: Path):
+    # AUDIOBOOK_TOPIC chỉ còn tác dụng ở nhánh dự phòng khi kho hết truyện.
+    run = _run(tmp_path, legacy=False, AUDIOBOOK_TOPIC="nghe_la_hong_bien", FAKE_NO_STORY="1")
     assert run.call_for("scripts.cli") == "scripts.cli --topic nghe_la_hong_bien --format full"
 
 
@@ -447,6 +449,54 @@ def test_doc_format_va_topic_tu_file_env(tmp_path: Path):
         legacy=False,
         dotenv='SECURE_1PSID=x\nAUDIOBOOK_FORMAT=episodes  # chia tập\nAUDIOBOOK_TOPIC="nghe_la_hong_bien"\n',
         FAKE_TOPIC="nghe_la_hong_bien",
+        FAKE_NO_STORY="1",
     )
     assert run.exit_code == 0, run.proc.stderr + run.stdout
     assert run.call_for("scripts.cli") == "scripts.cli --topic nghe_la_hong_bien --format episodes"
+
+
+# --- kho truyện: --story, mặc định mới, --dry-run-pick ---
+
+
+def test_khong_co_co_nao_thi_lay_truyen_tu_kho(tmp_path: Path):
+    run = _run(tmp_path, legacy=False)
+
+    assert run.exit_code == 0, run.proc.stderr
+    assert run.call_for("scripts.cli").startswith("scripts.cli --story 42")
+    assert "Truyện từ kho: #42" in run.stdout
+
+
+def test_story_chi_dinh_khong_goi_bo_chon(tmp_path: Path):
+    run = _run(tmp_path, ["--story", "7"], legacy=False)
+
+    assert run.exit_code == 0, run.proc.stderr
+    assert run.call_for("scripts.cli").startswith("scripts.cli --story 7")
+    # Chỉ định thẳng thì không cần hỏi kho chọn hộ.
+    assert not any(c.startswith("scripts.story_bank --pick") for c in run.calls)
+
+
+def test_kho_het_truyen_thi_roi_ve_topic_auto_va_canh_bao(tmp_path: Path):
+    run = _run(tmp_path, legacy=False, FAKE_NO_STORY="1")
+
+    assert run.exit_code == 0, run.proc.stderr
+    assert "CẢNH BÁO" in run.stdout and "kho truyện" in run.stdout
+    assert run.call_for("scripts.cli").startswith("scripts.cli --topic auto")
+
+
+def test_dry_run_pick_chi_in_lich_roi_thoat(tmp_path: Path):
+    run = _run(tmp_path, ["--dry-run-pick"], legacy=False)
+
+    assert run.exit_code == 0, run.proc.stderr
+    assert "Lịch truyện" in run.stdout
+    assert "Truyện giả số 1" in run.stdout and "Truyện giả số 7" in run.stdout
+    # Không dựng gì: không stage nào được gọi ngoài chính bộ xem trước.
+    assert not run.called("scripts.cli")
+    assert not run.called("tts.cli")
+    assert not run.called("notify.cli")
+
+
+def test_story_va_topic_loai_tru_nhau(tmp_path: Path):
+    run = _run(tmp_path, ["--story", "7", "--topic", "ho_hang_viet"], legacy=False)
+
+    assert run.exit_code == 2
+    assert "loại trừ nhau" in run.proc.stderr

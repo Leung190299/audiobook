@@ -12,10 +12,11 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
-from scripts.topics import topic_for_date
+from scripts.topics import parse_rotation, topic_for_date
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_BANK_PATH = ROOT / "data" / "story_bank.json"
@@ -29,6 +30,10 @@ TET_TIMING_MARK = "Trước Tết"
 
 # Thứ tự xét ưu tiên. Hết A mới sang B, hết B mới đụng C.
 PRIORITY_ORDER = ("A", "B", "C")
+
+# Giờ lên sóng cố định của kênh; "ngày phát sóng kế tiếp" tính theo múi giờ này.
+CHANNEL_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
+PUBLISH_HOUR = 20
 
 
 class StoryBankError(Exception):
@@ -253,3 +258,71 @@ def pick_upcoming(
             picked.add(story.id)
         out.append((day, story))
     return out
+
+
+def next_air_date(now: datetime | None = None) -> date:
+    """Ngày phát sóng kế tiếp: hôm nay nếu chưa tới 20h, không thì ngày mai.
+
+    `--story auto` chọn truyện cho NGÀY LÊN SÓNG chứ không phải ngày dựng, vì
+    lượt chạy 09:00 hôm nay tạo video phát 20h cùng ngày, còn lượt chạy lúc 22h
+    thì video phát tối mai.
+    """
+    now = now.astimezone(CHANNEL_TZ) if now else datetime.now(CHANNEL_TZ)
+    today = now.date()
+    return today if now.hour < PUBLISH_HOUR else today + timedelta(days=1)
+
+
+def _format_row(day: date, story: "Story | None") -> str:
+    if story is None:
+        return f"{day}  (kho không còn truyện phù hợp)"
+    mark = "hẹn" if story.publish_date == day else "   "
+    return (
+        f"{day}  {mark}  #{story.id:<3} {story.priority}  "
+        f"{story.topic:<18} {story.title}"
+    )
+
+
+def main(argv: "list[str] | None" = None) -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Xem trước hoặc chọn truyện từ kho, không dựng gì."
+    )
+    parser.add_argument("--upcoming", type=int, default=None, metavar="N",
+                        help="In lịch N ngày tới rồi thoát")
+    parser.add_argument("--pick", action="store_true",
+                        help="In đúng id truyện cho --date (rỗng + mã thoát 3 nếu hết)")
+    parser.add_argument("--date", default=None, help="YYYY-MM-DD; mặc định ngày phát sóng kế tiếp")
+    parser.add_argument("--from", dest="start", default=None, help="YYYY-MM-DD cho --upcoming")
+    parser.add_argument("--bank", type=Path, default=DEFAULT_BANK_PATH)
+    parser.add_argument("--state", type=Path, default=DEFAULT_STATE_PATH)
+    parser.add_argument("--rotation", default=None,
+                        help="Danh sách chủ đề cách nhau dấu phẩy; mặc định lấy .env")
+    args = parser.parse_args(argv)
+
+    rotation = parse_rotation(args.rotation) if args.rotation else None
+
+    try:
+        if args.upcoming:
+            start = date.fromisoformat(args.start) if args.start else next_air_date()
+            for day, story in pick_upcoming(
+                start, args.upcoming, path=args.bank, state_path=args.state, rotation=rotation
+            ):
+                print(_format_row(day, story))
+            return 0
+
+        day = date.fromisoformat(args.date) if args.date else next_air_date()
+        story = pick_story(day, path=args.bank, state_path=args.state, rotation=rotation)
+        if story is None:
+            # Mã thoát riêng để run_daily.sh phân biệt "hết truyện" (rơi về
+            # --topic auto) với lỗi thật (kho hỏng, thiếu file).
+            return 3
+        print(story.id)
+        return 0
+    except StoryBankError as exc:
+        print(f"Lỗi kho truyện: {exc}", file=__import__("sys").stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

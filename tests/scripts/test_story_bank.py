@@ -144,3 +144,58 @@ def test_pick_upcoming_tra_lich_nhieu_ngay(bank, tmp_path):
     # Không lặp truyện giữa các ngày trong cùng một lần xem trước.
     ids = [s.id for _, s in lich if s]
     assert len(ids) == len(set(ids))
+
+
+# --- ngày phát sóng kế tiếp + CLI xem trước ---
+
+
+def test_next_air_date_truoc_20h_thi_la_hom_nay():
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    now = datetime(2026, 9, 28, 14, 30, tzinfo=ZoneInfo("Asia/Ho_Chi_Minh"))
+    assert story_bank.next_air_date(now) == date(2026, 9, 28)
+
+
+def test_next_air_date_sau_20h_thi_la_ngay_mai():
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    now = datetime(2026, 9, 28, 20, 0, tzinfo=ZoneInfo("Asia/Ho_Chi_Minh"))
+    assert story_bank.next_air_date(now) == date(2026, 9, 29)
+
+
+def test_cli_upcoming_in_lich_va_thoat_0(bank, tmp_path, capsys):
+    code = story_bank.main(
+        ["--upcoming", "2", "--from", "2026-09-28",
+         "--bank", str(bank), "--state", str(tmp_path / "st.json"),
+         "--rotation", "ho_hang_viet"]
+    )
+
+    out = capsys.readouterr().out
+    assert code == 0
+    assert "2026-09-28" in out and "A1" in out
+
+
+def test_cli_pick_in_dung_mot_id(bank, tmp_path, capsys):
+    code = story_bank.main(
+        ["--pick", "--date", "2026-10-16", "--bank", str(bank),
+         "--state", str(tmp_path / "st.json"), "--rotation", "ho_hang_viet"]
+    )
+
+    assert code == 0
+    assert capsys.readouterr().out.strip() == "5"
+
+
+def test_cli_pick_het_truyen_thi_in_rong_va_thoat_khac_0(bank, tmp_path, capsys):
+    st = tmp_path / "st.json"
+    for i in (1, 2, 3, 4, 5):
+        story_bank.mark_used(i, state_path=st)
+
+    code = story_bank.main(
+        ["--pick", "--date", "2026-09-28", "--bank", str(bank),
+         "--state", str(st), "--rotation", "ho_hang_viet"]
+    )
+
+    assert code != 0
+    assert capsys.readouterr().out.strip() == ""

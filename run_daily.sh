@@ -2,14 +2,18 @@
 # Dựng trọn một truyện audio mỗi ngày: chọn chủ đề -> 7 stage -> báo khi xong.
 # Mặc định KHÔNG đăng lên YouTube — bạn tự up. Thêm --upload nếu muốn tự động đăng.
 #
-#   ./run_daily.sh                              # chủ đề xoay vòng (--topic auto), định dạng full
-#   ./run_daily.sh --topic ho_hang_viet         # chỉ định 1 trong 3 chủ đề (scripts/topics.py)
+#   ./run_daily.sh                              # truyện từ kho (--story auto), định dạng full
+#   ./run_daily.sh --story 42                   # chỉ định truyện trong data/story_bank.json
+#   ./run_daily.sh --dry-run-pick               # chỉ in lịch 7 ngày tới rồi thoát
+#   ./run_daily.sh --topic ho_hang_viet         # kiểu cũ: để Gemini tự nghĩ cốt theo chủ đề
 #   ./run_daily.sh --format episodes            # chia 3 tập như 22/09 thay vì 1 video full
 #   ./run_daily.sh --trend                      # kiểu cũ: bắt trend (stage 0) thay vì chủ đề
 #   ./run_daily.sh --trope trong_sinh_bao_thu   # kiểu cũ: trope có sẵn trong config/tropes.yaml
 #   ./run_daily.sh --upload                     # dựng xong đăng luôn lên YouTube
 #
-# Từ 24/09/2026 mặc định là 3 chủ đề trọng tâm xoay vòng theo thứ trong tuần
+# Từ 24/09/2026 truyện lấy từ kho biên tập sẵn data/story_bank.json (--story auto,
+# chọn theo ngày LÊN SÓNG chứ không phải ngày dựng). Hết truyện phù hợp thì rơi về
+# --topic auto kiểu cũ và in cảnh báo. Chủ đề xoay vòng theo thứ trong tuần
 # (AUDIOBOOK_TOPIC_ROTATION trong .env) và định dạng FULL (AUDIOBOOK_FORMAT, mặc
 # định full): 1 video 35-45 phút có cold open + card kết, 2 thumbnail A/B, 3 Shorts
 # từ 3 đoạn hài/sảng nhất. Với --upload: private + hẹn giờ 20h, vào playlist chủ đề.
@@ -73,6 +77,10 @@ env_get() {
 
 TROPE_ID=""
 TOPIC_ARG=""
+STORY_ARG=""
+DRY_RUN_PICK=0
+# Số ngày in ra khi --dry-run-pick.
+DRY_RUN_PICK_DAYS="${AUDIOBOOK_PICK_DAYS:-7}"
 USE_TREND=0
 FORMAT="${AUDIOBOOK_FORMAT:-full}"
 [[ -z "$FORMAT" ]] && FORMAT=full
@@ -83,6 +91,8 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --trope) TROPE_ID="${2:-}"; shift 2 ;;
     --topic) TOPIC_ARG="${2:-}"; shift 2 ;;
+    --story) STORY_ARG="${2:-}"; shift 2 ;;
+    --dry-run-pick) DRY_RUN_PICK=1; shift ;;
     --format) FORMAT="${2:-}"; shift 2 ;;
     --trend) USE_TREND=1; shift ;;
     --upload) DO_UPLOAD=1; shift ;;
@@ -95,13 +105,26 @@ case "$FORMAT" in
   full|episodes) ;;
   *) echo "--format phải là full hoặc episodes, nhận '$FORMAT'" >&2; exit 2 ;;
 esac
-if [[ -n "$TROPE_ID" && ( -n "$TOPIC_ARG" || "$USE_TREND" -eq 1 ) ]] || \
-   [[ -n "$TOPIC_ARG" && "$USE_TREND" -eq 1 ]]; then
-  echo "--trope, --topic và --trend loại trừ nhau, chỉ chọn một." >&2
+SOURCES=0
+[[ -n "$TROPE_ID" ]] && SOURCES=$((SOURCES + 1))
+[[ -n "$TOPIC_ARG" ]] && SOURCES=$((SOURCES + 1))
+[[ -n "$STORY_ARG" ]] && SOURCES=$((SOURCES + 1))
+[[ "$USE_TREND" -eq 1 ]] && SOURCES=$((SOURCES + 1))
+if (( SOURCES > 1 )); then
+  echo "--trope, --topic, --story và --trend loại trừ nhau, chỉ chọn một." >&2
   exit 2
 fi
-if [[ -z "$TROPE_ID" && "$USE_TREND" -eq 0 && -z "$TOPIC_ARG" ]]; then
-  TOPIC_ARG="${AUDIOBOOK_TOPIC:-auto}"
+# Mặc định từ 24/09: lấy truyện từ kho. Kho hết truyện phù hợp thì rơi về
+# --topic auto ở đoạn chọn nguồn bên dưới.
+if (( SOURCES == 0 )); then
+  STORY_ARG="${AUDIOBOOK_STORY:-auto}"
+fi
+
+# --dry-run-pick: chỉ xem lịch, không dựng gì, không đụng output/daily.
+if [[ "$DRY_RUN_PICK" -eq 1 ]]; then
+  echo "Lịch truyện $DRY_RUN_PICK_DAYS ngày tới (không dựng gì):"
+  $RUNNER scripts.story_bank --upcoming "$DRY_RUN_PICK_DAYS"
+  exit $?
 fi
 
 log() { echo "[$(date +%H:%M:%S)] $*" | tee -a "$LOG_FILE"; }
@@ -151,7 +174,38 @@ log "=== Bắt đầu lượt chạy $RUN_DATE (định dạng: $FORMAT) ==="
 
 # --- Stage 0: chọn chủ đề -----------------------------------------------------
 TOPIC_ID=""
-if [[ -n "$TOPIC_ARG" ]]; then
+STORY_ID=""
+if [[ -n "$STORY_ARG" ]]; then
+  # `auto` để scripts.story_bank chọn theo ngày lên sóng; mã thoát 3 nghĩa là
+  # kho không còn truyện phù hợp (khác lỗi thật), khi đó rơi về --topic auto.
+  if [[ "$STORY_ARG" == "auto" ]]; then
+    PICK_LOG="$LOG_DIR/00-pick.log"
+    if STORY_ID="$($RUNNER scripts.story_bank --pick 2>"$PICK_LOG")"; then
+      STORY_ID="${STORY_ID//[[:space:]]/}"
+    else
+      PICK_CODE=$?
+      STORY_ID=""
+      if (( PICK_CODE == 3 )); then
+        log "CẢNH BÁO: kho truyện không còn truyện phù hợp, quay về --topic auto."
+        TOPIC_ARG="${AUDIOBOOK_TOPIC:-auto}"
+        STORY_ARG=""
+      else
+        log "CẢNH BÁO: không đọc được kho truyện (mã $PICK_CODE), quay về --topic auto."
+        cat "$PICK_LOG" >>"$LOG_FILE" 2>/dev/null || true
+        TOPIC_ARG="${AUDIOBOOK_TOPIC:-auto}"
+        STORY_ARG=""
+      fi
+    fi
+  else
+    STORY_ID="$STORY_ARG"
+  fi
+fi
+
+if [[ -n "$STORY_ID" ]]; then
+  STAGE1_ARGS=(--story "$STORY_ID")
+  SLUG="story-$STORY_ID"
+  log "Truyện từ kho: #$STORY_ID"
+elif [[ -n "$TOPIC_ARG" ]]; then
   # Chủ đề trọng tâm: không cần bắt trend. `auto` được scripts.cli giải thành id
   # theo thứ trong tuần; id thật đọc lại từ log stage 1 ("Chủ đề: <id>").
   STAGE1_ARGS=(--topic "$TOPIC_ARG")
@@ -177,7 +231,9 @@ SCRIPT_LOG="$LOG_DIR/01-script.log"
 run_stage "Stage 1: Kịch bản" "$SCRIPT_LOG" $RUNNER scripts.cli "${STAGE1_ARGS[@]}" --format "$FORMAT"
 SCRIPT_PATH="$(extract 'Đã lưu kịch bản: ([^[:space:]]+\.json).*' "$SCRIPT_LOG")"
 require "$SCRIPT_PATH" "Stage 1: Kịch bản" "$SCRIPT_LOG"
-if [[ -n "$TOPIC_ARG" ]]; then
+# Chế độ kho cũng cần chủ đề thật (playlist theo chủ đề ở stage 8, --slug cho
+# notify): truyện trong kho có sẵn trường topic, stage 1 in ra như chế độ --topic.
+if [[ -n "$TOPIC_ARG" || -n "$STORY_ID" ]]; then
   TOPIC_ID="$(extract 'Chủ đề: ([a-z_]+)' "$SCRIPT_LOG")"
   require "$TOPIC_ID" "Stage 1: Kịch bản" "$SCRIPT_LOG"
   SLUG="$TOPIC_ID"
