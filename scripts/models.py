@@ -30,6 +30,10 @@ class Script:
     format: str = ""  # "full" | "episodes"
     setting: str = ""  # bối cảnh đã chọn từ registry
     premise: str = ""  # 1 câu tóm tắt tình huống, dùng chặn trùng 30 ngày
+    # Chỉ có ở chế độ kho (data/story_bank.json): id truyện để lần vết ở
+    # index.jsonl/story_bank_state, và tên series cho dòng mô tả.
+    story_id: int = 0
+    series: str = ""
     thumb_text: str = ""  # chữ trên thumbnail (<= 12 chữ)
     thumb_keywords: list[str] = field(default_factory=list)  # chuỗi con của thumb_text
     # Trích NGUYÊN VĂN 3 đoạn buồn cười/sảng nhất (stage 1 hỏi sau khi viết xong

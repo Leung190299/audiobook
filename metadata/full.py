@@ -27,6 +27,11 @@ FULL_CTA = "👉 Đăng ký kênh và bật chuông — truyện mới lên són
 # upload.episodes_cli thay dòng này bằng link playlist của chủ đề (biến .env
 # trong registry), hoặc xoá nếu chưa đặt.
 TOPIC_PLAYLIST_PLACEHOLDER = "📚 Nghe thêm truyện cùng chủ đề: (link playlist)"
+# Truyện thuộc series có nhân vật xuyên suốt (Nhà Họ Trần, Khu Trọ Cô Ba...):
+# nói rõ để người nghe biết còn truyện khác cùng dàn nhân vật.
+SERIES_LINE = "📚 Series {series} — nghe các truyện khác trong playlist"
+# Nhãn kho dùng cho truyện không thuộc series nào.
+STANDALONE_SERIES = "Truyện lẻ"
 DEFAULT_SIDE_QUESTION = "Nếu là bạn, bạn có nhịn không? 1 = nhịn cho yên nhà, 2 = xử đẹp luôn"
 # Luật YouTube cho "Khoảnh khắc chính": mốc đầu 0:00, ít nhất 3 mốc, cách nhau >= 10s.
 MIN_CHAPTER_GAP_SECONDS = 10
@@ -83,6 +88,7 @@ def build_full_description(
     comment_question: str,
     chapter_lines: list[str],
     hashtags: list[str],
+    series: str = "",
 ) -> str:
     parts: list[str] = []
     if hook:
@@ -91,6 +97,8 @@ def build_full_description(
     if summary:
         parts.append(summary)
     parts.append(f"❓ {comment_question or DEFAULT_SIDE_QUESTION}")
+    if series and series != STANDALONE_SERIES:
+        parts.append(SERIES_LINE.format(series=series))
     parts.append(TOPIC_PLAYLIST_PLACEHOLDER)
     parts.append(FULL_CTA)
     if chapter_lines:

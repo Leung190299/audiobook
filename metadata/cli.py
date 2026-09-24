@@ -115,6 +115,7 @@ def _run_full(script: Script, seo, manifest: dict, stem: str, thumbnails_dir: Pa
         comment_question=question,
         chapter_lines=youtube_chapter_lines(ep["chapters"]),
         hashtags=hashtags,
+        series=script.series,
     )
     new_video_path = rename_video_file(Path(ep["video_path"]), slugify(story_title))
     thumb_a, thumb_b = _find_full_thumbnails(thumbnails_dir, script.trope)

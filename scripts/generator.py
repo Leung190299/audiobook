@@ -160,6 +160,8 @@ async def generate_script(
         extra = dict(
             topic=story.topic,
             premise=story.premise,
+            story_id=story.id,
+            series=story.series,
             thumb_text=story.title,
             thumb_keywords=list(story.thumb_keywords),
         )

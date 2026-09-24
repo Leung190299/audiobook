@@ -107,3 +107,49 @@ async def test_run_full_ghi_metadata_index_va_doi_ten(tmp_path, monkeypatch, cap
     assert desc.splitlines()[-1] == "#truyenaudio #hohangcucpham #truyenhai"
     assert meta["pinned_comment"].startswith(f"❓ {QUESTION}")
     assert "1 = cho, 2 = không" in meta["pinned_comment"]
+
+
+# --- dòng series cho truyện thuộc series (spec kho 24/09 §5) ---
+
+
+def test_mo_ta_co_dong_series_khi_truyen_thuoc_series():
+    from metadata.full import SERIES_LINE, build_full_description
+
+    desc = build_full_description(
+        SeoCopy(title="T", description_draft="Câu một. Câu hai.", tags=[], hashtags=[]),
+        hook="hook",
+        comment_question="q?",
+        chapter_lines=["0:00 Chương 1"],
+        hashtags=["#truyenaudio"],
+        series="Nhà Họ Trần",
+    )
+
+    assert SERIES_LINE.format(series="Nhà Họ Trần") in desc
+    # Đứng trước link playlist để người đọc thấy ngay truyện này nằm trong series.
+    assert desc.index("Nhà Họ Trần") < desc.index("playlist)")
+
+
+def test_mo_ta_truyen_le_khong_co_dong_series():
+    from metadata.full import build_full_description
+
+    desc = build_full_description(
+        SeoCopy(title="T", description_draft="Câu một. Câu hai.", tags=[], hashtags=[]),
+        hook="hook",
+        comment_question="q?",
+        chapter_lines=[],
+        hashtags=[],
+        series="Truyện lẻ",
+    )
+
+    assert "Series" not in desc
+
+
+def test_mo_ta_khong_truyen_series_van_chay_nhu_cu():
+    from metadata.full import build_full_description
+
+    desc = build_full_description(
+        SeoCopy(title="T", description_draft="Câu một. Câu hai.", tags=[], hashtags=[]),
+        hook="hook", comment_question="q?", chapter_lines=[], hashtags=[],
+    )
+
+    assert "Series" not in desc
