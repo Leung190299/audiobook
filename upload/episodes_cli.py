@@ -38,6 +38,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 from datetime import datetime, timedelta, timezone, time as dtime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -106,18 +107,40 @@ def air_times(first_air: datetime, count: int) -> list[datetime]:
     return [first_air + timedelta(days=i) for i in range(count)]
 
 
+class PlaylistConfigError(ValueError):
+    """Biến .env playlist chủ đề đặt sai: không phải link cũng không phải id."""
+
+
+# Id playlist YouTube chỉ gồm chữ, số, gạch ngang và gạch dưới. Tên playlist có
+# dấu cách và dấu | nên rơi ra ngoài -- đúng cái ta cần chặn.
+PLAYLIST_ID_RE = re.compile(r"^[A-Za-z0-9_-]+$")
+
+
 def playlist_ref(value: str | None) -> tuple[str | None, str | None]:
     """Giá trị biến .env của playlist chủ đề -> (id, url). Nhận cả link
-    (…?list=PLxxx) lẫn id trần (PLxxx)."""
+    (…?list=PLxxx) lẫn id trần (PLxxx).
+
+    Đặt sai thì báo lỗi ngay chứ không đoán: trước đây dán nhầm TÊN playlist
+    ("Họ Hàng Cực Phẩm | Truyện Audio") sinh ra link hỏng dán thẳng vào mô tả
+    video công khai, mà chỉ hiện một dòng cảnh báo lúc thêm playlist thất bại.
+    """
     if not value or not value.strip():
         return None, None
     value = value.strip()
     if "list=" in value:
         playlist_id = value.split("list=", 1)[1].split("&", 1)[0]
+        if not PLAYLIST_ID_RE.match(playlist_id):
+            raise PlaylistConfigError(
+                f"Link playlist có id không hợp lệ: {playlist_id!r} (trong {value!r})."
+            )
         return playlist_id, value
-    if value.startswith("http"):
-        return None, value
-    return value, f"https://www.youtube.com/playlist?list={value}"
+    if PLAYLIST_ID_RE.match(value):
+        return value, f"https://www.youtube.com/playlist?list={value}"
+    raise PlaylistConfigError(
+        f"Giá trị playlist trong .env không phải link cũng không phải id: {value!r}. "
+        "Cần link dạng https://www.youtube.com/playlist?list=PLxxx hoặc id trần PLxxx "
+        "(mở playlist trong YouTube Studio rồi sao chép link trên thanh địa chỉ)."
+    )
 
 
 def fill_topic_playlist(description: str, playlist_url: str | None) -> str:

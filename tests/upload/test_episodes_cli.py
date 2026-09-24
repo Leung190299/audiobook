@@ -250,3 +250,41 @@ def test_khong_phai_che_do_kho_thi_giu_nguyen_cach_cu():
     assert episodes_cli.resolve_first_air(story_id=0, now=now, publish_hour=20) == (
         episodes_cli.default_first_air(now, 20)
     )
+
+
+# --- playlist chủ đề đặt sai trong .env (24/09/2026) ---------------------------
+
+
+def test_playlist_ref_gia_tri_khong_phai_link_hay_id_thi_bao_loi():
+    """Dán nhầm TÊN playlist thay vì link: phải dừng, không tự bịa ra link.
+
+    Trước đây "Họ Hàng Cực Phẩm | Truyện Audio" bị coi là id, đẻ ra
+    youtube.com/playlist?list=Họ Hàng... dán thẳng vào mô tả video công khai.
+    """
+    from upload.episodes_cli import PlaylistConfigError
+
+    with pytest.raises(PlaylistConfigError) as exc:
+        playlist_ref("Họ Hàng Cực Phẩm | Truyện Audio")
+    assert "Họ Hàng Cực Phẩm" in str(exc.value)
+
+    with pytest.raises(PlaylistConfigError):
+        playlist_ref("<link playlist 3>")
+
+    # Link youtube nhưng không có list= thì cũng không phải playlist.
+    with pytest.raises(PlaylistConfigError):
+        playlist_ref("https://www.youtube.com/@kenh")
+
+
+def test_playlist_sai_dinh_dang_thi_khong_upload_gi(tmp_path, monkeypatch):
+    """Dừng TRƯỚC khi đăng, đừng để video lên kênh rồi mới biết link hỏng."""
+    from upload.episodes_cli import PlaylistConfigError
+
+    monkeypatch.setenv("YOUTUBE_PLAYLIST_HO_HANG", "Họ Hàng Cực Phẩm | Truyện Audio")
+    up = FakeUploader()
+    with pytest.raises(PlaylistConfigError):
+        episodes_cli.run(
+            _full_index(tmp_path), uploader=up, commenter=lambda *a: "c",
+            description_updater=lambda *a: True, credentials_loader=lambda: "cred",
+            now=datetime(2026, 9, 24, 9, 0, tzinfo=LOCAL_TZ),
+        )
+    assert up.calls == []
