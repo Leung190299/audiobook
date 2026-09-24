@@ -1,5 +1,11 @@
 # episodes/cli.py
-"""Stage 4: dựng MỖI TẬP một video 15-20 phút thay cho một video 50 phút.
+"""Stage 4: dựng MỖI TẬP một video 15-20 phút, hoặc (--format full, từ 24/09)
+MỘT video cả truyện có cold open + card kết (xem episodes/full.py).
+
+    uv run python -m episodes.cli <script> <tts> <images> --format full
+    # Đã render video full: output/episodes/<topic>-<ts>-full.mp4
+    # Manifest: output/episodes/<topic>-<ts>-full.json
+    # Đã render 1 video vào output/episodes
 
     uv run python -m episodes.cli <script_json> <tts_metadata_json> <images_metadata_json>
     # Đã render tập 1/3: output/episodes/<trope>-<ts>-ep-01.mp4
@@ -23,12 +29,14 @@ from dotenv import load_dotenv
 
 from episodes.audio_build import build_episode_wav
 from episodes.cutter import plan_cuts
+from episodes.full import full_outro_text, plan_full_cut, suggest_same_topic
 from episodes.plan import plan_episodes
 from episodes.props_builder import build_episode_props, chapter_lines
 from episodes.storage import (
     episode_audio_path,
     episode_stem,
     episode_video_path,
+    full_stem,
     make_stem,
     save_episode_props,
     save_manifest,
@@ -40,6 +48,8 @@ load_dotenv()
 REPO_ROOT = Path(__file__).resolve().parent.parent
 REMOTION_DIR = REPO_ROOT / "remotion"
 OUTPUT_DIR = REPO_ROOT / "output" / "episodes"
+METADATA_INDEX_JSONL = REPO_ROOT / "output" / "metadata" / "index.jsonl"
+TOPICS_HISTORY = REPO_ROOT / "output" / "topics_history.json"
 
 
 class EpisodeRenderError(Exception):
@@ -68,7 +78,9 @@ def _render(props_path: Path, output_path: Path) -> None:
         )
 
 
-def _run(script_path: Path, tts_metadata_path: Path, images_metadata_path: Path) -> Path:
+def _run(
+    script_path: Path, tts_metadata_path: Path, images_metadata_path: Path, fmt: str | None = None
+) -> Path:
     tts_metadata_path = tts_metadata_path.resolve()
     images_metadata_path = images_metadata_path.resolve()
 
@@ -83,15 +95,25 @@ def _run(script_path: Path, tts_metadata_path: Path, images_metadata_path: Path)
         )
     images_dir = images_metadata_path.parent
 
-    episodes = plan_episodes(len(script.chapters))
-    cuts = plan_cuts(tts_metadata, episodes)
+    # Không truyền --format thì theo kịch bản (stage 1 ghi format), rồi mới tới
+    # mặc định cũ "episodes" -- để lệnh gọi tay trên kịch bản cũ không đổi hành vi.
+    fmt = fmt or script.format or "episodes"
     stem = make_stem(script.trope)
+    if fmt == "full":
+        cuts = [plan_full_cut(tts_metadata, len(script.chapters), script.short_beats)]
+        suggestion = suggest_same_topic(script.topic, script.title, METADATA_INDEX_JSONL, TOPICS_HISTORY)
+        label_override: str | None = ""
+        outro_override: str | None = full_outro_text(script.comment_question, suggestion)
+    else:
+        cuts = plan_cuts(tts_metadata, plan_episodes(len(script.chapters)))
+        label_override = None
+        outro_override = None
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     manifest_episodes: list[dict] = []
     for cut in cuts:
         ep = cut.episode
-        ep_stem = episode_stem(stem, ep.number)
+        ep_stem = full_stem(stem) if fmt == "full" else episode_stem(stem, ep.number)
         audio_path = episode_audio_path(ep_stem, OUTPUT_DIR)
         output_path = episode_video_path(ep_stem, OUTPUT_DIR)
 
@@ -104,6 +126,8 @@ def _run(script_path: Path, tts_metadata_path: Path, images_metadata_path: Path)
             audio_path=audio_path,
             images_dir=images_dir,
             repo_root=REPO_ROOT,
+            episode_label=label_override,
+            outro=outro_override,
         )
         props_path = save_episode_props(ep_stem, props, OUTPUT_DIR)
         _render(props_path, output_path)
@@ -122,19 +146,25 @@ def _run(script_path: Path, tts_metadata_path: Path, images_metadata_path: Path)
                 "chapters": chapter_lines(cut, script, tts_metadata),
             }
         )
-        print(f"Đã render tập {ep.number}/{ep.total}: {output_path}")
+        if fmt == "full":
+            print(f"Đã render video full: {output_path}")
+        else:
+            print(f"Đã render tập {ep.number}/{ep.total}: {output_path}")
 
     manifest = {
         "trope": script.trope,
+        "topic": script.topic,
+        "format": fmt,
         "title": script.title,
         "hook": script.hook,
         "comment_question": script.comment_question,
         "script_path": str(script_path.resolve()),
         "episodes": manifest_episodes,
     }
-    path = save_manifest(stem, manifest, OUTPUT_DIR)
+    path = save_manifest(stem, manifest, OUTPUT_DIR, fmt)
     print(f"Manifest: {path}")
-    print(f"Đã render {len(manifest_episodes)} tập vào {OUTPUT_DIR}")
+    unit = "video" if fmt == "full" else "tập"
+    print(f"Đã render {len(manifest_episodes)} {unit} vào {OUTPUT_DIR}")
     return path
 
 
@@ -143,8 +173,19 @@ def main() -> None:
     parser.add_argument("script_path", help="Đường dẫn file JSON kịch bản")
     parser.add_argument("tts_metadata_path", help="Đường dẫn file JSON metadata TTS")
     parser.add_argument("images_metadata_path", help="Đường dẫn file JSON metadata ảnh")
+    parser.add_argument(
+        "--format",
+        choices=("full", "episodes"),
+        default=None,
+        help="full = 1 video cả truyện; episodes = 3 tập. Mặc định: theo kịch bản, rồi 'episodes'.",
+    )
     args = parser.parse_args()
-    _run(Path(args.script_path), Path(args.tts_metadata_path), Path(args.images_metadata_path))
+    _run(
+        Path(args.script_path),
+        Path(args.tts_metadata_path),
+        Path(args.images_metadata_path),
+        args.format,
+    )
 
 
 if __name__ == "__main__":

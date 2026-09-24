@@ -33,6 +33,14 @@ EXPECTED_THUMBNAIL = "output/thumbnails/me_chong_giau_cua-20260813T015100Z.png"
 EXPECTED_METADATA_INDEX = "output/metadata/me_chong_giau_cua-20260813T015000Z-episodes.json"
 EXPECTED_SHORTS_PREFIX = "output/shorts/me_chong_giau_cua-20260813T015300Z"
 EXPECTED_SHORT_COUNT = "2"
+EXPECTED_FULL_MANIFEST = "output/episodes/me_chong_giau_cua-20260813T015000Z-full.json"
+EXPECTED_FULL_INDEX = "output/metadata/me_chong_giau_cua-20260813T015000Z-full.json"
+EXPECTED_FULL_RENAMED = "output/episodes/me-chong-giau-so-do.mp4"
+
+# Các test dưới phần "đường đi thuận lợi" viết cho dây chuyền 22/09 (bắt trend +
+# 3 tập). Từ 24/09 mặc định là chủ đề xoay vòng + FULL, nên _run() tự thêm hai
+# cờ này cho chúng; test của chế độ mới gọi _run(..., legacy=False).
+LEGACY_ARGS = ["--trend", "--format", "episodes"]
 
 
 class Run:
@@ -67,26 +75,40 @@ class Run:
         return any(line.split(" ")[0] == module for line in self.calls)
 
 
-def _run(tmp_path: Path, args: list[str] | None = None, **env_overrides) -> Run:
+def _run(
+    tmp_path: Path,
+    args: list[str] | None = None,
+    legacy: bool = True,
+    dotenv: str | None = None,
+    **env_overrides,
+) -> Run:
+    args = list(args or [])
+    if legacy and not {"--trope", "--topic", "--khong-ton-tai"} & set(args):
+        args = LEGACY_ARGS + args
+    elif legacy and "--trope" in args:
+        args = ["--format", "episodes"] + args
     root = tmp_path / "repo"
     root.mkdir()
     shutil.copy(RUN_DAILY, root / "run_daily.sh")
     (root / "run_daily.sh").chmod(0o755)
+    if dotenv is not None:
+        (root / ".env").write_text(dotenv, encoding="utf-8")
 
     # TITLE= đọc title từ file metadata JSON thật (dùng cho notify.cli), nên phải
     # dựng sẵn file đó.
-    metadata_path = root / EXPECTED_METADATA_INDEX
-    metadata_path.parent.mkdir(parents=True, exist_ok=True)
-    metadata_path.write_text(
-        json.dumps({"story_title": "Mẹ chồng giấu sổ đỏ", "episodes": []}, ensure_ascii=False),
-        encoding="utf-8",
-    )
+    for index in (EXPECTED_METADATA_INDEX, EXPECTED_FULL_INDEX):
+        metadata_path = root / index
+        metadata_path.parent.mkdir(parents=True, exist_ok=True)
+        metadata_path.write_text(
+            json.dumps({"story_title": "Mẹ chồng giấu sổ đỏ", "episodes": []}, ensure_ascii=False),
+            encoding="utf-8",
+        )
 
     calls_file = tmp_path / "calls.log"
     calls_file.touch()
 
     env = {
-        **os.environ,
+        **{k: v for k, v in os.environ.items() if not k.startswith("AUDIOBOOK_")},
         "AUDIOBOOK_RUNNER": str(FAKE_STAGE),
         "FAKE_LOG": str(calls_file),
     }
@@ -134,7 +156,7 @@ def test_stage_4_nhan_dung_3_duong_dan_theo_dung_thu_tu(tmp_path: Path):
     # Đây là chỗ dễ nhầm nhất: script JSON, TTS JSON, images JSON — không phải .wav/.png.
     run = _run(tmp_path)
     assert run.call_for("episodes.cli") == (
-        f"episodes.cli {EXPECTED_SCRIPT} {EXPECTED_AUDIO_JSON} {EXPECTED_IMAGES_JSON}"
+        f"episodes.cli {EXPECTED_SCRIPT} {EXPECTED_AUDIO_JSON} {EXPECTED_IMAGES_JSON} --format episodes"
     )
 
 
@@ -158,7 +180,7 @@ def test_stage_7_short_nhan_audio_va_images_json(tmp_path: Path):
     # Short cắt theo mốc câu trong audio JSON của stage 2, không cần script hay video.
     run = _run(tmp_path)
     assert run.call_for("shorts.cli") == (
-        f"shorts.cli {EXPECTED_AUDIO_JSON} {EXPECTED_IMAGES_JSON}"
+        f"shorts.cli {EXPECTED_AUDIO_JSON} {EXPECTED_IMAGES_JSON} --script {EXPECTED_SCRIPT}"
     )
 
 
@@ -229,7 +251,7 @@ def test_trope_chi_dinh_thi_bo_qua_stage_0(tmp_path: Path):
     run = _run(tmp_path, ["--trope", "trong_sinh_bao_thu"])
     assert run.exit_code == 0
     assert not run.called("trend.cli")
-    assert run.call_for("scripts.cli") == "scripts.cli trong_sinh_bao_thu"
+    assert run.call_for("scripts.cli") == "scripts.cli trong_sinh_bao_thu --format episodes"
 
 
 def test_co_no_upload_cu_van_chay_duoc_cho_tuong_thich(tmp_path: Path):
@@ -355,3 +377,76 @@ def test_moi_stage_ghi_log_rieng_de_lan_lai_khi_hong(tmp_path: Path):
     run_log = (log_dirs[0] / "run.log").read_text(encoding="utf-8")
     assert "me_chong_giau_cua" in run_log
     assert EXPECTED_RENAMED in run_log
+
+
+# --- 24/09/2026: chủ đề + định dạng FULL (mặc định mới) ------------------------
+
+
+def test_mac_dinh_la_topic_auto_va_full_khong_bat_trend(tmp_path: Path):
+    run = _run(tmp_path, legacy=False)
+    assert run.exit_code == 0, run.proc.stderr + run.stdout
+    assert not run.called("trend.cli")
+    assert run.call_for("scripts.cli") == "scripts.cli --topic auto --format full"
+    assert run.call_for("episodes.cli") == (
+        f"episodes.cli {EXPECTED_SCRIPT} {EXPECTED_AUDIO_JSON} {EXPECTED_IMAGES_JSON} --format full"
+    )
+    assert run.call_for("thumbnail.cli") == f"thumbnail.cli {EXPECTED_SCRIPT} --episodes {EXPECTED_FULL_MANIFEST}"
+    assert run.call_for("metadata.cli") == f"metadata.cli {EXPECTED_SCRIPT} --episodes {EXPECTED_FULL_MANIFEST}"
+    assert not run.called("upload.episodes_cli")
+    notify = run.call_for("notify.cli")
+    assert "success" in notify and EXPECTED_FULL_RENAMED in notify
+    assert "--slug ho_hang_viet" in notify  # id chủ đề thật, không phải "auto"
+    run_log = next((run.root / "output" / "daily").iterdir()) / "run.log"
+    text = run_log.read_text(encoding="utf-8")
+    assert "Chủ đề hôm nay: ho_hang_viet" in text
+    assert "Full: 1 video trong output/episodes" in text
+
+
+def test_topic_auto_format_full_co_upload(tmp_path: Path):
+    run = _run(tmp_path, ["--topic", "auto", "--format", "full", "--upload"], legacy=False)
+    assert run.exit_code == 0, run.proc.stderr + run.stdout
+    assert run.call_for("upload.episodes_cli") == (
+        f"upload.episodes_cli {EXPECTED_FULL_INDEX} --shorts-prefix {EXPECTED_SHORTS_PREFIX}"
+    )
+    assert "--url https://youtu.be/FAKEFULL1" in run.call_for("notify.cli")
+
+
+def test_topic_chi_dinh_va_format_tu_env(tmp_path: Path):
+    run = _run(tmp_path, ["--topic", "bo_me_trong_sinh"], legacy=False,
+               AUDIOBOOK_FORMAT="episodes", FAKE_TOPIC="bo_me_trong_sinh")
+    assert run.exit_code == 0, run.proc.stderr + run.stdout
+    assert run.call_for("scripts.cli") == "scripts.cli --topic bo_me_trong_sinh --format episodes"
+    assert run.call_for("episodes.cli").endswith("--format episodes")
+    assert "--slug bo_me_trong_sinh" in run.call_for("notify.cli")
+
+
+def test_env_audiobook_topic_thay_auto(tmp_path: Path):
+    run = _run(tmp_path, legacy=False, AUDIOBOOK_TOPIC="nghe_la_hong_bien")
+    assert run.call_for("scripts.cli") == "scripts.cli --topic nghe_la_hong_bien --format full"
+
+
+def test_full_khong_doi_ten_thi_coi_nhu_hong(tmp_path: Path):
+    run = _run(tmp_path, ["--upload"], legacy=False, FAKE_NO_RENAME="1")
+    assert run.exit_code == 1
+    assert not run.called("upload.episodes_cli")
+
+
+@pytest.mark.parametrize(
+    "args",
+    [["--format", "dai"], ["--topic", "ho_hang_viet", "--trend"], ["--trope", "x", "--topic", "auto"]],
+)
+def test_co_sai_hoac_xung_dot_thi_bao_loi_ngay(tmp_path: Path, args):
+    run = _run(tmp_path, args, legacy=False)
+    assert run.exit_code == 2
+    assert not run.calls
+
+
+def test_doc_format_va_topic_tu_file_env(tmp_path: Path):
+    run = _run(
+        tmp_path,
+        legacy=False,
+        dotenv='SECURE_1PSID=x\nAUDIOBOOK_FORMAT=episodes  # chia tập\nAUDIOBOOK_TOPIC="nghe_la_hong_bien"\n',
+        FAKE_TOPIC="nghe_la_hong_bien",
+    )
+    assert run.exit_code == 0, run.proc.stderr + run.stdout
+    assert run.call_for("scripts.cli") == "scripts.cli --topic nghe_la_hong_bien --format episodes"

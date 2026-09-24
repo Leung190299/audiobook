@@ -1,14 +1,19 @@
 #!/bin/bash
-# Dựng trọn một tập truyện audio mỗi ngày: bắt trend -> 7 stage -> báo khi xong.
+# Dựng trọn một truyện audio mỗi ngày: chọn chủ đề -> 7 stage -> báo khi xong.
 # Mặc định KHÔNG đăng lên YouTube — bạn tự up. Thêm --upload nếu muốn tự động đăng.
 #
-#   ./run_daily.sh                              # chủ đề bắt trend (mặc định)
-#   ./run_daily.sh --trope trong_sinh_bao_thu   # bỏ qua trend, dùng trope có sẵn
+#   ./run_daily.sh                              # chủ đề xoay vòng (--topic auto), định dạng full
+#   ./run_daily.sh --topic ho_hang_viet         # chỉ định 1 trong 3 chủ đề (scripts/topics.py)
+#   ./run_daily.sh --format episodes            # chia 3 tập như 22/09 thay vì 1 video full
+#   ./run_daily.sh --trend                      # kiểu cũ: bắt trend (stage 0) thay vì chủ đề
+#   ./run_daily.sh --trope trong_sinh_bao_thu   # kiểu cũ: trope có sẵn trong config/tropes.yaml
 #   ./run_daily.sh --upload                     # dựng xong đăng luôn lên YouTube
 #
-# Mỗi lượt dựng 1 truyện = 3 TẬP 15-20 phút (cold open + cliffhanger + card tập sau),
-# 1 thumbnail/tập, 3 trích đoạn Shorts trỏ về tập 1, metadata SEO + bình luận ghim/tập.
-# Với --upload: 3 tập được tải lên hẹn giờ 20h mỗi ngày một tập (xem upload/episodes_cli.py).
+# Từ 24/09/2026 mặc định là 3 chủ đề trọng tâm xoay vòng theo thứ trong tuần
+# (AUDIOBOOK_TOPIC_ROTATION trong .env) và định dạng FULL (AUDIOBOOK_FORMAT, mặc
+# định full): 1 video 35-45 phút có cold open + card kết, 2 thumbnail A/B, 3 Shorts
+# từ 3 đoạn hài/sảng nhất. Với --upload: private + hẹn giờ 20h, vào playlist chủ đề.
+# --format episodes giữ nguyên dây chuyền 3 tập của 22/09.
 #
 # Mỗi lượt ghi log vào output/daily/<ngày>/. Lỗi ở bất kỳ stage nào cũng dừng ngay
 # và bắn Telegram kèm phần cuối log của stage đó — trừ Stage 7 (short), stage này
@@ -57,18 +62,47 @@ mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/run.log"
 START_TS=$(date +%s)
 
+# bash không tự nạp .env (python nạp qua load_dotenv): đọc riêng hai biến điều
+# khiển dây chuyền. Biến môi trường đã đặt thì ưu tiên hơn .env.
+env_get() {
+  [[ -f "$REPO_ROOT/.env" ]] || return 0
+  sed -n -E "s/^$1=[\"']?([^\"'#]*)[\"']?[[:space:]]*(#.*)?$/\1/p" "$REPO_ROOT/.env" | tail -1 | tr -d '[:space:]'
+}
+: "${AUDIOBOOK_FORMAT:=$(env_get AUDIOBOOK_FORMAT)}"
+: "${AUDIOBOOK_TOPIC:=$(env_get AUDIOBOOK_TOPIC)}"
+
 TROPE_ID=""
+TOPIC_ARG=""
+USE_TREND=0
+FORMAT="${AUDIOBOOK_FORMAT:-full}"
+[[ -z "$FORMAT" ]] && FORMAT=full
 # Mặc định chỉ dựng video, không đăng. Đăng lên YouTube cần token OAuth và một
 # project đã qua audit của Google mới ra public được — không đáng để bật mặc định.
 DO_UPLOAD=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --trope) TROPE_ID="${2:-}"; shift 2 ;;
+    --topic) TOPIC_ARG="${2:-}"; shift 2 ;;
+    --format) FORMAT="${2:-}"; shift 2 ;;
+    --trend) USE_TREND=1; shift ;;
     --upload) DO_UPLOAD=1; shift ;;
     --no-upload) shift ;;  # giữ lại cho tương thích, giờ đã là mặc định
     *) echo "Tham số không hiểu: $1" >&2; exit 2 ;;
   esac
 done
+
+case "$FORMAT" in
+  full|episodes) ;;
+  *) echo "--format phải là full hoặc episodes, nhận '$FORMAT'" >&2; exit 2 ;;
+esac
+if [[ -n "$TROPE_ID" && ( -n "$TOPIC_ARG" || "$USE_TREND" -eq 1 ) ]] || \
+   [[ -n "$TOPIC_ARG" && "$USE_TREND" -eq 1 ]]; then
+  echo "--trope, --topic và --trend loại trừ nhau, chỉ chọn một." >&2
+  exit 2
+fi
+if [[ -z "$TROPE_ID" && "$USE_TREND" -eq 0 && -z "$TOPIC_ARG" ]]; then
+  TOPIC_ARG="${AUDIOBOOK_TOPIC:-auto}"
+fi
 
 log() { echo "[$(date +%H:%M:%S)] $*" | tee -a "$LOG_FILE"; }
 
@@ -113,10 +147,17 @@ require() {
   fi
 }
 
-log "=== Bắt đầu lượt chạy $RUN_DATE ==="
+log "=== Bắt đầu lượt chạy $RUN_DATE (định dạng: $FORMAT) ==="
 
 # --- Stage 0: chọn chủ đề -----------------------------------------------------
-if [[ -z "$TROPE_ID" ]]; then
+TOPIC_ID=""
+if [[ -n "$TOPIC_ARG" ]]; then
+  # Chủ đề trọng tâm: không cần bắt trend. `auto` được scripts.cli giải thành id
+  # theo thứ trong tuần; id thật đọc lại từ log stage 1 ("Chủ đề: <id>").
+  STAGE1_ARGS=(--topic "$TOPIC_ARG")
+  SLUG="$TOPIC_ARG"
+  log "Chủ đề: $TOPIC_ARG"
+elif [[ "$USE_TREND" -eq 1 ]]; then
   TREND_LOG="$LOG_DIR/00-trend.log"
   run_stage "Stage 0: Bắt trend" "$TREND_LOG" $RUNNER trend.cli
   IDEA_FILE="$(extract 'Đã lưu ý tưởng: (.+\.txt)' "$TREND_LOG")"
@@ -133,9 +174,15 @@ fi
 
 # --- Stage 1: kịch bản --------------------------------------------------------
 SCRIPT_LOG="$LOG_DIR/01-script.log"
-run_stage "Stage 1: Kịch bản" "$SCRIPT_LOG" $RUNNER scripts.cli "${STAGE1_ARGS[@]}"
+run_stage "Stage 1: Kịch bản" "$SCRIPT_LOG" $RUNNER scripts.cli "${STAGE1_ARGS[@]}" --format "$FORMAT"
 SCRIPT_PATH="$(extract 'Đã lưu kịch bản: ([^[:space:]]+\.json).*' "$SCRIPT_LOG")"
 require "$SCRIPT_PATH" "Stage 1: Kịch bản" "$SCRIPT_LOG"
+if [[ -n "$TOPIC_ARG" ]]; then
+  TOPIC_ID="$(extract 'Chủ đề: ([a-z_]+)' "$SCRIPT_LOG")"
+  require "$TOPIC_ID" "Stage 1: Kịch bản" "$SCRIPT_LOG"
+  SLUG="$TOPIC_ID"
+  log "Chủ đề hôm nay: $TOPIC_ID"
+fi
 
 # --- Stage 2: TTS -------------------------------------------------------------
 TTS_LOG="$LOG_DIR/02-tts.log"
@@ -150,21 +197,22 @@ run_stage "Stage 3: Ảnh nền" "$IMAGES_LOG" $RUNNER images.cli "$SCRIPT_PATH"
 IMAGES_JSON="$(extract 'Metadata: ([^[:space:]]+\.json)' "$IMAGES_LOG")"
 require "$IMAGES_JSON" "Stage 3: Ảnh nền" "$IMAGES_LOG"
 
-# --- Stage 4: render từng tập -----------------------------------------------
-# Từ 22/09/2026 không dựng một video 50 phút nữa: kênh đo được giữ chân 1:43 trên
-# video dài nên YouTube không đề xuất. episodes.cli cắt truyện thành 3 tập theo
-# episodes/plan.py, mỗi tập có cold open + card kêu gọi tập sau, và ghi manifest
-# mà stage 5/6/8 đọc. Muốn bản full cũ: uv run python -m video.cli ... (vẫn chạy).
+# --- Stage 4: render ----------------------------------------------------------
+# full (mặc định từ 24/09): 1 video cả truyện = cold open 20-30s từ đoạn sảng
+# nhất + mọi chương + card kết 8s (episodes/full.py). episodes (22/09): cắt 3
+# tập theo episodes/plan.py. Cả hai ghi manifest mà stage 5/6/8 đọc (có trường
+# "format" và "topic").
 VIDEO_LOG="$LOG_DIR/04-episodes.log"
-run_stage "Stage 4: Render tập" "$VIDEO_LOG" \
-  $RUNNER episodes.cli "$SCRIPT_PATH" "$AUDIO_JSON" "$IMAGES_JSON"
+run_stage "Stage 4: Render video" "$VIDEO_LOG" \
+  $RUNNER episodes.cli "$SCRIPT_PATH" "$AUDIO_JSON" "$IMAGES_JSON" --format "$FORMAT"
 EPISODES_MANIFEST="$(extract 'Manifest: ([^[:space:]]+\.json)' "$VIDEO_LOG")"
-require "$EPISODES_MANIFEST" "Stage 4: Render tập" "$VIDEO_LOG"
-EPISODE_COUNT="$(extract 'Đã render ([0-9]+) tập vào .+' "$VIDEO_LOG")"
-require "$EPISODE_COUNT" "Stage 4: Render tập" "$VIDEO_LOG"
+require "$EPISODES_MANIFEST" "Stage 4: Render video" "$VIDEO_LOG"
+EPISODE_COUNT="$(extract 'Đã render ([0-9]+) [^[:space:]]+ vào .+' "$VIDEO_LOG")"
+require "$EPISODE_COUNT" "Stage 4: Render video" "$VIDEO_LOG"
 
 # --- Stage 5: thumbnail -------------------------------------------------------
-# Một ảnh nền, một bản/tập có badge "TẬP N/3" (cùng gốc tên `-ep-0N.png`).
+# Kịch bản chủ đề: layout "linh vật sticker + cả câu tiêu đề", bản A + bản B
+# (-thumbnail-b.png cho Test & compare). Chế độ tập: thêm badge "TẬP N/3".
 THUMB_LOG="$LOG_DIR/05-thumbnail.log"
 run_stage "Stage 5: Thumbnail" "$THUMB_LOG" \
   $RUNNER thumbnail.cli "$SCRIPT_PATH" --episodes "$EPISODES_MANIFEST"
@@ -179,8 +227,12 @@ run_stage "Stage 6: SEO Metadata" "$META_LOG" \
   $RUNNER metadata.cli "$SCRIPT_PATH" --episodes "$EPISODES_MANIFEST"
 METADATA_INDEX="$(extract 'Danh sách: ([^[:space:]]+\.json)' "$META_LOG")"
 require "$METADATA_INDEX" "Stage 6: SEO Metadata" "$META_LOG"
-# Tập 1 sau khi đổi tên: dùng cho thông báo và làm "video chính" của lượt chạy.
-FINAL_VIDEO="$(extract 'Video tập 1 đã đổi tên: ([^[:space:]]+\.mp4)' "$META_LOG")"
+# Video chính của lượt chạy (bản full, hoặc tập 1) sau khi đổi tên: dùng cho thông báo.
+if [[ "$FORMAT" == "full" ]]; then
+  FINAL_VIDEO="$(extract 'Video full đã đổi tên: ([^[:space:]]+\.mp4)' "$META_LOG")"
+else
+  FINAL_VIDEO="$(extract 'Video tập 1 đã đổi tên: ([^[:space:]]+\.mp4)' "$META_LOG")"
+fi
 require "$FINAL_VIDEO" "Stage 6: SEO Metadata" "$META_LOG"
 
 TITLE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["story_title"])' "$METADATA_INDEX")"
@@ -195,7 +247,9 @@ TITLE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding
 SHORT_LOG="$LOG_DIR/07-short.log"
 SHORT_COUNT=""
 log "▶ Stage 7: Short"
-if $RUNNER shorts.cli "$AUDIO_JSON" "$IMAGES_JSON" >"$SHORT_LOG" 2>&1; then
+# --script: kịch bản chủ đề có 3 đoạn hài/sảng (short_beats) -> 3 Shorts mở bằng
+# câu thoại đó; kịch bản cũ không có thì shorts.cli rải 3 trích đoạn như trước.
+if $RUNNER shorts.cli "$AUDIO_JSON" "$IMAGES_JSON" --script "$SCRIPT_PATH" >"$SHORT_LOG" 2>&1; then
   cat "$SHORT_LOG" >>"$LOG_FILE"
   SHORT_COUNT="$(extract 'Đã render ([0-9]+) short vào .+' "$SHORT_LOG")"
   if [[ -z "$SHORT_COUNT" ]]; then
@@ -204,13 +258,17 @@ if $RUNNER shorts.cli "$AUDIO_JSON" "$IMAGES_JSON" >"$SHORT_LOG" 2>&1; then
 else
   cat "$SHORT_LOG" >>"$LOG_FILE"
   log "CẢNH BÁO: Stage 7: Short THẤT BẠI, nhưng video dài vẫn ổn, không dừng lượt chạy. Xem $SHORT_LOG"
-  log "  Dựng lại tay: $RUNNER shorts.cli \"$AUDIO_JSON\" \"$IMAGES_JSON\""
+  log "  Dựng lại tay: $RUNNER shorts.cli \"$AUDIO_JSON\" \"$IMAGES_JSON\" --script \"$SCRIPT_PATH\""
 fi
 
 if [[ "$DO_UPLOAD" -eq 0 ]]; then
   DURATION="$(human_duration $(($(date +%s) - START_TS)))"
   log "✔ Đã dựng xong sau $DURATION. Video: $FINAL_VIDEO"
-  log "  Tập: $EPISODE_COUNT tập trong output/episodes (metadata: $METADATA_INDEX)"
+  if [[ "$FORMAT" == "full" ]]; then
+    log "  Full: $EPISODE_COUNT video trong output/episodes (metadata: $METADATA_INDEX)"
+  else
+    log "  Tập: $EPISODE_COUNT tập trong output/episodes (metadata: $METADATA_INDEX)"
+  fi
   [[ -n "$SHORT_COUNT" ]] && log "  Short: $SHORT_COUNT trích đoạn trong output/shorts"
   $RUNNER notify.cli success \
     --title "$TITLE" \
@@ -222,9 +280,10 @@ if [[ "$DO_UPLOAD" -eq 0 ]]; then
 fi
 
 # --- Stage 8: upload YouTube (chỉ khi có --upload) ---------------------------
-# Đăng cả 3 tập hẹn giờ 20h mỗi ngày một tập (tập 1 tối nay nếu chạy trước
-# 19h30), gắn link tập sau vào mô tả tập trước, đăng bình luận câu hỏi, rồi 3
-# trích đoạn trỏ về tập 1. Ghim bình luận vẫn làm tay trong Studio.
+# full: 1 video private + publishAt 20h, thêm vào playlist CHỦ ĐỀ, bình luận câu
+# hỏi chọn phe, 3 Shorts trỏ về video full; ghi video_id/publishAt vào
+# output/metadata/index.jsonl. episodes: 3 tập hẹn giờ 20h mỗi ngày một tập như
+# 22/09. Ghim bình luận vẫn làm tay trong Studio.
 UPLOAD_LOG="$LOG_DIR/08-upload.log"
 SHORTS_PREFIX="$(extract 'Đã render short: (.+)-part-01\.mp4' "$SHORT_LOG")"
 UPLOAD_ARGS=("$METADATA_INDEX")

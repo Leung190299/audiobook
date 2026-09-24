@@ -97,7 +97,12 @@ def build_episode_props(
     audio_path: Path,
     images_dir: Path,
     repo_root: Path,
+    episode_label: str | None = None,
+    outro: str | None = None,
 ) -> dict:
+    """`episode_label`/`outro` None = mặc định chế độ tập ("TẬP N/3", card tập
+    sau). Chế độ full truyền "" (không badge -- MainVideo ẩn khi rỗng) và câu
+    card kết riêng (episodes/full.py)."""
     for source_name, source in (("tts", tts_metadata), ("images", images_metadata)):
         if source["trope"] != script.trope or source["title"] != script.title:
             raise EpisodePropsBuildError(
@@ -182,12 +187,12 @@ def build_episode_props(
         "audioPath": str(audio_path.relative_to(repo_root)),
         "sampleRate": tts_metadata["sample_rate"],
         "chapters": chapters,
-        "episodeLabel": f"TẬP {ep.number}/{ep.total}",
+        "episodeLabel": f"TẬP {ep.number}/{ep.total}" if episode_label is None else episode_label,
         "hookText": script.hook,
         "coldOpenSeconds": cut.cold_open.duration_seconds if cut.cold_open else 0.0,
         "outroSeconds": cut.outro_seconds,
         "outroTitle": script.title,
-        "outroText": outro_text(cut, script.comment_question),
+        "outroText": outro_text(cut, script.comment_question) if outro is None else outro,
     }
 
 

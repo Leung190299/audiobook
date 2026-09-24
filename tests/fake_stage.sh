@@ -21,6 +21,10 @@ module="$1"; shift
 [[ "$module" == "${FAKE_FAIL_MODULE:-}" ]] && { echo "Traceback giả: $module hỏng" >&2; exit 1; }
 [[ "$module" == "${FAKE_GARBAGE_MODULE:-}" ]] && { echo "xong rồi nhé"; exit 0; }
 
+all_args="$*"
+is_full=0
+[[ "$all_args" == *"--format full"* || "$all_args" == *"-full.json"* ]] && is_full=1
+
 case "$module" in
   trend.cli)
     echo "Đã lưu ý tưởng: output/ideas/me_chong_giau_cua-20260813T010000Z.txt"
@@ -30,6 +34,11 @@ case "$module" in
     echo "Bám trend: chủ đề tranh chấp tài sản đang lên"
     ;;
   scripts.cli)
+    if [[ "$all_args" == *"--topic"* ]]; then
+      echo "Chủ đề: ${FAKE_TOPIC:-ho_hang_viet}"
+      echo "Bối cảnh: Tết về quê, cả họ tra hỏi lương thưởng"
+    fi
+    echo "Định dạng: x"
     echo "Đã lưu kịch bản: output/scripts/me_chong_giau_cua-20260813T011000Z.json (11500 từ, 16 chương)"
     ;;
   tts.cli)
@@ -41,6 +50,12 @@ case "$module" in
     echo "Metadata: output/images/me_chong_giau_cua-20260813T013500Z.json"
     ;;
   episodes.cli)
+    if [[ $is_full -eq 1 ]]; then
+      echo "Đã render video full: output/episodes/me_chong_giau_cua-20260813T015000Z-full.mp4"
+      echo "Manifest: output/episodes/me_chong_giau_cua-20260813T015000Z-full.json"
+      echo "Đã render 1 video vào output/episodes"
+      exit 0
+    fi
     echo "Đã render tập 1/3: output/episodes/me_chong_giau_cua-20260813T015000Z-ep-01.mp4"
     echo "Đã render tập 2/3: output/episodes/me_chong_giau_cua-20260813T015000Z-ep-02.mp4"
     echo "Đã render tập 3/3: output/episodes/me_chong_giau_cua-20260813T015000Z-ep-03.mp4"
@@ -48,12 +63,24 @@ case "$module" in
     echo "Đã render 3 tập vào output/episodes"
     ;;
   thumbnail.cli)
+    if [[ $is_full -eq 1 ]]; then
+      echo "Đã lưu thumbnail: output/thumbnails/me_chong_giau_cua-20260813T015100Z-thumbnail-a.png"
+      echo "Thumbnail B: output/thumbnails/me_chong_giau_cua-20260813T015100Z-thumbnail-b.png"
+      exit 0
+    fi
     echo "Đã lưu thumbnail: output/thumbnails/me_chong_giau_cua-20260813T015100Z.png"
     echo "Thumbnail tập 1/3: output/thumbnails/me_chong_giau_cua-20260813T015100Z-ep-01.png"
     echo "Thumbnail tập 2/3: output/thumbnails/me_chong_giau_cua-20260813T015100Z-ep-02.png"
     echo "Thumbnail tập 3/3: output/thumbnails/me_chong_giau_cua-20260813T015100Z-ep-03.png"
     ;;
   metadata.cli)
+    if [[ $is_full -eq 1 ]]; then
+      echo "Đã lưu metadata full: output/metadata/me_chong_giau_cua-20260813T015000Z-full.txt"
+      [[ -z "${FAKE_NO_RENAME:-}" ]] && \
+        echo "Video full đã đổi tên: output/episodes/me-chong-giau-so-do.mp4"
+      echo "Danh sách: output/metadata/me_chong_giau_cua-20260813T015000Z-full.json"
+      exit 0
+    fi
     for n in 1 2 3; do
       echo "Đã lưu metadata tập $n/3: output/metadata/me_chong_giau_cua-20260813T015000Z-ep-0$n.txt"
       [[ -z "${FAKE_NO_RENAME:-}" ]] && \
@@ -69,6 +96,11 @@ case "$module" in
     echo "Đã render 2 short vào output/shorts"
     ;;
   upload.episodes_cli)
+    if [[ $is_full -eq 1 ]]; then
+      echo "Full: Mẹ chồng giấu sổ đỏ — https://youtu.be/FAKEFULL1 (lên sóng 2026-08-13 20:00)"
+      echo "Đã upload: https://youtu.be/FAKEFULL1"
+      exit 0
+    fi
     echo "Tập 1/3: Mẹ chồng giấu sổ đỏ | Tập 1/3 — https://youtu.be/FAKE12345 (lên sóng 2026-08-13 20:00)"
     echo "Tập 2/3: Mẹ chồng giấu sổ đỏ | Tập 2/3 — https://youtu.be/FAKE22345 (lên sóng 2026-08-14 20:00)"
     echo "Tập 3/3: Mẹ chồng giấu sổ đỏ | Tập 3/3 — https://youtu.be/FAKE32345 (lên sóng 2026-08-15 20:00)"
