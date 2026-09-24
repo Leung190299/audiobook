@@ -146,6 +146,10 @@ def _run_full(script: Script, seo, manifest: dict, stem: str, thumbnails_dir: Pa
                 "topic": script.topic,
                 "format": "full",
                 "story_title": story_title,
+                # Chỉ khác 0 ở chế độ kho: stage 8 dùng để lấy publish_date và
+                # ghi lại video_id vào output/story_bank_state.json.
+                "story_id": script.story_id,
+                "series": script.series,
                 "tags": seo.tags,
                 "hashtags": hashtags,
                 "episodes": [

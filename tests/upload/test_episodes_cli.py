@@ -204,3 +204,49 @@ def test_full_chua_dat_playlist_thi_xoa_dong_giu_cho(tmp_path):
         now=datetime(2026, 9, 24, 9, 0, tzinfo=LOCAL_TZ),
     )
     assert "(link playlist)" not in up.calls[0]["description"]
+
+
+# --- kho truyện: publishAt theo publish_date, ghi story_id (spec kho §6) ---
+
+
+def test_publish_date_cua_truyen_quyet_dinh_gio_len_song(tmp_path, monkeypatch):
+    from datetime import date as _date
+
+    from scripts.story_bank import Story
+
+    story = Story(id=7, topic="ho_hang_viet", series="Truyện lẻ", title="T",
+                  premise="p", twist="t", hook="h", comment_question="q",
+                  thumb_keywords=(), timing="Quanh năm", priority="A",
+                  publish_date=_date(2026, 10, 16))
+    monkeypatch.setattr(episodes_cli.story_bank, "get_story", lambda sid: story)
+
+    air = episodes_cli.resolve_first_air(
+        story_id=7, now=datetime(2026, 9, 24, 10, 0, tzinfo=episodes_cli.LOCAL_TZ),
+        publish_hour=20,
+    )
+
+    assert air.date() == _date(2026, 10, 16)
+    assert (air.hour, air.minute) == (20, 0)
+    assert air.utcoffset().total_seconds() == 7 * 3600
+
+
+def test_khong_co_publish_date_thi_dung_ngay_trong_ke_tiep(tmp_path, monkeypatch):
+    from scripts.story_bank import Story
+
+    story = Story(id=8, topic="ho_hang_viet", series="Truyện lẻ", title="T",
+                  premise="p", twist="t", hook="h", comment_question="q",
+                  thumb_keywords=(), timing="Quanh năm", priority="A", publish_date=None)
+    monkeypatch.setattr(episodes_cli.story_bank, "get_story", lambda sid: story)
+    now = datetime(2026, 9, 24, 10, 0, tzinfo=episodes_cli.LOCAL_TZ)
+
+    air = episodes_cli.resolve_first_air(story_id=8, now=now, publish_hour=20)
+
+    assert air == episodes_cli.default_first_air(now, 20)
+
+
+def test_khong_phai_che_do_kho_thi_giu_nguyen_cach_cu():
+    now = datetime(2026, 9, 24, 10, 0, tzinfo=episodes_cli.LOCAL_TZ)
+
+    assert episodes_cli.resolve_first_air(story_id=0, now=now, publish_hour=20) == (
+        episodes_cli.default_first_air(now, 20)
+    )

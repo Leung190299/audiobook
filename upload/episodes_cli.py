@@ -38,7 +38,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, time as dtime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -46,6 +46,7 @@ from dotenv import load_dotenv
 
 from metadata.episodes import NEXT_EPISODE_PLACEHOLDER, PLAYLIST_PLACEHOLDER
 from metadata.full import TOPIC_PLAYLIST_PLACEHOLDER
+from scripts import story_bank
 from scripts.topics import TOPICS
 from upload import series_cli
 from upload.auth import YouTubeAuthError, load_credentials
@@ -72,6 +73,33 @@ def default_first_air(now: datetime, publish_hour: int = DEFAULT_PUBLISH_HOUR) -
     if candidate - now < MIN_LEAD:
         candidate += timedelta(days=1)
     return candidate
+
+
+def resolve_first_air(
+    story_id: int, now: datetime, publish_hour: int = DEFAULT_PUBLISH_HOUR
+) -> datetime:
+    """Giờ lên sóng tập đầu.
+
+    Chế độ kho: truyện có `publish_date` thì tôn trọng đúng ngày đó lúc 20h giờ
+    Việt Nam -- lịch đăng do người biên tập xếp, không để code tự dời. Không có
+    ngày hẹn (hoặc không phải chế độ kho) thì dùng ngày trống kế tiếp như cũ.
+
+    Kho đọc không được cũng không được làm hỏng lượt đăng: video đã render xong,
+    rơi về ngày kế tiếp còn hơn dừng cả lượt.
+    """
+    if story_id:
+        try:
+            story = story_bank.get_story(story_id)
+        except story_bank.StoryBankError as exc:
+            print(f"CẢNH BÁO: không đọc được truyện #{story_id} trong kho ({exc}); dùng ngày kế tiếp.")
+        else:
+            if story.publish_date:
+                return datetime.combine(
+                    story.publish_date,
+                    dtime(hour=publish_hour, minute=0),
+                    tzinfo=LOCAL_TZ,
+                )
+    return default_first_air(now, publish_hour)
 
 
 def air_times(first_air: datetime, count: int) -> list[datetime]:
@@ -154,7 +182,10 @@ def run(
 
     credentials = credentials_loader()
     now = now or datetime.now(tz=LOCAL_TZ)
-    first_air = (first_air or default_first_air(now, publish_hour)).astimezone(LOCAL_TZ)
+    story_id = int(index.get("story_id") or 0)
+    first_air = (
+        first_air or resolve_first_air(story_id, now, publish_hour)
+    ).astimezone(LOCAL_TZ)
     times = air_times(first_air, len(episodes))
 
     playlist_url = playlist_url or os.getenv("YOUTUBE_PLAYLIST_URL") or None
@@ -209,6 +240,15 @@ def run(
             "next_link_set": False,
         }
         save_state()
+        if story_id:
+            # Đánh dấu truyện đã dùng để pick_story không chọn lại; ghi ở file
+            # riêng, không đụng data/story_bank.json.
+            story_bank.mark_used(
+                story_id,
+                status="published",
+                video_id=result.video_id,
+                published_at=air_at.isoformat() if schedule else None,
+            )
         append_index_jsonl(
             index_jsonl,
             {
@@ -219,6 +259,7 @@ def run(
                 "episode": ep["number"],
                 "title": metadata["title"],
                 "story_title": index.get("story_title") or "",
+                "story_id": story_id,
                 "video_id": result.video_id,
                 "url": result.url,
                 "publishAt": air_at.isoformat() if schedule else None,
