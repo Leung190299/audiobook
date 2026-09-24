@@ -52,6 +52,9 @@ class ShortPart:
     source_start_seconds: float  # vị trí trong wav gốc của cả tập
     source_end_seconds: float
     captions: list[PartCaption]
+    # Câu thoại mở đầu của Short dựng từ short_beats (24/09/2026) -- làm tiêu đề
+    # và chữ trên card đầu. Rỗng với trích đoạn kiểu cũ (dùng tiêu đề chương).
+    hook_line: str = ""
 
     @property
     def duration_seconds(self) -> float:
@@ -228,3 +231,75 @@ def _build_part(number: int, chapter_index: int, heading: str, batch: list[dict]
         source_end_seconds=source_end,
         captions=captions,
     )
+
+
+# --- Shorts từ short_beats (24/09/2026) ---------------------------------------
+# 3 Shorts/truyện, mỗi cái là một đoạn hài/sảng stage 1 đã trích nguyên văn, mở
+# bằng chính câu thoại buồn cười đó. 30-55 giây: đủ trọn một miếng hài, dưới
+# ngưỡng người xem lướt đi.
+BEAT_MIN_SECONDS = 30.0
+BEAT_MAX_SECONDS = 55.0
+
+
+def plan_beat_shorts(
+    tts_metadata: dict,
+    beats: list[str],
+    count: int = TEASER_COUNT,
+    min_seconds: float = BEAT_MIN_SECONDS,
+    max_seconds: float = BEAT_MAX_SECONDS,
+) -> list[ShortPart]:
+    """Mỗi beat -> một ShortPart bắt đầu đúng câu mở của đoạn trích, kéo dài
+    30-55s trong cùng chương. Beat không dò được (hoặc chương quá ngắn) thì bị
+    bỏ và phần thiếu được bù bằng trích đoạn rải đều kiểu cũ -- không bao giờ
+    ra ít Short hơn trước chỉ vì Gemini trích sai một đoạn."""
+    from scripts.text_tools import locate_quote, span_within
+
+    sentences = tts_metadata.get("sentences") or []
+    if not sentences:
+        raise ShortPlanError("Metadata TTS không có mốc câu (mảng 'sentences' thiếu hoặc rỗng).")
+    headings = {c["index"]: c["heading"] for c in tts_metadata.get("chapters", [])}
+
+    chosen: list[ShortPart] = []
+    for beat in beats:
+        if len(chosen) == count:
+            break
+        found = locate_quote(beat, sentences)
+        if found is None:
+            continue
+        span = span_within(sentences, found[0], min_seconds, max_seconds, end_i=found[1])
+        if span is None:
+            continue
+        i, j = span
+        start, end = sentences[i]["start_seconds"], sentences[j]["end_seconds"]
+        if any(start < p.source_end_seconds and end > p.source_start_seconds for p in chosen):
+            continue
+        chapter = sentences[i]["chapter_index"]
+        part = _build_part(0, chapter, headings.get(chapter, ""), sentences[i : j + 1])
+        part.hook_line = sentences[i]["text"].strip()
+        chosen.append(part)
+
+    if len(chosen) < count:
+        for teaser in plan_teasers(tts_metadata, count):
+            if len(chosen) == count:
+                break
+            if any(
+                teaser.source_start_seconds < p.source_end_seconds
+                and teaser.source_end_seconds > p.source_start_seconds
+                for p in chosen
+            ):
+                continue
+            chosen.append(teaser)
+
+    chosen.sort(key=lambda p: p.source_start_seconds)
+    return _renumber(chosen)
+
+
+def short_title_from_line(line: str, max_chars: int = 50) -> str:
+    """Tiêu đề Short = câu thoại mở đầu (<= 50 ký tự, cắt ở ranh giới từ) + #Shorts."""
+    line = " ".join(line.split()).strip()
+    if len(line) > max_chars:
+        cut = line[: max_chars - 1]
+        if " " in cut:
+            cut = cut[: cut.rfind(" ")]
+        line = cut.rstrip(" ,.;:-–—") + "…"
+    return f"{line} #Shorts"

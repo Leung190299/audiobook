@@ -21,7 +21,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from shorts.audio_cut import cut_wav
-from shorts.planner import plan_teasers
+from scripts.models import Script
+from scripts.topics import TOPICS
+from shorts.planner import plan_beat_shorts, plan_teasers, short_title_from_line
 from shorts.props_builder import build_short_props
 from shorts.storage import (
     make_stem,
@@ -49,7 +51,10 @@ class ShortRenderError(Exception):
     pass
 
 
-def _run(tts_metadata_path: Path, images_metadata_path: Path) -> None:
+FULL_CTA_TEXT = "Nghe trọn truyện trên kênh"
+
+
+def _run(tts_metadata_path: Path, images_metadata_path: Path, script_path: Path | None = None) -> None:
     # Resolve trước khi lấy .parent/.with_suffix: build_short_props tính đường
     # dẫn bằng .relative_to(REPO_ROOT), cần cả hai vế đều là đường dẫn tuyệt đối.
     tts_metadata_path = tts_metadata_path.resolve()
@@ -78,8 +83,25 @@ def _run(tts_metadata_path: Path, images_metadata_path: Path) -> None:
         )
     images_dir = images_metadata_path.parent
 
-    # Trích đoạn mời nghe, không phải series nối tiếp: 5 đoạn rải đều cả tập.
-    parts = plan_teasers(tts_metadata)
+    script = (
+        Script.from_dict(json.loads(script_path.read_text(encoding="utf-8")))
+        if script_path is not None
+        else None
+    )
+    # Kịch bản chủ đề (24/09/2026): 3 Shorts từ 3 đoạn hài/sảng nhất, mở bằng
+    # câu thoại. Không có short_beats: trích đoạn mời nghe rải đều như trước.
+    if script is not None and script.short_beats:
+        parts = plan_beat_shorts(tts_metadata, script.short_beats)
+    else:
+        parts = plan_teasers(tts_metadata)
+    is_full = script is not None and script.format == "full"
+    cta_text = FULL_CTA_TEXT if is_full else None
+    topic = TOPICS.get(script.topic) if script is not None else None
+    short_tags = (
+        ["truyện audio", "truyện hài", "nghe truyện", "shorts", topic.name.split(",")[0].lower()]
+        if topic
+        else None
+    )
     total_parts = len(parts)
     if not 1 <= total_parts <= 99:
         raise ShortRenderError(
@@ -113,6 +135,7 @@ def _run(tts_metadata_path: Path, images_metadata_path: Path) -> None:
                 audio_path=audio_path,
                 images_dir=images_dir,
                 repo_root=REPO_ROOT,
+                cta_text=cta_text,
             )
             props_path = save_short_props(this_part_stem, props, OUTPUT_DIR)
 
@@ -186,7 +209,14 @@ def _run(tts_metadata_path: Path, images_metadata_path: Path) -> None:
             raise
 
         metadata_path, metadata_json_path = save_short_metadata(
-            this_part_stem, trope, episode_title, part.number, total_parts, OUTPUT_DIR
+            this_part_stem,
+            trope,
+            episode_title,
+            part.number,
+            total_parts,
+            OUTPUT_DIR,
+            title_override=short_title_from_line(part.hook_line) if part.hook_line else None,
+            tags=short_tags,
         )
 
         # In ngay sau khi mỗi phần xong, không dồn đến cuối -- một tập ra ~30
@@ -210,8 +240,14 @@ def main() -> None:
     parser.add_argument(
         "images_metadata_path", help="Đường dẫn file JSON metadata ảnh"
     )
+    parser.add_argument(
+        "--script",
+        type=Path,
+        default=None,
+        help="JSON kịch bản: có short_beats thì dựng 3 Shorts từ 3 đoạn hài/sảng nhất.",
+    )
     args = parser.parse_args()
-    _run(Path(args.tts_metadata_path), Path(args.images_metadata_path))
+    _run(Path(args.tts_metadata_path), Path(args.images_metadata_path), args.script)
 
 
 if __name__ == "__main__":

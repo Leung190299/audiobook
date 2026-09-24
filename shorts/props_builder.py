@@ -27,6 +27,7 @@ def build_short_props(
     images_dir: Path,
     repo_root: Path,
     cta_seconds: float = CTA_SECONDS,
+    cta_text: str | None = None,
 ) -> dict:
     images_by_index = {c["index"]: c for c in images_metadata["chapters"]}
     image_chapter = images_by_index.get(part.chapter_index)
@@ -86,7 +87,7 @@ def build_short_props(
     # Mọi trích đoạn đều mời về video dài. Trước đây card cuối ghi "Xem phần N+1"
     # vì short là một series nối tiếp; nay short chỉ là mồi, nên chỉ có một đích
     # duy nhất đáng dẫn tới là tập đầy đủ trên kênh.
-    cta_text = "Nghe trọn tập 1 trên kênh"
+    cta_text = cta_text or "Nghe trọn tập 1 trên kênh"
 
     captions = [
         {
@@ -103,7 +104,7 @@ def build_short_props(
         "audioPath": str(audio_path.relative_to(repo_root)),
         "imagePath": image_path_relative,
         "scenes": scene_props,
-        "hookText": part.heading,
+        "hookText": part.hook_line or part.heading,
         "partLabel": f"TRÍCH ĐOẠN {part.number}/{total_parts}",
         "captions": captions,
         "audioDurationSeconds": part.duration_seconds,

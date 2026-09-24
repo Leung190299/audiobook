@@ -80,15 +80,26 @@ def save_short_metadata(
     number: int,
     total: int,
     output_dir: Path,
+    title_override: str | None = None,
+    tags: list[str] | None = None,
 ) -> tuple[Path, Path]:
     """Ghi cả `.txt` (đọc tay) lẫn `.json` (upload/series_cli.py đọc máy) cho
-    một phần, cùng nội dung tiêu đề/mô tả. Trả về (txt_path, json_path)."""
+    một phần, cùng nội dung tiêu đề/mô tả. Trả về (txt_path, json_path).
+
+    `title_override` (Shorts từ short_beats, 24/09/2026): tiêu đề là câu thoại
+    mở đầu + "#Shorts" (spec); mô tả vẫn trỏ về video full qua dòng giữ chỗ."""
     output_dir.mkdir(parents=True, exist_ok=True)
     part_label = f"Trích đoạn {number}/{total}"
-    title = f"{episode_title} — {part_label}"
-    # Không hashtag: YouTube nhận diện Shorts qua khung 9:16 và thời lượng dưới
-    # 3 phút, "#shorts" không còn tác dụng; người dùng không muốn dấu # trong mô tả.
-    description = f"{title}.\n{FULL_EPISODE_PLACEHOLDER}\n{SHORT_COMMENT_HOOK}"
+    if title_override:
+        title = title_override
+        description = (
+            f"{episode_title}.\n{FULL_EPISODE_PLACEHOLDER}\n{SHORT_COMMENT_HOOK}"
+        )
+    else:
+        title = f"{episode_title} — {part_label}"
+        # Không hashtag: YouTube nhận diện Shorts qua khung 9:16 và thời lượng dưới
+        # 3 phút, "#shorts" không còn tác dụng; người dùng không muốn dấu # trong mô tả.
+        description = f"{title}.\n{FULL_EPISODE_PLACEHOLDER}\n{SHORT_COMMENT_HOOK}"
     video_filename = f"{part_stem}.mp4"
 
     txt_path = output_dir / f"{part_stem}.txt"
@@ -106,7 +117,7 @@ def save_short_metadata(
                 "trope": trope,
                 "title": title,
                 "description": description,
-                "tags": SHORT_TAGS,
+                "tags": tags or SHORT_TAGS,
                 "part_number": number,
                 "total_parts": total,
                 "video_filename": video_filename,
