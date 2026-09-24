@@ -26,7 +26,15 @@ from pathlib import Path
 from dotenv import load_dotenv
 from gemini_webapi import GeminiClient
 
-from episodes.storage import load_manifest
+from episodes.storage import load_manifest, stem_from_manifest
+from metadata.full import (
+    build_full_description,
+    full_pinned_comment,
+    full_title,
+    save_full_metadata,
+    topic_hashtags,
+    youtube_chapter_lines,
+)
 from metadata.chapters import build_chapter_lines
 from metadata.episodes import (
     build_episode_description,
@@ -39,6 +47,7 @@ from metadata.filename import rename_video_file, slugify
 from metadata.seo_generator import generate_seo_copy
 from metadata.storage import save_seo_metadata
 from scripts.models import Script
+from scripts.topics import TOPICS
 
 load_dotenv()
 
@@ -86,6 +95,79 @@ def _find_episode_thumbnail(thumbnails_dir: Path, trope: str, number: int) -> Pa
     return candidates[-1] if candidates else None
 
 
+def _find_full_thumbnails(thumbnails_dir: Path, trope: str) -> tuple[Path | None, Path | None]:
+    """Bản A/B mới nhất stage 5 sinh cho video full: `<trope>-<ts>-thumbnail-{a,b}.png`."""
+    a = sorted(thumbnails_dir.glob(f"{trope}-*-thumbnail-a.png"))
+    b = sorted(thumbnails_dir.glob(f"{trope}-*-thumbnail-b.png"))
+    return (a[-1] if a else None), (b[-1] if b else None)
+
+
+def _run_full(script: Script, seo, manifest: dict, stem: str, thumbnails_dir: Path) -> Path:
+    topic = TOPICS.get(script.topic)
+    ep = manifest["episodes"][0]
+    story_title = script.title if script.topic else seo.title
+    title = full_title(story_title)
+    question = manifest.get("comment_question") or script.comment_question
+    hashtags = topic_hashtags(topic.hashtags if topic else None, seo.hashtags)
+    description = build_full_description(
+        seo,
+        hook=manifest.get("hook") or script.hook,
+        comment_question=question,
+        chapter_lines=youtube_chapter_lines(ep["chapters"]),
+        hashtags=hashtags,
+    )
+    new_video_path = rename_video_file(Path(ep["video_path"]), slugify(story_title))
+    thumb_a, thumb_b = _find_full_thumbnails(thumbnails_dir, script.trope)
+    data = {
+        "topic": script.topic,
+        "format": "full",
+        "episode_number": 1,
+        "episode_total": 1,
+        "story_title": story_title,
+        "title": title,
+        "description": description,
+        "tags": seo.tags,
+        "hashtags": hashtags,
+        "pinned_comment": full_pinned_comment(question),
+        "video_filename": new_video_path.name,
+        "thumbnail_filename": thumb_a.name if thumb_a else None,
+        "thumbnail_b_filename": thumb_b.name if thumb_b else None,
+    }
+    txt_path, json_path = save_full_metadata(stem, data, OUTPUT_DIR)
+    print(f"Đã lưu metadata full: {txt_path}")
+    print(f"Video full đã đổi tên: {new_video_path}")
+
+    index_path = OUTPUT_DIR / f"{stem}-full.json"
+    index_path.write_text(
+        json.dumps(
+            {
+                "trope": script.trope,
+                "topic": script.topic,
+                "format": "full",
+                "story_title": story_title,
+                "tags": seo.tags,
+                "hashtags": hashtags,
+                "episodes": [
+                    {
+                        "number": 1,
+                        "total": 1,
+                        "title": title,
+                        "video_path": str(new_video_path),
+                        "metadata_path": str(json_path),
+                        "thumbnail_path": str(thumb_a) if thumb_a else None,
+                        "thumbnail_b_path": str(thumb_b) if thumb_b else None,
+                    }
+                ],
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    print(f"Danh sách: {index_path}")
+    return index_path
+
+
 async def _run_episodes(
     script_path: Path,
     manifest_path: Path,
@@ -100,9 +182,16 @@ async def _run_episodes(
         gemini_client = await _load_gemini_client()
     seo = await generate_seo_copy(script, gemini_client)
 
-    # Stem chung với stage 4: `<trope>-<ts>-episodes.json` -> `<trope>-<ts>`.
-    stem = manifest_path.name.removesuffix("-episodes.json")
+    # Stem chung với stage 4: `<trope>-<ts>-{episodes,full}.json` -> `<trope>-<ts>`.
+    stem = stem_from_manifest(manifest_path)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    if manifest.get("format") == "full":
+        return _run_full(script, seo, manifest, stem, thumbnails_dir)
+
+    topic = TOPICS.get(script.topic)
+    if topic is not None:
+        seo.hashtags = topic_hashtags(topic.hashtags, seo.hashtags)
 
     entries: list[dict] = []
     for ep in manifest["episodes"]:
@@ -153,6 +242,8 @@ async def _run_episodes(
         json.dumps(
             {
                 "trope": script.trope,
+                "topic": script.topic,
+                "format": "episodes",
                 "story_title": seo.title,
                 "tags": seo.tags,
                 "hashtags": seo.hashtags,
