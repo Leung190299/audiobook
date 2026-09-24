@@ -245,3 +245,23 @@ def update_description(credentials, video_id: str, description: str) -> bool:
     except HttpError as exc:
         print(f"[upload] Không cập nhật được mô tả {video_id} ({exc}).")
         return False
+
+
+def add_to_playlist(credentials, playlist_id: str, video_id: str) -> bool:
+    """Thêm video vào cuối playlist (playlistItems.insert, 50 đơn vị hạn mức).
+    Trả False (không ném lỗi) nếu hỏng -- video đã lên rồi, thêm tay trong Studio."""
+    youtube = build("youtube", "v3", credentials=credentials, cache_discovery=False)
+    try:
+        youtube.playlistItems().insert(
+            part="snippet",
+            body={
+                "snippet": {
+                    "playlistId": playlist_id,
+                    "resourceId": {"kind": "youtube#video", "videoId": video_id},
+                }
+            },
+        ).execute()
+        return True
+    except HttpError as exc:
+        print(f"[upload] Không thêm được {video_id} vào playlist {playlist_id} ({exc}). Thêm tay trong Studio.")
+        return False

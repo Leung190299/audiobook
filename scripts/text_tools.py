@@ -162,6 +162,16 @@ def span_within(
         j += 1
     if sentences[j]["end_seconds"] - start > max_seconds:
         return None
-    if sentences[j]["end_seconds"] - start < min_seconds:
+    i = start_i
+    # Tiến tới thì vướng một câu rất dài (vượt max) mà chưa đủ min: lùi điểm
+    # đầu về các câu ngay trước (cùng chương) -- đoạn vẫn chứa trọn câu mở.
+    while sentences[j]["end_seconds"] - sentences[i]["start_seconds"] < min_seconds and i > 0:
+        prev = sentences[i - 1]
+        if same_chapter and prev.get("chapter_index") != chapter:
+            break
+        if sentences[j]["end_seconds"] - prev["start_seconds"] > max_seconds:
+            break
+        i -= 1
+    if sentences[j]["end_seconds"] - sentences[i]["start_seconds"] < min_seconds:
         return None
-    return start_i, j
+    return i, j

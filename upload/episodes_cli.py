@@ -7,7 +7,15 @@
     # ...
     # Trích đoạn 1: ... — https://youtu.be/yyy
 
-`metadata_index_json` là `output/metadata/<stem>-episodes.json` mà stage 6 ghi.
+`metadata_index_json` là `output/metadata/<stem>-episodes.json` (hoặc
+`<stem>-full.json` từ 24/09/2026) mà stage 6 ghi.
+
+Bản FULL (1 video/ngày): private + publishAt 20h, thêm vào playlist của CHỦ ĐỀ
+(biến .env ghi trong scripts/topics.py: YOUTUBE_PLAYLIST_HO_HANG / _NGHE_LA /
+_BO_ME -- link playlist hoặc id), bình luận câu hỏi chọn phe, 3 Shorts trỏ về
+video full. Hạn mức: 1 video + 3 Shorts + playlist ≈ 6.450/10.000 đơn vị.
+Mỗi video dài đăng xong được ghi một dòng vào output/metadata/index.jsonl
+(topic, format, video_id, publishAt) để báo cáo KPI theo chủ đề.
 
 Lịch: tập 1 lên sóng vào `--first-air` (mặc định: 20h hôm nay nếu còn cách ít
 nhất 30 phút, không thì 20h mai), các tập sau cách nhau đúng 24h. Cả ba tập
@@ -37,10 +45,12 @@ from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
 
 from metadata.episodes import NEXT_EPISODE_PLACEHOLDER, PLAYLIST_PLACEHOLDER
+from metadata.full import TOPIC_PLAYLIST_PLACEHOLDER
+from scripts.topics import TOPICS
 from upload import series_cli
 from upload.auth import YouTubeAuthError, load_credentials
 from upload.series_cli import SeriesUploadError
-from upload.uploader import post_comment, update_description, upload_video
+from upload.uploader import add_to_playlist, post_comment, update_description, upload_video
 
 load_dotenv()
 
@@ -49,6 +59,7 @@ DEFAULT_PUBLISH_HOUR = 20
 # Cách giờ công chiếu ít nhất chừng này thì mới hẹn vào hôm nay; YouTube cần
 # thời gian xử lý video 15-20 phút và từ chối publishAt trong quá khứ.
 MIN_LEAD = timedelta(minutes=30)
+INDEX_JSONL = Path(__file__).resolve().parent.parent / "output" / "metadata" / "index.jsonl"
 
 
 class EpisodesUploadError(Exception):
@@ -65,6 +76,36 @@ def default_first_air(now: datetime, publish_hour: int = DEFAULT_PUBLISH_HOUR) -
 
 def air_times(first_air: datetime, count: int) -> list[datetime]:
     return [first_air + timedelta(days=i) for i in range(count)]
+
+
+def playlist_ref(value: str | None) -> tuple[str | None, str | None]:
+    """Giá trị biến .env của playlist chủ đề -> (id, url). Nhận cả link
+    (…?list=PLxxx) lẫn id trần (PLxxx)."""
+    if not value or not value.strip():
+        return None, None
+    value = value.strip()
+    if "list=" in value:
+        playlist_id = value.split("list=", 1)[1].split("&", 1)[0]
+        return playlist_id, value
+    if value.startswith("http"):
+        return None, value
+    return value, f"https://www.youtube.com/playlist?list={value}"
+
+
+def fill_topic_playlist(description: str, playlist_url: str | None) -> str:
+    if playlist_url:
+        return description.replace(
+            TOPIC_PLAYLIST_PLACEHOLDER, f"📚 Nghe thêm truyện cùng chủ đề: {playlist_url}"
+        )
+    return description.replace(TOPIC_PLAYLIST_PLACEHOLDER + "\n\n", "").replace(
+        TOPIC_PLAYLIST_PLACEHOLDER, ""
+    )
+
+
+def append_index_jsonl(path: Path, row: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
 def fill_links(description: str, next_url: str | None, playlist_url: str | None) -> str:
@@ -95,6 +136,8 @@ def run(
     commenter=post_comment,
     description_updater=update_description,
     credentials_loader=load_credentials,
+    playlist_adder=add_to_playlist,
+    index_jsonl: Path | None = None,
     now: datetime | None = None,
 ) -> dict:
     index_path = Path(index_path)
@@ -115,6 +158,14 @@ def run(
     times = air_times(first_air, len(episodes))
 
     playlist_url = playlist_url or os.getenv("YOUTUBE_PLAYLIST_URL") or None
+    fmt = index.get("format") or "episodes"
+    topic = TOPICS.get(index.get("topic") or "")
+    topic_playlist_id, topic_playlist_url = playlist_ref(
+        os.getenv(topic.playlist_env) if topic else None
+    )
+    if topic and not topic_playlist_id:
+        print(f"CẢNH BÁO: chưa đặt {topic.playlist_env} trong .env -- không thêm vào playlist chủ đề.")
+    index_jsonl = index_jsonl or INDEX_JSONL
 
     # 1) Tải từng tập lên (bỏ qua tập đã có trong state).
     for ep, air_at in zip(episodes, times):
@@ -123,7 +174,9 @@ def run(
             print(f"Tập {ep['number']}/{ep['total']} đã đăng trước đó: {state['uploaded'][key]['url']}")
             continue
         metadata = json.loads(Path(ep["metadata_path"]).read_text(encoding="utf-8"))
-        description = fill_links(metadata["description"], None, playlist_url)
+        description = fill_topic_playlist(
+            fill_links(metadata["description"], None, playlist_url), topic_playlist_url
+        )
         thumbnail = Path(ep["thumbnail_path"]) if ep.get("thumbnail_path") else None
         if thumbnail is not None and not thumbnail.exists():
             print(f"CẢNH BÁO: tập {ep['number']} không có thumbnail {thumbnail.name}, đăng không kèm ảnh.")
@@ -156,8 +209,24 @@ def run(
             "next_link_set": False,
         }
         save_state()
+        append_index_jsonl(
+            index_jsonl,
+            {
+                "date": datetime.now(tz=LOCAL_TZ).date().isoformat(),
+                "index": str(index_path),
+                "topic": index.get("topic") or "",
+                "format": fmt,
+                "episode": ep["number"],
+                "title": metadata["title"],
+                "story_title": index.get("story_title") or "",
+                "video_id": result.video_id,
+                "url": result.url,
+                "publishAt": air_at.isoformat() if schedule else None,
+            },
+        )
         when = f" (lên sóng {air_at.strftime('%Y-%m-%d %H:%M')})" if schedule else ""
-        print(f"Tập {ep['number']}/{ep['total']}: {metadata['title']} — {result.url}{when}")
+        label = "Full" if fmt == "full" else f"Tập {ep['number']}/{ep['total']}"
+        print(f"{label}: {metadata['title']} — {result.url}{when}")
 
     # 2) Gắn link tập sau vào mô tả tập trước; đăng bình luận câu hỏi.
     for i, ep in enumerate(episodes):
@@ -165,9 +234,15 @@ def run(
         entry = state["uploaded"][key]
         metadata = json.loads(Path(ep["metadata_path"]).read_text(encoding="utf-8"))
         nxt = episodes[i + 1] if i + 1 < len(episodes) else None
+        if topic_playlist_id and not entry.get("playlist_added"):
+            if playlist_adder(credentials, topic_playlist_id, entry["video_id"]):
+                entry["playlist_added"] = True
+                save_state()
         if nxt and not entry.get("next_link_set"):
             next_url = state["uploaded"][str(nxt["number"])]["url"]
-            description = fill_links(metadata["description"], next_url, playlist_url)
+            description = fill_topic_playlist(
+                fill_links(metadata["description"], next_url, playlist_url), topic_playlist_url
+            )
             if description_updater(credentials, entry["video_id"], description):
                 entry["next_link_set"] = True
                 save_state()

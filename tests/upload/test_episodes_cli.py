@@ -126,3 +126,81 @@ def test_no_schedule_khong_truyen_publish_at(tmp_path):
     episodes_cli.run(ix["index"], uploader=up, schedule=False, commenter=lambda *a: None,
                      description_updater=lambda *a: False, credentials_loader=lambda: "creds")
     assert all(c["publish_at"] is None for c in up.calls)
+
+
+# --- bản FULL theo chủ đề (24/09/2026) ----------------------------------------
+
+from metadata.full import TOPIC_PLAYLIST_PLACEHOLDER
+from upload.episodes_cli import playlist_ref
+
+
+def _full_index(tmp_path: Path) -> Path:
+    video = tmp_path / "bac-ca.mp4"; video.write_bytes(b"mp4")
+    thumb = tmp_path / "x-thumbnail-a.png"; thumb.write_bytes(b"png")
+    meta = tmp_path / "x-full-video.json"
+    meta.write_text(json.dumps({
+        "title": "[Truyện Audio] Bác Cả | Audio Truyện",
+        "description": f"Hook\n\n❓ Q\n\n{TOPIC_PLAYLIST_PLACEHOLDER}\n\nCTA",
+        "tags": ["a"], "pinned_comment": "❓ Q 1 = a, 2 = b",
+    }, ensure_ascii=False), encoding="utf-8")
+    index = tmp_path / "x-full.json"
+    index.write_text(json.dumps({
+        "topic": "ho_hang_viet", "format": "full", "story_title": "Bác Cả",
+        "episodes": [{"number": 1, "total": 1, "title": "t", "video_path": str(video),
+                      "metadata_path": str(meta), "thumbnail_path": str(thumb)}],
+    }, ensure_ascii=False), encoding="utf-8")
+    return index
+
+
+def test_playlist_ref_nhan_link_va_id():
+    assert playlist_ref("https://www.youtube.com/playlist?list=PLabc&si=1") == (
+        "PLabc", "https://www.youtube.com/playlist?list=PLabc&si=1")
+    assert playlist_ref("PLxyz") == ("PLxyz", "https://www.youtube.com/playlist?list=PLxyz")
+    assert playlist_ref("") == (None, None)
+
+
+def test_full_dang_1_video_hen_20h_vao_playlist_chu_de_va_ghi_jsonl(tmp_path, monkeypatch, capsys):
+    monkeypatch.setenv("YOUTUBE_PLAYLIST_HO_HANG", "https://www.youtube.com/playlist?list=PLhohang")
+    jsonl = tmp_path / "index.jsonl"
+    up = FakeUploader()
+    added = []
+    now = datetime(2026, 9, 24, 9, 0, tzinfo=LOCAL_TZ)
+    state = episodes_cli.run(
+        _full_index(tmp_path), uploader=up, commenter=lambda *a: "c1",
+        description_updater=lambda *a: True, credentials_loader=lambda: "cred",
+        playlist_adder=lambda cred, pid, vid: added.append((pid, vid)) or True,
+        index_jsonl=jsonl, now=now,
+    )
+    assert len(up.calls) == 1
+    call = up.calls[0]
+    assert call["publish_at"] == datetime(2026, 9, 24, 20, 0, tzinfo=LOCAL_TZ)
+    assert "Nghe thêm truyện cùng chủ đề: https://www.youtube.com/playlist?list=PLhohang" in call["description"]
+    assert TOPIC_PLAYLIST_PLACEHOLDER not in call["description"]
+    assert added == [("PLhohang", "vid1")]
+    assert state["uploaded"]["1"]["playlist_added"] is True
+    row = json.loads(jsonl.read_text(encoding="utf-8").strip())
+    assert row["topic"] == "ho_hang_viet" and row["format"] == "full"
+    assert row["video_id"] == "vid1" and row["publishAt"].startswith("2026-09-24T20:00")
+    out = capsys.readouterr().out
+    assert "Full: [Truyện Audio] Bác Cả" in out and "Đã upload: https://youtu.be/vid1" in out
+
+    # Chạy lại: không đăng trùng, không thêm playlist lần hai, không ghi jsonl lần hai.
+    episodes_cli.run(
+        _full_index(tmp_path), uploader=up, commenter=lambda *a: "c1",
+        description_updater=lambda *a: True, credentials_loader=lambda: "cred",
+        playlist_adder=lambda cred, pid, vid: added.append((pid, vid)) or True,
+        index_jsonl=jsonl, now=now,
+    )
+    assert len(up.calls) == 1 and len(added) == 1
+    assert len(jsonl.read_text(encoding="utf-8").strip().splitlines()) == 1
+
+
+def test_full_chua_dat_playlist_thi_xoa_dong_giu_cho(tmp_path):
+    up = FakeUploader()
+    episodes_cli.run(
+        _full_index(tmp_path), uploader=up, commenter=lambda *a: "c",
+        description_updater=lambda *a: True, credentials_loader=lambda: "cred",
+        playlist_adder=lambda *a: pytest.fail("không được thêm playlist khi chưa cấu hình"),
+        now=datetime(2026, 9, 24, 9, 0, tzinfo=LOCAL_TZ),
+    )
+    assert "(link playlist)" not in up.calls[0]["description"]
