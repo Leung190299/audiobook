@@ -6,7 +6,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from scripts import history
+from scripts import history, story_bank
 from scripts.generator import generate_script
 from scripts.prompts import FORMATS
 from scripts.qa import validate_script
@@ -28,11 +28,25 @@ async def _run(
     topic_arg: str | None = None,
     fmt: str = "episodes",
     today: date | None = None,
+    story_arg: str | None = None,
 ) -> None:
     today = today or date.today()
     topic = None
     setting = ""
-    if topic_arg is not None:
+    story = None
+    if story_arg is not None:
+        # Nhánh kho (24/09/2026): truyện đã biên tập sẵn trong data/story_bank.json.
+        # Tiêu đề do người biên tập quyết nên KHÔNG kiểm tra trùng, nhưng vẫn ghi
+        # premise vào history để nhánh --topic sau này biết truyện đã kể.
+        story = story_bank.get_story(int(story_arg))
+        bank = story_bank.load_bank()
+        # run_daily.sh đọc hai dòng này: chủ đề để xếp playlist, id để lần vết.
+        print(f"Chủ đề: {story.topic}")
+        print(f"Truyện: #{story.id} — {story.title}")
+        script = await generate_script(
+            story.topic, story.title, story.premise, fmt=fmt, story=story, bank=bank
+        )
+    elif topic_arg is not None:
         # Nhánh chủ đề (24/09/2026): chọn bối cảnh chưa dùng trong 30 ngày, đưa
         # premise đã dùng vào prompt, và chặn dàn ý trùng tiêu đề/premise.
         topic = resolve_topic(topic_arg, today)
@@ -77,6 +91,10 @@ async def _run(
         history.record(
             topic.id, setting, script.title, script.premise, str(out_path), today, HISTORY_PATH
         )
+    elif story is not None:
+        history.record(
+            story.topic, "", script.title, script.premise, str(out_path), today, HISTORY_PATH
+        )
 
     print(f"Định dạng: {script.format}")
     print(
@@ -99,6 +117,11 @@ def main() -> None:
         ),
     )
     group.add_argument(
+        "--story",
+        help="Id truyện trong data/story_bank.json. Tiêu đề, hook, câu hỏi bình "
+        "luận và từ khoá thumbnail lấy nguyên từ kho, Gemini chỉ viết chương.",
+    )
+    group.add_argument(
         "--topic",
         help="Chủ đề trong scripts/topics.py (ho_hang_viet | nghe_la_hong_bien | "
         "bo_me_trong_sinh) hoặc 'auto' (xoay vòng theo AUDIOBOOK_TOPIC_ROTATION).",
@@ -117,7 +140,10 @@ def main() -> None:
         help="full = một video 35-45 phút; episodes = 3 tập có cliffhanger (22/09).",
     )
     args = parser.parse_args()
-    asyncio.run(_run(args.trope_id, args.idea_file, args.label, args.topic, args.format))
+    asyncio.run(
+        _run(args.trope_id, args.idea_file, args.label, args.topic, args.format,
+             story_arg=args.story)
+    )
 
 
 if __name__ == "__main__":

@@ -375,3 +375,87 @@ Mỗi đoạn:
 Chỉ trả về DUY NHẤT một JSON: {{"short_beats": ["<đoạn 1>", "<đoạn 2>", "<đoạn 3>"]}}
 {_JSON_QUOTE_RULE}
 """
+
+
+def build_story_outline_prompt(bank, story, fmt: str = "full") -> str:
+    """Dàn ý cho một truyện lấy từ kho biên tập sẵn (`data/story_bank.json`).
+
+    Khác `build_topic_outline_prompt`: tiêu đề, hook, câu hỏi bình luận và từ
+    khoá thumbnail ĐÃ có sẵn, Gemini không được nghĩ lại — nó chỉ chia chương và
+    chọn 3 đoạn cắt Shorts. Truyện thuộc series thì chèn nguyên khối nhân vật để
+    tên và tính cách nhất quán giữa các truyện cùng series.
+    """
+    from scripts.topics import THUMB_TEXT_MAX_WORDS
+
+    if fmt == "full":
+        lo, hi = full_words_range()
+        c_lo, c_hi = FULL_CHAPTERS_RANGE
+        length_rule = (
+            f"- Một video FULL {FULL_TARGET_MINUTES[0]}–{FULL_TARGET_MINUTES[1]} phút: "
+            f"{_fmt_num(lo)}–{_fmt_num(hi)} từ, {c_lo}–{c_hi} chương "
+            f"(khuyến nghị {FULL_TARGET_CHAPTERS})."
+        )
+        chapters_rule = f"từ {c_lo} đến {c_hi} chương"
+    else:
+        length_rule = f"- {TOTAL_WORDS_RANGE} từ, đúng {TARGET_CHAPTERS} chương."
+        chapters_rule = f"đúng {TARGET_CHAPTERS} chương"
+
+    rules = "\n".join(f"- {r}" for r in bank.writing_rules)
+
+    series_block = ""
+    info = bank.series_for(story)
+    if info:
+        cast = "\n".join(f"  • {ten}: {tinh}" for ten, tinh in (info.get("cast") or {}).items())
+        series_block = (
+            f"\nSERIES: {story.series} — giữ ĐÚNG tên và tính cách nhân vật dưới đây,"
+            " vì khán giả đã nghe các truyện trước của series này.\n"
+            f"- Người kể: {info.get('narrator', '')}\n"
+            f"- Bối cảnh: {info.get('setting', '')}\n"
+            + (f"- Nhân vật:\n{cast}\n" if cast else "")
+        )
+
+    if story.outline:
+        outline_lines = "\n".join(
+            f"  {i}. {line}" for i, line in enumerate(story.outline, start=1)
+        )
+        chapters_rule = (
+            f"ĐÚNG {len(story.outline)} chương, bám SÁT dàn ý đã duyệt dưới đây,"
+            f" chương N theo đúng dòng N:\n{outline_lines}"
+        )
+
+    return f"""Bạn là biên kịch truyện audio tiếng Việt cho một kênh chuyên truyện HÀI + VẢ MẶT.
+Truyện dưới đây ĐÃ được biên tập duyệt. Nhiệm vụ của bạn là chia chương và viết dàn ý,
+KHÔNG đổi tiêu đề, KHÔNG đổi tình huống gốc, KHÔNG đổi cú lật.
+
+TIÊU ĐỀ (cố định, chép lại nguyên văn): {story.title}
+TÌNH HUỐNG GỐC: {story.premise}
+CÚ LẬT: {story.twist}
+CÂU MỞ ĐẦU (phải là câu đầu tiên của chương 1, nguyên văn): {story.hook}
+{series_block}
+{length_rule}
+
+LUẬT VIẾT:
+{rules}
+
+Hãy LÊN DÀN Ý (chưa viết nội dung đầy đủ):
+- "chapters": {chapters_rule}
+  Mỗi chương có "heading" (ngắn gọn) và "summary" (2-3 câu: diễn biến, miếng hài, nhịp sảng).
+  Chương 1 bắt đầu thẳng bằng CÂU MỞ ĐẦU ở trên, không chào hỏi, không dẫn nhập.
+  Cú lật ở trên phải rơi vào chương gần cuối và là cao trào vả mặt lớn nhất.
+- "short_beats": mảng đúng {SHORT_BEAT_COUNT} chuỗi — mỗi chuỗi mô tả một đoạn buồn cười/sảng
+  nhất (ghi rõ nằm ở chương nào), mỗi đoạn TỰ ĐỨNG ĐƯỢC khi cắt riêng làm video ngắn 30–55 giây.
+  Đoạn đầu tiên là đoạn sảng nhất (dùng làm mở đầu video).
+- "thumb_text": chép lại đúng tiêu đề ở trên (tối đa {THUMB_TEXT_MAX_WORDS} chữ).
+
+QUAN TRỌNG: Chỉ trả về DUY NHẤT một khối JSON hợp lệ, không kèm giải thích:
+{{
+  "title": "{story.title}",
+  "thumb_text": "...",
+  "short_beats": ["...", "...", "..."],
+  "chapters": [
+    {{"heading": "...", "summary": "..."}}
+  ]
+}}
+"chapters" là mảng phẳng, mỗi object đúng 2 field "heading" và "summary".
+{_JSON_QUOTE_RULE}
+"""

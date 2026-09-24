@@ -15,6 +15,7 @@ from scripts.prompts import (
     build_chapter_prompt,
     build_outline_prompt,
     build_short_beats_prompt,
+    build_story_outline_prompt,
     build_topic_outline_prompt,
 )
 from scripts.qa import MIN_CHAPTER_WORDS, looks_like_refusal, title_problem
@@ -44,6 +45,8 @@ async def generate_script(
     *,
     fmt: str = "episodes",
     topic=None,
+    story=None,
+    bank=None,
     setting: str = "",
     avoid_premises: "list[str] | None" = None,
     is_duplicate=None,
@@ -57,7 +60,13 @@ async def generate_script(
     các chương thì hỏi thêm một lượt lấy NGUYÊN VĂN 3 đoạn hài/sảng.
     """
     topic_mode = topic is not None
-    if topic_mode:
+    # Nhánh kho (24/09): truyện đã biên tập sẵn. Loại trừ với topic_mode -- khi
+    # có story thì caller truyền topic=None, nên mọi kiểm tra trùng tiêu đề của
+    # nhánh chủ đề tự động không chạy, đúng như spec yêu cầu.
+    story_mode = story is not None
+    if story_mode:
+        outline_prompt = build_story_outline_prompt(bank, story, fmt)
+    elif topic_mode:
         from scripts.topics import TITLE_MAX_CHARS
 
         outline_prompt = build_topic_outline_prompt(topic, setting, fmt, avoid_premises)
@@ -137,7 +146,24 @@ async def generate_script(
     )
     extra: dict = {}
     beat_plans: list[str] = []
-    if topic_mode:
+    if story_mode:
+        # Kho là nguồn sự thật: tiêu đề, hook, câu hỏi và từ khoá thumbnail do
+        # người biên tập quyết, Gemini có trả khác cũng bỏ qua.
+        title = story.title
+        hook = story.hook
+        comment_question = story.comment_question
+        if story.outline:
+            # Dàn ý đã duyệt: chương N theo đúng dòng N, không để Gemini chia lại.
+            chapter_plans = [(line, line) for line in story.outline]
+        raw_beats = outline.get("short_beats") or []
+        beat_plans = [str(b) for b in raw_beats if str(b).strip()][:SHORT_BEAT_COUNT]
+        extra = dict(
+            topic=story.topic,
+            premise=story.premise,
+            thumb_text=story.title,
+            thumb_keywords=list(story.thumb_keywords),
+        )
+    elif topic_mode:
         title = clip_chars(" ".join(str(title).split()), TITLE_MAX_CHARS)
         thumb_text, thumb_keywords = clean_thumb_fields(
             str(outline.get("thumb_text") or ""),
@@ -186,10 +212,17 @@ async def generate_script(
                 )
             await asyncio.sleep(RETRY_DELAY_SECONDS * (attempt + 1))
 
+        if story_mode and chapter_number == 1 and story.hook:
+            # Spec: câu đầu chương 1 phải là hook NGUYÊN VĂN. Prompt đã yêu cầu,
+            # nhưng Gemini hay mở bài bằng một câu dẫn -- ghép lại cho chắc.
+            first = " ".join(text.split())
+            if not first.startswith(story.hook):
+                text = f"{story.hook} {text}"
+
         chapters.append(Chapter(index=chapter_number, heading=heading, text=text))
 
     short_beats: list[str] = []
-    if topic_mode:
+    if topic_mode or story_mode:
         short_beats = await _ask_short_beats(chat, beat_plans, chapters)
 
     return Script(
