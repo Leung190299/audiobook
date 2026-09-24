@@ -65,6 +65,7 @@ def test_main_generates_from_idea_file_without_trope_lookup(tmp_path, monkeypatc
         "idea",
         "Trọng sinh làm sát thủ báo thù nhà giàu",
         "Trọng sinh làm sát thủ báo thù nhà giàu",
+        fmt="episodes",
     )
     saved_files = list((tmp_path / "output").glob("*.json"))
     assert len(saved_files) == 1
@@ -97,7 +98,7 @@ def test_label_chi_doi_ten_file_khong_doi_noi_dung(tmp_path, monkeypatch):
     cli.main()
 
     generate_mock.assert_awaited_once_with(
-        "me_chong_giau_so_do", "Mẹ chồng giấu sổ đỏ", "Mẹ chồng giấu sổ đỏ"
+        "me_chong_giau_so_do", "Mẹ chồng giấu sổ đỏ", "Mẹ chồng giấu sổ đỏ", fmt="episodes"
     )
     saved = list((tmp_path / "output").glob("*.json"))
     assert len(saved) == 1

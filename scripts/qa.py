@@ -8,6 +8,9 @@ MIN_WORDS = 9000
 # lần mất 3-4 phút sinh kịch bản. 15.000 từ ra khoảng 58 phút audio, vẫn nằm
 # trong tầm bình thường của video dài.
 MAX_WORDS = 15000
+# Bản FULL 35-45 phút (24/09/2026): 35 phút ~ 8.900 từ ở tốc độ VieNeu đo được
+# (scripts/prompts.py TTS_WORDS_PER_SECOND); chừa ~5% cho Gemini viết hụt.
+MIN_WORDS_FULL = 8400
 MIN_CHAPTERS = 14
 # Sàn độ dài MỖI chương. Tổng từ không đủ để bắt lỗi: tập 05/09 có chương 4 chỉ
 # 29 từ — nguyên văn lời từ chối của Gemini — mà tổng vẫn hơn 12.000 nên QA cũ
@@ -71,9 +74,10 @@ def validate_script(script: Script) -> None:
     if problem := title_problem(script.title):
         errors.append(problem)
 
-    if not (MIN_WORDS <= script.word_count <= MAX_WORDS):
+    min_words = MIN_WORDS_FULL if script.format == "full" else MIN_WORDS
+    if not (min_words <= script.word_count <= MAX_WORDS):
         errors.append(
-            f"Độ dài {script.word_count} từ nằm ngoài khoảng {MIN_WORDS}-{MAX_WORDS}."
+            f"Độ dài {script.word_count} từ nằm ngoài khoảng {min_words}-{MAX_WORDS}."
         )
 
     if not (MIN_CHAPTERS <= len(script.chapters) <= MAX_CHAPTERS):
@@ -90,6 +94,12 @@ def validate_script(script: Script) -> None:
             errors.append(
                 f"Chương {chapter.index} chỉ có {chapter.word_count} từ, dưới sàn {MIN_CHAPTER_WORDS}."
             )
+
+    # Hợp đồng với stage 5: từ khoá tô màu phải nằm nguyên văn trong chữ
+    # thumbnail, nếu không compositor không biết tô chữ nào.
+    for kw in script.thumb_keywords:
+        if kw.lower() not in script.thumb_text.lower():
+            errors.append(f"Từ khoá thumbnail '{kw}' không nằm trong thumb_text '{script.thumb_text}'.")
 
     lowered_text = script.full_text.lower()
     for term in BANNED_TERMS:

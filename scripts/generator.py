@@ -10,10 +10,15 @@ from scripts.models import Chapter, Script
 from scripts.prompts import (
     MAX_HOOK_WORDS,
     MAX_QUESTION_WORDS,
+    MAX_TOPIC_QUESTION_WORDS,
+    SHORT_BEAT_COUNT,
     build_chapter_prompt,
     build_outline_prompt,
+    build_short_beats_prompt,
+    build_topic_outline_prompt,
 )
 from scripts.qa import MIN_CHAPTER_WORDS, looks_like_refusal, title_problem
+from scripts.text_tools import clean_thumb_fields, clip_chars, locate_quote, split_sentences
 
 
 # Số lần hỏi Gemini cho dàn ý trước khi bỏ cuộc. Xem lý do ở generate_script().
@@ -36,7 +41,29 @@ async def generate_script(
     trope_name: str,
     trope_description: str,
     client: "GeminiClient | None" = None,
+    *,
+    fmt: str = "episodes",
+    topic=None,
+    setting: str = "",
+    avoid_premises: "list[str] | None" = None,
+    is_duplicate=None,
 ) -> Script:
+    """Sinh một kịch bản.
+
+    Nhánh cũ (trope/trend): `topic=None`, prompt như trước, chỉ thêm `fmt`.
+    Nhánh chủ đề (24/09/2026): `topic` là scripts.topics.Topic; dàn ý trả thêm
+    premise/thumb_text/thumb_keywords/short_beats; `is_duplicate(title, premise)`
+    trả True thì coi dàn ý là hỏng và hỏi lại (chặn trùng 30 ngày); viết xong
+    các chương thì hỏi thêm một lượt lấy NGUYÊN VĂN 3 đoạn hài/sảng.
+    """
+    topic_mode = topic is not None
+    if topic_mode:
+        from scripts.topics import TITLE_MAX_CHARS
+
+        outline_prompt = build_topic_outline_prompt(topic, setting, fmt, avoid_premises)
+    else:
+        outline_prompt = build_outline_prompt(trope_name, trope_description, fmt)
+
     if client is None:
         client = GeminiClient(
             os.environ["SECURE_1PSID"],
@@ -52,11 +79,10 @@ async def generate_script(
     # nháy kép, nhưng cấm không bằng thử lại: hỏng ở đây là mất trắng cả lượt chạy
     # một tiếng rưỡi. Chỉ thử lại lỗi parse; lỗi API thì ném ngay vì nó không tự khỏi.
     outline = None
+    retry_note = ""
     for attempt in range(OUTLINE_ATTEMPTS):
         try:
-            outline_response = await chat.send_message(
-                build_outline_prompt(trope_name, trope_description)
-            )
+            outline_response = await chat.send_message(outline_prompt + retry_note)
         except (GeminiError, APIError, AuthError) as exc:
             raise ScriptGenerationError(f"Gemini lỗi khi sinh dàn ý: {exc}") from exc
 
@@ -66,10 +92,29 @@ async def generate_script(
             # phải dừng tay giữa TTS vì "Bà Chó Sủa…" lọt qua.
             if isinstance(outline, dict) and (problem := title_problem(str(outline.get("title", "")))):
                 raise ScriptGenerationError(problem)
+            if topic_mode and isinstance(outline, dict):
+                title_text = " ".join(str(outline.get("title", "")).split())
+                is_last = attempt == OUTLINE_ATTEMPTS - 1
+                # Tiêu đề dài hơn 60 ký tự thì bị cắt cụt trên mobile: hỏi lại;
+                # lần cuối thì cắt ở ranh giới từ còn hơn mất lượt chạy.
+                if len(title_text) > TITLE_MAX_CHARS and not is_last:
+                    raise ScriptGenerationError(
+                        f"Tiêu đề dài {len(title_text)} ký tự, quá {TITLE_MAX_CHARS}: {title_text!r}"
+                    )
+                if is_duplicate is not None and is_duplicate(
+                    title_text, str(outline.get("premise", ""))
+                ):
+                    raise ScriptGenerationError(
+                        f"Dàn ý trùng truyện đã đăng trong 30 ngày: {title_text!r}"
+                    )
             break
-        except ScriptGenerationError:
+        except ScriptGenerationError as exc:
             if attempt == OUTLINE_ATTEMPTS - 1:
                 raise
+            if topic_mode:
+                # Hỏi lại y nguyên thì Gemini hay trả lại đúng dàn ý cũ; nói rõ
+                # vì sao bị loại để lần sau khác đi.
+                retry_note = f"\n\nLƯU Ý: dàn ý trước KHÔNG dùng được vì: {exc}. Hãy làm dàn ý KHÁC."
             # Chờ trước khi hỏi lại. Một lượt hỏng ngày 03/09 nhận ba phản hồi RỖNG
             # liên tiếp trong chưa đầy hai phút — hỏi lại tức thì chỉ lặp lại đúng
             # trạng thái đó. Chờ vài giây cho Gemini qua cơn.
@@ -87,8 +132,27 @@ async def generate_script(
     # lượt chạy -- stage 6 tự thay bằng câu hỏi chung khi rỗng.
     hook = _clip_words(str(outline.get("hook") or ""), MAX_HOOK_WORDS)
     comment_question = _clip_words(
-        str(outline.get("comment_question") or ""), MAX_QUESTION_WORDS
+        str(outline.get("comment_question") or ""),
+        MAX_TOPIC_QUESTION_WORDS if topic_mode else MAX_QUESTION_WORDS,
     )
+    extra: dict = {}
+    beat_plans: list[str] = []
+    if topic_mode:
+        title = clip_chars(" ".join(str(title).split()), TITLE_MAX_CHARS)
+        thumb_text, thumb_keywords = clean_thumb_fields(
+            str(outline.get("thumb_text") or ""),
+            outline.get("thumb_keywords") or [],
+            title,
+        )
+        raw_beats = outline.get("short_beats") or []
+        beat_plans = [str(b) for b in raw_beats if str(b).strip()][:SHORT_BEAT_COUNT]
+        extra = dict(
+            topic=topic.id,
+            setting=setting,
+            premise=" ".join(str(outline.get("premise") or "").split()),
+            thumb_text=thumb_text,
+            thumb_keywords=thumb_keywords,
+        )
 
     total_chapters = len(chapter_plans)
     chapters = []
@@ -97,7 +161,14 @@ async def generate_script(
         for attempt in range(CHAPTER_ATTEMPTS):
             try:
                 chapter_response = await chat.send_message(
-                    build_chapter_prompt(chapter_number, total_chapters, heading, summary)
+                    build_chapter_prompt(
+                        chapter_number,
+                        total_chapters,
+                        heading,
+                        summary,
+                        fmt=fmt,
+                        topic_mode=topic_mode,
+                    )
                 )
             except (GeminiError, APIError, AuthError) as exc:
                 raise ScriptGenerationError(
@@ -117,13 +188,45 @@ async def generate_script(
 
         chapters.append(Chapter(index=chapter_number, heading=heading, text=text))
 
+    short_beats: list[str] = []
+    if topic_mode:
+        short_beats = await _ask_short_beats(chat, beat_plans, chapters)
+
     return Script(
         trope=trope_id,
         title=title,
         chapters=chapters,
         hook=hook,
         comment_question=comment_question,
+        format=fmt,
+        short_beats=short_beats,
+        **extra,
     )
+
+
+async def _ask_short_beats(chat, beat_plans: list[str], chapters: list[Chapter]) -> list[str]:
+    """Nguyên văn 3 đoạn hài/sảng. Không bắt buộc: hỏng thì trả [] và stage 4/7
+    tự rơi về cách chọn đoạn cũ (theo vị trí trong chương) -- một lượt Gemini
+    phụ không đáng làm mất cả kịch bản 15 chương vừa viết."""
+    sentences = [
+        {"text": t, "start_seconds": float(i), "end_seconds": float(i + 1), "chapter_index": c.index}
+        for c in chapters
+        for i, t in enumerate(split_sentences(c.text))
+    ]
+    try:
+        response = await chat.send_message(build_short_beats_prompt(beat_plans))
+        data = _parse_json_response(response.text)
+        raw = data.get("short_beats") if isinstance(data, dict) else data
+        beats = [" ".join(str(b).split()) for b in (raw or []) if str(b).strip()]
+    except Exception as exc:  # noqa: BLE001 -- cố ý: bước phụ, không được làm hỏng kịch bản
+        print(f"CẢNH BÁO: không lấy được short_beats ({exc}); stage 4/7 dùng cách chọn đoạn cũ.")
+        return []
+    # Chỉ giữ đoạn dò được trong văn bản thật -- Gemini đôi khi "trích" bằng
+    # cách viết lại, khi đó stage 4/7 không tìm ra mốc thời gian.
+    found = [b for b in beats if locate_quote(b, sentences) is not None]
+    if len(found) < len(beats):
+        print(f"CẢNH BÁO: {len(beats) - len(found)} short_beat không khớp nguyên văn, đã bỏ.")
+    return found[:SHORT_BEAT_COUNT]
 
 
 def _clip_words(text: str, max_words: int) -> str:

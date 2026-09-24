@@ -1,23 +1,58 @@
 # scripts/cli.py
 import argparse
 import asyncio
+from datetime import date
 from pathlib import Path
 
 from dotenv import load_dotenv
 
+from scripts import history
 from scripts.generator import generate_script
+from scripts.prompts import FORMATS
 from scripts.qa import validate_script
 from scripts.storage import save_script
+from scripts.topics import resolve_topic
 from scripts.trope_bank import get_trope
 
 load_dotenv()
 
 CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "tropes.yaml"
 OUTPUT_DIR = Path(__file__).resolve().parent.parent / "output" / "scripts"
+HISTORY_PATH = history.DEFAULT_PATH
 
 
-async def _run(trope_id: str | None, idea_file: Path | None, label: str | None) -> None:
-    if idea_file is not None:
+async def _run(
+    trope_id: str | None,
+    idea_file: Path | None,
+    label: str | None,
+    topic_arg: str | None = None,
+    fmt: str = "episodes",
+    today: date | None = None,
+) -> None:
+    today = today or date.today()
+    topic = None
+    setting = ""
+    if topic_arg is not None:
+        # Nhánh chủ đề (24/09/2026): chọn bối cảnh chưa dùng trong 30 ngày, đưa
+        # premise đã dùng vào prompt, và chặn dàn ý trùng tiêu đề/premise.
+        topic = resolve_topic(topic_arg, today)
+        entries = history.load_history(HISTORY_PATH)
+        setting = history.pick_setting(topic.settings, entries, topic.id, today)
+        print(f"Chủ đề: {topic.id}")
+        print(f"Bối cảnh: {setting}")
+        script = await generate_script(
+            topic.id,
+            topic.name,
+            setting,
+            fmt=fmt,
+            topic=topic,
+            setting=setting,
+            avoid_premises=history.recent_premises(entries, topic.id, today),
+            is_duplicate=lambda title, premise: history.is_duplicate(
+                entries, topic.id, title, premise, today
+            ),
+        )
+    elif idea_file is not None:
         idea = idea_file.read_text(encoding="utf-8").strip()
         # `label` chỉ đặt tên file/nhãn thể loại — nội dung truyện vẫn lấy từ idea.
         # Không có label thì mọi lượt chạy từ ý tưởng đều ra file "idea-<ts>.json",
@@ -28,15 +63,22 @@ async def _run(trope_id: str | None, idea_file: Path | None, label: str | None) 
         # tự hai lần (5.644 ký tự thay vì 3.818) và dòng "Motif:" dài cả đoạn văn.
         title_hint, _, body = idea.partition("\n\n")
         script = await generate_script(
-            label or "idea", title_hint.strip(), (body or idea).strip()
+            label or "idea", title_hint.strip(), (body or idea).strip(), fmt=fmt
         )
     else:
         trope = get_trope(CONFIG_PATH, trope_id)
-        script = await generate_script(trope.id, trope.name, trope.description)
+        script = await generate_script(trope.id, trope.name, trope.description, fmt=fmt)
 
+    script.format = script.format or fmt
     validate_script(script)
     out_path = save_script(script, OUTPUT_DIR)
 
+    if topic is not None:
+        history.record(
+            topic.id, setting, script.title, script.premise, str(out_path), today, HISTORY_PATH
+        )
+
+    print(f"Định dạng: {script.format}")
     print(
         f"Đã lưu kịch bản: {out_path} "
         f"({script.word_count} từ, {len(script.chapters)} chương)"
@@ -56,6 +98,11 @@ def main() -> None:
             "nội dung đến từ nguồn ngoài (vd: tin nhắn Telegram)."
         ),
     )
+    group.add_argument(
+        "--topic",
+        help="Chủ đề trong scripts/topics.py (ho_hang_viet | nghe_la_hong_bien | "
+        "bo_me_trong_sinh) hoặc 'auto' (xoay vòng theo AUDIOBOOK_TOPIC_ROTATION).",
+    )
     parser.add_argument(
         "--label",
         help=(
@@ -63,8 +110,14 @@ def main() -> None:
             "(mặc định 'idea'). Chỉ ảnh hưởng tên file, không ảnh hưởng nội dung."
         ),
     )
+    parser.add_argument(
+        "--format",
+        choices=FORMATS,
+        default="episodes",
+        help="full = một video 35-45 phút; episodes = 3 tập có cliffhanger (22/09).",
+    )
     args = parser.parse_args()
-    asyncio.run(_run(args.trope_id, args.idea_file, args.label))
+    asyncio.run(_run(args.trope_id, args.idea_file, args.label, args.topic, args.format))
 
 
 if __name__ == "__main__":

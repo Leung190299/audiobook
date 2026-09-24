@@ -268,3 +268,84 @@ async def test_hook_qua_dai_bi_cat_theo_so_tu():
     fake_client, _ = _make_fake_client(outline_text, ["Chương một."])
     script = await generate_script("t", "Tên", "Mô tả", client=fake_client)
     assert len(script.hook.split()) == 20
+
+
+# --- nhánh chủ đề (24/09/2026) -------------------------------------------------
+
+import json as _json
+
+from scripts.topics import TOPICS
+
+
+def _topic_outline(title="Bác Cả Đòi Chia Đất Của Bố, Tôi Livestream Luôn", n=15, premise="P"):
+    return _json.dumps(
+        {
+            "title": title,
+            "premise": premise,
+            "thumb_text": title,
+            "thumb_keywords": ["Chia Đất", "không có"],
+            "hook": "Hook",
+            "comment_question": "Nếu là bạn, bạn có cho bác Cả mượn sổ đỏ không? 1 = cho, 2 = không",
+            "short_beats": ["đoạn 1 ở chương 2", "đoạn 2", "đoạn 3"],
+            "chapters": [{"heading": f"C{i}", "summary": "s"} for i in range(1, n + 1)],
+        },
+        ensure_ascii=False,
+    )
+
+
+def _topic_client(outlines, chapter_texts, beats_text):
+    responses = [MagicMock(text=o) for o in outlines] + [MagicMock(text=t) for t in chapter_texts] + [
+        MagicMock(text=beats_text)
+    ]
+    chat = MagicMock()
+    chat.send_message = AsyncMock(side_effect=responses)
+    client = MagicMock()
+    client.start_chat.return_value = chat
+    return client, chat
+
+
+async def test_chu_de_full_tra_them_truong_thumbnail_va_short_beats():
+    chapters = [f"Chương {i} mở đầu. Bác Cả đập bàn đòi đất số {i}. Tôi bật livestream luôn." for i in range(1, 16)]
+    beats = _json.dumps({"short_beats": ["Bác Cả đập bàn đòi đất số 2. Tôi bật livestream luôn.", "câu bịa hoàn toàn không có trong truyện nào cả"]}, ensure_ascii=False)
+    client, chat = _topic_client([_topic_outline()], chapters, beats)
+    script = await generate_script(
+        "ho_hang_viet", "n", "Tết về quê", client=client,
+        fmt="full", topic=TOPICS["ho_hang_viet"], setting="Tết về quê",
+    )
+    assert script.topic == "ho_hang_viet" and script.format == "full"
+    assert script.setting == "Tết về quê" and script.premise == "P"
+    assert script.thumb_keywords == ["Chia Đất"]
+    assert "2 = không" in script.comment_question
+    # Đoạn không dò được trong văn bản bị bỏ.
+    assert script.short_beats == ["Bác Cả đập bàn đòi đất số 2. Tôi bật livestream luôn."]
+    prompt = chat.send_message.call_args_list[0].args[0]
+    assert "Tết về quê" in prompt and "cá mặn hậu cung" in prompt
+    chapter_prompt = chat.send_message.call_args_list[1].args[0]
+    assert "cliffhanger" not in chapter_prompt.lower()
+
+
+async def test_chu_de_dan_y_trung_thi_hoi_lai():
+    chapters = [f"Nội dung {i}." for i in range(1, 16)]
+    client, chat = _topic_client(
+        [_topic_outline(title="Cũ"), _topic_outline(title="Mới")], chapters, '{"short_beats": []}'
+    )
+    script = await generate_script(
+        "ho_hang_viet", "n", "s", client=client, fmt="full", topic=TOPICS["ho_hang_viet"],
+        setting="s", is_duplicate=lambda title, premise: title == "Cũ",
+    )
+    assert script.title == "Mới"
+    assert "KHÔNG dùng được" in chat.send_message.call_args_list[1].args[0]
+
+
+async def test_chu_de_tieu_de_dai_hon_60_ky_tu_thi_hoi_lai():
+    long_title = "Tôi " + "Rất " * 30 + "Dài"
+    chapters = [f"Nội dung {i}." for i in range(1, 16)]
+    client, chat = _topic_client(
+        [_topic_outline(title=long_title), _topic_outline(title="Ngắn Gọn")], chapters, "không phải json"
+    )
+    script = await generate_script(
+        "ho_hang_viet", "n", "s", client=client, fmt="full", topic=TOPICS["ho_hang_viet"], setting="s"
+    )
+    assert script.title == "Ngắn Gọn"
+    # Bước short_beats hỏng không làm hỏng kịch bản.
+    assert script.short_beats == []

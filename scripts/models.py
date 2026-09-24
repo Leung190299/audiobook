@@ -24,6 +24,17 @@ class Script:
     # đó -- mọi nơi dùng phải chịu được chuỗi rỗng.
     hook: str = ""
     comment_question: str = ""
+    # Các trường từ 24/09/2026 (chủ đề + định dạng FULL). Rỗng với kịch bản cũ
+    # hoặc kịch bản dựng từ trope/trend -- mọi nơi dùng phải chịu được rỗng.
+    topic: str = ""  # id trong scripts/topics.py
+    format: str = ""  # "full" | "episodes"
+    setting: str = ""  # bối cảnh đã chọn từ registry
+    premise: str = ""  # 1 câu tóm tắt tình huống, dùng chặn trùng 30 ngày
+    thumb_text: str = ""  # chữ trên thumbnail (<= 12 chữ)
+    thumb_keywords: list[str] = field(default_factory=list)  # chuỗi con của thumb_text
+    # Trích NGUYÊN VĂN 3 đoạn buồn cười/sảng nhất (stage 1 hỏi sau khi viết xong
+    # các chương) -- stage 4 lấy đoạn đầu làm cold open, stage 7 làm 3 Shorts.
+    short_beats: list[str] = field(default_factory=list)
 
     @property
     def word_count(self) -> int:
@@ -39,6 +50,13 @@ class Script:
             "title": self.title,
             "hook": self.hook,
             "comment_question": self.comment_question,
+            "topic": self.topic,
+            "format": self.format,
+            "setting": self.setting,
+            "premise": self.premise,
+            "thumb_text": self.thumb_text,
+            "thumb_keywords": list(self.thumb_keywords),
+            "short_beats": list(self.short_beats),
             "chapters": [
                 {"index": c.index, "heading": c.heading, "text": c.text}
                 for c in self.chapters
@@ -52,6 +70,13 @@ class Script:
             title=data["title"],
             hook=data.get("hook", "") or "",
             comment_question=data.get("comment_question", "") or "",
+            topic=data.get("topic", "") or "",
+            format=data.get("format", "") or "",
+            setting=data.get("setting", "") or "",
+            premise=data.get("premise", "") or "",
+            thumb_text=data.get("thumb_text", "") or "",
+            thumb_keywords=list(data.get("thumb_keywords") or []),
+            short_beats=list(data.get("short_beats") or []),
             chapters=[
                 Chapter(index=c["index"], heading=c["heading"], text=c["text"])
                 for c in data["chapters"]

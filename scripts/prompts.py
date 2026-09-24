@@ -1,5 +1,14 @@
 # scripts/prompts.py
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from episodes.plan import EPISODE_COUNT, cliffhanger_chapters, plan_episodes
+
+if TYPE_CHECKING:
+    from scripts.topics import Topic
+
+FORMATS = ("full", "episodes")
 
 TARGET_CHAPTERS = 16
 TOTAL_WORDS_RANGE = "10.000–13.000"
@@ -53,8 +62,12 @@ Yêu cầu:
 """
 
 
-def build_outline_prompt(trope_name: str, trope_description: str) -> str:
+def build_outline_prompt(trope_name: str, trope_description: str, fmt: str = "episodes") -> str:
     cliff_list = ", ".join(str(c) for c in CLIFFHANGER_CHAPTERS)
+    if fmt == "full":
+        # Bản FULL không chia tập: bỏ ranh giới tập/cliffhanger khỏi prompt cũ,
+        # giữ nguyên phần còn lại để nhánh trope/trend chạy được cả hai định dạng.
+        return _full_outline_from_trope(trope_name, trope_description)
     return f"""{SYSTEM_PROMPT}
 
 Motif: {trope_name}
@@ -95,8 +108,15 @@ khối JSON.
 
 
 def build_chapter_prompt(
-    chapter_number: int, total_chapters: int, heading: str, summary: str
+    chapter_number: int,
+    total_chapters: int,
+    heading: str,
+    summary: str,
+    fmt: str = "episodes",
+    topic_mode: bool = False,
 ) -> str:
+    if fmt == "full":
+        return _build_full_chapter_prompt(chapter_number, total_chapters, heading, summary, topic_mode)
     if chapter_number == 1:
         structure_rule = (
             "- Đây là CHƯƠNG MỞ ĐẦU: ba câu đầu tiên phải là hành động hoặc lời thoại "
@@ -119,6 +139,8 @@ def build_chapter_prompt(
         )
     else:
         structure_rule = ""
+    if topic_mode:
+        structure_rule += TOPIC_CHAPTER_VOICE_RULE
 
     return f"""Bây giờ hãy viết ĐẦY ĐỦ nội dung Chương {chapter_number}/{total_chapters}: "{heading}".
 
@@ -134,4 +156,222 @@ YÊU CẦU BẮT BUỘC:
   cảnh, mạch cảm xúc, mốc thời gian).
 - CHỈ trả về nội dung văn xuôi của chương, KHÔNG kèm tiêu đề chương, KHÔNG kèm JSON,
   KHÔNG kèm giải thích hay bình luận nào khác ngoài nội dung truyện.
+"""
+
+
+# --- Định dạng FULL + 3 chủ đề (24/09/2026) ----------------------------------
+#
+# Tốc độ đọc VieNeu đo trên 6 tập 20-24/09/2026: 18,4-18,8 ký tự/giây, tức
+# ~4,25 từ/giây. Mục tiêu 35-45 phút sau TTS => 8.900-11.500 từ. Chỉnh hai hằng
+# số này nếu đổi giọng/tốc độ đọc, mọi con số trong prompt tự tính lại.
+TTS_CHARS_PER_SECOND = 18.5
+TTS_WORDS_PER_SECOND = 4.25
+FULL_TARGET_MINUTES = (35, 45)
+FULL_CHAPTERS_RANGE = (14, 16)
+FULL_TARGET_CHAPTERS = 15
+
+
+def full_words_range() -> tuple[int, int]:
+    lo, hi = FULL_TARGET_MINUTES
+    return (
+        int(round(lo * 60 * TTS_WORDS_PER_SECOND, -2)),
+        int(round(hi * 60 * TTS_WORDS_PER_SECOND, -2)),
+    )
+
+
+def full_chapter_words_range() -> tuple[int, int]:
+    lo, hi = full_words_range()
+    return (int(round(lo / FULL_TARGET_CHAPTERS, -1)), int(round(hi / FULL_TARGET_CHAPTERS, -1)))
+
+
+def _fmt_num(n: int) -> str:
+    return f"{n:,}".replace(",", ".")
+
+
+SHORT_BEAT_COUNT = 3
+# Câu hỏi chọn phe có hai vế đáp án ("1 = ..., 2 = ...") nên dài hơn câu hỏi cũ;
+# cắt ở 25 từ dễ mất vế 2.
+MAX_TOPIC_QUESTION_WORDS = 35
+
+TOPIC_CHAPTER_VOICE_RULE = (
+    "- Giữ giọng kể ngôi 'tôi'. Chương PHẢI có ít nhất 1 miếng hài (thoại mỏ hỗn / so sánh "
+    "bất ngờ) và 1 nhịp sảng (kẻ xấu bị bẽ mặt nhỏ).\n"
+)
+
+_JSON_QUOTE_RULE = """TUYỆT ĐỐI KHÔNG dùng dấu nháy kép bên trong nội dung chuỗi — muốn trích lời thoại thì
+dùng nháy đơn. Một dấu nháy kép lọt vào giữa chuỗi sẽ làm hỏng cả khối JSON."""
+
+
+def _full_outline_from_trope(trope_name: str, trope_description: str) -> str:
+    lo, hi = full_words_range()
+    c_lo, c_hi = FULL_CHAPTERS_RANGE
+    return f"""Bạn là biên kịch chuyên viết truyện audio tiếng Việt cho kênh YouTube.
+Sáng tác một truyện HOÀN TOÀN GỐC lấy cảm hứng từ motif dưới đây — không chuyển thể
+hay mô phỏng tác phẩm có sẵn. Truyện đăng thành MỘT video FULL {FULL_TARGET_MINUTES[0]}–{FULL_TARGET_MINUTES[1]} phút.
+
+Motif: {trope_name}
+Mô tả motif: {trope_description}
+
+Yêu cầu: {_fmt_num(lo)}–{_fmt_num(hi)} từ, {c_lo}–{c_hi} chương (khuyến nghị {FULL_TARGET_CHAPTERS}). Chương 1 mở thẳng
+vào xung đột; cao trào rõ ở các chương cuối; kết thúc thoả mãn.
+
+Hãy LÊN DÀN Ý (chưa viết nội dung). Chỉ trả về DUY NHẤT một khối JSON:
+{{
+  "title": "<tiêu đề dưới 60 ký tự>",
+  "hook": "<tối đa {MAX_HOOK_WORDS} từ>",
+  "comment_question": "<tối đa {MAX_QUESTION_WORDS} từ>",
+  "chapters": [
+    {{"heading": "<tiêu đề chương>", "summary": "<tóm tắt 2-3 câu>"}}
+  ]
+}}
+"chapters" là mảng phẳng {c_lo}–{c_hi} object, mỗi object đúng 2 field "heading" và "summary".
+{_JSON_QUOTE_RULE}
+"""
+
+
+def build_topic_outline_prompt(
+    topic: "Topic",
+    setting: str,
+    fmt: str = "full",
+    avoid_premises: list[str] | None = None,
+) -> str:
+    """Dàn ý cho một truyện thuộc 1 trong 3 chủ đề trọng tâm (scripts/topics.py).
+
+    Trả thêm so với dàn ý cũ: premise, thumb_text, thumb_keywords, short_beats
+    (kế hoạch 3 đoạn hài/sảng -- nguyên văn được hỏi lại sau khi viết xong)."""
+    from scripts.topics import (
+        THUMB_TEXT_MAX_WORDS,
+        TITLE_MAX_CHARS,
+        VIETNAM_ONLY_RULE,
+        VOICE_RULES,
+    )
+
+    if fmt == "full":
+        lo, hi = full_words_range()
+        c_lo, c_hi = FULL_CHAPTERS_RANGE
+        length_rule = (
+            f"- Truyện đăng thành MỘT video FULL {FULL_TARGET_MINUTES[0]}–{FULL_TARGET_MINUTES[1]} phút: "
+            f"{_fmt_num(lo)}–{_fmt_num(hi)} từ, {c_lo}–{c_hi} chương (khuyến nghị {FULL_TARGET_CHAPTERS})."
+        )
+        chapters_rule = f"từ {c_lo} đến {c_hi} chương"
+        cliff_rule = ""
+    else:
+        length_rule = (
+            f"- {TOTAL_WORDS_RANGE} từ, đúng {TARGET_CHAPTERS} chương, đăng thành {EPISODE_COUNT} TẬP theo ranh giới:\n"
+            + _episode_plan_text()
+        )
+        chapters_rule = f"đúng {TARGET_CHAPTERS} chương"
+        cliff_list = ", ".join(str(c) for c in CLIFFHANGER_CHAPTERS)
+        cliff_rule = f"\n  Tóm tắt chương {cliff_list} PHẢI nói rõ cliffhanger kết chương."
+
+    voice = "\n".join(f"- {r}" for r in VOICE_RULES)
+    if topic.vietnam_only:
+        voice += f"\n- {VIETNAM_ONLY_RULE}"
+    formulas = "\n".join(f"  • {f}" for f in topic.title_formulas)
+    banned = list(topic.banned_motifs)
+    avoid = [p for p in (avoid_premises or []) if p]
+    banned_text = "\n".join(f"  • {b}" for b in banned)
+    avoid_text = (
+        "\nCác truyện CÙNG CHỦ ĐỀ đã đăng trong 30 ngày qua — KHÔNG được lặp lại tình huống, "
+        "tiêu đề hay cú lật của chúng:\n" + "\n".join(f"  • {a}" for a in avoid[-20:])
+        if avoid
+        else ""
+    )
+
+    return f"""Bạn là biên kịch truyện audio tiếng Việt cho một kênh YouTube chuyên truyện HÀI + VẢ MẶT.
+Sáng tác một truyện HOÀN TOÀN GỐC — không chuyển thể, không mô phỏng tác phẩm có sẵn.
+
+CHỦ ĐỀ: {topic.name}
+- Nhân vật chính: {topic.protagonist}
+- Bối cảnh cho truyện này: {setting}
+- Giọng: {topic.tone}
+{length_rule}
+
+LUẬT GIỌNG KỂ:
+{voice}
+
+KHÔNG dùng các motif đã bão hoà:
+{banned_text}{avoid_text}
+
+Hãy LÊN DÀN Ý (chưa viết nội dung đầy đủ). Dàn ý gồm:
+- "title": tiêu đề TỐI ĐA {TITLE_MAX_CHARS} ký tự, là MỘT CÂU KỂ CHUYỆN ngôi 'Tôi' hoặc câu tình huống,
+  Viết Hoa Chữ Cái Đầu Mỗi Từ, theo một trong các công thức:
+{formulas}
+- "premise": 1 câu (tối đa 30 từ) tóm tình huống gốc của truyện.
+- "thumb_text": chữ in lên thumbnail, TỐI ĐA {THUMB_TEXT_MAX_WORDS} chữ — thường chính là tiêu đề hoặc bản rút gọn của nó.
+- "thumb_keywords": mảng 1–3 cụm từ cần tô màu nổi bật; mỗi cụm PHẢI là chuỗi con nguyên văn của thumb_text.
+- "hook": tối đa {MAX_HOOK_WORDS} từ, cú lật/miếng hài lớn nhất, viết như lời mời nghe. Không lộ cái kết.
+- "comment_question": {topic.comment_question_style} Tối đa {MAX_TOPIC_QUESTION_WORDS} từ.
+- "short_beats": mảng đúng {SHORT_BEAT_COUNT} chuỗi — mỗi chuỗi mô tả một đoạn buồn cười/sảng nhất của truyện
+  (ghi rõ nằm ở chương nào), mỗi đoạn phải TỰ ĐỨNG ĐƯỢC khi cắt riêng làm video ngắn 30–55 giây.
+  Đoạn đầu tiên là đoạn sảng nhất (dùng làm mở đầu video).
+- "chapters": {chapters_rule}, mỗi chương có "heading" (ngắn gọn) và "summary" (2-3 câu: diễn biến,
+  miếng hài, nhịp sảng của chương).{cliff_rule}
+
+QUAN TRỌNG: Chỉ trả về DUY NHẤT một khối JSON hợp lệ, không kèm giải thích:
+{{
+  "title": "...",
+  "premise": "...",
+  "thumb_text": "...",
+  "thumb_keywords": ["..."],
+  "hook": "...",
+  "comment_question": "...",
+  "short_beats": ["...", "...", "..."],
+  "chapters": [
+    {{"heading": "...", "summary": "..."}}
+  ]
+}}
+"chapters" là mảng phẳng, mỗi object đúng 2 field "heading" và "summary".
+{_JSON_QUOTE_RULE}
+"""
+
+
+def _build_full_chapter_prompt(
+    chapter_number: int, total_chapters: int, heading: str, summary: str, topic_mode: bool
+) -> str:
+    w_lo, w_hi = full_chapter_words_range()
+    if chapter_number == 1:
+        structure_rule = (
+            "- Đây là CHƯƠNG MỞ ĐẦU: câu đầu tiên là tình huống xung đột đang diễn ra, câu thứ "
+            "hai là một câu chọc cười. Không chào hỏi, không giới thiệu bản thân, không tả thời tiết.\n"
+        )
+    elif chapter_number == total_chapters:
+        structure_rule = (
+            "- Đây là CHƯƠNG KẾT: cú vả mặt lớn nhất, kẻ xấu nhận hậu quả rõ ràng, nhân vật "
+            "chính có kết thúc thoả mãn. Không bỏ lửng.\n"
+        )
+    elif chapter_number == total_chapters - 1:
+        structure_rule = "- Chương áp chót: dồn căng thẳng lên đỉnh, chuẩn bị cho cú vả mặt lớn ở chương kết.\n"
+    else:
+        structure_rule = ""
+    voice_rule = TOPIC_CHAPTER_VOICE_RULE if topic_mode else ""
+    return f"""Bây giờ hãy viết ĐẦY ĐỦ nội dung Chương {chapter_number}/{total_chapters}: "{heading}".
+
+Tóm tắt diễn biến chương này theo dàn ý đã thống nhất ở trên: {summary}
+
+YÊU CẦU BẮT BUỘC:
+{structure_rule}{voice_rule}- Viết đầy đủ cảnh, thoại, nội tâm — KHÔNG tóm tắt.
+- Độ dài BẮT BUỘC từ {w_lo} đến {w_hi} từ — không vượt quá {w_hi} từ.
+- Giữ nhất quán với các chương trước trong cuộc trò chuyện này (tên nhân vật, bối cảnh, mốc thời gian).
+- CHỈ trả về văn xuôi của chương, KHÔNG kèm tiêu đề chương, KHÔNG JSON, KHÔNG giải thích.
+"""
+
+
+def build_short_beats_prompt(beat_plans: list[str]) -> str:
+    """Hỏi lại NGUYÊN VĂN các đoạn hài/sảng sau khi đã viết xong mọi chương.
+
+    Dàn ý chỉ mô tả đoạn sẽ hay; stage 4/7 cần đúng chữ đã được đọc thành audio
+    để dò ra mốc thời gian, nên phải trích từ chính văn bản vừa viết."""
+    plans = "\n".join(f"{i}. {p}" for i, p in enumerate(beat_plans, start=1)) or "(tự chọn)"
+    return f"""Truyện đã viết xong. Hãy chọn {SHORT_BEAT_COUNT} đoạn buồn cười / sảng nhất trong CÁC CHƯƠNG VỪA VIẾT
+(ưu tiên đúng các đoạn đã lên kế hoạch dưới đây, nếu có):
+{plans}
+
+Mỗi đoạn:
+- TRÍCH NGUYÊN VĂN, liên tục, từ 60 đến 130 từ, copy đúng từng chữ như trong chương (không sửa, không tóm tắt).
+- Mở bằng một câu thoại buồn cười hoặc sảng, tự đứng được khi nghe riêng.
+- Đoạn thứ nhất là đoạn sảng nhất.
+
+Chỉ trả về DUY NHẤT một JSON: {{"short_beats": ["<đoạn 1>", "<đoạn 2>", "<đoạn 3>"]}}
+{_JSON_QUOTE_RULE}
 """
