@@ -60,6 +60,10 @@ class Script:
             "premise": self.premise,
             "thumb_text": self.thumb_text,
             "thumb_keywords": list(self.thumb_keywords),
+            # Stage 6 nạp lại kịch bản từ JSON: thiếu hai trường này thì mô tả
+            # mất dòng series và publishAt tính theo truyện số 0 (sai ngày).
+            "story_id": self.story_id,
+            "series": self.series,
             "short_beats": list(self.short_beats),
             "chapters": [
                 {"index": c.index, "heading": c.heading, "text": c.text}
@@ -78,6 +82,8 @@ class Script:
             format=data.get("format", "") or "",
             setting=data.get("setting", "") or "",
             premise=data.get("premise", "") or "",
+            story_id=int(data.get("story_id") or 0),
+            series=data.get("series", "") or "",
             thumb_text=data.get("thumb_text", "") or "",
             thumb_keywords=list(data.get("thumb_keywords") or []),
             short_beats=list(data.get("short_beats") or []),
