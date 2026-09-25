@@ -22,6 +22,10 @@ from scripts.qa import MIN_CHAPTER_WORDS, looks_like_refusal, title_problem
 from scripts.text_tools import clean_thumb_fields, clip_chars, locate_quote, split_sentences
 
 
+# Tên chương hiện trên khung hình ở cỡ chữ 20px và không xuống dòng
+# (remotion/src/MainVideo.tsx): dài quá là tràn ra ngoài mép phải.
+HEADING_MAX_CHARS = 80
+
 # Số lần hỏi Gemini cho dàn ý trước khi bỏ cuộc. Xem lý do ở generate_script().
 OUTLINE_ATTEMPTS = 3
 # Giây chờ trước lần thử lại đầu tiên; lần sau nhân đôi, nhân ba.
@@ -154,7 +158,23 @@ async def generate_script(
         comment_question = story.comment_question
         if story.outline:
             # Dàn ý đã duyệt: chương N theo đúng dòng N, không để Gemini chia lại.
-            chapter_plans = [(line, line) for line in story.outline]
+            #
+            # Chỉ dùng dòng dàn ý làm CHỈ DẪN VIẾT, không làm tên chương: nó là
+            # ghi chú nội bộ cho người viết ("Miếng hài: ...", "Cliffhanger:
+            # ..."), mà heading thì bị đốt lên khung hình (MainVideo.tsx) và
+            # thành mốc chương trong mô tả YouTube. Ngày 25/09 video truyện #2
+            # đã hiện nguyên câu "Miếng hài: bác Cả tự đo đất bằng bước chân"
+            # cho người xem. Tên chương lấy của Gemini như nhánh --topic.
+            goi_y = [h for h, _ in chapter_plans]
+            chapter_plans = [
+                (
+                    clip_chars(" ".join(goi_y[i].split()), HEADING_MAX_CHARS)
+                    if i < len(goi_y) and str(goi_y[i]).strip()
+                    else f"Chương {i + 1}",
+                    line,
+                )
+                for i, line in enumerate(story.outline)
+            ]
         raw_beats = outline.get("short_beats") or []
         beat_plans = [str(b) for b in raw_beats if str(b).strip()][:SHORT_BEAT_COUNT]
         extra = dict(

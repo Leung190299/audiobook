@@ -119,6 +119,12 @@ async def test_stage_1_truyen_that_co_outline_ra_dung_16_chuong_va_hook_dau(monk
                                    story=story, bank=bank)
 
     assert len(script.chapters) == 16
-    assert [c.heading for c in script.chapters] == list(story.outline)
+    # Tên chương lấy của Gemini, KHÔNG phải nguyên dòng dàn ý: dòng dàn ý là ghi
+    # chú nội bộ, mà heading thì hiện trên khung hình và trong mô tả YouTube.
+    assert [c.heading for c in script.chapters] == [f"C{i}" for i in range(1, 17)]
+    # Nội dung vẫn bám đúng dòng dàn ý theo thứ tự.
+    prompts = [str(c.args[0]) for c in chat.send_message.await_args_list]
+    for i, line in enumerate(story.outline):
+        assert line in prompts[i + 1], f"chương {i + 1} không bám dòng {i + 1}"
     assert script.chapters[0].text.startswith(story.hook)
     assert script.title == story.title

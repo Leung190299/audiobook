@@ -148,13 +148,39 @@ async def test_khong_kiem_tra_trung_tieu_de():
 async def test_co_outline_thi_so_chuong_bang_so_dong_va_dung_thu_tu():
     co = Story(**{**STORY.__dict__,
                   "outline": ("Bố mất, cả họ về", "Bác Cả đòi đất", "Thảo livestream")})
-    client, _ = _client(_outline(3), ["Một.", "Hai.", "Ba."])
+    client, chat = _client(_outline(3), ["Một.", "Hai.", "Ba."])
 
     script = await generate_script("x", "y", "z", client=client, fmt="full",
                                    story=co, bank=BANK)
 
     assert len(script.chapters) == 3
-    assert [c.heading for c in script.chapters] == list(co.outline)
+    # Dòng dàn ý điều khiển NỘI DUNG chương, theo đúng thứ tự.
+    prompts = [str(c.args[0]) for c in chat.send_message.await_args_list]
+    for i, line in enumerate(co.outline):
+        assert line in prompts[i + 1], f"chương {i + 1} không bám dòng {i + 1}"
+
+
+async def test_ten_chuong_khong_lay_nguyen_dong_dan_y():
+    """Dòng dàn ý là ghi chú nội bộ cho người viết.
+
+    Heading vừa bị đốt lên khung hình (MainVideo.tsx) vừa thành mốc chương
+    trong mô tả YouTube. Ngày 25/09 video #2 hiện nguyên câu "Miếng hài: bác
+    Cả tự đo đất bằng bước chân" cho người xem. Tên chương phải lấy của
+    Gemini, dòng dàn ý chỉ dùng để chỉ đạo nội dung.
+    """
+    co = Story(**{**STORY.__dict__, "outline": (
+        "Lai lịch mảnh đất 120m². Miếng hài: bác Cả tự đo đất bằng bước chân.",
+        "Bác Cả leo thang. Cliffhanger: đòi họp gia đình Chủ nhật tới.",
+    )})
+    client, _ = _client(_outline(2), ["Một.", "Hai."])
+
+    script = await generate_script("x", "y", "z", client=client, fmt="full",
+                                   story=co, bank=BANK)
+
+    headings = [c.heading for c in script.chapters]
+    assert headings == ["Chương 1", "Chương 2"]  # do _outline() sinh ra
+    for h in headings:
+        assert "Miếng hài" not in h and "Cliffhanger" not in h
 
 
 async def test_khong_co_outline_thi_dung_dan_y_cua_gemini():
