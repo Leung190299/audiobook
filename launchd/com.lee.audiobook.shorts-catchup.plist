@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.lee.audiobook.shorts-catchup</string>
+
+  <!-- Việc một lần cho ba tối 30/09 - 02/10/2026: đăng 3 short của truyện vừa
+       lên sóng. 20:05 chứ không phải 20:00 vì video dài tự công khai đúng
+       20:00; short trỏ vào video còn private là link chết. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/lee/Project/Apps/audiobook/scripts/catchup_shorts.sh</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/lee/Project/Apps/audiobook</string>
+
+  <!-- launchd không có trường Year, nên ba mốc này lặp lại hằng năm. Vô hại:
+       bảng LICH trong scripts/catchup_shorts.py chỉ có ngày của 2026, sang năm
+       gặp ngày không có trong bảng thì thoát êm. Dù vậy nên gỡ lịch sau 02/10:
+       launchctl bootout gui/$(id -u)/com.lee.audiobook.shorts-catchup -->
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict>
+      <key>Month</key><integer>9</integer>
+      <key>Day</key><integer>30</integer>
+      <key>Hour</key><integer>20</integer>
+      <key>Minute</key><integer>5</integer>
+    </dict>
+    <dict>
+      <key>Month</key><integer>10</integer>
+      <key>Day</key><integer>1</integer>
+      <key>Hour</key><integer>20</integer>
+      <key>Minute</key><integer>5</integer>
+    </dict>
+    <dict>
+      <key>Month</key><integer>10</integer>
+      <key>Day</key><integer>2</integer>
+      <key>Hour</key><integer>20</integer>
+      <key>Minute</key><integer>5</integer>
+    </dict>
+  </array>
+
+  <key>StandardOutPath</key>
+  <string>/Users/lee/Project/Apps/audiobook/output/daily/shorts-catchup.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/lee/Project/Apps/audiobook/output/daily/shorts-catchup.err.log</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>LANG</key><string>en_US.UTF-8</string>
+    <key>LC_ALL</key><string>en_US.UTF-8</string>
+  </dict>
+
+  <!-- Tải lên ba file 16-20 MB; đừng để macOS bóp CPU hay giết giữa chừng. -->
+  <key>ProcessType</key>
+  <string>Interactive</string>
+  <key>ExitTimeOut</key>
+  <integer>0</integer>
+
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>
