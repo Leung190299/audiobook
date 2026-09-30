@@ -7,6 +7,10 @@ import { Waveform } from "./Waveform";
 import { Caption } from "./Caption";
 import { FONT_FAMILY, useBeVietnamPro } from "./fonts";
 
+// Cảnh báo nội dung AI. Nói cả "hư cấu" lẫn "do AI tạo": truyện kể ngôi
+// "tôi" về chuyện nhà rất đời thường, người xem dễ tin là có thật.
+const AI_NOTICE = "Truyện hư cấu • Nội dung do AI tạo";
+
 // Dissolve giữa hai cảnh. Dài hơn khoảng nghỉ 0,5s giữa chương (gap_seconds ở
 // config/voice.yaml) là cố ý: ảnh tan dần qua ranh giới chương nhìn mềm hơn
 // là cắt đúng lúc tiếng ngắt.
@@ -128,6 +132,24 @@ export const MainVideo: React.FC<VideoProps> = ({
           {hookText}
         </div>
       ) : null}
+      {inColdOpen ? (
+        <div
+          style={{
+            position: "absolute",
+            bottom: 40,
+            left: 0,
+            right: 0,
+            textAlign: "center",
+            color: "rgba(255,255,255,0.82)",
+            fontFamily: FONT_FAMILY,
+            fontWeight: 700,
+            fontSize: 22,
+            textShadow: "0 2px 8px rgba(0,0,0,0.9)",
+          }}
+        >
+          {AI_NOTICE}
+        </div>
+      ) : null}
       {!inOutro ? <Caption chapters={chapters} /> : null}
       {inOutro ? (
         <AbsoluteFill
@@ -166,6 +188,18 @@ export const MainVideo: React.FC<VideoProps> = ({
               {line}
             </div>
           ))}
+          <div
+            style={{
+              color: "rgba(255,255,255,0.75)",
+              fontFamily: FONT_FAMILY,
+              fontWeight: 700,
+              fontSize: 24,
+              textAlign: "center",
+              marginTop: 8,
+            }}
+          >
+            {AI_NOTICE}
+          </div>
         </AbsoluteFill>
       ) : null}
       {audioPath ? <Audio src={staticFile(audioPath)} /> : null}

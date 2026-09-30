@@ -32,6 +32,19 @@ TOPIC_PLAYLIST_PLACEHOLDER = "📚 Nghe thêm truyện cùng chủ đề: (link 
 SERIES_LINE = "📚 Series {series} — nghe các truyện khác trong playlist"
 # Nhãn kho dùng cho truyện không thuộc series nào.
 STANDALONE_SERIES = "Truyện lẻ"
+# Cảnh báo nội dung AI. Nói CẢ "hư cấu" lẫn "do AI tạo": truyện kể ngôi "tôi"
+# về tranh chấp đất, chị dâu, khu trọ -- toàn chuyện đời thường, người nghe rất
+# dễ tin là có thật rồi kể lại. Chỉ ghi "do AI tạo" thì họ vẫn có thể nghĩ AI
+# đang kể lại một vụ có thật.
+#
+# Bản ngắn nằm ngay sau hook vì YouTube chỉ hiện ~2 dòng đầu trước khi phải bấm
+# "thêm": đặt ở đó thì thấy được mà không đè mất hook.
+AI_NOTICE_SHORT = "⚠️ Truyện hư cấu. Kịch bản, giọng đọc và hình ảnh do AI tạo ra."
+AI_NOTICE_FULL = (
+    "⚠️ Đây là truyện hư cấu, không phải chuyện có thật. Kịch bản, giọng đọc và "
+    "hình ảnh trong video đều do AI tạo ra. Tên người, địa danh và mọi tình tiết "
+    "đều là tưởng tượng; trùng với người thật việc thật là ngoài ý muốn."
+)
 DEFAULT_SIDE_QUESTION = "Nếu là bạn, bạn có nhịn không? 1 = nhịn cho yên nhà, 2 = xử đẹp luôn"
 # Luật YouTube cho "Khoảnh khắc chính": mốc đầu 0:00, ít nhất 3 mốc, cách nhau >= 10s.
 MIN_CHAPTER_GAP_SECONDS = 10
@@ -93,6 +106,7 @@ def build_full_description(
     parts: list[str] = []
     if hook:
         parts.append(hook)
+    parts.append(AI_NOTICE_SHORT)
     summary = two_sentence_summary(seo.description_draft)
     if summary:
         parts.append(summary)
@@ -103,6 +117,7 @@ def build_full_description(
     parts.append(FULL_CTA)
     if chapter_lines:
         parts.append("Chương:\n" + "\n".join(chapter_lines))
+    parts.append(AI_NOTICE_FULL)
     if hashtags:
         parts.append(" ".join(hashtags))
     return "\n\n".join(parts)

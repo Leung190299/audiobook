@@ -153,3 +153,44 @@ def test_mo_ta_khong_truyen_series_van_chay_nhu_cu():
     )
 
     assert "Series" not in desc
+
+
+# --- cảnh báo nội dung AI (30/09/2026) ---------------------------------------
+
+
+def test_mo_ta_co_canh_bao_ai_o_dong_hai_va_ban_day_du_o_cuoi():
+    """Truyện kể ngôi 'tôi' về chuyện nhà rất đời thường, người nghe dễ tưởng
+    có thật. YouTube chỉ hiện ~2 dòng đầu trước khi phải bấm 'thêm', nên dòng
+    ngắn phải nằm ngay sau hook thì mới thấy được mà không đè mất hook."""
+    from metadata.full import AI_NOTICE_FULL, AI_NOTICE_SHORT, build_full_description
+
+    desc = build_full_description(
+        SEO, hook="Hook mở đầu.", comment_question=QUESTION,
+        chapter_lines=["0:00 Mở đầu", "1:00 Chương 1"], hashtags=["#truyenaudio"],
+    )
+    khoi = desc.split("\n\n")
+
+    assert khoi[0] == "Hook mở đầu."
+    assert khoi[1] == AI_NOTICE_SHORT
+    assert AI_NOTICE_FULL in desc
+    # Bản đầy đủ ở cuối, hashtag vẫn là khối chốt.
+    assert khoi.index(AI_NOTICE_FULL) == len(khoi) - 2
+    assert khoi[-1] == "#truyenaudio"
+
+
+def test_canh_bao_noi_ca_hu_cau_lan_ai():
+    """Chỉ nói 'do AI tạo' thì người nghe vẫn có thể nghĩ AI kể lại vụ có thật."""
+    from metadata.full import AI_NOTICE_FULL, AI_NOTICE_SHORT
+
+    for text in (AI_NOTICE_SHORT, AI_NOTICE_FULL):
+        assert "hư cấu" in text.lower()
+        assert "AI" in text
+
+
+def test_khong_co_hook_thi_canh_bao_van_len_dau():
+    from metadata.full import AI_NOTICE_SHORT, build_full_description
+
+    desc = build_full_description(SEO, hook="", comment_question=QUESTION,
+                                  chapter_lines=[], hashtags=[])
+
+    assert desc.split("\n\n")[0] == AI_NOTICE_SHORT

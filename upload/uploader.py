@@ -125,6 +125,7 @@ def upload_video(
     thumbnail_path: Path | None = None,
     made_for_kids: bool = False,
     default_language: str = "vi",
+    synthetic_media: bool = True,
     publish_at: "datetime | None" = None,
 ) -> UploadResult:
     if not video_path.exists():
@@ -144,6 +145,11 @@ def upload_video(
         "status": {
             "privacyStatus": privacy_status,
             "selfDeclaredMadeForKids": made_for_kids,
+            # Kịch bản (Gemini), giọng đọc (VieNeu-TTS) và ảnh nền (FLUX) đều do
+            # AI sinh -- YouTube bắt khai báo mục "nội dung tổng hợp hoặc đã
+            # chỉnh sửa". Bật sẵn ở đây chứ không để phải nhớ tick tay trong
+            # Studio sau mỗi lượt đăng.
+            "containsSyntheticMedia": synthetic_media,
         },
     }
     if publish_at is not None:
