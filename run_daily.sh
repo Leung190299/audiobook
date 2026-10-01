@@ -317,6 +317,17 @@ else
   log "  Dựng lại tay: $RUNNER shorts.cli \"$AUDIO_JSON\" \"$IMAGES_JSON\" --script \"$SCRIPT_PATH\""
 fi
 
+# Ghi tiền tố short vào chỉ mục metadata. Stage 7 đặt tên short theo một dấu
+# thời gian RIÊNG, lệch dấu thời gian của chỉ mục (stage 6) vài phút, nên về sau
+# không thể dò ngược từ chỉ mục ra bộ short -- dò theo giờ là rủi ro đăng nhầm
+# short của truyện khác lên kênh. Ghi NGAY ĐÂY chứ không ở stage 8, vì lượt dựng
+# không kèm --upload (lịch 09:00 hằng ngày) thoát ngay bên dưới.
+SHORTS_PREFIX="$(extract 'Đã render short: (.+)-part-01\.mp4' "$SHORT_LOG")"
+if [[ -n "$SHORTS_PREFIX" && -n "$METADATA_INDEX" ]]; then
+  $RUNNER scripts.post_shorts --record "$METADATA_INDEX" "$SHORTS_PREFIX" \
+    >>"$LOG_FILE" 2>&1 || log "CẢNH BÁO: không ghi được shorts_prefix vào $METADATA_INDEX"
+fi
+
 if [[ "$DO_UPLOAD" -eq 0 ]]; then
   DURATION="$(human_duration $(($(date +%s) - START_TS)))"
   log "✔ Đã dựng xong sau $DURATION. Video: $FINAL_VIDEO"
@@ -341,7 +352,6 @@ fi
 # output/metadata/index.jsonl. episodes: 3 tập hẹn giờ 20h mỗi ngày một tập như
 # 22/09. Ghim bình luận vẫn làm tay trong Studio.
 UPLOAD_LOG="$LOG_DIR/08-upload.log"
-SHORTS_PREFIX="$(extract 'Đã render short: (.+)-part-01\.mp4' "$SHORT_LOG")"
 UPLOAD_ARGS=("$METADATA_INDEX")
 [[ -n "$SHORTS_PREFIX" ]] && UPLOAD_ARGS+=(--shorts-prefix "$SHORTS_PREFIX")
 run_stage "Stage 8: Upload YouTube" "$UPLOAD_LOG" \

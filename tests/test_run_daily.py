@@ -500,3 +500,25 @@ def test_story_va_topic_loai_tru_nhau(tmp_path: Path):
 
     assert run.exit_code == 2
     assert "loại trừ nhau" in run.proc.stderr
+
+
+def test_ghi_shorts_prefix_vao_chi_muc_ngay_sau_stage_7(tmp_path):
+    """Stage 7 đặt tên short theo dấu thời gian riêng, không dò ngược được từ
+    chỉ mục. Phải ghi lại NGAY, và ghi cả khi không có --upload -- lịch dựng
+    09:00 hằng ngày không dùng cờ đó."""
+    run = _run(tmp_path, legacy=False)
+
+    assert run.exit_code == 0
+    ghi = run.call_for("scripts.post_shorts")
+    assert ghi is not None, f"không thấy lượt ghi nào: {run.calls}"
+    assert "--record" in ghi
+    assert "-full.json" in ghi
+    assert "output/shorts/me_chong_giau_cua-20260813T015300Z" in ghi
+
+
+def test_stage_7_hong_thi_khong_ghi_shorts_prefix(tmp_path):
+    """Không có short thì đừng ghi tiền tố trỏ vào hư không."""
+    run = _run(tmp_path, legacy=False, FAKE_FAIL_MODULE="shorts.cli")
+
+    assert run.exit_code == 0  # stage 7 hỏng không làm vỡ lượt chạy
+    assert not run.called("scripts.post_shorts")

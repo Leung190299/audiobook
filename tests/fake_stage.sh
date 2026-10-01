@@ -106,6 +106,11 @@ case "$module" in
     done
     echo "Danh sách: output/metadata/me_chong_giau_cua-20260813T015000Z-episodes.json"
     ;;
+  scripts.post_shorts)
+    # --record chỉ ghi shorts_prefix vào chỉ mục; chỉ mục trong test là đường
+    # dẫn giả nên không làm gì, chỉ cần FAKE_LOG ở trên đã ghi lại lệnh gọi.
+    exit 0
+    ;;
   shorts.cli)
     echo "Đã render short: output/shorts/me_chong_giau_cua-20260813T015300Z-part-01.mp4"
     echo "Metadata short: output/shorts/me_chong_giau_cua-20260813T015300Z-part-01.txt"
