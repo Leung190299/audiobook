@@ -199,3 +199,34 @@ def test_cli_pick_het_truyen_thi_in_rong_va_thoat_khac_0(bank, tmp_path, capsys)
 
     assert code != 0
     assert capsys.readouterr().out.strip() == ""
+
+
+# --- đánh dấu đã dựng (02/10/2026) -------------------------------------------
+
+
+def test_cli_mark_used_danh_dau_truyen_da_dung(tmp_path):
+    """Dựng xong mà chưa đăng thì kho vẫn coi là chưa dùng, nên hôm sau
+    `--story auto` chọn lại đúng truyện đó và dựng lại từ đầu. Lượt 28/09 đã
+    mất gần 2 tiếng như thế rồi đổ ở bước đổi tên file trùng."""
+    from scripts import story_bank
+
+    state = tmp_path / "state.json"
+
+    assert story_bank.main(["--mark-used", "7", "--state", str(state)]) == 0
+
+    assert story_bank.used_ids(state) == {7}
+    assert story_bank.load_state(state)["7"]["status"] == "built"
+
+
+def test_mark_used_khong_de_len_trang_thai_da_dang(tmp_path):
+    """Đăng rồi thì giữ nguyên 'published' kèm video_id, đừng hạ cấp."""
+    from scripts import story_bank
+
+    state = tmp_path / "state.json"
+    story_bank.mark_used(7, state_path=state, status="published", video_id="abc")
+
+    story_bank.main(["--mark-used", "7", "--state", str(state)])
+
+    ban_ghi = story_bank.load_state(state)["7"]
+    assert ban_ghi["status"] == "published"
+    assert ban_ghi["video_id"] == "abc"

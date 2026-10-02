@@ -29,7 +29,12 @@ is_full=0
 
 case "$module" in
   scripts.story_bank)
-    # --pick in đúng một id (hoặc thoát 3 khi kho hết); --upcoming in lịch.
+    # --mark-used đánh dấu truyện đã dựng xong; --pick in đúng một id (hoặc
+    # thoát 3 khi kho hết); --upcoming in lịch.
+    if [[ " $* " == *" --mark-used "* ]]; then
+      echo "Đã đánh dấu truyện là đã dựng."
+      exit 0
+    fi
     if [[ " $* " == *" --pick "* ]]; then
       [[ -n "${FAKE_NO_STORY:-}" ]] && exit 3
       echo "${FAKE_STORY_ID:-42}"

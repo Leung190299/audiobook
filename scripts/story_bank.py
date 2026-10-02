@@ -151,7 +151,9 @@ def load_state(state_path: Path = DEFAULT_STATE_PATH) -> dict:
 def used_ids(state_path: Path = DEFAULT_STATE_PATH) -> set[int]:
     out = set()
     for key, value in load_state(state_path).items():
-        if isinstance(value, dict) and value.get("status") in (None, "used", "published"):
+        if isinstance(value, dict) and value.get("status") in (
+            None, "used", "built", "published"
+        ):
             try:
                 out.add(int(key))
             except (TypeError, ValueError):
@@ -292,6 +294,8 @@ def main(argv: "list[str] | None" = None) -> int:
                         help="In lịch N ngày tới rồi thoát")
     parser.add_argument("--pick", action="store_true",
                         help="In đúng id truyện cho --date (rỗng + mã thoát 3 nếu hết)")
+    parser.add_argument("--mark-used", type=int, default=None, metavar="ID",
+                        help="Đánh dấu truyện đã dựng xong (chưa đăng) rồi thoát")
     parser.add_argument("--date", default=None, help="YYYY-MM-DD; mặc định ngày phát sóng kế tiếp")
     parser.add_argument("--from", dest="start", default=None, help="YYYY-MM-DD cho --upcoming")
     parser.add_argument("--bank", type=Path, default=DEFAULT_BANK_PATH)
@@ -303,6 +307,19 @@ def main(argv: "list[str] | None" = None) -> int:
     rotation = parse_rotation(args.rotation) if args.rotation else None
 
     try:
+        if args.mark_used is not None:
+            # Dựng xong mà chưa đăng thì kho vẫn coi là chưa dùng, nên hôm sau
+            # `--story auto` chọn lại đúng truyện đó và dựng lại từ đầu (lượt
+            # 28/09 mất gần 2 tiếng như thế). Đánh dấu "built" ngay sau khi
+            # dựng; lúc đăng, upload sẽ nâng lên "published" kèm video_id.
+            hien = load_state(args.state).get(str(args.mark_used), {})
+            if hien.get("status") == "published":
+                print(f"Truyện #{args.mark_used} đã đăng rồi, giữ nguyên trạng thái.")
+                return 0
+            mark_used(args.mark_used, state_path=args.state, status="built")
+            print(f"Đã đánh dấu truyện #{args.mark_used} là đã dựng.")
+            return 0
+
         if args.upcoming:
             start = date.fromisoformat(args.start) if args.start else next_air_date()
             for day, story in pick_upcoming(

@@ -328,6 +328,15 @@ if [[ -n "$SHORTS_PREFIX" && -n "$METADATA_INDEX" ]]; then
     >>"$LOG_FILE" 2>&1 || log "CẢNH BÁO: không ghi được shorts_prefix vào $METADATA_INDEX"
 fi
 
+# Đánh dấu truyện đã dựng. Không làm thì kho vẫn coi truyện này chưa dùng, và
+# lượt --story auto hôm sau chọn lại đúng nó, dựng lại từ đầu -- lượt 28/09 mất
+# gần 2 tiếng như thế rồi đổ ở stage 6 vì tên file trùng. Lúc đăng, stage 8 nâng
+# trạng thái lên "published" kèm video_id.
+if [[ -n "$STORY_ID" ]]; then
+  $RUNNER scripts.story_bank --mark-used "$STORY_ID" \
+    >>"$LOG_FILE" 2>&1 || log "CẢNH BÁO: không đánh dấu được truyện #$STORY_ID là đã dựng"
+fi
+
 if [[ "$DO_UPLOAD" -eq 0 ]]; then
   DURATION="$(human_duration $(($(date +%s) - START_TS)))"
   log "✔ Đã dựng xong sau $DURATION. Video: $FINAL_VIDEO"

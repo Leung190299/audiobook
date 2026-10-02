@@ -522,3 +522,22 @@ def test_stage_7_hong_thi_khong_ghi_shorts_prefix(tmp_path):
 
     assert run.exit_code == 0  # stage 7 hỏng không làm vỡ lượt chạy
     assert not run.called("scripts.post_shorts")
+
+
+def test_danh_dau_truyen_da_dung_sau_khi_dung_xong(tmp_path):
+    """Không đánh dấu thì hôm sau --story auto chọn lại đúng truyện đó và dựng
+    lại từ đầu; lượt 28/09 mất gần 2 tiếng rồi đổ vì tên file trùng."""
+    run = _run(tmp_path, ["--story", "42"], legacy=False)
+
+    assert run.exit_code == 0
+    danh_dau = [c for c in run.calls if "--mark-used" in c]
+    assert len(danh_dau) == 1, f"mong đúng 1 lượt đánh dấu: {run.calls}"
+    assert "42" in danh_dau[0]
+
+
+def test_nhanh_topic_cu_khong_danh_dau_kho(tmp_path):
+    """--topic không lấy truyện từ kho, đánh dấu là sai dữ liệu."""
+    run = _run(tmp_path, ["--topic", "ho_hang_viet"], legacy=False)
+
+    assert run.exit_code == 0
+    assert not [c for c in run.calls if "--mark-used" in c]
