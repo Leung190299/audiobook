@@ -95,11 +95,23 @@ def resolve_first_air(
             print(f"CẢNH BÁO: không đọc được truyện #{story_id} trong kho ({exc}); dùng ngày kế tiếp.")
         else:
             if story.publish_date:
-                return datetime.combine(
+                hen = datetime.combine(
                     story.publish_date,
                     dtime(hour=publish_hour, minute=0),
                     tzinfo=LOCAL_TZ,
                 )
+                # Ngày hẹn đã trôi qua (dựng bù, hoặc lượt đăng chạy sau 20h
+                # cùng ngày): publishAt nằm ở quá khứ thì YouTube hoặc từ chối,
+                # hoặc công khai ngay lập tức -- cả hai đều không phải ý mình.
+                # Dời sang mốc 20h gần nhất còn ở tương lai và nói rõ.
+                if hen - now.astimezone(LOCAL_TZ) < MIN_LEAD:
+                    moi = default_first_air(now, publish_hour)
+                    print(
+                        f"CẢNH BÁO: truyện #{story_id} hẹn {hen:%d/%m %H:%M} nhưng "
+                        f"mốc đó đã qua; dời sang {moi:%d/%m %H:%M}."
+                    )
+                    return moi
+                return hen
     return default_first_air(now, publish_hour)
 
 

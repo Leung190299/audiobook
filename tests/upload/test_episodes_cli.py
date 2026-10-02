@@ -288,3 +288,53 @@ def test_playlist_sai_dinh_dang_thi_khong_upload_gi(tmp_path, monkeypatch):
             now=datetime(2026, 9, 24, 9, 0, tzinfo=LOCAL_TZ),
         )
     assert up.calls == []
+
+
+# --- ngày hẹn đã trôi qua (02/10/2026) ---------------------------------------
+
+
+def test_ngay_hen_da_qua_thi_doi_sang_toi_hom_sau(monkeypatch):
+    """Biên tập xếp truyện #49 vào 02/10, nhưng lượt đăng chạy lúc 23:30 cùng
+    ngày -- 20:00 đã trôi qua. Giữ nguyên là publishAt nằm ở quá khứ: YouTube
+    hoặc từ chối, hoặc công khai ngay lập tức, cả hai đều không phải ý mình."""
+    from datetime import date as _date
+
+    from upload import episodes_cli as ec
+
+    class _Story:
+        publish_date = _date(2026, 10, 2)
+
+    monkeypatch.setattr(ec.story_bank, "get_story", lambda sid: _Story())
+    now = datetime(2026, 10, 2, 23, 30, tzinfo=LOCAL_TZ)
+
+    assert ec.resolve_first_air(49, now, 20) == datetime(2026, 10, 3, 20, 0, tzinfo=LOCAL_TZ)
+
+
+def test_ngay_hen_con_o_tuong_lai_thi_giu_nguyen(monkeypatch):
+    from datetime import date as _date
+
+    from upload import episodes_cli as ec
+
+    class _Story:
+        publish_date = _date(2026, 10, 5)
+
+    monkeypatch.setattr(ec.story_bank, "get_story", lambda sid: _Story())
+    now = datetime(2026, 10, 2, 23, 30, tzinfo=LOCAL_TZ)
+
+    assert ec.resolve_first_air(49, now, 20) == datetime(2026, 10, 5, 20, 0, tzinfo=LOCAL_TZ)
+
+
+def test_ngay_hen_qua_nhieu_ngay_van_doi_toi_moc_tuong_lai(monkeypatch):
+    """Dựng bù một truyện hẹn từ tuần trước: phải ra mốc sau 'bây giờ'."""
+    from datetime import date as _date
+
+    from upload import episodes_cli as ec
+
+    class _Story:
+        publish_date = _date(2026, 9, 20)
+
+    monkeypatch.setattr(ec.story_bank, "get_story", lambda sid: _Story())
+    now = datetime(2026, 10, 2, 23, 30, tzinfo=LOCAL_TZ)
+
+    ra = ec.resolve_first_air(49, now, 20)
+    assert ra > now
