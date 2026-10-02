@@ -149,6 +149,15 @@ def upload_video(
             # AI sinh -- YouTube bắt khai báo mục "nội dung tổng hợp hoặc đã
             # chỉnh sửa". Bật sẵn ở đây chứ không để phải nhớ tick tay trong
             # Studio sau mỗi lượt đăng.
+            #
+            # ĐỪNG tưởng nó hỏng rồi đi sửa: videos.list KHÔNG BAO GIỜ trả
+            # trường này về, đọc lại luôn ra None dù đã bật. Kiểm chứng 02/10
+            # trên video jAddikf_Dns -- Studio hiện đã bật, trong khi API đọc ra
+            # None. Muốn kiểm thì mở Studio, đừng tin read-back.
+            #
+            # Trường này cũng chỉ ăn lúc videos.insert. Thử qua videos.update
+            # cho 5 video đăng trước 01/10: API nhận lệnh, không báo lỗi, nhưng
+            # không có tác dụng -- video cũ phải tick tay.
             "containsSyntheticMedia": synthetic_media,
         },
     }
