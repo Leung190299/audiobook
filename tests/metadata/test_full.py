@@ -239,3 +239,16 @@ def test_thieu_tu_khoa_thi_bo_dong_keywords():
     from metadata.full import build_minimal_description
 
     assert "Keywords:" not in build_minimal_description("T", hashtags=["#a"], keywords=[])
+
+
+def test_hashtag_trung_khac_hoa_thuong_chi_giu_mot():
+    """YouTube coi #truyenaudio và #TruyenAudio là một. Bản #9 ngày 05/10 đã
+    ra cả hai vì hashtag chủ đề và hashtag Gemini gợi ý viết hoa khác nhau."""
+    from metadata.full import build_minimal_description
+
+    desc = build_minimal_description(
+        "T", hashtags=["#truyenaudio", "#hohang", "#TruyenAudio", "#HoHang", "#moi"], keywords=[]
+    )
+
+    dong = [l for l in desc.splitlines() if l.startswith("Hashtags:")][0]
+    assert dong == "Hashtags: #truyenaudio #hohang #moi"

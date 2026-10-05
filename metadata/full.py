@@ -110,7 +110,15 @@ def build_minimal_description(title: str, hashtags: list[str], keywords: list[st
     format tham khảo không có, mà 38 phút vẫn 2,38 triệu view.
     """
     parts = [title, AI_NOTICE_SHORT]
-    tags = list(dict.fromkeys(hashtags))[:MAX_DESCRIPTION_HASHTAGS]
+    # Khử trùng không phân biệt hoa thường: YouTube coi #truyenaudio và
+    # #TruyenAudio là một. Giữ cách viết xuất hiện TRƯỚC (hashtag chủ đề).
+    seen: set[str] = set()
+    tags = []
+    for t in hashtags:
+        if t and t.lower() not in seen:
+            seen.add(t.lower())
+            tags.append(t)
+    tags = tags[:MAX_DESCRIPTION_HASHTAGS]
     if tags:
         parts.append("Hashtags: " + " ".join(tags))
     words = [k for k in dict.fromkeys(keywords) if k][:MAX_DESCRIPTION_KEYWORDS]
