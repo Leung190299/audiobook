@@ -10,7 +10,7 @@ description: Use when asked to produce, render, upload, or schedule a finished a
 One **35–50 min long video per day** + **3 Shorts**, Vietnamese family-drama stories read by TTS. The look copies the *layout* of top audiobook channels (reference: Dứa Audio, 2.38M views on a 38-min video) — **never their branding**:
 
 ```
-┌───────────── 1024 x 576 ─────────────┐
+┌──────────── 1920 x 1080 ─────────────┐
 │ 🐸 vẫy tay │                │ 🐸 đọc truyện│
 │            │  VIDEO "THỦ    │  Audio       │
 │ Đăng ký    │  CÔNG" GIỮA    │  Truyện      │
@@ -24,6 +24,8 @@ One **35–50 min long video per day** + **3 Shorts**, Vietnamese family-drama s
 - **Centre = a background video**, picked at random per episode from `assets/backgrounds/`. The centre box follows the clip's aspect ratio: vertical clips (most Douyin clips) show uncropped and the side panels widen; landscape clips are capped at 66% of the width and cropped at the sides.
 - **Side panels = channel brand**: cream background from the logo palette, the **frog mascot** top and bottom, "subscribe, new story 20h every night" on the left, channel name + the fixed AI disclosure on the right.
 - **One mascot everywhere**: a chubby green frog wearing a Vietnamese conical hat (*nón lá*). It is on the avatar, every thumbnail and both side panels. It was designed (spec 24/09) to differ from competitors' white duck / capybara — do not swap it for a competitor-looking character.
+
+**Output quality**: long video renders at **1920×1080** (was 1024×576 until 05/10 — SD, and it threw away over half the vertical detail of the 1024–1280 px Douyin sources). Remotion's intermediate frames are JPEG 95 (`backgrounds.RENDER_JPEG_QUALITY`; default 80 smeared text edges). 1080p renders ~33% slower than 576p. `BrandPanel` scales all its size clamps by `height / 576`, so changing the frame size keeps the layout.
 
 Layout code: `remotion/src/MainVideo.tsx` → `BrandedLayout.tsx` (centre box width) → `BrandPanel.tsx` (panels, colours, AI text) + `BackgroundVideo.tsx` (looped centre clip). Shorts (`ShortVideo.tsx`) keep their own older layout with captions.
 
@@ -59,7 +61,7 @@ After stage 7, `run_daily.sh` records `shorts_prefix` into the metadata index an
 
 Drop `.mp4` files into `assets/backgrounds/` — that's all. Each episode picks one at random (seeded by the episode stem, so a re-render keeps the same clip). New files are picked up automatically.
 
-Each source is prepared **once** by ffmpeg into `assets/backgrounds/.prepared/`: `<name>-h576.mp4` for the long video and, for vertical sources only, `<name>-h1920.mp4` for Shorts (the 576 px copy blown up 3.3× to the 1080×1920 Short frame is blurry). Aspect kept, **audio stripped** (Douyin music would fight the narration), 30 fps. Shorts prefer vertical clips; a landscape clip squeezed into a vertical frame keeps only the middle ~32%.
+Each source is prepared **once** by ffmpeg into `assets/backgrounds/.prepared/`: `<name>-h1080.mp4` for the long video and, for vertical sources only, `<name>-h1920.mp4` for Shorts (Short frame is 1080×1920). Aspect kept, **audio stripped** (Douyin music would fight the narration), 30 fps. Shorts prefer vertical clips; a landscape clip squeezed into a vertical frame keeps only the middle ~32%.
 
 With videos present `run_daily.sh` **skips stage 3 entirely** and calls stages 4 and 7 without an images file — a run drops from ~70 to ~40 min. Empty folder → stage 3 runs and everything uses images as before. A source that fails ffmpeg is skipped and the episode falls back to the stage-3 images — one bad clip never kills an hour-long run. `assets/backgrounds/` is gitignored (hundreds of MB).
 
@@ -79,11 +81,13 @@ The avatar must be uploaded **by hand in YouTube Studio** — the API cannot cha
 
 `upload.episodes_cli <metadata-index>` uploads the long video as `private` with `publishAt` = the story's `publish_date` at 20:00 (+07:00). **A date already in the past rolls forward** to the next 20:00 with a warning, instead of producing a past `publishAt`. Without a `publish_date`, `--first-air 2026-10-07T20:00` sets it — check it does not collide with an already-scheduled video. It adds the video to its topic playlist (`YOUTUBE_PLAYLIST_*` in `.env`, link or bare `PL…` id — a playlist *name* is rejected) and marks the story `published` with its `video_id`.
 
-**Shorts go out by themselves.** `launchd/com.lee.audiobook.shorts.plist` runs `scripts.post_shorts` at **20:05 every night**: it finds the story whose `published_at` is today (its long video went public five minutes earlier), uploads its 3 Shorts as public and retitles them `<story title> — Trích đoạn N/3` (the default title is a truncated first sentence). It **refuses** if the long video is not public yet — a Short pointing at a private video is a dead link exactly when Shorts get most views. To front-load quota, upload Shorts early as `--privacy private`; the 20:05 job then only flips them public (50 units instead of 1,600).
+**Shorts are uploaded and scheduled together with the long video.** Pass `--shorts-prefix <prefix>` (stored as `shorts_prefix` in the metadata index; `run_daily.sh --upload` does it) and the 3 Shorts go up immediately as `private` with `publishAt` = the long video's publish time **+ 5 min**, titled `<story title> — Trích đoạn N/3` from the start. YouTube flips them public by itself — nothing has to be awake or authenticated on air night. The publish time is read from the long video's **saved upload state**, never recomputed (a hand-picked `--first-air` date would otherwise drift). If that time has already passed, Shorts go up public immediately (YouTube rejects a past `publishAt`). Re-running for a long video already uploaded skips it and only uploads the Shorts.
+
+`launchd/com.lee.audiobook.shorts.plist` still runs `scripts.post_shorts` at **20:05 every night** as a safety net: for today's story it makes any already-uploaded Shorts public and fixes their titles, and uploads them if they were never uploaded. It refuses while the long video is still private — a Short pointing at a private video is a dead link exactly when Shorts get most views.
 
 ## Gotchas that have actually bitten
 
-- **Quota is 10,000 units/day and resets at midnight Pacific (~14:00 Vietnam), not local midnight.** `videos.insert` = 1,600 regardless of size. One long video + 3 Shorts ≈ 6,600. Plan multi-video days around this.
+- **Quota resets at midnight Pacific (~14:00 Vietnam), not local midnight.** `videos.insert` = 1,600 regardless of size. The default limit is 10,000/day, **but on 05/10 about 21,000 units' worth of calls (1 long video + 12 Shorts + updates) went through in one Pacific day with no quota error** — this project's real limit is higher. Check Google Cloud Console → YouTube Data API v3 → Quotas before planning around 10,000. `series_cli` stops cleanly on `quotaExceeded` and saves progress, so a rerun the next day picks up where it stopped.
 - **OAuth token dies every 7 days** (project in Testing mode). Symptom: `invalid_grant` in `output/daily/shorts.err.log` or the upload log. Fix: `uv run python -m upload.auth` — the browser consent is the operator's to click, never Claude's.
 - **`run_daily.sh` runs on macOS `/bin/bash` 3.2.** Under `set -u`, expanding an empty array as `"${arr[@]}"` is an "unbound variable" error that kills the run. Use `${arr[@]+"${arr[@]}"}`. And never edit `run_daily.sh` while a run is executing it — bash reads the file as it goes.
 - **Only 16 GB RAM.** Never run a second FLUX job (mascots, `mac-image-ai`) while stage 3 or 5 is running, or while a Remotion render is going — swap thrash slows everything and can kill a stage. Check `memory_pressure` first.
