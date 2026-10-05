@@ -429,3 +429,46 @@ def test_run_khong_co_long_video_url_thi_mo_ta_giu_nguyen(tmp_path):
     series_cli.run(prefix, limit=10, uploader=uploader, credentials_loader=_fake_credentials)
 
     assert uploader.calls[0]["description"] == "Mô tả phần 1."
+
+
+# --- hẹn giờ short ngay lúc đăng video dài (05/10/2026) ------------------------
+
+
+class _HenGioUploader(FakeUploader):
+    def __call__(self, credentials, *, publish_at=None, **kw):
+        result = super().__call__(credentials, **kw)
+        self.calls[-1]["publish_at"] = publish_at
+        return result
+
+
+def test_short_hen_gio_va_dat_dung_tieu_de_ngay_luc_dang(tmp_path):
+    """Trước đây short đăng ngay rồi lịch 20:05 tối chiếu mới bật công khai và
+    sửa tiêu đề -- phụ thuộc máy phải thức và token còn sống đúng tối đó (tối
+    02/10 token chết, short hỏng). Nay YouTube tự công khai theo publishAt."""
+    from datetime import datetime, timezone
+
+    prefix = _make_series(tmp_path, [1, 2, 3])
+    uploader = _HenGioUploader()
+    gio = datetime(2026, 10, 7, 13, 5, tzinfo=timezone.utc)
+
+    series_cli.run(
+        prefix, limit=10, uploader=uploader, credentials_loader=_fake_credentials,
+        publish_at=gio, story_title="Ra Mắt Nhà Người Yêu",
+    )
+
+    assert [c["title"] for c in uploader.calls] == [
+        "Ra Mắt Nhà Người Yêu — Trích đoạn 1/3",
+        "Ra Mắt Nhà Người Yêu — Trích đoạn 2/3",
+        "Ra Mắt Nhà Người Yêu — Trích đoạn 3/3",
+    ]
+    assert all(c["publish_at"] == gio for c in uploader.calls)
+    assert all(c["privacy_status"] == "private" for c in uploader.calls)
+
+
+def test_khong_hen_gio_thi_giu_hanh_vi_cu(tmp_path):
+    prefix = _make_series(tmp_path, [1])
+    uploader = FakeUploader()  # không nhận publish_at: không được truyền vào
+
+    series_cli.run(prefix, limit=10, uploader=uploader, credentials_loader=_fake_credentials)
+
+    assert uploader.calls[0]["title"] == "Vô Đối Trả Thù — Phần 1/5"

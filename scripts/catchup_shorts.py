@@ -50,7 +50,8 @@ LICH: dict[date, tuple[str, str, str]] = {
 }
 
 # Dòng episodes_cli in ra cho mỗi short vừa đăng.
-DONG_SHORT = re.compile(r"^Phần (\d+): .*https://youtu\.be/([\w-]+)\s*$", re.M)
+# Không neo cuối dòng: từ 05/10 dòng có thể kèm "(công khai dd/mm HH:MM)" sau link.
+DONG_SHORT = re.compile(r"^Phần (\d+): .*?https://youtu\.be/([\w-]+)", re.M)
 
 
 class ShortsError(Exception):

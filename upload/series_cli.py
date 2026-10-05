@@ -176,7 +176,17 @@ def run(
     uploader=upload_video,
     credentials_loader=load_credentials,
     long_video_url: str | None = None,
+    publish_at: "datetime | None" = None,
+    story_title: str | None = None,
 ) -> None:
+    """`publish_at`: hẹn giờ cho MỌI short (private + publishAt), YouTube tự
+    công khai đúng giờ. `story_title`: đặt tiêu đề "<truyện> — Trích đoạn N/T"
+    ngay lúc đăng thay cho câu đầu trích đoạn bị cắt cụt.
+
+    Trước 05/10 short đăng ngay rồi lịch 20:05 tối chiếu mới bật công khai và
+    sửa tiêu đề -- phụ thuộc máy phải thức và token còn sống đúng tối đó. Tối
+    02/10 token chết, short không lên.
+    """
     series_prefix = Path(series_prefix)
     state_path = _state_path(series_prefix)
     state = _load_state(state_path)
@@ -223,16 +233,26 @@ def run(
             )
             thumbnail_path = None
 
+        title = (
+            f"{story_title} — Trích đoạn {part.number}/{len(all_parts)}"
+            if story_title
+            else metadata["title"]
+        )
+        extra = {}
+        if publish_at is not None:
+            # Chỉ truyền khi hẹn giờ: giữ nguyên lời gọi cũ cho đường không hẹn.
+            extra["publish_at"] = publish_at
         try:
             result = uploader(
                 credentials,
                 video_path=part.video_path,
-                title=metadata["title"],
+                title=title,
                 description=description,
                 tags=metadata.get("tags", []),
                 category_id=category_id,
-                privacy_status=privacy_status,
+                privacy_status="private" if publish_at is not None else privacy_status,
                 thumbnail_path=thumbnail_path,
+                **extra,
             )
         except HttpError as exc:
             if _is_quota_exceeded(exc):
@@ -267,7 +287,8 @@ def run(
         _save_state(state_path, state)
         uploaded_this_run += 1
 
-        print(f"Phần {part.number}: {metadata['title']} — {result.url}")
+        hen = f" (công khai {publish_at.astimezone().strftime('%d/%m %H:%M')})" if publish_at else ""
+        print(f"Phần {part.number}: {title} — {result.url}{hen}")
 
     total_uploaded = len(state.get("uploaded", {}))
     remaining = len(all_parts) - total_uploaded

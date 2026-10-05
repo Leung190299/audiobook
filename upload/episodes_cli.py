@@ -126,6 +126,28 @@ def resolve_first_air(
         return default_first_air(now, publish_hour)
 
 
+# Short công khai sau video dài vài phút, để link trong short đã sống khi người
+# xem bấm vào.
+SHORT_DELAY = timedelta(minutes=5)
+
+
+def _short_schedule(
+    long_publish_at: str | None, now: datetime, privacy_status: str
+) -> tuple[datetime | None, str]:
+    """(giờ hẹn cho short, chế độ riêng tư) theo giờ chiếu ĐÃ LƯU của video dài.
+
+    Lấy từ state chứ không tính lại: #9 đăng với lịch chỉ định tay 26/10, tính
+    lại sẽ ra ngày khác. Video dài không hẹn giờ thì short cũng không. Giờ chiếu
+    đã qua thì publishAt ở quá khứ bị YouTube từ chối -- đăng công khai luôn.
+    """
+    if not long_publish_at:
+        return None, privacy_status
+    at = datetime.fromisoformat(long_publish_at).astimezone(LOCAL_TZ) + SHORT_DELAY
+    if at - now.astimezone(LOCAL_TZ) < MIN_LEAD:
+        return None, "public"
+    return at, "private"
+
+
 def air_times(first_air: datetime, count: int) -> list[datetime]:
     return [first_air + timedelta(days=i) for i in range(count)]
 
@@ -342,16 +364,26 @@ def run(
 
     first_url = state["uploaded"][str(episodes[0]["number"])]["url"]
 
-    # 3) Trích đoạn trỏ về tập 1.
+    # 3) Trích đoạn trỏ về tập 1, hẹn giờ NGAY LÚC NÀY theo giờ chiếu của video
+    #    dài. Trước 05/10 short đăng sau, bằng lịch 20:05 tối chiếu -- phụ thuộc
+    #    máy phải thức và token còn sống đúng tối đó; tối 02/10 token chết, short
+    #    không lên. Nay YouTube tự công khai theo publishAt.
     if shorts_prefix is not None:
+        short_at, short_privacy = _short_schedule(
+            state["uploaded"][str(episodes[0]["number"])].get("publish_at"),
+            now or datetime.now(LOCAL_TZ),
+            privacy_status,
+        )
         series_cli.run(
             Path(shorts_prefix),
             limit=99,
-            privacy_status=privacy_status,
+            privacy_status=short_privacy,
             category_id=category_id,
             long_video_url=first_url,
             uploader=uploader,
             credentials_loader=lambda: credentials,
+            publish_at=short_at,
+            story_title=index.get("story_title") or None,
         )
 
     print(f"Đã upload: {first_url}")

@@ -151,3 +151,12 @@ def test_ba_ngay_trong_lich_khong_dung_chung_tien_to_short():
     assert len(set(prefixes)) == 3, "hai ngày trỏ cùng bộ short là đăng nhầm truyện"
     indexes = [v[0] for v in cs.LICH.values()]
     assert len(set(indexes)) == 3
+
+
+def test_doc_id_short_ca_khi_dong_co_gio_cong_khai_phia_sau():
+    out = (
+        "Phần 1: Truyện X — Trích đoạn 1/3 — https://youtu.be/AbC-1_x (công khai 07/10 20:05)\n"
+        "Phần 2: Truyện X — Trích đoạn 2/3 — https://youtu.be/DeF2\n"
+    )
+
+    assert cs.DONG_SHORT.findall(out) == [("1", "AbC-1_x"), ("2", "DeF2")]

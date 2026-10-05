@@ -98,10 +98,12 @@ def test_dang_3_tap_hen_gio_cach_nhau_1_ngay_roi_link_comment_va_short(tmp_path)
     assert "▶️ Tập tiếp theo: https://youtu.be/vid2" in updates[0][1]
     assert NEXT_EPISODE_PLACEHOLDER not in updates[0][1]
     assert [c[0] for c in comments] == ["vid1", "vid2", "vid3"]
-    # Short trỏ về tập 1.
+    # Short trỏ về tập 1, hẹn giờ ngay lúc đăng: 5 phút sau khi tập 1 lên sóng
+    # (trước 05/10 short đăng ngay rồi chờ lịch 20:05 tối chiếu bật công khai).
+    tap1 = up.calls[0]["publish_at"]
     for call in up.calls[3:]:
         assert "https://youtu.be/vid1" in call["description"]
-        assert call["publish_at"] is None
+        assert call["publish_at"] == tap1 + timedelta(minutes=5)
     assert state["uploaded"]["1"]["next_link_set"] and state["uploaded"]["3"]["comment_posted"]
     assert (tmp_path / "t-episodes-upload-state.json").exists()
 
@@ -390,3 +392,75 @@ def test_ngay_hen_da_qua_cung_tim_toi_trong_khong_dam_vao_video_khac(monkeypatch
     now = datetime(2026, 10, 5, 11, 0, tzinfo=LOCAL_TZ)
 
     assert ec.resolve_first_air(49, now, 20) == datetime(2026, 10, 27, 20, 0, tzinfo=LOCAL_TZ)
+
+
+# --- short hẹn giờ cùng lúc đăng video dài (05/10/2026) ------------------------
+
+
+def _bat_series(monkeypatch):
+    goi = {}
+    monkeypatch.setattr(episodes_cli.series_cli, "run", lambda prefix, **kw: goi.update(kw))
+    return goi
+
+
+def test_dang_video_dai_thi_hen_gio_short_sau_5_phut(tmp_path, monkeypatch):
+    goi = _bat_series(monkeypatch)
+    up = FakeUploader()
+    now = datetime(2026, 10, 5, 9, 0, tzinfo=LOCAL_TZ)
+
+    episodes_cli.run(
+        _full_index(tmp_path), uploader=up, commenter=lambda *a: "c",
+        description_updater=lambda *a: True, credentials_loader=lambda: "cred",
+        playlist_adder=lambda *a: True, now=now, shorts_prefix=tmp_path / "x",
+    )
+
+    assert goi["publish_at"] == datetime(2026, 10, 5, 20, 5, tzinfo=LOCAL_TZ)
+    assert goi["story_title"] == "Bác Cả"
+
+
+def test_video_dai_da_dang_tu_truoc_thi_lay_gio_da_luu_khong_tinh_lai(tmp_path, monkeypatch):
+    """#9 đăng với lịch chỉ định tay 26/10. Chạy lại để đăng short mà tính lại
+    giờ thì ra ngày khác -- short phải bám đúng giờ video dài ĐÃ hẹn."""
+    import json as _json
+
+    goi = _bat_series(monkeypatch)
+    index = _full_index(tmp_path)
+    state = index.with_name(f"{index.stem}-upload-state.json")
+    state.write_text(_json.dumps({"uploaded": {"1": {
+        "video_id": "dai", "url": "https://youtu.be/dai",
+        "publish_at": "2026-10-26T20:00:00+07:00",
+        "playlist_added": True, "comment_posted": True, "next_link_set": True,
+    }}}), encoding="utf-8")
+
+    episodes_cli.run(
+        index, uploader=FakeUploader(), commenter=lambda *a: "c",
+        description_updater=lambda *a: True, credentials_loader=lambda: "cred",
+        playlist_adder=lambda *a: True, now=datetime(2026, 10, 5, 15, 0, tzinfo=LOCAL_TZ),
+        shorts_prefix=tmp_path / "x",
+    )
+
+    assert goi["publish_at"] == datetime(2026, 10, 26, 20, 5, tzinfo=LOCAL_TZ)
+
+
+def test_video_dai_da_cong_khai_thi_short_cong_khai_ngay(tmp_path, monkeypatch):
+    """Giờ chiếu đã qua: publishAt ở quá khứ thì YouTube từ chối -- đăng công
+    khai luôn."""
+    import json as _json
+
+    goi = _bat_series(monkeypatch)
+    index = _full_index(tmp_path)
+    index.with_name(f"{index.stem}-upload-state.json").write_text(_json.dumps({"uploaded": {"1": {
+        "video_id": "dai", "url": "https://youtu.be/dai",
+        "publish_at": "2026-10-01T20:00:00+07:00",
+        "playlist_added": True, "comment_posted": True, "next_link_set": True,
+    }}}), encoding="utf-8")
+
+    episodes_cli.run(
+        index, uploader=FakeUploader(), commenter=lambda *a: "c",
+        description_updater=lambda *a: True, credentials_loader=lambda: "cred",
+        playlist_adder=lambda *a: True, now=datetime(2026, 10, 5, 15, 0, tzinfo=LOCAL_TZ),
+        shorts_prefix=tmp_path / "x",
+    )
+
+    assert goi["publish_at"] is None
+    assert goi["privacy_status"] == "public"
