@@ -73,18 +73,20 @@ def test_khong_co_nguon_thi_none():
 # --- cache bản đã chuẩn bị ---------------------------------------------------
 
 
-def test_duong_dan_cache_mang_kich_thuoc(tmp_path):
+def test_duong_dan_cache_mang_chieu_cao(tmp_path):
+    """Khoá cache khác bản đệm mờ cũ (abc-1024x576.mp4), để bản cũ không bị
+    dùng nhầm sau khi đổi sang bố cục tấm thương hiệu."""
     src = _mp4(tmp_path, "abc.mp4")
 
-    out = bg.prepared_path(src, 1024, 576)
+    out = bg.prepared_path(src, 576)
 
     assert out.parent.name == bg.CACHE_DIRNAME
-    assert out.name == "abc-1024x576.mp4"
+    assert out.name == "abc-h576.mp4"
 
 
 def test_cache_cu_hon_nguon_thi_phai_lam_lai(tmp_path):
     src = _mp4(tmp_path, "abc.mp4")
-    out = bg.prepared_path(src, 1024, 576)
+    out = bg.prepared_path(src, 576)
     out.parent.mkdir(parents=True)
     out.write_bytes(b"cu")
     os.utime(out, (1, 1))
@@ -95,7 +97,7 @@ def test_cache_cu_hon_nguon_thi_phai_lam_lai(tmp_path):
 def test_cache_moi_hon_nguon_thi_dung_lai(tmp_path):
     src = _mp4(tmp_path, "abc.mp4")
     os.utime(src, (1, 1))
-    out = bg.prepared_path(src, 1024, 576)
+    out = bg.prepared_path(src, 576)
     out.parent.mkdir(parents=True)
     out.write_bytes(b"moi")
 
@@ -105,26 +107,25 @@ def test_cache_moi_hon_nguon_thi_dung_lai(tmp_path):
 def test_chua_co_cache_thi_phai_lam(tmp_path):
     src = _mp4(tmp_path, "abc.mp4")
 
-    assert bg.needs_prepare(src, bg.prepared_path(src, 1024, 576)) is True
+    assert bg.needs_prepare(src, bg.prepared_path(src, 576)) is True
 
 
 # --- lệnh ffmpeg -------------------------------------------------------------
 
 
-def test_lenh_ffmpeg_bo_tieng_goc_va_dem_mo_hai_ben(tmp_path):
-    """Video Douyin có nhạc nền riêng: lọt vào là đè lên giọng đọc."""
-    cmd = bg.ffmpeg_command(Path("in.mp4"), Path("out.mp4"), 1024, 576, 30)
+def test_lenh_ffmpeg_bo_tieng_goc_giu_kho_dua_ve_chieu_cao(tmp_path):
+    """Video Douyin có nhạc nền riêng: lọt vào là đè lên giọng đọc. Giữ nguyên
+    khổ (không đệm mờ, không cắt): ô giữa của Remotion co giãn theo khổ, hai
+    bên là tấm thương hiệu."""
+    cmd = bg.ffmpeg_command(Path("in.mp4"), Path("out.mp4"), 576, 30)
 
     assert "-an" in cmd
-    filtre = cmd[cmd.index("-filter_complex") + 1]
-    # Lớp nền phủ kín rồi làm mờ, lớp trước giữ nguyên tỉ lệ đặt giữa.
-    assert "force_original_aspect_ratio=increase" in filtre
-    assert "boxblur" in filtre
-    assert "force_original_aspect_ratio=decrease" in filtre
-    # libx264 đòi kích thước chẵn; 576x1036 thu về 320,2px là lẻ.
-    assert "force_divisible_by=2" in filtre
-    assert "overlay=(W-w)/2:(H-h)/2" in filtre
-    assert "fps=30" in filtre
+    vf = cmd[cmd.index("-vf") + 1]
+    # -2: bề rộng tự tính theo khổ VÀ làm tròn về số chẵn (libx264 đòi chẵn;
+    # 576x1036 thu về 320,2px là lẻ).
+    assert "scale=-2:576" in vf
+    assert "fps=30" in vf
+    assert "boxblur" not in vf
 
 
 # --- chọn cho một tập --------------------------------------------------------
@@ -140,17 +141,19 @@ def test_choose_tra_duong_dan_tuong_doi_repo_va_thoi_luong(tmp_path):
     nen.mkdir(parents=True)
     _mp4(nen, "a.mp4")
 
-    def fake_prepare(src, width, height, fps):
-        out = bg.prepared_path(src, width, height)
+    def fake_prepare(src, height, fps):
+        out = bg.prepared_path(src, height)
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_bytes(b"ok")
-        return out, 312.6
+        return out, 312.6, 324 / 576
 
     ra = bg.choose(nen, "tap-1", repo_root=repo, prepare=fake_prepare)
 
     assert ra == {
-        "backgroundVideo": "assets/backgrounds/.prepared/a-1024x576.mp4",
+        "backgroundVideo": "assets/backgrounds/.prepared/a-h576.mp4",
         "backgroundVideoSeconds": 312.6,
+        # Remotion dùng tỉ lệ này để tính bề rộng ô giữa.
+        "backgroundVideoAspect": 0.5625,
     }
 
 

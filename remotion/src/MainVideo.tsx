@@ -1,47 +1,39 @@
 import React from "react";
-import { AbsoluteFill, Audio, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Audio, staticFile, useVideoConfig } from "remotion";
 import type { VideoProps } from "./types";
-import { Avatar } from "./Avatar";
 import { BackgroundVideo } from "./BackgroundVideo";
+import { BrandedLayout } from "./BrandedLayout";
 import { SceneBackground } from "./SceneBackground";
-import { Waveform } from "./Waveform";
-import { Caption } from "./Caption";
-import { FONT_FAMILY, useBeVietnamPro } from "./fonts";
+import { useBeVietnamPro } from "./fonts";
 
-// Cảnh báo nội dung AI. Nói cả "hư cấu" lẫn "do AI tạo": truyện kể ngôi
-// "tôi" về chuyện nhà rất đời thường, người xem dễ tin là có thật.
-const AI_NOTICE = "Truyện hư cấu • Nội dung do AI tạo";
-
-// Dissolve giữa hai cảnh. Dài hơn khoảng nghỉ 0,5s giữa chương (gap_seconds ở
-// config/voice.yaml) là cố ý: ảnh tan dần qua ranh giới chương nhìn mềm hơn
-// là cắt đúng lúc tiếng ngắt.
+// Dissolve giữa hai cảnh ảnh (chỉ dùng khi không có video nền). Dài hơn khoảng
+// nghỉ 0,5s giữa chương (gap_seconds ở config/voice.yaml) là cố ý: ảnh tan dần
+// qua ranh giới chương nhìn mềm hơn là cắt đúng lúc tiếng ngắt.
 const CROSSFADE_SECONDS = 1.0;
 
+// Video dài kiểu "video thủ công ở giữa, hai tấm thương hiệu hai bên" (05/10).
+//
+// Khung hình tĩnh từ đầu tới cuối: KHÔNG phụ đề, tên chương, avatar, sóng âm,
+// chữ hook đầu tập hay card kết. Bỏ theo format tham khảo đang chạy tốt (2,38
+// triệu view, 38 phút) -- video giữa tự giữ mắt người xem, người cần phụ đề tự
+// bật phụ đề tự động của YouTube. Cảnh báo "truyện hư cấu, do AI tạo" nằm cố
+// định ở tấm bên phải (BrandPanel).
+//
+// hookText, coldOpenSeconds, outroTitle, outroText, episodeLabel vẫn có trong
+// props (episodes/props_builder.py còn ghi) nhưng không vẽ nữa. Đoạn cold open
+// vẫn PHÁT tiếng -- nó là phần dựng audio, chỉ bỏ chữ đè lên hình.
 export const MainVideo: React.FC<VideoProps> = ({
   audioPath,
   chapters,
-  episodeLabel,
-  hookText,
-  coldOpenSeconds = 0,
   outroSeconds = 0,
-  outroTitle,
-  outroText,
   backgroundVideo,
   backgroundVideoSeconds = 0,
+  backgroundVideoAspect,
+  channelName,
 }) => {
   useBeVietnamPro();
-  const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const crossfadeFrames = Math.round(CROSSFADE_SECONDS * fps);
-  const seconds = frame / fps;
-
-  const currentChapter = chapters.find(
-    (c) => seconds >= c.startSeconds && seconds < c.endSeconds
-  );
-  const lastChapter = chapters[chapters.length - 1];
-  const contentEnd = lastChapter ? lastChapter.endSeconds : 0;
-  const inColdOpen = coldOpenSeconds > 0 && seconds < coldOpenSeconds;
-  const inOutro = outroSeconds > 0 && seconds >= contentEnd;
 
   // Trải mọi cảnh của mọi chương thành một dãy, đánh số liên tục để chọn kiểu
   // chuyển động luân phiên trên toàn tập chứ không reset mỗi chương.
@@ -51,163 +43,36 @@ export const MainVideo: React.FC<VideoProps> = ({
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
-      {backgroundVideo ? (
-        <BackgroundVideo src={backgroundVideo} seconds={backgroundVideoSeconds} />
-      ) : null}
-      {backgroundVideo ? null : scenes.map(({ chapterIndex, scene }, i) => {
-        // Lấy mốc bắt đầu của cảnh KẾ TIẾP làm endFrame, không phải endSeconds
-        // của chính cảnh này: giữa hai chương có khoảng nghỉ tiếng 0,5s (scene
-        // N kết thúc ở T, scene N+1 bắt đầu ở T+0,5), nên với endFrame cũ cả
-        // hai lớp đều mờ nửa chừng quanh T+0,25 (~6% đen lộ ra). Giữ lớp trước
-        // đục kín qua hết khoảng nghỉ đó; cảnh cuối cùng kéo qua cả card kết
-        // (nếu có) để nền vẫn còn dưới card thay vì tắt đen.
-        const next = scenes[i + 1];
-        const endSeconds = next
-          ? next.scene.startSeconds
-          : scene.endSeconds + outroSeconds;
-        return (
-          <SceneBackground
-            key={`${chapterIndex}-${scene.number}`}
-            scene={scene}
-            startFrame={Math.round(scene.startSeconds * fps)}
-            endFrame={Math.round(endSeconds * fps)}
-            crossfadeFrames={crossfadeFrames}
-            motionIndex={i}
-          />
-        );
-      })}
-      {/* Vignette tĩnh: tối nhẹ bốn góc để ảnh có chiều sâu và chữ dễ đọc hơn. */}
-      <AbsoluteFill
-        style={{
-          background:
-            "radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 100%)",
-          pointerEvents: "none",
-        }}
-      />
-      <Avatar />
-      {audioPath ? <Waveform audioPath={audioPath} /> : null}
-      {currentChapter && !inColdOpen ? (
-        <div
-          style={{
-            position: "absolute",
-            top: 190,
-            left: 24,
-            color: "#fff",
-            fontStyle: "italic",
-            fontSize: 20,
-          }}
-        >
-          {currentChapter.heading}
-        </div>
-      ) : null}
-      {episodeLabel ? (
-        <div
-          style={{
-            position: "absolute",
-            top: 20,
-            right: 24,
-            color: "#FFD84D",
-            fontFamily: FONT_FAMILY,
-            fontWeight: 900,
-            fontSize: 26,
-            letterSpacing: 2,
-            textShadow: "0 3px 10px rgba(0,0,0,0.85)",
-          }}
-        >
-          {episodeLabel}
-        </div>
-      ) : null}
-      {inColdOpen && hookText ? (
-        // Cold open: câu hook đè lên đoạn cao trào, người xem biết ngay truyện
-        // này về cái gì trước khi vào chương 1.
-        <div
-          style={{
-            position: "absolute",
-            top: 230,
-            left: "10%",
-            right: "10%",
-            textAlign: "center",
-            color: "#FFD84D",
-            fontFamily: FONT_FAMILY,
-            fontWeight: 900,
-            fontSize: 44,
-            lineHeight: 1.15,
-            textShadow: "0 4px 14px rgba(0,0,0,0.9)",
-          }}
-        >
-          {hookText}
-        </div>
-      ) : null}
-      {inColdOpen ? (
-        <div
-          style={{
-            position: "absolute",
-            bottom: 40,
-            left: 0,
-            right: 0,
-            textAlign: "center",
-            color: "rgba(255,255,255,0.82)",
-            fontFamily: FONT_FAMILY,
-            fontWeight: 700,
-            fontSize: 22,
-            textShadow: "0 2px 8px rgba(0,0,0,0.9)",
-          }}
-        >
-          {AI_NOTICE}
-        </div>
-      ) : null}
-      {!inOutro ? <Caption chapters={chapters} /> : null}
-      {inOutro ? (
-        <AbsoluteFill
-          style={{
-            backgroundColor: "rgba(0,0,0,0.85)",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 60,
-            gap: 28,
-          }}
-        >
-          <div
-            style={{
-              color: "#fff",
-              fontFamily: FONT_FAMILY,
-              fontWeight: 900,
-              fontSize: 40,
-              lineHeight: 1.2,
-              textAlign: "center",
-            }}
-          >
-            {outroTitle}
-          </div>
-          {(outroText ?? "").split("\n").map((line, i) => (
-            <div
-              key={i}
-              style={{
-                color: i === 0 && (outroText ?? "").includes("\n") ? "#fff" : "#FFD84D",
-                fontFamily: FONT_FAMILY,
-                fontWeight: 700,
-                fontSize: 30,
-                lineHeight: 1.3,
-                textAlign: "center",
-              }}
-            >
-              {line}
-            </div>
-          ))}
-          <div
-            style={{
-              color: "rgba(255,255,255,0.75)",
-              fontFamily: FONT_FAMILY,
-              fontWeight: 700,
-              fontSize: 24,
-              textAlign: "center",
-              marginTop: 8,
-            }}
-          >
-            {AI_NOTICE}
-          </div>
-        </AbsoluteFill>
-      ) : null}
+      <BrandedLayout
+        // Ảnh cảnh của stage 3 là khổ 16:9; thiếu tỉ lệ thì BrandedLayout cũng
+        // coi như 16:9 và chặn ô giữa ở 66% bề ngang.
+        aspect={backgroundVideo ? backgroundVideoAspect : undefined}
+        channelName={channelName}
+      >
+        {backgroundVideo ? (
+          <BackgroundVideo src={backgroundVideo} seconds={backgroundVideoSeconds} />
+        ) : (
+          scenes.map(({ chapterIndex, scene }, i) => {
+            // Lấy mốc bắt đầu của cảnh KẾ TIẾP làm endFrame, không phải
+            // endSeconds của chính cảnh này: giữa hai chương có khoảng nghỉ
+            // tiếng 0,5s, nên với endFrame cũ cả hai lớp đều mờ nửa chừng quanh
+            // ranh giới (~6% đen lộ ra). Cảnh cuối kéo qua cả đoạn kết để nền
+            // không tắt đen khi tiếng đã hết.
+            const next = scenes[i + 1];
+            const endSeconds = next ? next.scene.startSeconds : scene.endSeconds + outroSeconds;
+            return (
+              <SceneBackground
+                key={`${chapterIndex}-${scene.number}`}
+                scene={scene}
+                startFrame={Math.round(scene.startSeconds * fps)}
+                endFrame={Math.round(endSeconds * fps)}
+                crossfadeFrames={crossfadeFrames}
+                motionIndex={i}
+              />
+            );
+          })
+        )}
+      </BrandedLayout>
       {audioPath ? <Audio src={staticFile(audioPath)} /> : null}
     </AbsoluteFill>
   );

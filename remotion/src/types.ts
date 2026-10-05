@@ -38,6 +38,10 @@ export interface VideoProps {
   // các cảnh ảnh của stage 3 như trước.
   backgroundVideo?: string;
   backgroundVideoSeconds?: number;
+  // rộng/cao của video nền; BrandedLayout dùng để tính bề rộng ô giữa.
+  backgroundVideoAspect?: number;
+  // CHANNEL_NAME trong .env, hiện ở tấm thương hiệu bên phải.
+  channelName?: string;
 }
 
 export interface ShortCaption {

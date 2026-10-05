@@ -32,6 +32,7 @@ from episodes.cutter import plan_cuts
 from episodes.full import full_outro_text, plan_full_cut, suggest_same_topic
 from episodes.plan import plan_episodes
 from episodes import backgrounds
+from metadata.full import channel_name
 from episodes.props_builder import build_episode_props, chapter_lines
 from episodes.storage import (
     episode_audio_path,
@@ -136,6 +137,9 @@ def _run(
         nen = backgrounds.choose(seed=ep_stem)
         if nen:
             props.update(nen)
+        # Tên kênh trên tấm thương hiệu bên phải lấy cùng nguồn với đuôi tiêu đề
+        # YouTube (CHANNEL_NAME), để đổi tên kênh chỉ phải sửa một chỗ.
+        props["channelName"] = channel_name()
         props_path = save_episode_props(ep_stem, props, OUTPUT_DIR)
         _render(props_path, output_path)
 

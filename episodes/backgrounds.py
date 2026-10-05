@@ -4,15 +4,17 @@ Thả file .mp4 vào assets/backgrounds/ là xong; mỗi tập tự bốc ngẫu
 video. Thư mục trống (hoặc mọi video đều hỏng) thì không đổi gì, video vẫn dựng
 bằng ảnh của stage 3 như trước.
 
+Video nằm ở Ô GIỮA khung hình, hai bên là tấm thương hiệu của kênh
+(remotion/src/BrandedLayout.tsx). Ô giữa co giãn theo khổ video: video dọc
+(phần lớn video Douyin) hiện trọn vẹn, không cắt; video ngang thì bị chặn ở 66%
+bề ngang và cắt bớt hai mép.
+
 Mỗi video nguồn được tiền xử lý MỘT lần bằng ffmpeg rồi cache vào
 assets/backgrounds/.prepared/:
-- Đưa về đúng khung video dài (1024x576, 30fps -- remotion/src/Root.tsx).
-- Video dọc (phần lớn video Douyin) không bị cắt cụt mà đặt giữa, hai bên là
-  chính nó phóng to làm mờ. Cắt cho vừa khung ngang thì chỉ còn dải giữa ~32%
-  chiều cao, lại phóng gần gấp đôi từ 576px nên nhoè.
+- Đưa về đúng chiều cao khung (576px, 30fps -- remotion/src/Root.tsx), giữ
+  nguyên khổ. Nguồn 720x1280 mà để nguyên thì Remotion giải mã gấp 5 lần số
+  điểm ảnh cần dùng, suốt 45 phút render.
 - Bỏ tiếng gốc: nhạc nền Douyin lọt vào là đè lên giọng đọc.
-Làm sẵn ở đây thay vì để Remotion xử lý mỗi khung hình: đệm mờ trong Remotion
-là giải mã HAI lớp video suốt 45 phút render.
 """
 
 from __future__ import annotations
@@ -27,13 +29,9 @@ ROOT = Path(__file__).resolve().parent.parent
 BACKGROUND_DIR = ROOT / "assets" / "backgrounds"
 CACHE_DIRNAME = ".prepared"
 
-# Khung video dài, phải khớp WIDTH/HEIGHT/FPS trong remotion/src/Root.tsx.
-WIDTH = 1024
+# Khung video dài, phải khớp HEIGHT/FPS trong remotion/src/Root.tsx.
 HEIGHT = 576
 FPS = 30
-
-# Độ mờ lớp nền hai bên. Đủ mờ để không tranh chỗ với video chính giữa.
-BLUR = "boxblur=20:2"
 
 
 class BackgroundError(Exception):
@@ -68,8 +66,10 @@ def pick(sources: list[Path], seed: str) -> Path | None:
     return random.Random(seed).choice(sources)
 
 
-def prepared_path(src: Path, width: int = WIDTH, height: int = HEIGHT) -> Path:
-    return src.parent / CACHE_DIRNAME / f"{src.stem}-{width}x{height}.mp4"
+def prepared_path(src: Path, height: int = HEIGHT) -> Path:
+    # Khoá "-h576" khác bản đệm mờ cũ ("-1024x576"): đổi bố cục là bản cũ tự
+    # bị bỏ qua, không dùng nhầm video có hai dải mờ vào ô giữa.
+    return src.parent / CACHE_DIRNAME / f"{src.stem}-h{height}.mp4"
 
 
 def needs_prepare(src: Path, out: Path) -> bool:
@@ -77,43 +77,40 @@ def needs_prepare(src: Path, out: Path) -> bool:
     return not out.exists() or out.stat().st_mtime < src.stat().st_mtime
 
 
-def ffmpeg_command(src: Path, out: Path, width: int, height: int, fps: int) -> list[str]:
-    filtre = (
-        "[0:v]split=2[nen][truoc];"
-        f"[nen]scale={width}:{height}:force_original_aspect_ratio=increase,"
-        f"crop={width}:{height},{BLUR}[nenmo];"
-        # force_divisible_by=2: libx264 đòi kích thước chẵn, mà 576x1036 thu về
-        # 320,2px là lẻ.
-        f"[truoc]scale={width}:{height}:force_original_aspect_ratio=decrease:"
-        "force_divisible_by=2[truocthu];"
-        f"[nenmo][truocthu]overlay=(W-w)/2:(H-h)/2,fps={fps},setsar=1,format=yuv420p"
-    )
+def ffmpeg_command(src: Path, out: Path, height: int, fps: int) -> list[str]:
+    # scale=-2:H: bề rộng tự tính theo khổ VÀ làm tròn về số chẵn -- libx264
+    # đòi kích thước chẵn, mà 576x1036 thu về 320,2px là lẻ.
     return [
         "ffmpeg", "-y", "-loglevel", "error",
         "-i", str(src),
         "-an",
-        "-filter_complex", filtre,
-        "-c:v", "libx264", "-preset", "veryfast", "-crf", "26",
+        "-vf", f"scale=-2:{height},fps={fps},setsar=1,format=yuv420p",
+        "-c:v", "libx264", "-preset", "veryfast", "-crf", "24",
         "-movflags", "+faststart",
         str(out),
     ]
 
 
-def probe_seconds(path: Path) -> float:
+def probe(path: Path) -> tuple[float, float]:
+    """(thời lượng giây, tỉ lệ rộng/cao) của video đã chuẩn bị."""
     try:
         out = subprocess.run(
-            ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+            ["ffprobe", "-v", "error", "-select_streams", "v:0",
+             "-show_entries", "format=duration:stream=width,height",
              "-of", "json", str(path)],
             capture_output=True, text=True, check=True,
         ).stdout
-        return float(json.loads(out)["format"]["duration"])
-    except (subprocess.CalledProcessError, KeyError, ValueError, json.JSONDecodeError) as exc:
-        raise BackgroundError(f"Không đọc được thời lượng {path.name}: {exc}") from exc
+        data = json.loads(out)
+        stream = data["streams"][0]
+        return float(data["format"]["duration"]), stream["width"] / stream["height"]
+    except (subprocess.CalledProcessError, KeyError, IndexError, ValueError,
+            ZeroDivisionError, json.JSONDecodeError) as exc:
+        raise BackgroundError(f"Không đọc được thông tin {path.name}: {exc}") from exc
 
 
-def prepare(src: Path, width: int = WIDTH, height: int = HEIGHT, fps: int = FPS) -> tuple[Path, float]:
-    """Bản đã chuẩn bị của `src` (làm mới nếu cần) cùng thời lượng giây."""
-    out = prepared_path(src, width, height)
+def prepare(src: Path, height: int = HEIGHT, fps: int = FPS) -> tuple[Path, float, float]:
+    """Bản đã chuẩn bị của `src` (làm mới nếu cần), thời lượng giây, tỉ lệ khung."""
+    out = prepared_path(src, height)
     if needs_prepare(src, out):
         out.parent.mkdir(parents=True, exist_ok=True)
         # Ghi ra file tạm rồi đổi tên: ffmpeg chết giữa chừng thì không để lại
@@ -121,7 +118,7 @@ def prepare(src: Path, width: int = WIDTH, height: int = HEIGHT, fps: int = FPS)
         tmp = out.with_name(out.stem + ".tmp.mp4")
         print(f"Chuẩn bị video nền {src.name} -> {out.name} (chỉ làm một lần)")
         ket_qua = subprocess.run(
-            ffmpeg_command(src, tmp, width, height, fps), capture_output=True, text=True
+            ffmpeg_command(src, tmp, height, fps), capture_output=True, text=True
         )
         if ket_qua.returncode != 0:
             tmp.unlink(missing_ok=True)
@@ -129,7 +126,8 @@ def prepare(src: Path, width: int = WIDTH, height: int = HEIGHT, fps: int = FPS)
                 f"ffmpeg không xử lý được {src.name}: {ket_qua.stderr.strip()[-400:]}"
             )
         tmp.replace(out)
-    return out, probe_seconds(out)
+    seconds, aspect = probe(out)
+    return out, seconds, aspect
 
 
 def choose(
@@ -137,7 +135,7 @@ def choose(
     seed: str = "",
     *,
     repo_root: Path | None = None,
-    prepare: Callable[..., tuple[Path, float]] | None = None,
+    prepare: Callable[..., tuple[Path, float, float]] | None = None,
 ) -> dict | None:
     """Trường props cho Remotion, hoặc None nếu không có video nền dùng được.
 
@@ -150,7 +148,7 @@ def choose(
     if src is None:
         return None
     try:
-        out, seconds = prepare(src, WIDTH, HEIGHT, FPS)
+        out, seconds, aspect = prepare(src, HEIGHT, FPS)
     except BackgroundError as exc:
         print(f"CẢNH BÁO: bỏ video nền, dựng bằng ảnh như cũ ({exc})")
         return None
@@ -161,4 +159,5 @@ def choose(
     return {
         "backgroundVideo": str(out.relative_to(repo_root)),
         "backgroundVideoSeconds": round(seconds, 3),
+        "backgroundVideoAspect": round(aspect, 4),
     }
