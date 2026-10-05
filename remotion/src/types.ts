@@ -34,6 +34,10 @@ export interface VideoProps {
   outroSeconds?: number; // card kết sau khi hết tiếng
   outroTitle?: string;
   outroText?: string;
+  // Video nền thay ảnh tĩnh (episodes/backgrounds.py). Không có thì dựng bằng
+  // các cảnh ảnh của stage 3 như trước.
+  backgroundVideo?: string;
+  backgroundVideoSeconds?: number;
 }
 
 export interface ShortCaption {

@@ -2,6 +2,7 @@ import React from "react";
 import { AbsoluteFill, Audio, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import type { VideoProps } from "./types";
 import { Avatar } from "./Avatar";
+import { BackgroundVideo } from "./BackgroundVideo";
 import { SceneBackground } from "./SceneBackground";
 import { Waveform } from "./Waveform";
 import { Caption } from "./Caption";
@@ -25,6 +26,8 @@ export const MainVideo: React.FC<VideoProps> = ({
   outroSeconds = 0,
   outroTitle,
   outroText,
+  backgroundVideo,
+  backgroundVideoSeconds = 0,
 }) => {
   useBeVietnamPro();
   const frame = useCurrentFrame();
@@ -48,7 +51,10 @@ export const MainVideo: React.FC<VideoProps> = ({
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
-      {scenes.map(({ chapterIndex, scene }, i) => {
+      {backgroundVideo ? (
+        <BackgroundVideo src={backgroundVideo} seconds={backgroundVideoSeconds} />
+      ) : null}
+      {backgroundVideo ? null : scenes.map(({ chapterIndex, scene }, i) => {
         // Lấy mốc bắt đầu của cảnh KẾ TIẾP làm endFrame, không phải endSeconds
         // của chính cảnh này: giữa hai chương có khoảng nghỉ tiếng 0,5s (scene
         // N kết thúc ở T, scene N+1 bắt đầu ở T+0,5), nên với endFrame cũ cả

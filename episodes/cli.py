@@ -31,6 +31,7 @@ from episodes.audio_build import build_episode_wav
 from episodes.cutter import plan_cuts
 from episodes.full import full_outro_text, plan_full_cut, suggest_same_topic
 from episodes.plan import plan_episodes
+from episodes import backgrounds
 from episodes.props_builder import build_episode_props, chapter_lines
 from episodes.storage import (
     episode_audio_path,
@@ -129,6 +130,12 @@ def _run(
             episode_label=label_override,
             outro=outro_override,
         )
+        # Video nền thay ảnh tĩnh nếu assets/backgrounds/ có video; trống thì
+        # props giữ nguyên và Remotion dựng bằng ảnh như trước. Seed là stem
+        # của tập (đã mang dấu thời gian) nên mỗi tập một nền ngẫu nhiên.
+        nen = backgrounds.choose(seed=ep_stem)
+        if nen:
+            props.update(nen)
         props_path = save_episode_props(ep_stem, props, OUTPUT_DIR)
         _render(props_path, output_path)
 

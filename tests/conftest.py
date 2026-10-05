@@ -34,3 +34,17 @@ def _chan_goi_youtube(monkeypatch):
             if hasattr(mod, thuoc_tinh):
                 monkeypatch.setattr(mod, thuoc_tinh, _no)
     yield
+
+
+@pytest.fixture(autouse=True)
+def _khong_dung_video_nen_that(monkeypatch, tmp_path_factory):
+    """assets/backgrounds/ chứa video thật (hàng trăm MB). Không chặn thì mọi
+    test của stage 4 đều thấy chúng và cố chạy ffmpeg -- đúng chuyện xảy ra
+    05/10 khi vừa chép video vào. Test nào cần thì tự truyền thư mục riêng."""
+    try:
+        from episodes import backgrounds
+    except ImportError:
+        yield
+        return
+    monkeypatch.setattr(backgrounds, "BACKGROUND_DIR", tmp_path_factory.mktemp("nen-trong"))
+    yield
