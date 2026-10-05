@@ -76,6 +76,14 @@ def default_first_air(now: datetime, publish_hour: int = DEFAULT_PUBLISH_HOUR) -
     return candidate
 
 
+def _free_evening_from(now: datetime, publish_hour: int) -> datetime:
+    """Tối 20h đầu tiên còn kịp (cách bây giờ >= MIN_LEAD) mà chưa có video
+    và chưa được biên tập hẹn cho truyện khác."""
+    soonest = default_first_air(now, publish_hour)
+    day = story_bank.first_free_evening(soonest.date())
+    return datetime.combine(day, dtime(hour=publish_hour, minute=0), tzinfo=LOCAL_TZ)
+
+
 def resolve_first_air(
     story_id: int, now: datetime, publish_hour: int = DEFAULT_PUBLISH_HOUR
 ) -> datetime:
@@ -83,36 +91,39 @@ def resolve_first_air(
 
     Chế độ kho: truyện có `publish_date` thì tôn trọng đúng ngày đó lúc 20h giờ
     Việt Nam -- lịch đăng do người biên tập xếp, không để code tự dời. Không có
-    ngày hẹn (hoặc không phải chế độ kho) thì dùng ngày trống kế tiếp như cũ.
+    ngày hẹn, hoặc ngày hẹn đã qua, thì lấy tối trống đầu tiên: chưa có video và
+    chưa được hẹn cho truyện khác. Trước 05/10 chỗ này mặc định "tối mai" bất
+    kể tối mai đã có video, phải tự chỉ ngày bằng tay cho #6/#75 (28/09) và #9.
 
     Kho đọc không được cũng không được làm hỏng lượt đăng: video đã render xong,
     rơi về ngày kế tiếp còn hơn dừng cả lượt.
     """
-    if story_id:
-        try:
-            story = story_bank.get_story(story_id)
-        except story_bank.StoryBankError as exc:
-            print(f"CẢNH BÁO: không đọc được truyện #{story_id} trong kho ({exc}); dùng ngày kế tiếp.")
-        else:
-            if story.publish_date:
-                hen = datetime.combine(
-                    story.publish_date,
-                    dtime(hour=publish_hour, minute=0),
-                    tzinfo=LOCAL_TZ,
-                )
-                # Ngày hẹn đã trôi qua (dựng bù, hoặc lượt đăng chạy sau 20h
-                # cùng ngày): publishAt nằm ở quá khứ thì YouTube hoặc từ chối,
-                # hoặc công khai ngay lập tức -- cả hai đều không phải ý mình.
-                # Dời sang mốc 20h gần nhất còn ở tương lai và nói rõ.
-                if hen - now.astimezone(LOCAL_TZ) < MIN_LEAD:
-                    moi = default_first_air(now, publish_hour)
-                    print(
-                        f"CẢNH BÁO: truyện #{story_id} hẹn {hen:%d/%m %H:%M} nhưng "
-                        f"mốc đó đã qua; dời sang {moi:%d/%m %H:%M}."
-                    )
-                    return moi
-                return hen
-    return default_first_air(now, publish_hour)
+    if not story_id:
+        return default_first_air(now, publish_hour)
+    try:
+        story = story_bank.get_story(story_id)
+    except story_bank.StoryBankError as exc:
+        print(f"CẢNH BÁO: không đọc được truyện #{story_id} trong kho ({exc}); dùng ngày kế tiếp.")
+        return default_first_air(now, publish_hour)
+
+    if story.publish_date:
+        hen = datetime.combine(story.publish_date, dtime(hour=publish_hour, minute=0), tzinfo=LOCAL_TZ)
+        if hen - now.astimezone(LOCAL_TZ) >= MIN_LEAD:
+            return hen
+        # Ngày hẹn đã trôi qua (dựng bù, hoặc đăng sau 20h cùng ngày):
+        # publishAt ở quá khứ thì YouTube hoặc từ chối, hoặc công khai ngay.
+        moi = _free_evening_from(now, publish_hour)
+        print(
+            f"CẢNH BÁO: truyện #{story_id} hẹn {hen:%d/%m %H:%M} nhưng mốc đó đã qua; "
+            f"dời sang tối trống đầu tiên {moi:%d/%m %H:%M}."
+        )
+        return moi
+
+    try:
+        return _free_evening_from(now, publish_hour)
+    except story_bank.StoryBankError as exc:
+        print(f"CẢNH BÁO: không tính được tối trống ({exc}); dùng ngày kế tiếp.")
+        return default_first_air(now, publish_hour)
 
 
 def air_times(first_air: datetime, count: int) -> list[datetime]:

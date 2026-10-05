@@ -11,6 +11,7 @@ là dữ liệu biên tập, không bao giờ bị code ghi đè.
 from __future__ import annotations
 
 import json
+import sys
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -136,7 +137,8 @@ def get_story(story_id: int, path: Path = DEFAULT_BANK_PATH) -> Story:
 # --- trạng thái đã dùng ----------------------------------------------------
 
 
-def load_state(state_path: Path = DEFAULT_STATE_PATH) -> dict:
+def load_state(state_path: Path | None = None) -> dict:
+    state_path = state_path or DEFAULT_STATE_PATH
     if not state_path.exists():
         return {}
     try:
@@ -148,7 +150,8 @@ def load_state(state_path: Path = DEFAULT_STATE_PATH) -> dict:
     return data if isinstance(data, dict) else {}
 
 
-def used_ids(state_path: Path = DEFAULT_STATE_PATH) -> set[int]:
+def used_ids(state_path: Path | None = None) -> set[int]:
+    state_path = state_path or DEFAULT_STATE_PATH
     out = set()
     for key, value in load_state(state_path).items():
         if isinstance(value, dict) and value.get("status") in (
@@ -164,11 +167,12 @@ def used_ids(state_path: Path = DEFAULT_STATE_PATH) -> set[int]:
 def mark_used(
     story_id: int,
     *,
-    state_path: Path = DEFAULT_STATE_PATH,
+    state_path: Path | None = None,
     status: str = "used",
     video_id: str | None = None,
     published_at: str | None = None,
 ) -> None:
+    state_path = state_path or DEFAULT_STATE_PATH
     state = load_state(state_path)
     entry = dict(state.get(str(story_id), {}))
     entry["status"] = status
@@ -200,7 +204,7 @@ def pick_story(
     day: date,
     *,
     path: Path = DEFAULT_BANK_PATH,
-    state_path: Path = DEFAULT_STATE_PATH,
+    state_path: Path | None = None,
     rotation: tuple[str, ...] | None = None,
     exclude: set[int] | None = None,
 ) -> Story | None:
@@ -211,6 +215,7 @@ def pick_story(
     rồi C. Trong cùng một mức ưu tiên lấy id nhỏ nhất để kết quả ổn định,
     không phụ thuộc thứ tự đọc file.
     """
+    state_path = state_path or DEFAULT_STATE_PATH
     bank = load_bank(path)
     taken = used_ids(state_path) | (exclude or set())
 
@@ -237,18 +242,104 @@ def pick_story(
     return None
 
 
+def occupied_days(*, path: Path | None = None, state_path: Path | None = None) -> set[date]:
+    """Những tối đã có video: đã đăng vào tối đó, hoặc truyện hẹn tối đó đã dựng.
+
+    Truyện đã đăng tính theo published_at (có thể đã bị dời khỏi ngày hẹn vì
+    đăng muộn). Truyện dựng xong chưa đăng thì tính theo ngày hẹn của nó.
+    """
+    # Giải mặc định lúc gọi: gắn lúc import thì monkeypatch trong test không ăn.
+    path = path or DEFAULT_BANK_PATH
+    state_path = state_path or DEFAULT_STATE_PATH
+    state = load_state(state_path)
+    days: set[date] = set()
+    for value in state.values():
+        if not isinstance(value, dict) or value.get("status") != "published":
+            continue
+        raw = value.get("published_at")
+        if not raw:
+            continue
+        try:
+            days.add(datetime.fromisoformat(raw).astimezone(CHANNEL_TZ).date())
+        except ValueError:
+            continue
+    for story in load_bank(path).stories:
+        ban_ghi = state.get(str(story.id))
+        if (
+            story.publish_date
+            and isinstance(ban_ghi, dict)
+            and ban_ghi.get("status") in (None, "used", "built")
+        ):
+            days.add(story.publish_date)
+    return days
+
+
+def pick_next_unfilled(
+    start: date,
+    *,
+    horizon: int = 60,
+    path: Path | None = None,
+    state_path: Path | None = None,
+    rotation: tuple[str, ...] | None = None,
+) -> tuple[date, Story] | None:
+    """Tối gần nhất từ `start` chưa có video, cùng truyện nên dựng cho tối đó.
+
+    Thay cho pick_story(ngày phát sóng kế tiếp) trong `--story auto`. Lịch biên
+    tập kín mọi tối tới 25/10; cách cũ thấy 06/10 đã có #42 thì vớ một truyện
+    KHÔNG hẹn (#46), dựng mất một tiếng mà không có tối nào để chiếu. Nay đi
+    tiếp tới tối chưa có video và dựng đúng truyện đã hẹn cho tối đó (hoặc
+    theo vòng xoay nếu tối đó không ai hẹn) -- kênh luôn có video sẵn trước.
+    """
+    path = path or DEFAULT_BANK_PATH
+    state_path = state_path or DEFAULT_STATE_PATH
+    occupied = occupied_days(path=path, state_path=state_path)
+    for offset in range(horizon):
+        day = start + timedelta(days=offset)
+        if day in occupied:
+            continue
+        story = pick_story(day, path=path, state_path=state_path, rotation=rotation)
+        if story is not None:
+            return day, story
+    return None
+
+
+def first_free_evening(
+    start: date,
+    *,
+    horizon: int = 365,
+    path: Path | None = None,
+    state_path: Path | None = None,
+) -> date:
+    """Tối đầu tiên từ `start` chưa có video VÀ chưa được biên tập hẹn cho ai.
+
+    Dùng khi đăng truyện không có ngày hẹn. Trước đây code mặc định "tối mai"
+    bất kể tối mai đã có video, phải tự chỉ ngày bằng tay cho #6/#75 (28/09)
+    và #9 (05/10).
+    """
+    path = path or DEFAULT_BANK_PATH
+    state_path = state_path or DEFAULT_STATE_PATH
+    occupied = occupied_days(path=path, state_path=state_path)
+    reserved = {s.publish_date for s in load_bank(path).stories if s.publish_date}
+    for offset in range(horizon):
+        day = start + timedelta(days=offset)
+        if day not in occupied and day not in reserved:
+            return day
+    return start + timedelta(days=horizon)
+
+
 def pick_upcoming(
     start: date,
     days: int = 7,
     *,
     path: Path = DEFAULT_BANK_PATH,
-    state_path: Path = DEFAULT_STATE_PATH,
+    state_path: Path | None = None,
     rotation: tuple[str, ...] | None = None,
 ) -> list[tuple[date, Story | None]]:
     """Lịch dự kiến `days` ngày liên tiếp, không lặp truyện trong cùng lần xem.
 
     Chỉ để xem trước (`--dry-run-pick`); không ghi gì vào state.
     """
+    state_path = state_path or DEFAULT_STATE_PATH
     picked: set[int] = set()
     out: list[tuple[date, Story | None]] = []
     for offset in range(days):
@@ -329,15 +420,21 @@ def main(argv: "list[str] | None" = None) -> int:
             return 0
 
         day = date.fromisoformat(args.date) if args.date else next_air_date()
-        story = pick_story(day, path=args.bank, state_path=args.state, rotation=rotation)
-        if story is None:
+        ket_qua = pick_next_unfilled(
+            day, path=args.bank, state_path=args.state, rotation=rotation
+        )
+        if ket_qua is None:
             # Mã thoát riêng để run_daily.sh phân biệt "hết truyện" (rơi về
             # --topic auto) với lỗi thật (kho hỏng, thiếu file).
             return 3
+        ngay, story = ket_qua
+        # stdout chỉ có id (run_daily.sh đọc nguyên dòng); ngày chiếu ra stderr
+        # để vào log mà không làm vỡ chỗ parse.
+        print(f"Dựng sẵn cho tối {ngay:%d/%m}: #{story.id} {story.title}", file=sys.stderr)
         print(story.id)
         return 0
     except StoryBankError as exc:
-        print(f"Lỗi kho truyện: {exc}", file=__import__("sys").stderr)
+        print(f"Lỗi kho truyện: {exc}", file=sys.stderr)
         return 2
 
 

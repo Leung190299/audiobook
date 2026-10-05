@@ -230,3 +230,95 @@ def test_mark_used_khong_de_len_trang_thai_da_dang(tmp_path):
     ban_ghi = story_bank.load_state(state)["7"]
     assert ban_ghi["status"] == "published"
     assert ban_ghi["video_id"] == "abc"
+
+
+# --- dựng trước tối trống gần nhất (05/10/2026) -------------------------------
+#
+# Lịch biên tập kín mọi tối tới 25/10. pick_story(ngày phát sóng kế tiếp) cũ
+# thấy 06/10 đã có #42 rồi thì vớ một truyện KHÔNG hẹn (#46), dựng mất một tiếng
+# mà không có tối nào để chiếu. Việc đúng là dựng truyện đã hẹn cho tối gần nhất
+# chưa có video.
+
+
+def _state(path, data: dict):
+    path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    return path
+
+
+def test_ngay_da_co_video_gom_ca_da_dang_lan_da_dung_dung_ngay_hen(bank, tmp_path):
+    st = _state(tmp_path / "s.json", {
+        "1": {"status": "published", "published_at": "2026-10-10T20:00:00+07:00"},
+        "5": {"status": "built"},  # hẹn 16/10, dựng xong chưa đăng: 16/10 coi như đã có
+    })
+
+    days = story_bank.occupied_days(path=bank, state_path=st)
+
+    assert date(2026, 10, 10) in days
+    assert date(2026, 10, 16) in days
+
+
+def test_truyen_hen_chua_dung_thi_ngay_do_chua_co_video(bank, tmp_path):
+    st = _state(tmp_path / "s.json", {})
+
+    assert date(2026, 10, 16) not in story_bank.occupied_days(path=bank, state_path=st)
+
+
+def test_chon_truyen_hen_cho_toi_trong_gan_nhat(bank, tmp_path):
+    """15/10 trống mà không ai hẹn -> chọn theo vòng xoay; nhưng nếu tối gần
+    nhất chưa có video là tối có truyện hẹn thì phải dựng đúng truyện đó."""
+    st = _state(tmp_path / "s.json", {})
+
+    ngay, s = story_bank.pick_next_unfilled(
+        date(2026, 10, 16), path=bank, state_path=st, rotation=ROT
+    )
+
+    assert ngay == date(2026, 10, 16) and s.id == 5
+
+
+def test_bo_qua_toi_da_co_video_di_tiep_toi_toi_sau(bank, tmp_path):
+    st = _state(tmp_path / "s.json", {
+        "5": {"status": "built"},  # 16/10 đã có video
+    })
+
+    ngay, s = story_bank.pick_next_unfilled(
+        date(2026, 10, 16), path=bank, state_path=st, rotation=ROT
+    )
+
+    # 16/10 có rồi -> sang 17/10, không ai hẹn -> theo vòng xoay, ưu tiên A.
+    assert ngay == date(2026, 10, 17)
+    assert s.id == 1
+
+
+def test_toi_trong_khong_hen_thi_khong_lay_truyen_hen_ngay_khac(bank, tmp_path):
+    """Truyện hẹn ngày khác phải để dành đúng ngày đó, không lấy sớm."""
+    st = _state(tmp_path / "s.json", {})
+
+    ngay, s = story_bank.pick_next_unfilled(
+        date(2026, 10, 1), path=bank, state_path=st, rotation=ROT
+    )
+
+    assert ngay == date(2026, 10, 1)
+    assert s.id != 5
+
+
+def test_free_evening_bo_qua_ca_ngay_da_dang_va_ngay_bien_tap_hen(bank, tmp_path):
+    """Truyện không hẹn lúc đăng: trước đây mặc định 'tối mai' bất kể tối mai
+    đã có video -- phải tự chỉ ngày bằng tay cho #6/#75 hôm 28/09 và #9 hôm 05/10."""
+    st = _state(tmp_path / "s.json", {
+        "1": {"status": "published", "published_at": "2026-10-15T20:00:00+07:00"},
+    })
+
+    # 15/10 đã đăng, 16/10 biên tập hẹn #5 -> tối trống đầu tiên là 17/10.
+    assert story_bank.first_free_evening(
+        date(2026, 10, 15), path=bank, state_path=st
+    ) == date(2026, 10, 17)
+
+
+def test_cli_pick_dung_truoc_toi_trong(bank, tmp_path, capsys):
+    st = _state(tmp_path / "s.json", {"5": {"status": "built"}})
+
+    rc = story_bank.main(["--pick", "--date", "2026-10-16", "--bank", str(bank),
+                          "--state", str(st), "--rotation", ",".join(ROT)])
+
+    assert rc == 0
+    assert capsys.readouterr().out.strip() == "1"  # 16/10 có rồi -> dựng cho 17/10

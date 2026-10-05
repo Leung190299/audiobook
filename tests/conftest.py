@@ -48,3 +48,17 @@ def _khong_dung_video_nen_that(monkeypatch, tmp_path_factory):
         return
     monkeypatch.setattr(backgrounds, "BACKGROUND_DIR", tmp_path_factory.mktemp("nen-trong"))
     yield
+
+
+@pytest.fixture(autouse=True)
+def _khong_dung_trang_thai_kho_that(monkeypatch, tmp_path_factory):
+    """output/story_bank_state.json điều khiển lịch tự động 09:00: truyện nào đã
+    dựng, đã đăng, tối nào đã có video. Test đọc nó thì kết quả phụ thuộc lịch
+    kênh hôm đó; test GHI vào nó thì lượt chạy sáng mai chọn sai truyện. Kho
+    biên tập (data/story_bank.json) chỉ đọc nên vẫn để test dùng bản thật."""
+    from scripts import story_bank
+
+    monkeypatch.setattr(
+        story_bank, "DEFAULT_STATE_PATH", tmp_path_factory.mktemp("kho") / "state.json"
+    )
+    yield

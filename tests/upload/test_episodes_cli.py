@@ -293,10 +293,11 @@ def test_playlist_sai_dinh_dang_thi_khong_upload_gi(tmp_path, monkeypatch):
 # --- ngày hẹn đã trôi qua (02/10/2026) ---------------------------------------
 
 
-def test_ngay_hen_da_qua_thi_doi_sang_toi_hom_sau(monkeypatch):
+def test_ngay_hen_da_qua_thi_tim_tu_toi_mai(monkeypatch):
     """Biên tập xếp truyện #49 vào 02/10, nhưng lượt đăng chạy lúc 23:30 cùng
     ngày -- 20:00 đã trôi qua. Giữ nguyên là publishAt nằm ở quá khứ: YouTube
-    hoặc từ chối, hoặc công khai ngay lập tức, cả hai đều không phải ý mình."""
+    hoặc từ chối, hoặc công khai ngay lập tức. Phải tìm tối trống bắt đầu từ
+    TỐI MAI (tối nay đã lỡ), không đâm vào video đã xếp."""
     from datetime import date as _date
 
     from upload import episodes_cli as ec
@@ -305,9 +306,17 @@ def test_ngay_hen_da_qua_thi_doi_sang_toi_hom_sau(monkeypatch):
         publish_date = _date(2026, 10, 2)
 
     monkeypatch.setattr(ec.story_bank, "get_story", lambda sid: _Story())
+    goi = {}
+
+    def fake_free(start, **kw):
+        goi["start"] = start
+        return start  # giả như tối đầu tiên tìm tới là trống
+
+    monkeypatch.setattr(ec.story_bank, "first_free_evening", fake_free)
     now = datetime(2026, 10, 2, 23, 30, tzinfo=LOCAL_TZ)
 
     assert ec.resolve_first_air(49, now, 20) == datetime(2026, 10, 3, 20, 0, tzinfo=LOCAL_TZ)
+    assert goi["start"] == _date(2026, 10, 3)
 
 
 def test_ngay_hen_con_o_tuong_lai_thi_giu_nguyen(monkeypatch):
@@ -338,3 +347,46 @@ def test_ngay_hen_qua_nhieu_ngay_van_doi_toi_moc_tuong_lai(monkeypatch):
 
     ra = ec.resolve_first_air(49, now, 20)
     assert ra > now
+
+
+# --- truyện không hẹn: tối trống đầu tiên, không phải "tối mai" (05/10) --------
+
+
+def test_truyen_khong_hen_xep_vao_toi_trong_dau_tien(monkeypatch):
+    """Trước đây mặc định tối mai bất kể tối mai đã có video -- phải tự chỉ
+    ngày bằng tay cho #6/#75 (28/09) và #9 (05/10)."""
+    from datetime import date as _date
+
+    from upload import episodes_cli as ec
+
+    class _Story:
+        publish_date = None
+
+    monkeypatch.setattr(ec.story_bank, "get_story", lambda sid: _Story())
+    goi = {}
+
+    def fake_free(start, **kw):
+        goi["start"] = start
+        return _date(2026, 10, 27)
+
+    monkeypatch.setattr(ec.story_bank, "first_free_evening", fake_free)
+    now = datetime(2026, 10, 5, 11, 0, tzinfo=LOCAL_TZ)
+
+    assert ec.resolve_first_air(46, now, 20) == datetime(2026, 10, 27, 20, 0, tzinfo=LOCAL_TZ)
+    # Tìm từ tối sớm nhất còn kịp (tối nay 20h, còn hơn 30 phút).
+    assert goi["start"] == _date(2026, 10, 5)
+
+
+def test_ngay_hen_da_qua_cung_tim_toi_trong_khong_dam_vao_video_khac(monkeypatch):
+    from datetime import date as _date
+
+    from upload import episodes_cli as ec
+
+    class _Story:
+        publish_date = _date(2026, 10, 2)
+
+    monkeypatch.setattr(ec.story_bank, "get_story", lambda sid: _Story())
+    monkeypatch.setattr(ec.story_bank, "first_free_evening", lambda start, **kw: _date(2026, 10, 27))
+    now = datetime(2026, 10, 5, 11, 0, tzinfo=LOCAL_TZ)
+
+    assert ec.resolve_first_air(49, now, 20) == datetime(2026, 10, 27, 20, 0, tzinfo=LOCAL_TZ)
