@@ -29,6 +29,7 @@ from gemini_webapi import GeminiClient
 from episodes.storage import load_manifest, stem_from_manifest
 from metadata.full import (
     build_full_description,
+    build_minimal_description,
     full_pinned_comment,
     full_title,
     save_full_metadata,
@@ -109,13 +110,13 @@ def _run_full(script: Script, seo, manifest: dict, stem: str, thumbnails_dir: Pa
     title = full_title(story_title)
     question = manifest.get("comment_question") or script.comment_question
     hashtags = topic_hashtags(topic.hashtags if topic else None, seo.hashtags)
-    description = build_full_description(
-        seo,
-        hook=manifest.get("hook") or script.hook,
-        comment_question=question,
-        chapter_lines=youtube_chapter_lines(ep["chapters"]),
-        hashtags=hashtags,
-        series=script.series,
+    # Mô tả tối giản theo format tham khảo (05/10): tiêu đề, cảnh báo AI,
+    # hashtag, từ khoá. Hashtag của chủ đề đứng trước (YouTube hiện 3 cái đầu
+    # trên tiêu đề), rồi mới tới hashtag Gemini gợi ý.
+    description = build_minimal_description(
+        title,
+        hashtags=hashtags + list(seo.hashtags),
+        keywords=list(seo.tags),
     )
     new_video_path = rename_video_file(Path(ep["video_path"]), slugify(story_title))
     thumb_a, thumb_b = _find_full_thumbnails(thumbnails_dir, script.trope)

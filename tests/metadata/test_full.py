@@ -93,18 +93,17 @@ async def test_run_full_ghi_metadata_index_va_doi_ten(tmp_path, monkeypatch, cap
 
     meta = json.loads(open(ep["metadata_path"], encoding="utf-8").read())
     desc = meta["description"]
-    order = [
-        desc.index("Bác Cả đòi đất, tôi bật live."),
-        desc.index("Câu một giới thiệu. Câu hai hấp dẫn!"),
-        desc.index(f"❓ {QUESTION}"),
-        desc.index(TOPIC_PLAYLIST_PLACEHOLDER),
-        desc.index("Đăng ký kênh"),
-        desc.index("0:00 Mở đầu"),
-        desc.index("#truyenaudio"),
-    ]
-    assert order == sorted(order)
-    assert "Câu ba thừa" not in desc
-    assert desc.splitlines()[-1] == "#truyenaudio #hohangcucpham #truyenhai"
+    # Mô tả tối giản theo format tham khảo (05/10): tiêu đề -> cảnh báo AI ->
+    # hashtag (chủ đề trước, Gemini sau) -> từ khoá.
+    from metadata.full import AI_NOTICE_SHORT
+
+    khoi = desc.split("\n\n")
+    assert khoi[0] == f"[Truyện Audio] {STORY} | Audio Truyện"
+    assert khoi[1] == AI_NOTICE_SHORT
+    assert khoi[2].startswith("Hashtags: #truyenaudio #hohangcucpham #truyenhai")
+    assert khoi[3].startswith("Keywords: ")
+    assert "❓" not in desc and TOPIC_PLAYLIST_PLACEHOLDER not in desc
+    # Câu hỏi chọn phe vẫn sống ở bình luận ghim, chỉ rời khỏi mô tả.
     assert meta["pinned_comment"].startswith(f"❓ {QUESTION}")
     assert "1 = cho, 2 = không" in meta["pinned_comment"]
 
@@ -194,3 +193,49 @@ def test_khong_co_hook_thi_canh_bao_van_len_dau():
                                   chapter_lines=[], hashtags=[])
 
     assert desc.split("\n\n")[0] == AI_NOTICE_SHORT
+
+
+# --- mô tả tối giản theo format tham khảo (05/10/2026) -----------------------
+
+
+def test_mo_ta_toi_gian_gom_tieu_de_canh_bao_hashtag_tu_khoa():
+    """Format tham khảo (2,38 triệu view) chỉ có ba dòng: tiêu đề, hashtag, từ
+    khoá. Giữ thêm cảnh báo AI -- yêu cầu riêng của kênh từ 30/09."""
+    from metadata.full import AI_NOTICE_SHORT, build_minimal_description
+
+    desc = build_minimal_description(
+        "[Truyện Audio] Bác Cả Đòi Chia Đất | Audio Truyện",
+        hashtags=["#truyenaudio", "#hohangcucpham"],
+        keywords=["truyện audio", "truyện gia đình"],
+    )
+    khoi = desc.split("\n\n")
+
+    assert khoi[0] == "[Truyện Audio] Bác Cả Đòi Chia Đất | Audio Truyện"
+    assert khoi[1] == AI_NOTICE_SHORT
+    assert khoi[2] == "Hashtags: #truyenaudio #hohangcucpham"
+    assert khoi[3] == "Keywords: truyện audio, truyện gia đình"
+    assert len(khoi) == 4
+
+
+def test_mo_ta_toi_gian_khong_con_chuong_hay_cau_hoi():
+    from metadata.full import build_minimal_description
+
+    desc = build_minimal_description("T", hashtags=["#a"], keywords=["k"])
+
+    assert "Chương:" not in desc and "❓" not in desc and "(link playlist)" not in desc
+
+
+def test_hashtag_khong_qua_15_cai_ke_ca_khi_seo_tra_nhieu():
+    """Quá 15 hashtag là YouTube bỏ qua TẤT CẢ hashtag trong mô tả."""
+    from metadata.full import build_minimal_description
+
+    desc = build_minimal_description("T", hashtags=[f"#h{i}" for i in range(30)], keywords=[])
+
+    dong = [l for l in desc.splitlines() if l.startswith("Hashtags:")][0]
+    assert len(dong.split()) - 1 <= 15
+
+
+def test_thieu_tu_khoa_thi_bo_dong_keywords():
+    from metadata.full import build_minimal_description
+
+    assert "Keywords:" not in build_minimal_description("T", hashtags=["#a"], keywords=[])

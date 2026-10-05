@@ -95,6 +95,30 @@ def topic_hashtags(topic_tags: tuple[str, ...] | list[str] | None, fallback: lis
     return out
 
 
+# YouTube bỏ qua TẤT CẢ hashtag trong mô tả nếu có quá 15 cái.
+MAX_DESCRIPTION_HASHTAGS = 15
+# Từ khoá trong mô tả: đủ cho tìm kiếm, nhiều hơn chỉ là nhồi chữ.
+MAX_DESCRIPTION_KEYWORDS = 10
+
+
+def build_minimal_description(title: str, hashtags: list[str], keywords: list[str]) -> str:
+    """Mô tả tối giản theo format tham khảo đang chạy tốt (05/10/2026): tiêu đề,
+    hashtag, từ khoá. Giữ thêm cảnh báo AI ngay dòng hai -- yêu cầu riêng của
+    kênh từ 30/09, và YouTube chỉ hiện ~2 dòng đầu trước khi phải bấm "thêm".
+
+    Bỏ khối chương, câu hỏi bình luận, link playlist so với build_full_description:
+    format tham khảo không có, mà 38 phút vẫn 2,38 triệu view.
+    """
+    parts = [title, AI_NOTICE_SHORT]
+    tags = list(dict.fromkeys(hashtags))[:MAX_DESCRIPTION_HASHTAGS]
+    if tags:
+        parts.append("Hashtags: " + " ".join(tags))
+    words = [k for k in dict.fromkeys(keywords) if k][:MAX_DESCRIPTION_KEYWORDS]
+    if words:
+        parts.append("Keywords: " + ", ".join(words))
+    return "\n\n".join(parts)
+
+
 def build_full_description(
     seo: SeoCopy,
     hook: str,
