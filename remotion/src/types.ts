@@ -64,4 +64,9 @@ export interface ShortProps {
   audioDurationSeconds: number;
   ctaSeconds: number;
   ctaText: string;
+  // Video nền thay dãy ảnh cảnh (episodes/backgrounds.choose_for_short). Có
+  // thì scenes rỗng và imagePath = "" -- stage 3 đã bị bỏ.
+  backgroundVideo?: string;
+  backgroundVideoSeconds?: number;
+  backgroundVideoAspect?: number;
 }

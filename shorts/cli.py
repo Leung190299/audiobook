@@ -1,7 +1,10 @@
 # shorts/cli.py
 """Stage 7: cắt tập đã đọc theo câu thành series short đánh số liên tục.
 
-    uv run python -m shorts.cli <tts_metadata_json> <images_metadata_json>
+    uv run python -m shorts.cli <tts_metadata_json> [<images_metadata_json>]
+
+Không truyền metadata ảnh = dựng short bằng video nền (assets/backgrounds/,
+ưu tiên video dọc) -- stage 3 đã bị bỏ.
     # Đã render short: output/shorts/<trope>-<ts>-part-01.mp4
     # Metadata short: output/shorts/<trope>-<ts>-part-01.txt
     # ...
@@ -24,6 +27,7 @@ from shorts.audio_cut import cut_wav
 from scripts.models import Script
 from scripts.topics import TOPICS
 from shorts.planner import plan_beat_shorts, plan_teasers, short_title_from_line
+from episodes import backgrounds
 from shorts.props_builder import build_short_props
 from shorts.storage import (
     make_stem,
@@ -54,16 +58,19 @@ class ShortRenderError(Exception):
 FULL_CTA_TEXT = "Nghe trọn truyện trên kênh"
 
 
-def _run(tts_metadata_path: Path, images_metadata_path: Path, script_path: Path | None = None) -> None:
+def _run(
+    tts_metadata_path: Path, images_metadata_path: Path | None, script_path: Path | None = None
+) -> None:
     # Resolve trước khi lấy .parent/.with_suffix: build_short_props tính đường
     # dẫn bằng .relative_to(REPO_ROOT), cần cả hai vế đều là đường dẫn tuyệt đối.
     tts_metadata_path = tts_metadata_path.resolve()
-    images_metadata_path = images_metadata_path.resolve()
-
     tts_metadata = json.loads(tts_metadata_path.read_text(encoding="utf-8"))
-    images_metadata = json.loads(images_metadata_path.read_text(encoding="utf-8"))
+    images_metadata = None
+    if images_metadata_path is not None:
+        images_metadata_path = images_metadata_path.resolve()
+        images_metadata = json.loads(images_metadata_path.read_text(encoding="utf-8"))
 
-    if (
+    if images_metadata is not None and (
         tts_metadata["trope"] != images_metadata["trope"]
         or tts_metadata["title"] != images_metadata["title"]
     ):
@@ -81,7 +88,7 @@ def _run(tts_metadata_path: Path, images_metadata_path: Path, script_path: Path 
             f"Không tìm thấy file wav nguồn tại {source_wav} (suy ra từ đường dẫn "
             f"metadata TTS {tts_metadata_path} bằng .with_suffix('.wav'))."
         )
-    images_dir = images_metadata_path.parent
+    images_dir = images_metadata_path.parent if images_metadata_path is not None else None
 
     script = (
         Script.from_dict(json.loads(script_path.read_text(encoding="utf-8")))
@@ -126,6 +133,13 @@ def _run(tts_metadata_path: Path, images_metadata_path: Path, script_path: Path 
         try:
             cut_wav(source_wav, part.source_start_seconds, part.source_end_seconds, audio_path)
 
+            # Không có ảnh: mỗi short bốc một video nền (ưu tiên dọc) theo stem
+            # của chính phần đó, nên 3 short của một truyện thường khác nền.
+            nen = (
+                backgrounds.choose_for_short(seed=this_part_stem)
+                if images_metadata is None
+                else None
+            )
             props = build_short_props(
                 part=part,
                 total_parts=total_parts,
@@ -136,6 +150,7 @@ def _run(tts_metadata_path: Path, images_metadata_path: Path, script_path: Path 
                 images_dir=images_dir,
                 repo_root=REPO_ROOT,
                 cta_text=cta_text,
+                background=nen,
             )
             props_path = save_short_props(this_part_stem, props, OUTPUT_DIR)
 
@@ -238,7 +253,10 @@ def main() -> None:
     )
     parser.add_argument("tts_metadata_path", help="Đường dẫn file JSON metadata TTS")
     parser.add_argument(
-        "images_metadata_path", help="Đường dẫn file JSON metadata ảnh"
+        "images_metadata_path",
+        nargs="?",
+        default=None,
+        help="Metadata ảnh của stage 3. Bỏ trống = nền short là video (assets/backgrounds/)",
     )
     parser.add_argument(
         "--script",
@@ -247,7 +265,11 @@ def main() -> None:
         help="JSON kịch bản: có short_beats thì dựng 3 Shorts từ 3 đoạn hài/sảng nhất.",
     )
     args = parser.parse_args()
-    _run(Path(args.tts_metadata_path), Path(args.images_metadata_path), args.script)
+    _run(
+        Path(args.tts_metadata_path),
+        Path(args.images_metadata_path) if args.images_metadata_path else None,
+        args.script,
+    )
 
 
 if __name__ == "__main__":

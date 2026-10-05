@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Img, staticFile } from "remotion";
+import { AbsoluteFill, Img, OffthreadVideo, staticFile } from "remotion";
 import type { ShortProps } from "./types";
 import { FONT_FAMILY, useBeVietnamPro } from "./fonts";
 
@@ -12,21 +12,32 @@ export const ShortThumbnail: React.FC<ShortProps> = ({
   imagePath,
   hookText,
   partLabel,
+  backgroundVideo,
 }) => {
   useBeVietnamPro();
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       <AbsoluteFill style={{ overflow: "hidden" }}>
-        {/* Ảnh tĩnh: không zoom, animation vô nghĩa vì chỉ có một khung hình. */}
-        <Img
-          src={staticFile(imagePath)}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-          }}
-        />
+        {/* Ảnh tĩnh: không zoom, animation vô nghĩa vì chỉ có một khung hình.
+            Có video nền (đã bỏ stage 3, không còn ảnh) thì chụp khung đầu của
+            chính video đó. */}
+        {backgroundVideo ? (
+          <OffthreadVideo
+            src={staticFile(backgroundVideo)}
+            muted
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        ) : (
+          <Img
+            src={staticFile(imagePath)}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        )}
       </AbsoluteFill>
 
       {/* Gradient đậm hơn ShortVideo.tsx: ảnh bìa phải đọc được chữ khi thu nhỏ

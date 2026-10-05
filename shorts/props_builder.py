@@ -22,13 +22,38 @@ def build_short_props(
     total_parts: int,
     episode_title: str,
     trope: str,
-    images_metadata: dict,
+    images_metadata: dict | None,
     audio_path: Path,
-    images_dir: Path,
+    images_dir: Path | None,
     repo_root: Path,
     cta_seconds: float = CTA_SECONDS,
     cta_text: str | None = None,
+    background: dict | None = None,
 ) -> dict:
+    """`images_metadata` None = đã bỏ stage 3, nền short là video (`background`,
+    từ episodes/backgrounds.choose_for_short). Khi đó scenes rỗng và imagePath
+    rỗng; ShortVideo/ShortThumbnail vẽ video thay ảnh."""
+    if images_metadata is None:
+        if not background:
+            raise ShortPropsBuildError(
+                "Short không có ảnh (đã bỏ stage 3) mà cũng không có video nền -- "
+                "thêm video .mp4 vào assets/backgrounds/ hoặc chạy stage 3."
+            )
+        scene_props: list[dict] = []
+        image_path_relative = ""
+    else:
+        scene_props, image_path_relative = _scenes_from_images(
+            part, images_metadata, images_dir, repo_root
+        )
+    return _assemble(
+        part, total_parts, episode_title, trope, audio_path, repo_root,
+        scene_props, image_path_relative, cta_seconds, cta_text, background,
+    )
+
+
+def _scenes_from_images(
+    part: ShortPart, images_metadata: dict, images_dir: Path, repo_root: Path
+) -> tuple[list[dict], str]:
     images_by_index = {c["index"]: c for c in images_metadata["chapters"]}
     image_chapter = images_by_index.get(part.chapter_index)
     if image_chapter is None:
@@ -82,8 +107,22 @@ def build_short_props(
         for s in overlapping
     ]
     # Ảnh bìa (ShortThumbnail) vẫn là cảnh đang chiếu lúc phần bắt đầu.
-    image_path_relative = scene_props[0]["imagePath"]
+    return scene_props, scene_props[0]["imagePath"]
 
+
+def _assemble(
+    part: ShortPart,
+    total_parts: int,
+    episode_title: str,
+    trope: str,
+    audio_path: Path,
+    repo_root: Path,
+    scene_props: list[dict],
+    image_path_relative: str,
+    cta_seconds: float,
+    cta_text: str | None,
+    background: dict | None,
+) -> dict:
     # Mọi trích đoạn đều mời về video dài. Trước đây card cuối ghi "Xem phần N+1"
     # vì short là một series nối tiếp; nay short chỉ là mồi, nên chỉ có một đích
     # duy nhất đáng dẫn tới là tập đầy đủ trên kênh.
@@ -98,7 +137,7 @@ def build_short_props(
         for caption in part.captions
     ]
 
-    return {
+    props = {
         "trope": trope,
         "title": episode_title,
         "audioPath": str(audio_path.relative_to(repo_root)),
@@ -111,3 +150,6 @@ def build_short_props(
         "ctaSeconds": cta_seconds,
         "ctaText": cta_text,
     }
+    if background:
+        props.update(background)
+    return props

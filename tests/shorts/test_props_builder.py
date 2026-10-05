@@ -248,3 +248,42 @@ def test_thieu_file_anh_cua_canh_thu_hai_thi_bao_loi(tmp_path):
             images_dir=images_dir,
             repo_root=repo_root,
         )
+
+
+# --- không có ảnh: dựng short bằng video nền (05/10/2026) ---------------------
+
+
+NEN = {
+    "backgroundVideo": "assets/backgrounds/.prepared/doc-h1920.mp4",
+    "backgroundVideoSeconds": 312.6,
+    "backgroundVideoAspect": 0.5625,
+}
+
+
+def test_short_khong_anh_dung_video_nen(tmp_path: Path):
+    """Bỏ stage 3 (~30 phút/truyện): short không có ảnh cảnh, nền là video."""
+    repo_root, _, audio_path = _setup_repo(tmp_path)
+
+    props = build_short_props(
+        part=_part(), total_parts=3, episode_title=TITLE, trope=TROPE,
+        images_metadata=None, audio_path=audio_path, images_dir=None,
+        repo_root=repo_root, background=NEN,
+    )
+
+    assert props["scenes"] == []
+    assert props["imagePath"] == ""
+    assert props["backgroundVideo"] == NEN["backgroundVideo"]
+    assert props["backgroundVideoSeconds"] == 312.6
+    # Phụ đề, hook, nhãn phần vẫn đủ như short dùng ảnh.
+    assert props["captions"] and props["partLabel"] == "TRÍCH ĐOẠN 2/3"
+
+
+def test_short_khong_anh_khong_video_nen_thi_bao_loi(tmp_path: Path):
+    repo_root, _, audio_path = _setup_repo(tmp_path)
+
+    with pytest.raises(ShortPropsBuildError, match="video nền"):
+        build_short_props(
+            part=_part(), total_parts=3, episode_title=TITLE, trope=TROPE,
+            images_metadata=None, audio_path=audio_path, images_dir=None,
+            repo_root=repo_root, background=None,
+        )

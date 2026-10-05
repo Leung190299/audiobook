@@ -247,11 +247,29 @@ AUDIO_JSON="$(extract 'Metadata: ([^[:space:]]+\.json)' "$TTS_LOG")"
 require "$AUDIO_JSON" "Stage 2: TTS" "$TTS_LOG"
 
 # --- Stage 3: ảnh nền ---------------------------------------------------------
-IMAGES_LOG="$LOG_DIR/03-images.log"
-# Stage 3 cần mốc câu của stage 2 để chia mỗi chương thành cảnh ~50s.
-run_stage "Stage 3: Ảnh nền" "$IMAGES_LOG" $RUNNER images.cli "$SCRIPT_PATH" "$AUDIO_JSON"
-IMAGES_JSON="$(extract 'Metadata: ([^[:space:]]+\.json)' "$IMAGES_LOG")"
-require "$IMAGES_JSON" "Stage 3: Ảnh nền" "$IMAGES_LOG"
+# Có video trong assets/backgrounds/ thì BỎ HẲN stage 3: video dài và short đều
+# dựng trên video nền (episodes/backgrounds.py), ảnh sinh ra không ai xem mà
+# tốn ~30 phút mỗi truyện -- gần nửa thời gian cả lượt. Thư mục trống thì sinh
+# ảnh như cũ, giữ đường lui.
+#
+# IMAGES_ARGS rỗng hay một phần tử; khai triển bằng ${arr[@]+"${arr[@]}"}
+# chứ không phải "${arr[@]}": /bin/bash của macOS là 3.2, mảng rỗng dưới set -u
+# ở đó là lỗi "unbound variable" làm chết cả lượt.
+shopt -s nullglob nocaseglob
+BG_VIDEOS=("$REPO_ROOT"/assets/backgrounds/*.mp4)
+shopt -u nullglob nocaseglob
+IMAGES_JSON=""
+IMAGES_ARGS=()
+if [[ ${#BG_VIDEOS[@]} -gt 0 ]]; then
+  log "Bỏ Stage 3: dựng trên ${#BG_VIDEOS[@]} video nền trong assets/backgrounds/"
+else
+  IMAGES_LOG="$LOG_DIR/03-images.log"
+  # Stage 3 cần mốc câu của stage 2 để chia mỗi chương thành cảnh ~50s.
+  run_stage "Stage 3: Ảnh nền" "$IMAGES_LOG" $RUNNER images.cli "$SCRIPT_PATH" "$AUDIO_JSON"
+  IMAGES_JSON="$(extract 'Metadata: ([^[:space:]]+\.json)' "$IMAGES_LOG")"
+  require "$IMAGES_JSON" "Stage 3: Ảnh nền" "$IMAGES_LOG"
+  IMAGES_ARGS=("$IMAGES_JSON")
+fi
 
 # --- Stage 4: render ----------------------------------------------------------
 # full (mặc định từ 24/09): 1 video cả truyện = cold open 20-30s từ đoạn sảng
@@ -260,7 +278,7 @@ require "$IMAGES_JSON" "Stage 3: Ảnh nền" "$IMAGES_LOG"
 # "format" và "topic").
 VIDEO_LOG="$LOG_DIR/04-episodes.log"
 run_stage "Stage 4: Render video" "$VIDEO_LOG" \
-  $RUNNER episodes.cli "$SCRIPT_PATH" "$AUDIO_JSON" "$IMAGES_JSON" --format "$FORMAT"
+  $RUNNER episodes.cli "$SCRIPT_PATH" "$AUDIO_JSON" ${IMAGES_ARGS[@]+"${IMAGES_ARGS[@]}"} --format "$FORMAT"
 EPISODES_MANIFEST="$(extract 'Manifest: ([^[:space:]]+\.json)' "$VIDEO_LOG")"
 require "$EPISODES_MANIFEST" "Stage 4: Render video" "$VIDEO_LOG"
 EPISODE_COUNT="$(extract 'Đã render ([0-9]+) [^[:space:]]+ vào .+' "$VIDEO_LOG")"
@@ -305,7 +323,7 @@ SHORT_COUNT=""
 log "▶ Stage 7: Short"
 # --script: kịch bản chủ đề có 3 đoạn hài/sảng (short_beats) -> 3 Shorts mở bằng
 # câu thoại đó; kịch bản cũ không có thì shorts.cli rải 3 trích đoạn như trước.
-if $RUNNER shorts.cli "$AUDIO_JSON" "$IMAGES_JSON" --script "$SCRIPT_PATH" >"$SHORT_LOG" 2>&1; then
+if $RUNNER shorts.cli "$AUDIO_JSON" ${IMAGES_ARGS[@]+"${IMAGES_ARGS[@]}"} --script "$SCRIPT_PATH" >"$SHORT_LOG" 2>&1; then
   cat "$SHORT_LOG" >>"$LOG_FILE"
   SHORT_COUNT="$(extract 'Đã render ([0-9]+) short vào .+' "$SHORT_LOG")"
   if [[ -z "$SHORT_COUNT" ]]; then
@@ -314,7 +332,7 @@ if $RUNNER shorts.cli "$AUDIO_JSON" "$IMAGES_JSON" --script "$SCRIPT_PATH" >"$SH
 else
   cat "$SHORT_LOG" >>"$LOG_FILE"
   log "CẢNH BÁO: Stage 7: Short THẤT BẠI, nhưng video dài vẫn ổn, không dừng lượt chạy. Xem $SHORT_LOG"
-  log "  Dựng lại tay: $RUNNER shorts.cli \"$AUDIO_JSON\" \"$IMAGES_JSON\" --script \"$SCRIPT_PATH\""
+  log "  Dựng lại tay: $RUNNER shorts.cli \"$AUDIO_JSON\" $IMAGES_JSON --script \"$SCRIPT_PATH\""
 fi
 
 # Ghi tiền tố short vào chỉ mục metadata. Stage 7 đặt tên short theo một dấu

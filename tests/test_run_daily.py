@@ -80,6 +80,7 @@ def _run(
     args: list[str] | None = None,
     legacy: bool = True,
     dotenv: str | None = None,
+    video_nen: bool = False,
     **env_overrides,
 ) -> Run:
     args = list(args or [])
@@ -89,6 +90,12 @@ def _run(
         args = ["--format", "episodes"] + args
     root = tmp_path / "repo"
     root.mkdir()
+    if video_nen:
+        # Có video trong assets/backgrounds/ thì run_daily bỏ stage 3. Đuôi viết
+        # hoa có chủ đích: phải nhận .MP4 như .mp4.
+        nen = root / "assets" / "backgrounds"
+        nen.mkdir(parents=True)
+        (nen / "doc.MP4").write_bytes(b"mp4")
     shutil.copy(RUN_DAILY, root / "run_daily.sh")
     (root / "run_daily.sh").chmod(0o755)
     if dotenv is not None:
@@ -541,3 +548,27 @@ def test_nhanh_topic_cu_khong_danh_dau_kho(tmp_path):
 
     assert run.exit_code == 0
     assert not [c for c in run.calls if "--mark-used" in c]
+
+
+# --- có video nền thì bỏ stage 3 (05/10/2026) ---------------------------------
+
+
+def test_co_video_nen_thi_bo_stage_3(tmp_path):
+    """Video dài và short đều dựng trên video nền; ảnh sinh ra không ai xem mà
+    tốn ~30 phút mỗi truyện."""
+    run = _run(tmp_path, ["--story", "42"], legacy=False, video_nen=True)
+
+    assert run.exit_code == 0, run.stdout
+    assert not run.called("images.cli"), "có video nền mà vẫn sinh ảnh"
+    ep = run.call_for("episodes.cli")
+    assert ep is not None and "images" not in ep, f"stage 4 vẫn nhận ảnh: {ep}"
+    sh = run.call_for("shorts.cli")
+    assert sh is not None and "images" not in sh, f"stage 7 vẫn nhận ảnh: {sh}"
+
+
+def test_khong_co_video_nen_thi_van_sinh_anh_nhu_cu(tmp_path):
+    run = _run(tmp_path, ["--story", "42"], legacy=False)
+
+    assert run.exit_code == 0
+    assert run.called("images.cli")
+    assert "images" in (run.call_for("episodes.cli") or "")

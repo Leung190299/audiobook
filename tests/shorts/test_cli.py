@@ -362,3 +362,39 @@ def test_thieu_file_wav_nguon_thi_bao_loi_ro_duong_dan(sandbox):
     with pytest.raises(shorts_cli.ShortRenderError) as exc_info:
         shorts_cli._run(tts_path, images_path)
     assert str(source_wav) in str(exc_info.value)
+
+
+def test_khong_anh_thi_moi_short_dung_video_nen(sandbox, monkeypatch):
+    """Bỏ stage 3: short không có ảnh, nền là video dọc từ assets/backgrounds/."""
+    import json
+
+    tts_path, _images_path, output_dir = sandbox
+    monkeypatch.setattr(subprocess, "run", _fake_render_ok())
+    seeds = []
+
+    def fake_choose(**kw):
+        seeds.append(kw["seed"])
+        return {"backgroundVideo": "assets/backgrounds/.prepared/doc-h1920.mp4",
+                "backgroundVideoSeconds": 300.0, "backgroundVideoAspect": 0.5625}
+
+    monkeypatch.setattr(shorts_cli.backgrounds, "choose_for_short", fake_choose)
+
+    shorts_cli._run(tts_path, None)
+
+    props_files = sorted(output_dir.glob("*-part-*-props.json"))
+    assert props_files, "phải có props cho từng short"
+    for f in props_files:
+        p = json.loads(f.read_text(encoding="utf-8"))
+        assert p["backgroundVideo"].endswith("doc-h1920.mp4")
+        assert p["scenes"] == [] and p["imagePath"] == ""
+    # Mỗi short bốc nền theo stem riêng, để 3 short của một truyện khác nhau.
+    assert len(set(seeds)) == len(seeds)
+
+
+def test_khong_anh_khong_video_nen_thi_bao_loi(sandbox, monkeypatch):
+    tts_path, _images_path, _ = sandbox
+    monkeypatch.setattr(subprocess, "run", _fake_render_ok())
+    monkeypatch.setattr(shorts_cli.backgrounds, "choose_for_short", lambda **kw: None)
+
+    with pytest.raises(Exception, match="video nền"):
+        shorts_cli._run(tts_path, None)

@@ -6,6 +6,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { BackgroundVideo } from "./BackgroundVideo";
 import { SceneBackground } from "./SceneBackground";
 import type { ShortProps } from "./types";
 import { FONT_FAMILY, useBeVietnamPro } from "./fonts";
@@ -24,6 +25,8 @@ export const ShortVideo: React.FC<ShortProps> = ({
   captions,
   audioDurationSeconds,
   ctaText,
+  backgroundVideo,
+  backgroundVideoSeconds = 0,
 }) => {
   useBeVietnamPro();
 
@@ -45,7 +48,12 @@ export const ShortVideo: React.FC<ShortProps> = ({
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       <AbsoluteFill style={{ overflow: "hidden" }}>
-        {scenes.map((scene, i) => {
+        {/* Video nền phủ kín khung dọc 1080x1920 (ưu tiên video dọc, vừa
+            khít). Không có thì dựng bằng dãy ảnh cảnh của stage 3 như cũ. */}
+        {backgroundVideo ? (
+          <BackgroundVideo src={backgroundVideo} seconds={backgroundVideoSeconds} />
+        ) : null}
+        {backgroundVideo ? null : scenes.map((scene, i) => {
           const next = scenes[i + 1];
           // Cảnh cuối kéo dài hết composition: nền vẫn còn dưới card CTA thay
           // vì tắt đen đúng lúc audio hết. Mốc cảnh đã quy về gốc phần.
