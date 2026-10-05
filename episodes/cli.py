@@ -7,7 +7,10 @@ MỘT video cả truyện có cold open + card kết (xem episodes/full.py).
     # Manifest: output/episodes/<topic>-<ts>-full.json
     # Đã render 1 video vào output/episodes
 
-    uv run python -m episodes.cli <script_json> <tts_metadata_json> <images_metadata_json>
+    uv run python -m episodes.cli <script_json> <tts_metadata_json> [<images_metadata_json>]
+
+Không truyền metadata ảnh = dựng bằng video nền (assets/backgrounds/), stage 3
+được bỏ hẳn. Khi đó thư mục video nền phải có video dùng được.
     # Đã render tập 1/3: output/episodes/<trope>-<ts>-ep-01.mp4
     # Đã render tập 2/3: ...
     # Manifest: output/episodes/<trope>-<ts>-episodes.json
@@ -81,21 +84,26 @@ def _render(props_path: Path, output_path: Path) -> None:
 
 
 def _run(
-    script_path: Path, tts_metadata_path: Path, images_metadata_path: Path, fmt: str | None = None
+    script_path: Path, tts_metadata_path: Path, images_metadata_path: Path | None, fmt: str | None = None
 ) -> Path:
     tts_metadata_path = tts_metadata_path.resolve()
-    images_metadata_path = images_metadata_path.resolve()
+    if images_metadata_path is not None:
+        images_metadata_path = images_metadata_path.resolve()
 
     script = Script.from_dict(json.loads(script_path.read_text(encoding="utf-8")))
     tts_metadata = json.loads(tts_metadata_path.read_text(encoding="utf-8"))
-    images_metadata = json.loads(images_metadata_path.read_text(encoding="utf-8"))
+    images_metadata = (
+        json.loads(images_metadata_path.read_text(encoding="utf-8"))
+        if images_metadata_path is not None
+        else None
+    )
 
     source_wav = tts_metadata_path.with_suffix(".wav")
     if not source_wav.exists():
         raise EpisodeRenderError(
             f"Không tìm thấy wav nguồn tại {source_wav} (suy ra từ {tts_metadata_path})."
         )
-    images_dir = images_metadata_path.parent
+    images_dir = images_metadata_path.parent if images_metadata_path is not None else None
 
     # Không truyền --format thì theo kịch bản (stage 1 ghi format), rồi mới tới
     # mặc định cũ "episodes" -- để lệnh gọi tay trên kịch bản cũ không đổi hành vi.
@@ -137,6 +145,14 @@ def _run(
         nen = backgrounds.choose(seed=ep_stem)
         if nen:
             props.update(nen)
+        elif images_metadata is None:
+            # Bỏ stage 3 mà video nền lại không dùng được: render tiếp là ra
+            # 40 phút màn hình đen giữa hai tấm thương hiệu. Dừng ở đây.
+            raise EpisodeRenderError(
+                "Không có ảnh (đã bỏ stage 3) mà cũng không có video nền dùng được trong "
+                f"{backgrounds.BACKGROUND_DIR}. Thêm video .mp4 vào đó, hoặc chạy stage 3 "
+                "rồi truyền metadata ảnh."
+            )
         # Tên kênh trên tấm thương hiệu bên phải lấy cùng nguồn với đuôi tiêu đề
         # YouTube (CHANNEL_NAME), để đổi tên kênh chỉ phải sửa một chỗ.
         props["channelName"] = channel_name()
@@ -183,7 +199,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Dựng từng tập 15-20 phút bằng Remotion.")
     parser.add_argument("script_path", help="Đường dẫn file JSON kịch bản")
     parser.add_argument("tts_metadata_path", help="Đường dẫn file JSON metadata TTS")
-    parser.add_argument("images_metadata_path", help="Đường dẫn file JSON metadata ảnh")
+    parser.add_argument(
+        "images_metadata_path",
+        nargs="?",
+        default=None,
+        help="Metadata ảnh của stage 3. Bỏ trống = dựng bằng video nền (assets/backgrounds/)",
+    )
     parser.add_argument(
         "--format",
         choices=("full", "episodes"),
@@ -194,7 +215,7 @@ def main() -> None:
     _run(
         Path(args.script_path),
         Path(args.tts_metadata_path),
-        Path(args.images_metadata_path),
+        Path(args.images_metadata_path) if args.images_metadata_path else None,
         args.format,
     )
 

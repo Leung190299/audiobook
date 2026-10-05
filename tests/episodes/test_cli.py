@@ -74,3 +74,27 @@ def test_cli_thieu_wav_thi_loi(patched):
     sandbox["wav_path"].unlink()
     with pytest.raises(episodes_cli.EpisodeRenderError, match="wav"):
         episodes_cli._run(sandbox["script_path"], sandbox["tts_path"], sandbox["images_path"])
+
+
+def test_khong_anh_ma_khong_co_video_nen_thi_dung_som(patched):
+    """Bỏ stage 3 mà thư mục video nền trống (conftest trỏ nó sang thư mục tạm
+    rỗng): render tiếp là ra 40 phút màn hình đen giữa hai tấm thương hiệu."""
+    sandbox, calls = patched
+
+    with pytest.raises(episodes_cli.EpisodeRenderError, match="video nền"):
+        episodes_cli._run(sandbox["script_path"], sandbox["tts_path"], None)
+    assert calls == [], "không được gọi Remotion khi biết chắc sẽ ra màn hình đen"
+
+
+def test_khong_anh_co_video_nen_thi_render_binh_thuong(patched, monkeypatch):
+    sandbox, calls = patched
+    monkeypatch.setattr(
+        episodes_cli.backgrounds, "choose",
+        lambda **kw: {"backgroundVideo": "assets/backgrounds/.prepared/a-h576.mp4",
+                      "backgroundVideoSeconds": 300.0, "backgroundVideoAspect": 0.5625},
+    )
+
+    manifest_path = episodes_cli._run(sandbox["script_path"], sandbox["tts_path"], None)
+
+    assert manifest_path.exists()
+    assert len(calls) >= 1

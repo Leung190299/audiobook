@@ -165,3 +165,56 @@ def test_choose_chuan_bi_hong_thi_none_khong_lam_vo_luot_dung(tmp_path):
         raise bg.BackgroundError("ffmpeg chết")
 
     assert bg.choose(tmp_path, "x", repo_root=tmp_path, prepare=hong) is None
+
+
+# --- video nền cho short (05/10/2026) ----------------------------------------
+
+
+def _fake_prepare(src, height, fps):
+    out = bg.prepared_path(src, height)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_bytes(b"ok")
+    return out, 300.0, 0.5625
+
+
+def test_short_uu_tien_video_doc(tmp_path):
+    """Short khổ 1080x1920: video dọc vừa khít, video ngang ép vào thì chỉ còn
+    dải giữa ~32% bề ngang."""
+    for name in ("ngang.mp4", "doc.mp4"):
+        _mp4(tmp_path, name)
+    khuon = {"ngang.mp4": 1.778, "doc.mp4": 0.5625}
+
+    for seed in ("a", "b", "c", "d", "e"):
+        ra = bg.choose_for_short(
+            tmp_path, seed, repo_root=tmp_path, prepare=_fake_prepare,
+            aspect_of=lambda p: khuon[p.name],
+        )
+        assert "doc-h1920" in ra["backgroundVideo"]
+
+
+def test_short_khong_co_video_doc_thi_dung_video_ngang(tmp_path):
+    _mp4(tmp_path, "ngang.mp4")
+
+    ra = bg.choose_for_short(
+        tmp_path, "x", repo_root=tmp_path, prepare=_fake_prepare, aspect_of=lambda p: 1.778,
+    )
+
+    assert "ngang-h1920" in ra["backgroundVideo"]
+
+
+def test_short_chuan_bi_o_do_cao_khung_short(tmp_path):
+    """Bản 576px của video dài mà phóng 3,3 lần lên 1920px thì nhoè."""
+    _mp4(tmp_path, "doc.mp4")
+    goi = {}
+
+    def prep(src, height, fps):
+        goi["height"] = height
+        return _fake_prepare(src, height, fps)
+
+    bg.choose_for_short(tmp_path, "x", repo_root=tmp_path, prepare=prep, aspect_of=lambda p: 0.56)
+
+    assert goi["height"] == bg.SHORT_HEIGHT == 1920
+
+
+def test_short_thu_muc_trong_thi_none(tmp_path):
+    assert bg.choose_for_short(tmp_path, "x", repo_root=tmp_path, prepare=_fake_prepare) is None

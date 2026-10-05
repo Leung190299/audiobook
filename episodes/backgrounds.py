@@ -32,6 +32,9 @@ CACHE_DIRNAME = ".prepared"
 # Khung video dài, phải khớp HEIGHT/FPS trong remotion/src/Root.tsx.
 HEIGHT = 576
 FPS = 30
+# Khung short (SHORT_HEIGHT trong Root.tsx). Chuẩn bị riêng ở độ cao này: bản
+# 576px của video dài mà phóng 3,3 lần lên khung short thì nhoè.
+SHORT_HEIGHT = 1920
 
 
 class BackgroundError(Exception):
@@ -156,6 +159,63 @@ def choose(
         print(f"CẢNH BÁO: video nền {out.name} dài 0 giây, dựng bằng ảnh như cũ")
         return None
     print(f"Video nền: {src.name}")
+    return {
+        "backgroundVideo": str(out.relative_to(repo_root)),
+        "backgroundVideoSeconds": round(seconds, 3),
+        "backgroundVideoAspect": round(aspect, 4),
+    }
+
+
+def source_aspect(src: Path) -> float:
+    """Tỉ lệ rộng/cao của video NGUỒN (chưa chuẩn bị)."""
+    try:
+        out = subprocess.run(
+            ["ffprobe", "-v", "error", "-select_streams", "v:0",
+             "-show_entries", "stream=width,height", "-of", "json", str(src)],
+            capture_output=True, text=True, check=True,
+        ).stdout
+        stream = json.loads(out)["streams"][0]
+        return stream["width"] / stream["height"]
+    except (subprocess.CalledProcessError, KeyError, IndexError, ValueError,
+            ZeroDivisionError, json.JSONDecodeError) as exc:
+        raise BackgroundError(f"Không đọc được khổ {src.name}: {exc}") from exc
+
+
+def choose_for_short(
+    directory: Path | None = None,
+    seed: str = "",
+    *,
+    repo_root: Path | None = None,
+    prepare: Callable[..., tuple[Path, float, float]] | None = None,
+    aspect_of: Callable[[Path], float] | None = None,
+) -> dict | None:
+    """Trường props video nền cho MỘT short, hoặc None nếu không có video nào.
+
+    Ưu tiên video dọc: short là khung 1080x1920, video dọc vừa khít còn video
+    ngang ép vào thì chỉ còn dải giữa ~32% bề ngang. Thư mục không có video dọc
+    nào thì mới dùng video ngang.
+    """
+    repo_root = repo_root or ROOT
+    prepare = prepare or globals()["prepare"]
+    aspect_of = aspect_of or source_aspect
+    sources = list_sources(directory)
+    if not sources:
+        return None
+    doc = []
+    for s in sources:
+        try:
+            if aspect_of(s) < 1:
+                doc.append(s)
+        except BackgroundError:
+            continue
+    src = pick(doc or sources, seed)
+    try:
+        out, seconds, aspect = prepare(src, SHORT_HEIGHT, FPS)
+    except BackgroundError as exc:
+        print(f"CẢNH BÁO: bỏ video nền cho short ({exc})")
+        return None
+    if seconds <= 0:
+        return None
     return {
         "backgroundVideo": str(out.relative_to(repo_root)),
         "backgroundVideoSeconds": round(seconds, 3),

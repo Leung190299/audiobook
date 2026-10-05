@@ -92,18 +92,26 @@ def _sentences_in(sentences: list[dict], source_start: float, source_end: float,
 def build_episode_props(
     script: Script,
     tts_metadata: dict,
-    images_metadata: dict,
+    images_metadata: dict | None,
     cut: EpisodeCut,
     audio_path: Path,
-    images_dir: Path,
+    images_dir: Path | None,
     repo_root: Path,
     episode_label: str | None = None,
     outro: str | None = None,
 ) -> dict:
     """`episode_label`/`outro` None = mặc định chế độ tập ("TẬP N/3", card tập
     sau). Chế độ full truyền "" (không badge -- MainVideo ẩn khi rỗng) và câu
-    card kết riêng (episodes/full.py)."""
-    for source_name, source in (("tts", tts_metadata), ("images", images_metadata)):
+    card kết riêng (episodes/full.py).
+
+    `images_metadata` None = dựng bằng video nền (episodes/backgrounds.py), bỏ
+    hẳn stage 3: mỗi chương có `scenes` rỗng, MainVideo chỉ vẽ video nền. Mốc
+    chương, mốc câu và cold open vẫn tính như thường.
+    """
+    sources = [("tts", tts_metadata)]
+    if images_metadata is not None:
+        sources.append(("images", images_metadata))
+    for source_name, source in sources:
         if source["trope"] != script.trope or source["title"] != script.title:
             raise EpisodePropsBuildError(
                 f"trope/title của {source_name}_metadata không khớp với script "
@@ -117,21 +125,22 @@ def build_episode_props(
 
     ep = cut.episode
     tts_by_index = {c["index"]: c for c in tts_metadata["chapters"]}
-    images_by_index = {c["index"]: c for c in images_metadata["chapters"]}
+    images_by_index = (
+        {c["index"]: c for c in images_metadata["chapters"]} if images_metadata is not None else None
+    )
     script_by_index = {c.index: c for c in script.chapters}
     sentences_by_chapter: dict[int, list[dict]] = {}
     for s in tts_metadata["sentences"]:
         sentences_by_chapter.setdefault(s["chapter_index"], []).append(s)
 
+    tables = [("script", script_by_index), ("tts", tts_by_index)]
+    if images_by_index is not None:
+        tables.append(("images", images_by_index))
     for index in ep.chapter_indices:
-        missing = [
-            name
-            for name, table in (("script", script_by_index), ("tts", tts_by_index), ("images", images_by_index))
-            if index not in table
-        ]
+        missing = [name for name, table in tables if index not in table]
         if missing:
             raise EpisodePropsBuildError(f"Thiếu chương {index} trong: {', '.join(missing)}")
-        if not images_by_index[index].get("scenes"):
+        if images_by_index is not None and not images_by_index[index].get("scenes"):
             raise EpisodePropsBuildError(
                 f"Metadata ảnh của chương {index} không có mảng 'scenes' -- chạy lại stage 3."
             )
@@ -140,7 +149,6 @@ def build_episode_props(
 
     if cut.cold_open is not None:
         co = cut.cold_open
-        co_scenes = images_by_index[co.chapter_index]["scenes"]
         shift = -co.source_start_seconds
         chapters.append(
             {
@@ -148,8 +156,13 @@ def build_episode_props(
                 "heading": COLD_OPEN_HEADING,
                 "startSeconds": 0.0,
                 "endSeconds": co.duration_seconds,
-                "scenes": _scenes_in(
-                    co_scenes, co.source_start_seconds, co.source_end_seconds, shift, images_dir, repo_root
+                "scenes": (
+                    _scenes_in(
+                        images_by_index[co.chapter_index]["scenes"],
+                        co.source_start_seconds, co.source_end_seconds, shift, images_dir, repo_root,
+                    )
+                    if images_by_index is not None
+                    else []
                 ),
                 "sentences": _sentences_in(
                     sentences_by_chapter.get(co.chapter_index, []),
@@ -171,8 +184,10 @@ def build_episode_props(
                 "heading": script_by_index[index].heading,
                 "startSeconds": start + body_shift,
                 "endSeconds": end + body_shift,
-                "scenes": _scenes_in(
-                    images_by_index[index]["scenes"], start, end, body_shift, images_dir, repo_root
+                "scenes": (
+                    _scenes_in(images_by_index[index]["scenes"], start, end, body_shift, images_dir, repo_root)
+                    if images_by_index is not None
+                    else []
                 ),
                 "sentences": _sentences_in(sentences_by_chapter.get(index, []), start, end, body_shift),
             }

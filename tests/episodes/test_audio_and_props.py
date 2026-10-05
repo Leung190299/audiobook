@@ -146,3 +146,27 @@ def test_props_metadata_lech_title_thi_loi(sandbox):
             script, sandbox["tts_metadata"], bad_images, cut,
             audio_path=sandbox["repo_root"] / "a.wav", images_dir=sandbox["images_dir"], repo_root=sandbox["repo_root"],
         )
+
+
+# --- không có ảnh: dựng bằng video nền (05/10/2026) ---------------------------
+
+
+def test_props_khong_co_anh_thi_moi_chuong_scenes_rong(sandbox):
+    """Có video nền thì bỏ hẳn stage 3 (~30 phút sinh ảnh mỗi truyện): MainVideo
+    chỉ vẽ video nền, không cần cảnh ảnh. Mốc chương, câu, cold open vẫn đủ."""
+    script = Script.from_dict(json.loads(sandbox["script_path"].read_text(encoding="utf-8")))
+    cut = plan_cuts(sandbox["tts_metadata"], plan_episodes(6))[1]
+    audio_path = sandbox["repo_root"] / "output" / "episodes" / "ep-02.wav"
+    audio_path.parent.mkdir(parents=True, exist_ok=True)
+    audio_path.write_bytes(b"")
+
+    props = build_episode_props(
+        script, sandbox["tts_metadata"], None, cut,
+        audio_path=audio_path, images_dir=None, repo_root=sandbox["repo_root"],
+    )
+
+    assert props["chapters"], "phải còn chương"
+    assert all(c["scenes"] == [] for c in props["chapters"])
+    assert any(c["sentences"] for c in props["chapters"])
+    # Cold open vẫn là chương 0, như khi có ảnh.
+    assert props["chapters"][0]["index"] == 0
