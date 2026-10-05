@@ -98,3 +98,13 @@ def test_khong_anh_co_video_nen_thi_render_binh_thuong(patched, monkeypatch):
 
     assert manifest_path.exists()
     assert len(calls) >= 1
+
+
+def test_render_voi_chat_luong_khung_cao(patched):
+    """Mặc định Remotion nén khung trung gian JPEG 80, làm nhoè viền chữ."""
+    sandbox, calls = patched
+
+    episodes_cli._run(sandbox["script_path"], sandbox["tts_path"], sandbox["images_path"])
+
+    render = [c for c in calls if "render" in c][0]
+    assert "--jpeg-quality=95" in render

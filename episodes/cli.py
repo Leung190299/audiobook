@@ -71,6 +71,7 @@ def _render(props_path: Path, output_path: Path) -> None:
         str(output_path),
         f"--props={props_path}",
         f"--public-dir={REPO_ROOT}",
+        f"--jpeg-quality={backgrounds.RENDER_JPEG_QUALITY}",
     ]
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=REMOTION_DIR)
     if result.returncode != 0:

@@ -29,16 +29,17 @@ const MASCOT = {
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
-const Card: React.FC<{ children: React.ReactNode; tone?: "card" | "accent"; font: number }> = ({
-  children,
-  tone = "card",
-  font,
-}) => (
+const Card: React.FC<{
+  children: React.ReactNode;
+  tone?: "card" | "accent";
+  font: number;
+  k: number;
+}> = ({ children, tone = "card", font, k }) => (
   <div
     style={{
       backgroundColor: tone === "accent" ? BRAND.accent : BRAND.card,
       color: tone === "accent" ? BRAND.card : BRAND.ink,
-      border: `2px solid ${BRAND.ink}`,
+      border: `${2 * k}px solid ${BRAND.ink}`,
       borderRadius: font * 0.8,
       padding: `${font * 0.55}px ${font * 0.65}px`,
       fontFamily: FONT_FAMILY,
@@ -47,7 +48,7 @@ const Card: React.FC<{ children: React.ReactNode; tone?: "card" | "accent"; font
       lineHeight: 1.25,
       textAlign: "center",
       width: "84%",
-      boxShadow: `0 3px 0 ${BRAND.ink}`,
+      boxShadow: `0 ${3 * k}px 0 ${BRAND.ink}`,
     }}
   >
     {children}
@@ -68,12 +69,15 @@ interface BrandPanelProps {
 // 350px (video dọc) đều cân, không bên nào trống trơn hay chật chữ.
 export const BrandPanel: React.FC<BrandPanelProps> = ({ side, width, channelName }) => {
   const { height } = useVideoConfig();
+  // Các mốc chặn dưới đo trên khung 576px; nhân theo tỉ lệ khung để lên 1080p
+  // bố cục y hệt chứ không ra chữ bé tí giữa tấm nền to.
+  const k = height / 576;
   // Co theo CẢ chiều cao, không chỉ bề rộng: tấm bên video dọc rộng 350px,
   // co theo bề rộng thì linh vật 210px + 164px cộng tên kênh và thẻ chữ vượt
   // 576px -- ếch kính râm góc dưới bên phải bị cắt mất nửa người.
-  const mascot = clamp(Math.min(width * 0.62, height * 0.3), 90, 210);
-  const font = clamp(width * 0.075, 12, 22);
-  const nameFont = clamp(width * 0.115, 18, 36);
+  const mascot = clamp(Math.min(width * 0.62, height * 0.3), 90 * k, 210 * k);
+  const font = clamp(width * 0.075, 12 * k, 22 * k);
+  const nameFont = clamp(width * 0.115, 18 * k, 36 * k);
   const [head, ...rest] = (channelName || DEFAULT_CHANNEL).trim().split(/\s+/);
   const art = MASCOT[side];
 
@@ -95,7 +99,7 @@ export const BrandPanel: React.FC<BrandPanelProps> = ({ side, width, channelName
     >
       <Img src={staticFile(art.top)} style={{ width: mascot, height: mascot, objectFit: "contain" }} />
       {side === "left" ? (
-        <Card tone="accent" font={font}>
+        <Card tone="accent" font={font} k={k}>
           Đăng ký kênh
           <br />
           truyện mới 20h mỗi tối
@@ -120,7 +124,7 @@ export const BrandPanel: React.FC<BrandPanelProps> = ({ side, width, channelName
               </>
             ) : null}
           </div>
-          <Card font={font}>
+          <Card font={font} k={k}>
             <div style={{ color: BRAND.accent, fontSize: font * 1.08 }}>{AI_NOTICE_HEAD}</div>
             {AI_NOTICE_BODY}
           </Card>

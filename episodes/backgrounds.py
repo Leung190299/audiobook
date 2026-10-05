@@ -11,9 +11,8 @@ bề ngang và cắt bớt hai mép.
 
 Mỗi video nguồn được tiền xử lý MỘT lần bằng ffmpeg rồi cache vào
 assets/backgrounds/.prepared/:
-- Đưa về đúng chiều cao khung (576px, 30fps -- remotion/src/Root.tsx), giữ
-  nguyên khổ. Nguồn 720x1280 mà để nguyên thì Remotion giải mã gấp 5 lần số
-  điểm ảnh cần dùng, suốt 45 phút render.
+- Đưa về đúng chiều cao khung (1080px, 30fps -- remotion/src/Root.tsx), giữ
+  nguyên khổ, để Remotion không phải co giãn từng khung suốt 40 phút render.
 - Bỏ tiếng gốc: nhạc nền Douyin lọt vào là đè lên giọng đọc.
 """
 
@@ -29,12 +28,19 @@ ROOT = Path(__file__).resolve().parent.parent
 BACKGROUND_DIR = ROOT / "assets" / "backgrounds"
 CACHE_DIRNAME = ".prepared"
 
-# Khung video dài, phải khớp HEIGHT/FPS trong remotion/src/Root.tsx.
-HEIGHT = 576
+# Khung video dài, phải khớp HEIGHT/FPS trong remotion/src/Root.tsx (1080p từ
+# 05/10; khoá cache theo chiều cao nên bản 576px cũ tự bị bỏ qua).
+HEIGHT = 1080
 FPS = 30
 # Khung short (SHORT_HEIGHT trong Root.tsx). Chuẩn bị riêng ở độ cao này: bản
 # 576px của video dài mà phóng 3,3 lần lên khung short thì nhoè.
 SHORT_HEIGHT = 1920
+
+
+# Remotion chụp mỗi khung thành JPEG rồi mới mã hoá H.264; mặc định chất lượng
+# 80 làm nhoè viền chữ trên tấm thương hiệu và phụ đề short. 95 gần như không
+# thấy khác biệt với PNG mà nhẹ hơn nhiều.
+RENDER_JPEG_QUALITY = 95
 
 
 class BackgroundError(Exception):

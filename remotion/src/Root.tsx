@@ -12,8 +12,12 @@ type CompositionVideoProps = VideoProps & Record<string, unknown>;
 type CompositionShortProps = ShortProps & Record<string, unknown>;
 
 const FPS = 30;
-const WIDTH = 1024;
-const HEIGHT = 576;
+// 1920x1080 từ 05/10 (trước là 1024x576). Nguồn Douyin cao 1024-1280px, khung
+// 576px vứt đi hơn nửa chi tiết dọc của video giữa; YouTube cũng cấp codec tốt
+// hơn (VP9/AV1) cho bản tải lên từ 1080p. Render chậm hơn ~33% (đo 05/10: 8s
+// so với 6s cho 10s video), bù lại đã bỏ ~30 phút sinh ảnh ở stage 3.
+const WIDTH = 1920;
+const HEIGHT = 1080;
 
 const SHORT_WIDTH = 1080;
 const SHORT_HEIGHT = 1920;

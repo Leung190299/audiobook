@@ -150,7 +150,8 @@ def test_choose_tra_duong_dan_tuong_doi_repo_va_thoi_luong(tmp_path):
     ra = bg.choose(nen, "tap-1", repo_root=repo, prepare=fake_prepare)
 
     assert ra == {
-        "backgroundVideo": "assets/backgrounds/.prepared/a-h576.mp4",
+        # Chiều cao khung video dài (1080p từ 05/10) nằm trong tên cache.
+        "backgroundVideo": f"assets/backgrounds/.prepared/a-h{bg.HEIGHT}.mp4",
         "backgroundVideoSeconds": 312.6,
         # Remotion dùng tỉ lệ này để tính bề rộng ô giữa.
         "backgroundVideoAspect": 0.5625,
