@@ -33,22 +33,37 @@ def test_rename_video_file_uses_slugified_title(tmp_path):
     assert not video_path.exists()
 
 
-def test_rename_video_file_refuses_to_overwrite_existing_destination(tmp_path):
+def test_rename_trung_ten_thi_them_hau_to_khong_ghi_de_khong_chet(tmp_path):
+    """Sáng 05/10 lượt dựng truyện #9 chết ở stage 6 sau gần 1 tiếng, chỉ vì
+    bản dựng #9 hôm 30/09 còn nằm đúng tên đó. Tên file chỉ để nhìn trên máy
+    (tiêu đề YouTube là chuyện riêng) -- không đáng làm mất cả lượt dựng.
+
+    Thuộc tính cũ vẫn giữ: KHÔNG BAO GIỜ ghi đè file đang có."""
     video_path = tmp_path / "phe_vat_nghich_tap-20260722T083627Z.mp4"
     video_path.write_bytes(b"fake video content")
-
-    # Create an existing file at the destination slug path
     destination = tmp_path / "ke-phe-vat-mang-linh-hon-than-co.mp4"
     destination.write_bytes(b"existing video that should not be overwritten")
 
-    # Should raise VideoRenameError instead of silently overwriting
-    with pytest.raises(VideoRenameError):
-        rename_video_file(video_path, "Kẻ Phế Vật Mang Linh Hồn Thần Cổ")
+    new_path = rename_video_file(video_path, "Kẻ Phế Vật Mang Linh Hồn Thần Cổ")
 
-    # Verify the original video file still exists (rename did NOT happen)
-    assert video_path.exists()
-    assert video_path.read_bytes() == b"fake video content"
-
-    # Verify the destination was not modified
-    assert destination.exists()
+    assert new_path.name == "ke-phe-vat-mang-linh-hon-than-co-2.mp4"
+    assert new_path.read_bytes() == b"fake video content"
     assert destination.read_bytes() == b"existing video that should not be overwritten"
+    assert not video_path.exists()
+
+
+def test_rename_trung_nhieu_lan_thi_tang_dan_hau_to(tmp_path):
+    for name in ("abc.mp4", "abc-2.mp4", "abc-3.mp4"):
+        (tmp_path / name).write_bytes(b"cu")
+    video_path = tmp_path / "moi.mp4"
+    video_path.write_bytes(b"moi")
+
+    assert rename_video_file(video_path, "abc").name == "abc-4.mp4"
+
+
+def test_rename_dung_ten_cua_chinh_no_thi_giu_nguyen(tmp_path):
+    """Chạy lại stage 6 trên video đã đổi tên rồi: đừng tự đổi thành -2."""
+    video_path = tmp_path / "abc.mp4"
+    video_path.write_bytes(b"x")
+
+    assert rename_video_file(video_path, "abc") == video_path
