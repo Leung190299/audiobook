@@ -46,11 +46,11 @@ Layout code: `remotion/src/MainVideo.tsx` → `BrandedLayout.tsx` (centre box wi
 |---|--------|-------|-------|
 | 1 | `scripts.cli --story <id>` | 2 min | Title, hook, comment question, thumb keywords come **from the bank**, not Gemini. Approved outline → chapter N follows line N, but **chapter headings come from Gemini** (outline lines are internal notes like "Miếng hài: …"). |
 | 2 | `tts.cli` | 5.5 min | VieNeu-TTS, ONNX on CPU. |
-| 3 | `images.cli` | 31 min | FLUX.2-klein via mflux. Not shown in the long video any more (background video replaces it) but **Shorts still use these images**, so it stays. |
-| 4 | `episodes.cli` | 16–23 min | Remotion render. 23 min with a background video (video decode) vs 16 with images. Picks the background here. |
+| 3 | `images.cli` | 31 min | **Skipped whenever `assets/backgrounds/` has a video** — long video and Shorts both run on background video. Only runs (FLUX via mflux) as the fallback when that folder is empty. |
+| 4 | `episodes.cli` | 27–41 min | Remotion render; picks the background here. Images arg is optional — omitted when stage 3 is skipped. |
 | 5 | `thumbnail.cli` | 2 min | Frog sticker left + almost-full title right in Anton, keywords coloured. Already matches the reference style. |
 | 6 | `metadata.cli` | 5 s | Minimal description (below). Renames the mp4 to the title slug. |
-| 7 | `shorts.cli --script` | 1–2 min | 3 Shorts from `short_beats`. **Failure only warns**, never fails the run. |
+| 7 | `shorts.cli --script` | 1–2 min | 3 Shorts from `short_beats`, each on its own background video (vertical clips preferred). **Failure only warns**, never fails the run. |
 | 8 | `upload.episodes_cli` | — | Only with `--upload`. |
 
 After stage 7, `run_daily.sh` records `shorts_prefix` into the metadata index and marks the story `built` in the bank (see Gotchas).
@@ -59,7 +59,9 @@ After stage 7, `run_daily.sh` records `shorts_prefix` into the metadata index an
 
 Drop `.mp4` files into `assets/backgrounds/` — that's all. Each episode picks one at random (seeded by the episode stem, so a re-render keeps the same clip). New files are picked up automatically.
 
-Each source is prepared **once** by ffmpeg into `assets/backgrounds/.prepared/<name>-h576.mp4`: scaled to 576 px tall keeping its aspect, **audio stripped** (Douyin music would fight the narration), 30 fps. A source that fails ffmpeg is skipped and the episode falls back to the stage-3 images — one bad clip never kills an hour-long run. `assets/backgrounds/` is gitignored (hundreds of MB).
+Each source is prepared **once** by ffmpeg into `assets/backgrounds/.prepared/`: `<name>-h576.mp4` for the long video and, for vertical sources only, `<name>-h1920.mp4` for Shorts (the 576 px copy blown up 3.3× to the 1080×1920 Short frame is blurry). Aspect kept, **audio stripped** (Douyin music would fight the narration), 30 fps. Shorts prefer vertical clips; a landscape clip squeezed into a vertical frame keeps only the middle ~32%.
+
+With videos present `run_daily.sh` **skips stage 3 entirely** and calls stages 4 and 7 without an images file — a run drops from ~70 to ~40 min. Empty folder → stage 3 runs and everything uses images as before. A source that fails ffmpeg is skipped and the episode falls back to the stage-3 images — one bad clip never kills an hour-long run. `assets/backgrounds/` is gitignored (hundreds of MB).
 
 ## Mascot, avatar, brand assets
 
@@ -83,6 +85,7 @@ The avatar must be uploaded **by hand in YouTube Studio** — the API cannot cha
 
 - **Quota is 10,000 units/day and resets at midnight Pacific (~14:00 Vietnam), not local midnight.** `videos.insert` = 1,600 regardless of size. One long video + 3 Shorts ≈ 6,600. Plan multi-video days around this.
 - **OAuth token dies every 7 days** (project in Testing mode). Symptom: `invalid_grant` in `output/daily/shorts.err.log` or the upload log. Fix: `uv run python -m upload.auth` — the browser consent is the operator's to click, never Claude's.
+- **`run_daily.sh` runs on macOS `/bin/bash` 3.2.** Under `set -u`, expanding an empty array as `"${arr[@]}"` is an "unbound variable" error that kills the run. Use `${arr[@]+"${arr[@]}"}`. And never edit `run_daily.sh` while a run is executing it — bash reads the file as it goes.
 - **Only 16 GB RAM.** Never run a second FLUX job (mascots, `mac-image-ai`) while stage 3 or 5 is running, or while a Remotion render is going — swap thrash slows everything and can kill a stage. Check `memory_pressure` first.
 - **Don't edit Remotion or stage-4 Python while stage 4 is starting.** Remotion bundles the source once at render start; once `chrome-headless-shell` processes exist, editing is safe for that render.
 - **Built-but-unuploaded stories must be marked**, or `--story auto` rebuilds them the next day. Since 02/10 `run_daily.sh` marks `built` after stage 7. A run that dies before stage 7 leaves the story unmarked — check `output/story_bank_state.json` after any failed run.
@@ -97,11 +100,11 @@ The avatar must be uploaded **by hand in YouTube Studio** — the API cannot cha
 Stages 1–3 are the slow, reusable part. To rebuild only the visuals:
 
 ```bash
-uv run python -m episodes.cli <script.json> <audio.json> <images.json>   # prints Manifest:
-uv run python -m metadata.cli <script.json> --episodes <manifest.json>   # prints Danh sách:
-uv run python -m shorts.cli <audio.json> <images.json> --script <script.json>
+uv run python -m episodes.cli <script.json> <audio.json> [<images.json>]   # prints Manifest:
+uv run python -m metadata.cli <script.json> --episodes <manifest.json>     # prints Danh sách:
+uv run python -m shorts.cli <audio.json> [<images.json>] --script <script.json>
 uv run python -m scripts.post_shorts --record <metadata-index.json> <shorts-prefix>
 uv run python -m scripts.story_bank --mark-used <id>
 ```
 
-The three input paths are in `output/daily/<date>/01-*.log`, `02-*.log`, `03-*.log` (`Đã lưu kịch bản:` / `Metadata:`).
+Leave out `<images.json>` to render on background video. The input paths are in `output/daily/<date>/01-*.log` and `02-*.log` (`Đã lưu kịch bản:` / `Metadata:`), plus `03-*.log` when stage 3 ran.
