@@ -29,7 +29,6 @@ export const MainVideo: React.FC<VideoProps> = ({
   backgroundVideo,
   backgroundVideoSeconds = 0,
   backgroundVideoAspect,
-  channelName,
 }) => {
   useBeVietnamPro();
   const { fps } = useVideoConfig();
@@ -47,7 +46,6 @@ export const MainVideo: React.FC<VideoProps> = ({
         // Ảnh cảnh của stage 3 là khổ 16:9; thiếu tỉ lệ thì BrandedLayout cũng
         // coi như 16:9 và chặn ô giữa ở 66% bề ngang.
         aspect={backgroundVideo ? backgroundVideoAspect : undefined}
-        channelName={channelName}
       >
         {backgroundVideo ? (
           <BackgroundVideo src={backgroundVideo} seconds={backgroundVideoSeconds} />

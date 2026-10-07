@@ -27,11 +27,10 @@ export const centerWidthFor = (aspect: number | undefined, width: number, height
 
 interface BrandedLayoutProps {
   aspect?: number; // rộng/cao của nội dung giữa; thiếu thì coi như 16:9
-  channelName?: string;
   children: React.ReactNode; // nội dung ô giữa: video nền hoặc dãy ảnh cảnh
 }
 
-export const BrandedLayout: React.FC<BrandedLayoutProps> = ({ aspect, channelName, children }) => {
+export const BrandedLayout: React.FC<BrandedLayoutProps> = ({ aspect, children }) => {
   const { width, height } = useVideoConfig();
   const center = centerWidthFor(aspect, width, height);
   const side = (width - center) / 2;
@@ -49,8 +48,8 @@ export const BrandedLayout: React.FC<BrandedLayoutProps> = ({ aspect, channelNam
       >
         {children}
       </div>
-      <BrandPanel side="left" width={side} channelName={channelName} />
-      <BrandPanel side="right" width={side} channelName={channelName} />
+      <BrandPanel side="left" width={side} />
+      <BrandPanel side="right" width={side} />
     </AbsoluteFill>
   );
 };

@@ -68,7 +68,10 @@ class Topic:
     comment_question_style: str
     # (nền pastel, màu từ khoá 1, màu từ khoá 2) -- hex "#RRGGBB"
     thumb_palette: tuple[str, str, str]
-    mascot_pose_hints: tuple[str, ...]
+    # Sticker linh vật cho thumbnail bản A, bản B -- tên file trong
+    # assets/brand/stickers/ (scripts/cut_sticker_sheet.py). Chọn sticker có câu
+    # thoại ngắn hợp sắc thái chủ đề; câu dài tranh chỗ với tiêu đề.
+    thumb_stickers: tuple[str, str]
     playlist_env: str
     hashtags: tuple[str, str]
     vietnam_only: bool = True
@@ -104,11 +107,7 @@ TOPICS: dict[str, Topic] = {
             "huống họ hàng trong truyện. Dạng: 'Nếu là bạn, bạn có <X> không? 1 = <A>, 2 = <B>'."
         ),
         thumb_palette=("#FFE3C2", "#E4312B", "#1E7A46"),
-        mascot_pose_hints=(
-            "arms crossed with a smug side-eye",
-            "holding a red envelope with a sly grin",
-            "pointing forward, mouth open mid-roast",
-        ),
+        thumb_stickers=("hum", "chill"),
         playlist_env="YOUTUBE_PLAYLIST_HO_HANG",
         hashtags=("#hohangcucpham", "#truyenhai"),
     ),
@@ -140,11 +139,7 @@ TOPICS: dict[str, Topic] = {
             "đoán thủ phạm. Dạng: 'Nếu là bạn, bạn có <X> không? 1 = <A>, 2 = <B>'."
         ),
         thumb_palette=("#CDEBFF", "#FF6B00", "#7A2FD0"),
-        mascot_pose_hints=(
-            "peeking from behind a door with wide curious eyes",
-            "holding a magnifying glass with a cheeky grin",
-            "gasping with both hands on cheeks",
-        ),
+        thumb_stickers=("hay-qua", "hum"),
         playlist_env="YOUTUBE_PLAYLIST_NGHE_LA",
         hashtags=("#nghela", "#honbien"),
     ),
@@ -175,11 +170,7 @@ TOPICS: dict[str, Topic] = {
             "'Nếu là bạn, bạn có <X> không? 1 = <A>, 2 = <B>'."
         ),
         thumb_palette=("#E6F5D0", "#D6336C", "#1C6DD0"),
-        mascot_pose_hints=(
-            "wearing sunglasses and holding a suitcase, carefree",
-            "holding a land title booklet close to chest, determined",
-            "sipping tea calmly with a knowing smile",
-        ),
+        thumb_stickers=("chill", "thu-gian"),
         playlist_env="YOUTUBE_PLAYLIST_BO_ME",
         hashtags=("#trongsinh", "#bomegia"),
         vietnam_only=False,

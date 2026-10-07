@@ -14,11 +14,14 @@ nhận ra chủ đề bằng màu nền (mỗi chủ đề một màu, xem scrip
     └──────────────────────────────┘
 
 Linh vật là nhân vật GỐC của kênh: ếch xanh tròn đội nón lá -- không dùng vịt
-trắng hay capybara (nhận diện của đối thủ) hay nhân vật có bản quyền. Prompt và
-seed cố định để nhân vật giống nhau mọi video; chỉ đổi tư thế/biểu cảm theo
-`mascot_pose_hints` của chủ đề. mflux không xuất nền trong, nên sinh trên nền
-trắng trơn rồi tách nền bằng loang màu từ mép ảnh (viền đen dày của phong cách
-sticker chặn không cho loang vào trong nhân vật).
+trắng hay capybara (nhận diện của đối thủ) hay nhân vật có bản quyền. Từ 07/10
+lấy từ bộ sticker kênh tự thiết kế (assets/brand/stickers/, cắt bởi
+scripts/cut_sticker_sheet.py) theo `thumb_stickers` của chủ đề -- cùng một chú
+ếch với tấm bên video, không còn vẽ bằng FLUX mỗi lượt.
+
+Ảnh linh vật nền đặc (ảnh FLUX cũ, ảnh test) vẫn nhận: tách nền bằng loang màu
+từ mép ảnh (viền đen dày của phong cách sticker chặn không cho loang vào trong
+nhân vật) rồi vẽ viền trắng.
 """
 
 from __future__ import annotations
@@ -35,6 +38,7 @@ from scripts.text_tools import keyword_spans
 WIDTH, HEIGHT = 1280, 720
 MASCOT_AREA_RATIO = 0.42
 FONTS_DIR = Path(__file__).resolve().parent.parent / "assets" / "fonts"
+STICKER_DIR = Path(__file__).resolve().parent.parent / "assets" / "brand" / "stickers"
 # Anton: condensed rất đậm, có đủ dấu tiếng Việt (kiểm tra "Ố Ẫ Ự Ỹ" trong
 # tests/thumbnail/test_sticker.py). Oswald/Bebas Neue Pro VN là phương án thay.
 TITLE_FONT_PATH = FONTS_DIR / "Anton-Regular.ttf"
@@ -70,6 +74,16 @@ MASCOT_STYLE = (
 
 def mascot_prompt(pose: str) -> str:
     return f"{MASCOT_CHARACTER}, {pose}, {MASCOT_STYLE}"
+
+
+def load_sticker(name: str) -> bytes:
+    """Sticker linh vật đã tách nền + viền trắng, theo tên (vd. "hum")."""
+    path = STICKER_DIR / f"{name}.png"
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Không có sticker {path}. Chạy: uv run python -m scripts.cut_sticker_sheet"
+        )
+    return path.read_bytes()
 
 
 def channel_name() -> str:
@@ -247,8 +261,9 @@ def compose_sticker_thumbnail(
     if mascot_bytes:
         mascot = Image.open(io.BytesIO(mascot_bytes))
         if mascot.mode != "RGBA" or mascot.getchannel("A").getextrema() == (255, 255):
-            mascot = cut_out_background(mascot)
-        mascot = sticker(mascot)
+            mascot = sticker(cut_out_background(mascot))
+        # Ảnh đã nền trong (bộ sticker kênh) có sẵn viền trắng: vẽ thêm viền nữa
+        # thành viền dày gấp đôi.
         box_w, box_h = mascot_w - 20, HEIGHT - 70
         scale = min(box_w / mascot.width, box_h / mascot.height)
         mascot = mascot.resize((max(1, int(mascot.width * scale)), max(1, int(mascot.height * scale))), Image.LANCZOS)

@@ -106,13 +106,13 @@ def _topic_script(tmp_path, fmt="full"):
 
 async def test_cli_chu_de_full_ra_ban_a_va_b_khong_goi_gemini(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(cli, "OUTPUT_DIR", tmp_path / "out")
-    prompts = []
+    names = []
 
-    def fake_mascot(prompt, seed):
-        prompts.append((prompt, seed))
+    def fake_sticker(name):
+        names.append(name)
         return _mascot_bytes()
 
-    monkeypatch.setattr(cli, "generate_mascot_image", fake_mascot)
+    monkeypatch.setattr(cli, "load_sticker", fake_sticker)
 
     async def boom(*a, **k):
         raise AssertionError("không được gọi Gemini cho kịch bản chủ đề")
@@ -124,15 +124,14 @@ async def test_cli_chu_de_full_ra_ban_a_va_b_khong_goi_gemini(tmp_path, monkeypa
     assert "Thumbnail B:" in out and "-thumbnail-b.png" in out
     files = sorted(p.name for p in (tmp_path / "out").iterdir())
     assert len(files) == 2
-    assert len({s for _, s in prompts}) == 1, "cùng seed để linh vật là một nhân vật"
-    assert prompts[0][0] != prompts[1][0], "bản B đổi biểu cảm linh vật"
+    assert names == list(TOPICS["ho_hang_viet"].thumb_stickers), "bản B đổi sticker linh vật"
     a, b = ((tmp_path / "out" / f).read_bytes() for f in files)
     assert a != b
 
 
 async def test_cli_chu_de_episodes_giu_badge_tap(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(cli, "OUTPUT_DIR", tmp_path / "out")
-    monkeypatch.setattr(cli, "generate_mascot_image", lambda prompt, seed: _mascot_bytes())
+    monkeypatch.setattr(cli, "load_sticker", lambda name: _mascot_bytes())
     manifest = tmp_path / "x-episodes.json"
     manifest.write_text(
         json.dumps({"format": "episodes", "episodes": [{"number": n, "total": 3} for n in (1, 2, 3)]}),
@@ -141,3 +140,20 @@ async def test_cli_chu_de_episodes_giu_badge_tap(tmp_path, monkeypatch, capsys):
     await cli._run(_topic_script(tmp_path, "episodes"), episodes_manifest=manifest)
     out = capsys.readouterr().out
     assert out.count("Thumbnail tập") == 3 and "Thumbnail B:" in out
+
+
+def test_moi_sticker_cua_chu_de_ghep_duoc_thumbnail():
+    from thumbnail.sticker import load_sticker
+
+    for topic in TOPICS.values():
+        for name in topic.thumb_stickers:
+            png = compose_sticker_thumbnail(load_sticker(name), "Tiêu Đề Thử", [], topic.thumb_palette)
+            assert Image.open(io.BytesIO(png)).size == (WIDTH, HEIGHT)
+
+
+def test_thieu_sticker_bao_cach_cat(tmp_path, monkeypatch):
+    from thumbnail import sticker as mod
+
+    monkeypatch.setattr(mod, "STICKER_DIR", tmp_path)
+    with pytest.raises(FileNotFoundError, match="cut_sticker_sheet"):
+        mod.load_sticker("hum")

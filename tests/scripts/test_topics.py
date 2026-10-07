@@ -4,6 +4,7 @@ from datetime import date
 import pytest
 
 from scripts.text_tools import clean_thumb_fields
+from thumbnail.sticker import STICKER_DIR
 from scripts.topics import (
     DEFAULT_ROTATION,
     SATURATED_MOTIFS,
@@ -34,7 +35,9 @@ def test_moi_chu_de_du_truong_bat_buoc(topic_id):
     assert t.title_formulas
     assert len(t.thumb_palette) == 3
     assert all(c.startswith("#") and len(c) == 7 for c in t.thumb_palette)
-    assert t.mascot_pose_hints
+    assert len(t.thumb_stickers) == 2 and t.thumb_stickers[0] != t.thumb_stickers[1]
+    for name in t.thumb_stickers:
+        assert (STICKER_DIR / f"{name}.png").exists(), name
     assert t.playlist_env.startswith("YOUTUBE_PLAYLIST_")
     assert len(t.hashtags) == 2 and all(h.startswith("#") for h in t.hashtags)
     for motif in SATURATED_MOTIFS:

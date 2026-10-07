@@ -2,8 +2,8 @@ import React from "react";
 import { Img, staticFile, useVideoConfig } from "remotion";
 import { FONT_FAMILY } from "./fonts";
 
-// Bảng màu lấy từ logo kênh (remotion/public/avatar.png): nền kem ấm, chữ nâu
-// đậm như viền logo, điểm nhấn san hô như dải ruy băng "TRUYỆN".
+// Bảng màu ấm hợp với bộ sticker ếch nón lá: nền kem, chữ nâu đậm như nét viền
+// sticker, điểm nhấn san hô.
 export const BRAND = {
   panel: "#F8E6D2",
   card: "#FFFAF3",
@@ -18,13 +18,13 @@ export const BRAND = {
 export const AI_NOTICE_HEAD = "Truyện hư cấu";
 export const AI_NOTICE_BODY = "Nội dung, giọng đọc và hình ảnh do AI tạo";
 
-const DEFAULT_CHANNEL = "Audio Truyện";
-
-// Linh vật kênh, tách nền trong suốt (scripts/cutout_sticker.py). Trên + dưới
-// mỗi tấm như format tham khảo; tư thế khác nhau để hai tấm không giống hệt.
+// Sticker linh vật của kênh, cắt từ bảng sticker (scripts/cut_sticker_sheet.py).
+// Trái lo việc mời đăng ký: biển "Đừng quên đăng ký nhé!" + "Like nhé!". Phải
+// lo nhận diện: logo "AUDIO TRUYỆN" (có sẵn tên kênh, nên không viết tên kênh
+// bằng chữ nữa) + ếch đeo tai nghe đọc truyện.
 const MASCOT = {
-  left: { top: "remotion/public/mascot-wave.png", bottom: "remotion/public/mascot-cool.png" },
-  right: { top: "remotion/public/mascot-read.png", bottom: "remotion/public/mascot-cool.png" },
+  left: { top: "remotion/public/sticker-dang-ky.png", bottom: "remotion/public/sticker-like.png" },
+  right: { top: "remotion/public/sticker-logo.png", bottom: "remotion/public/sticker-nghe-truyen.png" },
 } as const;
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
@@ -58,27 +58,24 @@ const Card: React.FC<{
 interface BrandPanelProps {
   side: "left" | "right";
   width: number;
-  channelName?: string; // CHANNEL_NAME trong .env
 }
 
-// Một tấm nền thương hiệu hai bên video giữa. Bố cục mỗi tấm: linh vật trên,
-// thẻ chữ giữa, linh vật dưới. Trái mời đăng ký, phải nhắc tên kênh và cảnh báo
+// Một tấm nền thương hiệu hai bên video giữa. Bố cục mỗi tấm: sticker trên,
+// thẻ chữ giữa, sticker dưới. Trái mời đăng ký, phải là logo kênh và cảnh báo
 // nội dung AI -- mỗi bên một việc để người xem không đọc trùng.
 //
 // Mọi kích thước tỉ lệ theo bề rộng tấm: tấm rộng 174px (video ngang) hay
 // 350px (video dọc) đều cân, không bên nào trống trơn hay chật chữ.
-export const BrandPanel: React.FC<BrandPanelProps> = ({ side, width, channelName }) => {
+export const BrandPanel: React.FC<BrandPanelProps> = ({ side, width }) => {
   const { height } = useVideoConfig();
   // Các mốc chặn dưới đo trên khung 576px; nhân theo tỉ lệ khung để lên 1080p
   // bố cục y hệt chứ không ra chữ bé tí giữa tấm nền to.
   const k = height / 576;
-  // Co theo CẢ chiều cao, không chỉ bề rộng: tấm bên video dọc rộng 350px,
-  // co theo bề rộng thì linh vật 210px + 164px cộng tên kênh và thẻ chữ vượt
-  // 576px -- ếch kính râm góc dưới bên phải bị cắt mất nửa người.
-  const mascot = clamp(Math.min(width * 0.62, height * 0.3), 90 * k, 210 * k);
+  // Co theo CẢ chiều cao, không chỉ bề rộng: tấm bên video dọc rộng ~650px ở
+  // 1080p, co theo bề rộng thì hai sticker cộng thẻ chữ vượt chiều cao khung và
+  // sticker dưới bị cắt mất nửa.
+  const mascot = clamp(Math.min(width * 0.82, height * 0.34), 90 * k, 210 * k);
   const font = clamp(width * 0.075, 12 * k, 22 * k);
-  const nameFont = clamp(width * 0.115, 18 * k, 36 * k);
-  const [head, ...rest] = (channelName || DEFAULT_CHANNEL).trim().split(/\s+/);
   const art = MASCOT[side];
 
   return (
@@ -98,41 +95,23 @@ export const BrandPanel: React.FC<BrandPanelProps> = ({ side, width, channelName
       }}
     >
       <Img src={staticFile(art.top)} style={{ width: mascot, height: mascot, objectFit: "contain" }} />
-      {side === "left" ? (
-        <Card tone="accent" font={font} k={k}>
-          Đăng ký kênh
-          <br />
-          truyện mới 20h mỗi tối
-        </Card>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: font * 0.7, width: "100%" }}>
-          <div
-            style={{
-              fontFamily: FONT_FAMILY,
-              fontWeight: 900,
-              fontSize: nameFont,
-              lineHeight: 1.05,
-              color: BRAND.ink,
-              textAlign: "center",
-            }}
-          >
-            {head}
-            {rest.length ? (
-              <>
-                <br />
-                <span style={{ color: BRAND.accent }}>{rest.join(" ")}</span>
-              </>
-            ) : null}
-          </div>
-          <Card font={font} k={k}>
+      <Card tone={side === "left" ? "accent" : "card"} font={font} k={k}>
+        {side === "left" ? (
+          <>
+            Truyện mới
+            <br />
+            20h mỗi tối
+          </>
+        ) : (
+          <>
             <div style={{ color: BRAND.accent, fontSize: font * 1.08 }}>{AI_NOTICE_HEAD}</div>
             {AI_NOTICE_BODY}
-          </Card>
-        </div>
-      )}
+          </>
+        )}
+      </Card>
       <Img
         src={staticFile(art.bottom)}
-        style={{ width: mascot * 0.78, height: mascot * 0.78, objectFit: "contain" }}
+        style={{ width: mascot * 0.9, height: mascot * 0.9, objectFit: "contain" }}
       />
     </div>
   );

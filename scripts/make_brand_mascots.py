@@ -1,15 +1,12 @@
-"""Vẽ bộ linh vật thương hiệu: các tư thế cho tấm bên video dài, và avatar kênh.
+"""Vẽ avatar kênh (ếch nón lá bằng FLUX).
 
-Một nhân vật cho mọi chỗ -- avatar, ảnh bìa, tấm bên video -- như các kênh truyện
-audio đang chạy tốt dùng đúng một linh vật xuyên suốt. Nhân vật là ếch xanh đội
-nón lá đã thiết kế cho ảnh bìa (thumbnail/sticker.py): cùng prompt, cùng mô
-hình, cùng seed, nên chú ếch ở đây giống hệt chú ếch trên ảnh bìa.
+Tấm bên video dài và thumbnail đã chuyển sang bộ sticker kênh tự thiết kế
+(scripts/cut_sticker_sheet.py, 07/10); script này chỉ còn vẽ avatar.
 
-    uv run python -m scripts.make_brand_mascots            # vẽ những bản còn thiếu
-    uv run python -m scripts.make_brand_mascots --force    # vẽ lại hết
+    uv run python -m scripts.make_brand_mascots            # vẽ nếu chưa có
+    uv run python -m scripts.make_brand_mascots --force    # vẽ lại
 
-Chạy khi máy rảnh RAM: FLUX cần ~6GB, chạy song song với stage 3 của lượt dựng
-(cũng FLUX) trên máy 16GB là dễ làm chết cả hai.
+Chạy khi máy rảnh RAM: FLUX cần ~6GB.
 """
 
 from __future__ import annotations
@@ -21,19 +18,10 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 from thumbnail.generator import generate_mascot_image
-from thumbnail.sticker import MASCOT_SEED, cut_out_background, mascot_prompt, sticker
+from thumbnail.sticker import MASCOT_SEED, cut_out_background, mascot_prompt
 
 ROOT = Path(__file__).resolve().parent.parent
-PUBLIC = ROOT / "remotion" / "public"
 BRAND_DIR = ROOT / "assets" / "brand"
-
-# Tư thế cho tấm bên (remotion/src/BrandPanel.tsx đọc đúng các tên file này).
-# "Đọc truyện đeo tai nghe" nói thẳng đây là kênh truyện AUDIO.
-PANEL_POSES = {
-    "mascot-wave": "waving one hand hello with a big friendly smile",
-    "mascot-read": "wearing big headphones and holding an open storybook, happily listening",
-    "mascot-cool": "wearing black sunglasses, arms crossed, smug confident smile",
-}
 
 # Avatar: cận mặt, nét to, ít chi tiết. Avatar YouTube hiện ở cỡ 40px trong
 # bình luận -- logo cũ (sách, mic, cốc, nốt nhạc, chữ) ở cỡ đó thành một đốm màu.
@@ -49,16 +37,6 @@ HEAD_RATIO = 0.80
 def _ve(pose: str) -> Image.Image:
     raw = generate_mascot_image(mascot_prompt(pose), seed=MASCOT_SEED)
     return cut_out_background(Image.open(io.BytesIO(raw)))
-
-
-def ve_tu_the(name: str, pose: str, force: bool) -> Path:
-    out = PUBLIC / f"{name}.png"
-    if out.exists() and not force:
-        print(f"đã có, bỏ qua: {out.name}")
-        return out
-    print(f"vẽ {out.name}: {pose}")
-    sticker(_ve(pose)).save(out)
-    return out
 
 
 def ve_avatar(force: bool) -> Path:
@@ -109,8 +87,6 @@ def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--force", action="store_true", help="Vẽ lại kể cả bản đã có")
     a = p.parse_args()
-    for name, pose in PANEL_POSES.items():
-        ve_tu_the(name, pose, a.force)
     print(f"Avatar: {ve_avatar(a.force)}")
 
 

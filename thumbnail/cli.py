@@ -14,7 +14,8 @@ Không có --episodes thì vẫn ra một ảnh như pipeline cũ (dựng video 
 
 Từ 24/09/2026, kịch bản CHỦ ĐỀ (có `thumb_text`) dùng layout "linh vật sticker +
 cả câu tiêu đề" (thumbnail/sticker.py) và không cần Gemini: chữ đã có từ stage 1.
-Sinh 2 linh vật (2 tư thế) -> bản A + bản B cho Test & compare của YouTube:
+Hai sticker linh vật (thumb_stickers của chủ đề, lấy từ bộ sticker kênh -- không
+chạy FLUX) -> bản A + bản B cho Test & compare của YouTube:
 
     # (full)      Đã lưu thumbnail: output/thumbnails/<stem>-thumbnail-a.png
     #             Thumbnail B: output/thumbnails/<stem>-thumbnail-b.png
@@ -35,14 +36,14 @@ from episodes.storage import load_manifest
 from scripts.models import Script
 from scripts.topics import TOPICS
 from thumbnail.compositor import overlay_hook_text
-from thumbnail.generator import generate_mascot_image, generate_thumbnail_image
+from thumbnail.generator import generate_thumbnail_image
 from thumbnail.prompt_generator import generate_thumbnail_prompt
-from thumbnail.sticker import MASCOT_SEED, compose_sticker_thumbnail, mascot_prompt
+from thumbnail.sticker import compose_sticker_thumbnail, load_sticker
 from thumbnail.storage import make_stem, save_episode_thumbnail
 
 # Chủ đề lạ (kịch bản sửa tay) vẫn có màu: nền kem, đỏ + xanh lá.
 FALLBACK_PALETTE = ("#FFE3C2", "#E4312B", "#1E7A46")
-FALLBACK_POSES = ("arms crossed with a smug side-eye", "gasping with both hands on cheeks")
+FALLBACK_STICKERS = ("hum", "hay-qua")
 
 load_dotenv()
 
@@ -82,13 +83,11 @@ def _run_sticker(script: Script, manifest: dict | None) -> None:
     check_thumb_keywords(script.thumb_text, script.thumb_keywords)
     topic = TOPICS.get(script.topic)
     palette = topic.thumb_palette if topic else FALLBACK_PALETTE
-    poses = (topic.mascot_pose_hints if topic else ()) or FALLBACK_POSES
-    pose_a = poses[0]
-    pose_b = poses[1 % len(poses)]
-    mascot_a = generate_mascot_image(mascot_prompt(pose_a), MASCOT_SEED)
-    # Bản B đổi biểu cảm linh vật VÀ đảo màu từ khoá -- hai biến khác nhau rõ
-    # để Test & compare có gì mà so. Cùng seed để vẫn là một nhân vật.
-    mascot_b = mascot_a if pose_b == pose_a else generate_mascot_image(mascot_prompt(pose_b), MASCOT_SEED)
+    name_a, name_b = topic.thumb_stickers if topic else FALLBACK_STICKERS
+    # Bản B đổi sticker linh vật VÀ đảo màu từ khoá -- hai biến khác nhau rõ
+    # để Test & compare có gì mà so.
+    mascot_a = load_sticker(name_a)
+    mascot_b = load_sticker(name_b)
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     stem = make_stem(script.trope)
