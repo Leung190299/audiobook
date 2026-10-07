@@ -22,8 +22,8 @@ One **35–50 min long video per day** + **3 Shorts**, Vietnamese family-drama s
 
 - **Static frame start to end.** No burned-in captions, chapter titles, avatar, waveform, hook text or end card. Viewers who want captions turn on YouTube's auto-captions. The cold open still *plays* (it is an audio edit); only its text overlay is gone.
 - **Centre = a background video**, picked at random per episode from `assets/backgrounds/`. The centre box follows the clip's aspect ratio: vertical clips (most Douyin clips) show uncropped and the side panels widen; landscape clips are capped at 66% of the width and cropped at the sides.
-- **Side panels = channel brand**: cream background from the logo palette, the **frog mascot** top and bottom, "subscribe, new story 20h every night" on the left, channel name + the fixed AI disclosure on the right.
-- **One mascot everywhere**: a chubby green frog wearing a Vietnamese conical hat (*nón lá*). It is on the avatar, every thumbnail and both side panels. It was designed (spec 24/09) to differ from competitors' white duck / capybara — do not swap it for a competitor-looking character.
+- **Side panels = channel brand**: cream background, two **frog stickers** per panel. Left: "Đừng quên Đăng ký nhé!" sign, card "Truyện mới 20h mỗi tối", "Like nhé!". Right: the "AUDIO TRUYỆN" logo sticker (it carries the channel name — no name text any more), the fixed AI disclosure card, the headphones-reading frog.
+- **One mascot everywhere**: a chubby green frog wearing a Vietnamese conical hat (*nón lá*). It is on the avatar, every thumbnail and both side panels. Since 07/10 panels and thumbnails use the channel's own 4×4 sticker sheet (`assets/brand/sticker-sheet.webp`), not FLUX drawings. It was designed (spec 24/09) to differ from competitors' white duck / capybara — do not swap it for a competitor-looking character.
 
 **Output quality**: long video renders at **1920×1080** (was 1024×576 until 05/10 — SD, and it threw away over half the vertical detail of the 1024–1280 px Douyin sources). Remotion's intermediate frames are JPEG 95 (`backgrounds.RENDER_JPEG_QUALITY`; default 80 smeared text edges). 1080p renders ~33% slower than 576p. `BrandPanel` scales all its size clamps by `height / 576`, so changing the frame size keeps the layout.
 
@@ -50,7 +50,7 @@ Layout code: `remotion/src/MainVideo.tsx` → `BrandedLayout.tsx` (centre box wi
 | 2 | `tts.cli` | 5.5 min | VieNeu-TTS, ONNX on CPU. |
 | 3 | `images.cli` | 31 min | **Skipped whenever `assets/backgrounds/` has a video** — long video and Shorts both run on background video. Only runs (FLUX via mflux) as the fallback when that folder is empty. |
 | 4 | `episodes.cli` | 27–41 min | Remotion render; picks the background here. Images arg is optional — omitted when stage 3 is skipped. |
-| 5 | `thumbnail.cli` | 2 min | Frog sticker left + almost-full title right in Anton, keywords coloured. Already matches the reference style. |
+| 5 | `thumbnail.cli` | seconds | Frog sticker left + almost-full title right in Anton, keywords coloured. Stickers come from the topic's `thumb_stickers` (A, B) in `scripts/topics.py` — no FLUX. |
 | 6 | `metadata.cli` | 5 s | Minimal description (below). Renames the mp4 to the title slug. |
 | 7 | `shorts.cli --script` | 1–2 min | 3 Shorts from `short_beats`, each on its own background video (vertical clips preferred). **Failure only warns**, never fails the run. |
 | 8 | `upload.episodes_cli` | — | Only with `--upload`. |
@@ -67,7 +67,9 @@ With videos present `run_daily.sh` **skips stage 3 entirely** and calls stages 4
 
 ## Mascot, avatar, brand assets
 
-`uv run python -m scripts.make_brand_mascots` draws the panel poses into `remotion/public/mascot-{wave,read,cool}.png` and the avatar into `assets/brand/avatar-frog.png` (800×800). It reuses the thumbnail's exact prompt, model and seed (`thumbnail/sticker.py`: `MASCOT_CHARACTER`, `MASCOT_SEED`), so the frog matches the thumbnails. Background removal is the existing flood-fill `thumbnail.sticker.cut_out_background` — the thick dark outline stops the fill, no extra model needed. Existing files are skipped; `--force` redraws **all four** (~4 min). The avatar's cut-out is cached as `avatar-frog-raw.png`, so re-composing the avatar does not need FLUX: delete only `avatar-frog.png` and run again.
+`uv run python -m scripts.cut_sticker_sheet` cuts `assets/brand/sticker-sheet.webp` into 16 transparent stickers in `assets/brand/stickers/<name>.png` (logo, nghe-truyen, hay-qua, thu-gian, dang-ky, ngu, cung-nghe, cam-on, hum, truyen-hay, like, chill, moi-luc, co-len, kien-thuc, hen-gap) and copies the four the panels use to `remotion/public/sticker-*.png`. The sheet's white background equals the stickers' white rim, so the rim is removed with the background and redrawn by `thumbnail.sticker.sticker()`. A new sheet with the same 4×4 layout: replace the file and rerun; a different layout: edit `NAMES`. To change which stickers appear: `MASCOT` in `remotion/src/BrandPanel.tsx`, `thumb_stickers` in `scripts/topics.py` (prefer stickers with short speech text — long text fights the title).
+
+`uv run python -m scripts.make_brand_mascots` now only draws the FLUX avatar `assets/brand/avatar-frog.png` (800×800); its cut-out is cached as `avatar-frog-raw.png`.
 
 The avatar must be uploaded **by hand in YouTube Studio** — the API cannot change a channel's profile picture.
 
