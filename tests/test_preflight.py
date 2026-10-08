@@ -161,3 +161,20 @@ def test_bao_cao_hien_cach_sua_cho_muc_hong_va_giau_o_muc_dat():
 def test_tong_ket_dem_dung_tung_loai():
     checks = [Check("a", OK), Check("b", WARN), Check("c", FAIL), Check("d", FAIL)]
     assert summarize(checks) == (1, 1, 2)
+
+
+def test_viet_bang_claude_ma_thieu_key_thi_hong(monkeypatch):
+    from preflight.checks import FAIL, check_story_llm
+
+    monkeypatch.setenv("STORY_LLM", "claude")
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    assert check_story_llm().status == FAIL
+
+
+def test_viet_bang_claude_co_key_thi_dat(monkeypatch):
+    from preflight.checks import check_story_llm
+
+    monkeypatch.setenv("STORY_LLM", "claude")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
+    check = check_story_llm()
+    assert check.status == OK and check.detail == "claude"

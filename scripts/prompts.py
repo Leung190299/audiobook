@@ -351,7 +351,8 @@ Tóm tắt diễn biến chương này theo dàn ý đã thống nhất ở trê
 
 YÊU CẦU BẮT BUỘC:
 {structure_rule}{voice_rule}- Viết đầy đủ cảnh, thoại, nội tâm — KHÔNG tóm tắt.
-- Độ dài BẮT BUỘC từ {w_lo} đến {w_hi} từ — không vượt quá {w_hi} từ.
+- Độ dài BẮT BUỘC từ {w_lo} đến {w_hi} từ — không vượt quá {w_hi} từ. Đếm theo TIẾNG
+  cách nhau bởi dấu cách ("con gái" là 2 từ, "bà nội tôi" là 3 từ), không đếm theo từ ghép.
 - Giữ nhất quán với các chương trước trong cuộc trò chuyện này (tên nhân vật, bối cảnh, mốc thời gian).
 - CHỈ trả về văn xuôi của chương, KHÔNG kèm tiêu đề chương, KHÔNG JSON, KHÔNG giải thích.
 """

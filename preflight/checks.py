@@ -60,6 +60,25 @@ def check_gemini_cookies() -> Check:
     return Check("Cookie Gemini", OK, "đã có SECURE_1PSID và SECURE_1PSIDTS")
 
 
+def check_story_llm() -> Check:
+    """Stage 1 viết truyện bằng Claude hay Gemini (scripts/llm.py). Cookie
+    Gemini vẫn phải có kể cả khi viết bằng Claude: stage 6 (SEO) còn dùng."""
+    from scripts.llm import CLAUDE, resolve_provider
+
+    try:
+        provider = resolve_provider()
+    except ValueError as exc:
+        return Check("Mô hình viết truyện", FAIL, str(exc), "Sửa STORY_LLM trong .env: claude hoặc gemini.")
+    if provider == CLAUDE and not os.getenv("ANTHROPIC_API_KEY"):
+        return Check(
+            "Mô hình viết truyện",
+            FAIL,
+            "STORY_LLM=claude nhưng thiếu ANTHROPIC_API_KEY",
+            "Thêm ANTHROPIC_API_KEY vào .env, hoặc đặt STORY_LLM=gemini.",
+        )
+    return Check("Mô hình viết truyện", OK, provider)
+
+
 def check_youtube_client_secret(root: Path) -> Check:
     path = root / "config" / "youtube_client_secret.json"
     if not path.exists():
@@ -312,6 +331,7 @@ def run_all(root: Path, deep: bool = False, upload: bool = False) -> list[Check]
     checks = [
         check_env_file(root),
         check_gemini_cookies(),
+        check_story_llm(),
         check_voice_config(root),
         check_trend_config(root, deep),
         check_remotion(root),

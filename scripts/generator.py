@@ -1,10 +1,11 @@
 # scripts/generator.py
 import asyncio
 import json
-import os
 
-from gemini_webapi import GeminiClient
+import anthropic
 from gemini_webapi.exceptions import APIError, AuthError, GeminiError
+
+from scripts.llm import make_client
 
 from scripts.models import Chapter, Script
 from scripts.prompts import (
@@ -37,6 +38,11 @@ RETRY_DELAY_SECONDS = 5
 CHAPTER_ATTEMPTS = 3
 
 
+# Lỗi phía mô hình (mạng, xác thực, quá tải) -- không tự khỏi khi hỏi lại
+# trong cùng lượt, nên ném ngay thành ScriptGenerationError.
+LLM_ERRORS = (GeminiError, APIError, AuthError, anthropic.APIError)
+
+
 class ScriptGenerationError(Exception):
     pass
 
@@ -45,8 +51,9 @@ async def generate_script(
     trope_id: str,
     trope_name: str,
     trope_description: str,
-    client: "GeminiClient | None" = None,
+    client=None,
     *,
+    llm: "str | None" = None,
     fmt: str = "episodes",
     topic=None,
     story=None,
@@ -62,6 +69,9 @@ async def generate_script(
     premise/thumb_text/thumb_keywords/short_beats; `is_duplicate(title, premise)`
     trả True thì coi dàn ý là hỏng và hỏi lại (chặn trùng 30 ngày); viết xong
     các chương thì hỏi thêm một lượt lấy NGUYÊN VĂN 3 đoạn hài/sảng.
+
+    `client` là bất cứ gì có `start_chat()` (test truyền giả); bỏ trống thì tạo
+    theo `llm` / STORY_LLM (scripts/llm.py): Claude API hoặc Gemini.
     """
     topic_mode = topic is not None
     # Nhánh kho (24/09): truyện đã biên tập sẵn. Loại trừ với topic_mode -- khi
@@ -78,11 +88,7 @@ async def generate_script(
         outline_prompt = build_outline_prompt(trope_name, trope_description, fmt)
 
     if client is None:
-        client = GeminiClient(
-            os.environ["SECURE_1PSID"],
-            os.environ["SECURE_1PSIDTS"],
-        )
-        await client.init(timeout=30, auto_close=False, close_delay=300, auto_refresh=True)
+        client = await make_client(llm)
 
     chat = client.start_chat()
 
@@ -96,8 +102,8 @@ async def generate_script(
     for attempt in range(OUTLINE_ATTEMPTS):
         try:
             outline_response = await chat.send_message(outline_prompt + retry_note)
-        except (GeminiError, APIError, AuthError) as exc:
-            raise ScriptGenerationError(f"Gemini lỗi khi sinh dàn ý: {exc}") from exc
+        except LLM_ERRORS as exc:
+            raise ScriptGenerationError(f"Mô hình lỗi khi sinh dàn ý: {exc}") from exc
 
         try:
             outline = _parse_json_response(outline_response.text)
@@ -138,7 +144,7 @@ async def generate_script(
     except (KeyError, TypeError) as exc:
         raise ScriptGenerationError(
             f"Dữ liệu dàn ý không đúng cấu trúc mong đợi: {exc}\n"
-            f"Phản hồi thô từ Gemini: {outline_response.text[:500]!r}"
+            f"Phản hồi thô từ mô hình: {outline_response.text[:500]!r}"
         ) from exc
     # Hai trường mới (22/09) không bắt buộc: Gemini thỉnh thoảng bỏ field phụ dù
     # prompt yêu cầu, và một dàn ý thiếu câu hỏi bình luận không đáng để mất cả
@@ -218,9 +224,9 @@ async def generate_script(
                         topic_mode=topic_mode,
                     )
                 )
-            except (GeminiError, APIError, AuthError) as exc:
+            except LLM_ERRORS as exc:
                 raise ScriptGenerationError(
-                    f"Gemini lỗi khi sinh chương {chapter_number}: {exc}"
+                    f"Mô hình lỗi khi sinh chương {chapter_number}: {exc}"
                 ) from exc
 
             text = chapter_response.text.strip()
@@ -229,7 +235,7 @@ async def generate_script(
                 break
             if attempt == CHAPTER_ATTEMPTS - 1:
                 raise ScriptGenerationError(
-                    f"Gemini không sinh được chương {chapter_number} sau "
+                    f"Mô hình không sinh được chương {chapter_number} sau "
                     f"{CHAPTER_ATTEMPTS} lần: {problem}. Nguyên văn: {text[:200]!r}"
                 )
             await asyncio.sleep(RETRY_DELAY_SECONDS * (attempt + 1))
@@ -296,7 +302,7 @@ def _chapter_problem(text: str) -> "str | None":
     """Lý do một chương không dùng được, hoặc None nếu ổn. Cùng hai tiêu chí với
     scripts/qa.py -- QA là lưới thứ hai cho trường hợp hàm này bị bỏ qua."""
     if looks_like_refusal(text):
-        return "lời từ chối của Gemini"
+        return "lời từ chối của mô hình"
     words = len(text.split())
     if words < MIN_CHAPTER_WORDS:
         return f"chỉ {words} từ, dưới sàn {MIN_CHAPTER_WORDS}"
@@ -309,6 +315,10 @@ def _parse_json_response(raw_text: str) -> dict:
         text = text.strip("`").strip()
         if text.lower().startswith("json"):
             text = text[len("json") :].strip()
+    elif not text.startswith(("{", "[")) and "{" in text and text.rstrip().endswith(("}", "```")):
+        # Claude đôi khi mở bằng một câu dẫn ("Đây là dàn ý:") rồi mới tới khối
+        # JSON (có thể bọc ```json). Lấy từ dấu { đầu tới dấu } cuối.
+        text = text[text.index("{") : text.rindex("}") + 1]
     try:
         # strict=False: Gemini hay nhét ký tự xuống dòng thô vào giữa chuỗi, mà
         # json.loads mặc định từ chối ký tự điều khiển trong chuỗi. Đo thực tế:
@@ -320,9 +330,9 @@ def _parse_json_response(raw_text: str) -> dict:
         # và ba bản vá nhầm chỗ chỉ vì thông báo cũ nói "không parse được JSON".
         if not text.lstrip().startswith(("{", "[")):
             raise ScriptGenerationError(
-                "Gemini không trả về JSON mà trả văn bản thường — nhiều khả năng "
+                "Mô hình không trả về JSON mà trả văn bản thường — nhiều khả năng "
                 f"là lời từ chối nội dung. Nguyên văn: {text[:300]!r}"
             ) from exc
         raise ScriptGenerationError(
-            f"Không parse được JSON từ phản hồi Gemini: {exc}"
+            f"Không parse được JSON từ phản hồi mô hình: {exc}"
         ) from exc

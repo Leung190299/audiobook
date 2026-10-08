@@ -62,3 +62,25 @@ def _khong_dung_trang_thai_kho_that(monkeypatch, tmp_path_factory):
         story_bank, "DEFAULT_STATE_PATH", tmp_path_factory.mktemp("kho") / "state.json"
     )
     yield
+
+
+class GoiMoHinhTrongTest(AssertionError):
+    pass
+
+
+@pytest.fixture(autouse=True)
+def _chan_goi_mo_hinh(monkeypatch):
+    """.env có ANTHROPIC_API_KEY thật từ 08/10: test nào lỡ để generate_script
+    tự tạo client là gọi Claude thật, mỗi lượt vài đô. Test nào cần thì truyền
+    client giả (có start_chat) vào generate_script, hoặc ClaudeChat giả."""
+
+    def _no(*args, **kwargs):
+        raise GoiMoHinhTrongTest(
+            "Test vừa cố gọi mô hình thật (Claude/Gemini). Truyền client giả vào hàm."
+        )
+
+    from scripts import generator, llm
+
+    monkeypatch.setattr(generator, "make_client", _no)
+    monkeypatch.setattr(llm.anthropic, "AsyncAnthropic", _no)
+    yield

@@ -4,10 +4,13 @@ import asyncio
 from datetime import date
 from pathlib import Path
 
+import os
+
 from dotenv import load_dotenv
 
 from scripts import history, story_bank
 from scripts.generator import generate_script
+from scripts.llm import PROVIDERS, resolve_provider
 from scripts.prompts import FORMATS
 from scripts.qa import validate_script
 from scripts.storage import save_script
@@ -119,7 +122,7 @@ def main() -> None:
     group.add_argument(
         "--story",
         help="Id truyện trong data/story_bank.json. Tiêu đề, hook, câu hỏi bình "
-        "luận và từ khoá thumbnail lấy nguyên từ kho, Gemini chỉ viết chương.",
+        "luận và từ khoá thumbnail lấy nguyên từ kho, mô hình chỉ viết chương.",
     )
     group.add_argument(
         "--topic",
@@ -139,7 +142,18 @@ def main() -> None:
         default="episodes",
         help="full = một video 35-45 phút; episodes = 3 tập có cliffhanger (22/09).",
     )
+    parser.add_argument(
+        "--llm",
+        choices=PROVIDERS,
+        help="Mô hình viết truyện: claude (Claude API, cần ANTHROPIC_API_KEY) hoặc "
+        "gemini (cookie web). Mặc định theo STORY_LLM trong .env; không đặt thì có "
+        "ANTHROPIC_API_KEY là dùng claude.",
+    )
     args = parser.parse_args()
+    if args.llm:
+        os.environ["STORY_LLM"] = args.llm
+    provider = resolve_provider()
+    print(f"Mô hình viết truyện: {provider}")
     asyncio.run(
         _run(args.trope_id, args.idea_file, args.label, args.topic, args.format,
              story_arg=args.story)
