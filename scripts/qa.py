@@ -8,9 +8,10 @@ MIN_WORDS = 9000
 # lần mất 3-4 phút sinh kịch bản. 15.000 từ ra khoảng 58 phút audio, vẫn nằm
 # trong tầm bình thường của video dài.
 MAX_WORDS = 15000
-# Bản FULL 35-45 phút (24/09/2026): 35 phút ~ 8.900 từ ở tốc độ VieNeu đo được
-# (scripts/prompts.py TTS_WORDS_PER_SECOND); chừa ~5% cho Gemini viết hụt.
-MIN_WORDS_FULL = 8400
+# Bản FULL 35-45 phút (24/09/2026): sàn = số từ cho 35 phút ở tốc độ đọc của
+# mô hình đang viết (scripts/prompts.py words_per_second), chừa ~5% viết hụt.
+# Gemini: ~8.400; Claude đọc chậm hơn nên ~7.500.
+FULL_MIN_SLACK = 0.95
 MIN_CHAPTERS = 14
 # Sàn độ dài MỖI chương. Tổng từ không đủ để bắt lỗi: tập 05/09 có chương 4 chỉ
 # 29 từ — nguyên văn lời từ chối của Gemini — mà tổng vẫn hơn 12.000 nên QA cũ
@@ -74,7 +75,12 @@ def validate_script(script: Script) -> None:
     if problem := title_problem(script.title):
         errors.append(problem)
 
-    min_words = MIN_WORDS_FULL if script.format == "full" else MIN_WORDS
+    if script.format == "full":
+        from scripts.prompts import full_words_range
+
+        min_words = int(full_words_range()[0] * FULL_MIN_SLACK)
+    else:
+        min_words = MIN_WORDS
     if not (min_words <= script.word_count <= MAX_WORDS):
         errors.append(
             f"Độ dài {script.word_count} từ nằm ngoài khoảng {min_words}-{MAX_WORDS}."

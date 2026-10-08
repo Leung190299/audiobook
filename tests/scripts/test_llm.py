@@ -88,3 +88,13 @@ def test_ten_mo_hinh_sai_thi_bao_loi(monkeypatch):
 def test_json_co_cau_dan_phia_truoc():
     raw = 'Đây là dàn ý:\n```json\n{"title": "A", "chapters": []}\n```'
     assert _parse_json_response(raw) == {"title": "A", "chapters": []}
+
+
+def test_claude_doc_cham_hon_nen_it_tu_hon(monkeypatch):
+    from scripts.prompts import full_chapter_words_range, full_words_range
+
+    gemini = full_words_range()
+    monkeypatch.setenv("STORY_LLM", "claude")
+    claude = full_words_range()
+    assert claude[0] < gemini[0] and claude[1] < gemini[1]
+    assert full_chapter_words_range() == (530, 670)

@@ -83,4 +83,7 @@ def _chan_goi_mo_hinh(monkeypatch):
 
     monkeypatch.setattr(generator, "make_client", _no)
     monkeypatch.setattr(llm.anthropic, "AsyncAnthropic", _no)
+    # Số từ mục tiêu phụ thuộc mô hình (scripts/prompts.py words_per_second):
+    # ghim Gemini để test không đổi kết quả theo .env máy chạy.
+    monkeypatch.setenv("STORY_LLM", "gemini")
     yield

@@ -169,13 +169,30 @@ TTS_WORDS_PER_SECOND = 4.25
 FULL_TARGET_MINUTES = (35, 45)
 FULL_CHAPTERS_RANGE = (14, 16)
 FULL_TARGET_CHAPTERS = 15
+# Văn Claude đọc chậm hơn: truyện #43 (08/10) 11.913 từ ra video 53:47, tức
+# ~3,75 từ/giây. Claude viết nhiều thoại ngắn, ~39 đoạn/chương so với ~11 của
+# Gemini, mỗi câu thêm một quãng nghỉ (sentence_gap_seconds). Đo trên MỘT
+# truyện -- đo lại sau vài truyện nữa.
+CLAUDE_WORDS_PER_SECOND = 3.75
+
+
+def words_per_second() -> float:
+    """Tốc độ đọc dùng để quy phút ra số từ, theo mô hình đang viết truyện."""
+    from scripts.llm import CLAUDE, resolve_provider
+
+    try:
+        claude = resolve_provider() == CLAUDE
+    except ValueError:
+        claude = False
+    return CLAUDE_WORDS_PER_SECOND if claude else TTS_WORDS_PER_SECOND
 
 
 def full_words_range() -> tuple[int, int]:
     lo, hi = FULL_TARGET_MINUTES
+    wps = words_per_second()
     return (
-        int(round(lo * 60 * TTS_WORDS_PER_SECOND, -2)),
-        int(round(hi * 60 * TTS_WORDS_PER_SECOND, -2)),
+        int(round(lo * 60 * wps, -2)),
+        int(round(hi * 60 * wps, -2)),
     )
 
 
