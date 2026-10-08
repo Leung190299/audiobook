@@ -179,6 +179,39 @@ def full_words_range() -> tuple[int, int]:
     )
 
 
+# Khoảng số từ một chương ở định dạng 3 tập (ghi cứng trong prompt chương).
+EPISODE_CHAPTER_WORDS = (650, 800)
+
+
+def chapter_words_range(fmt: str) -> tuple[int, int]:
+    """Khoảng số từ một chương mà prompt chương yêu cầu, theo định dạng."""
+    return full_chapter_words_range() if fmt == "full" else EPISODE_CHAPTER_WORDS
+
+
+def build_length_note(words: int, lo: int, hi: int) -> str:
+    """Nhắc số từ THẬT của chương vừa viết, nối vào cuối prompt chương sau.
+
+    Mô hình không đếm được chữ của chính nó; báo con số đo được thì chương sau
+    tự co lại. Trong khoảng cho phép thì không nói gì."""
+    if words > hi:
+        return (
+            f"\n\nLƯU Ý ĐỘ DÀI: chương vừa rồi dài {words} từ, VƯỢT trần {hi}. "
+            f"Chương này viết NGẮN hơn hẳn, trong khoảng {lo}-{hi} từ."
+        )
+    if words < lo:
+        return f"\n\nLƯU Ý ĐỘ DÀI: chương vừa rồi chỉ {words} từ, dưới {lo}. Chương này viết đủ {lo}-{hi} từ."
+    return ""
+
+
+def build_shorten_prompt(words: int, lo: int, hi: int) -> str:
+    return (
+        f"Chương vừa viết dài {words} từ, vượt quá trần {hi} từ. Viết lại CHÍNH chương đó "
+        f"gọn còn {lo}-{hi} từ (đếm theo tiếng cách nhau bởi dấu cách): giữ nguyên diễn "
+        "biến, tên nhân vật, các câu thoại đắt và câu kết chương; bỏ bớt miêu tả lặp và "
+        "thoại thừa. CHỈ trả về văn xuôi của chương, KHÔNG tiêu đề, KHÔNG giải thích."
+    )
+
+
 def full_chapter_words_range() -> tuple[int, int]:
     lo, hi = full_words_range()
     return (int(round(lo / FULL_TARGET_CHAPTERS, -1)), int(round(hi / FULL_TARGET_CHAPTERS, -1)))

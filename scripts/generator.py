@@ -14,6 +14,9 @@ from scripts.prompts import (
     MAX_TOPIC_QUESTION_WORDS,
     SHORT_BEAT_COUNT,
     build_chapter_prompt,
+    build_length_note,
+    build_shorten_prompt,
+    chapter_words_range,
     build_outline_prompt,
     build_short_beats_prompt,
     build_story_outline_prompt,
@@ -36,6 +39,11 @@ RETRY_DELAY_SECONDS = 5
 # được nhận như nội dung thật. Hỏi lại trong cùng chat thường ra chương bình
 # thường; hết lượt thì ném lỗi, không bao giờ để chương từ chối lọt xuống TTS.
 CHAPTER_ATTEMPTS = 3
+# Chương dài hơn trần quá tỉ lệ này thì xin viết gọn lại. 08/10: Claude viết
+# 895-1.008 từ/chương dù prompt bảo 590-770, cả truyện 56 phút thay vì 35-45.
+# Báo số từ thật của chương trước (build_length_note) kéo chương sau về; chương
+# vẫn vượt xa thì mới tốn thêm một lượt viết lại.
+SHORTEN_RATIO = 1.15
 
 
 # Lỗi phía mô hình (mạng, xác thực, quá tải) -- không tự khỏi khi hỏi lại
@@ -210,6 +218,8 @@ async def generate_script(
 
     total_chapters = len(chapter_plans)
     chapters = []
+    w_lo, w_hi = chapter_words_range(fmt)
+    length_note = ""
     for i, (heading, summary) in enumerate(chapter_plans):
         chapter_number = i + 1
         for attempt in range(CHAPTER_ATTEMPTS):
@@ -223,6 +233,7 @@ async def generate_script(
                         fmt=fmt,
                         topic_mode=topic_mode,
                     )
+                    + length_note
                 )
             except LLM_ERRORS as exc:
                 raise ScriptGenerationError(
@@ -239,6 +250,19 @@ async def generate_script(
                     f"{CHAPTER_ATTEMPTS} lần: {problem}. Nguyên văn: {text[:200]!r}"
                 )
             await asyncio.sleep(RETRY_DELAY_SECONDS * (attempt + 1))
+
+        words = len(text.split())
+        if words > w_hi * SHORTEN_RATIO:
+            try:
+                shorter = (await chat.send_message(build_shorten_prompt(words, w_lo, w_hi))).text.strip()
+            except LLM_ERRORS as exc:
+                print(f"CẢNH BÁO: không viết gọn được chương {chapter_number} ({exc}); giữ bản dài.")
+                shorter = ""
+            if shorter and _chapter_problem(shorter) is None and len(shorter.split()) < words:
+                print(f"Chương {chapter_number}: {words} từ, viết gọn còn {len(shorter.split())}.")
+                text = shorter
+                words = len(text.split())
+        length_note = build_length_note(words, w_lo, w_hi)
 
         if story_mode and chapter_number == 1 and story.hook:
             # Spec: câu đầu chương 1 phải là hook NGUYÊN VĂN. Prompt đã yêu cầu,

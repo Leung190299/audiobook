@@ -349,3 +349,20 @@ async def test_chu_de_tieu_de_dai_hon_60_ky_tu_thi_hoi_lai():
     assert script.title == "Ngắn Gọn"
     # Bước short_beats hỏng không làm hỏng kịch bản.
     assert script.short_beats == []
+
+
+async def test_chuong_qua_dai_thi_viet_gon_va_nhac_chuong_sau(monkeypatch):
+    """08/10: Claude viết 895-1.008 từ/chương dù prompt bảo tối đa 770."""
+    monkeypatch.setattr("scripts.generator.chapter_words_range", lambda fmt: (10, 20))
+    dai = " ".join(["chữ"] * 40)
+    gon = " ".join(["gọn"] * 15)
+    vua = " ".join(["vừa"] * 21)  # vượt trần nhưng dưới 1,15 lần: không viết lại
+    fake_client, fake_chat = _make_fake_client(_outline_json(3), [dai, gon, vua, gon])
+
+    script = await generate_script("t", "T", "m", client=fake_client)
+
+    assert [c.text for c in script.chapters] == [gon, vua, gon]
+    prompts = [call.args[0] for call in fake_chat.send_message.call_args_list]
+    assert "Viết lại CHÍNH chương đó" in prompts[2]
+    assert "LƯU Ý ĐỘ DÀI" not in prompts[3], "chương 1 sau khi viết gọn đã vừa"
+    assert "dài 21 từ, VƯỢT trần 20" in prompts[4]
