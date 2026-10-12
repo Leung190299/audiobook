@@ -98,3 +98,50 @@ def test_claude_doc_cham_hon_nen_it_tu_hon(monkeypatch):
     claude = full_words_range()
     assert claude[0] < gemini[0] and claude[1] < gemini[1]
     assert full_chapter_words_range() == (530, 670)
+
+
+async def test_mat_mang_thi_cho_roi_thu_lai(monkeypatch):
+    """12/10 09:00: máy vừa thức, mạng chưa lên -> timeout sau 17 giây, mất
+    nguyên lượt dựng. Lỗi kết nối phải chờ rồi thử lại, không ném ngay."""
+    import anthropic
+
+    waits = []
+
+    async def fake_sleep(s):
+        waits.append(s)
+
+    monkeypatch.setattr(llm.asyncio, "sleep", fake_sleep)
+    outcomes = [anthropic.APITimeoutError(request=None), anthropic.APIConnectionError(request=None), _resp("dàn ý")]
+    calls = []
+
+    def stream(**kwargs):
+        calls.append([m["role"] for m in kwargs["messages"]])
+        out = outcomes.pop(0)
+        if isinstance(out, Exception):
+            raise out
+        return _Stream(out)
+
+    client = SimpleNamespace(beta=SimpleNamespace(messages=SimpleNamespace(stream=stream)))
+    chat = llm.ClaudeChat(client, "m", "high")
+
+    assert (await chat.send_message("viết dàn ý")).text == "dàn ý"
+    assert len(waits) == 2 and waits[1] > waits[0]
+    assert all(c == ["user"] for c in calls), "không nhân đôi lượt hỏi khi thử lại"
+
+
+async def test_mat_mang_qua_lau_thi_bao_loi_va_khong_de_luot_treo(monkeypatch):
+    import anthropic
+
+    async def fake_sleep(s):
+        pass
+
+    monkeypatch.setattr(llm.asyncio, "sleep", fake_sleep)
+
+    def stream(**kwargs):
+        raise anthropic.APIConnectionError(request=None)
+
+    client = SimpleNamespace(beta=SimpleNamespace(messages=SimpleNamespace(stream=stream)))
+    chat = llm.ClaudeChat(client, "m", "high")
+    with pytest.raises(anthropic.APIConnectionError):
+        await chat.send_message("viết dàn ý")
+    assert chat._messages == []

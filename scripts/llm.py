@@ -16,6 +16,7 @@ chương trước.
 
 from __future__ import annotations
 
+import asyncio
 import os
 from dataclasses import dataclass
 
@@ -35,6 +36,11 @@ MAX_TOKENS = 32000
 # Khi Opus từ chối (bộ lọc an toàn bắt nhầm truyện gia đình có cãi vã), API tự
 # chạy lại trên mô hình dự phòng trong cùng lượt gọi thay vì trả về rỗng.
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
+# Chờ (giây) trước mỗi lần thử lại khi mất kết nối / API quá tải. 12/10 09:00:
+# máy vừa thức theo lịch, mạng chưa lên, SDK thử lại 2 lần trong 17 giây rồi
+# bỏ -- mất nguyên lượt dựng. Tổng ~7 phút đủ cho Wi-Fi kết nối lại.
+NETWORK_RETRY_DELAYS = (15, 30, 60, 120, 180)
+_RETRYABLE = (anthropic.APIConnectionError, anthropic.InternalServerError, anthropic.RateLimitError)
 
 
 def resolve_provider(explicit: str | None = None) -> str:
@@ -62,6 +68,30 @@ class ClaudeChat:
 
     async def send_message(self, text: str) -> Reply:
         self._messages.append({"role": "user", "content": text})
+        for attempt in range(len(NETWORK_RETRY_DELAYS) + 1):
+            try:
+                response = await self._ask()
+                break
+            except _RETRYABLE as exc:
+                if attempt == len(NETWORK_RETRY_DELAYS):
+                    # Bỏ lượt hỏi treo để hội thoại vẫn hợp lệ nếu ai gọi tiếp.
+                    self._messages.pop()
+                    raise
+                delay = NETWORK_RETRY_DELAYS[attempt]
+                print(f"Claude lỗi kết nối ({type(exc).__name__}), thử lại sau {delay}s...", flush=True)
+                await asyncio.sleep(delay)
+
+        if response.stop_reason == "refusal":
+            # Không giữ lượt bị từ chối trong lịch sử: generator sẽ hỏi lại, và
+            # hỏi lại trên nền một lượt từ chối thì dễ bị từ chối tiếp.
+            self._messages.pop()
+            return Reply("")
+        # Giữ NGUYÊN content (cả khối suy nghĩ) chứ không chỉ chữ: Opus 5.5 đọc
+        # lại suy nghĩ của chính nó ở lượt sau, và lịch sử phải chỉ nối thêm.
+        self._messages.append({"role": "assistant", "content": response.content})
+        return Reply("".join(b.text for b in response.content if b.type == "text"))
+
+    async def _ask(self):
         async with self._client.beta.messages.stream(
             model=self._model,
             max_tokens=MAX_TOKENS,
@@ -73,17 +103,7 @@ class ClaudeChat:
             betas=[FALLBACK_BETA],
             fallbacks="default",
         ) as stream:
-            response = await stream.get_final_message()
-
-        if response.stop_reason == "refusal":
-            # Không giữ lượt bị từ chối trong lịch sử: generator sẽ hỏi lại, và
-            # hỏi lại trên nền một lượt từ chối thì dễ bị từ chối tiếp.
-            self._messages.pop()
-            return Reply("")
-        # Giữ NGUYÊN content (cả khối suy nghĩ) chứ không chỉ chữ: Opus 5.5 đọc
-        # lại suy nghĩ của chính nó ở lượt sau, và lịch sử phải chỉ nối thêm.
-        self._messages.append({"role": "assistant", "content": response.content})
-        return Reply("".join(b.text for b in response.content if b.type == "text"))
+            return await stream.get_final_message()
 
 
 class ClaudeClient:
