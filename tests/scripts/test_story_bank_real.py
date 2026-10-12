@@ -18,12 +18,12 @@ def state(tmp_path):
     return tmp_path / "state.json"
 
 
-def test_kho_that_dung_100_truyen_va_topic_khop_registry():
+def test_kho_that_dung_112_truyen_va_topic_khop_registry():
     from scripts.topics import TOPICS
 
     bank = load_bank()
 
-    assert len(bank.stories) == 100
+    assert len(bank.stories) == 112
     assert {s.topic for s in bank.stories} <= set(TOPICS)
 
 
@@ -128,3 +128,21 @@ async def test_stage_1_truyen_that_co_outline_ra_dung_16_chuong_va_hook_dau(monk
         assert line in prompts[i + 1], f"chương {i + 1} không bám dòng {i + 1}"
     assert script.chapters[0].text.startswith(story.hook)
     assert script.title == story.title
+
+
+def test_truyen_hoc_duong_co_luat_cam_rieng_trong_prompt():
+    """Series Lớp 11A2 có nhân vật vị thành niên: dàn ý (nhánh kho) phải mang
+    điều cấm riêng của chủ đề, không chỉ luật viết chung."""
+    from scripts.prompts import build_story_outline_prompt
+    from scripts.story_bank import get_story
+
+    prompt = build_story_outline_prompt(load_bank(), get_story(109), "full")
+    assert "TUYỆT ĐỐI KHÔNG: yêu đương" in prompt
+    assert "Minh Anh (tôi)" in prompt  # khối series được chèn
+
+
+def test_truyen_cu_khong_doi_prompt_vi_chu_de_moi():
+    from scripts.prompts import build_story_outline_prompt
+    from scripts.story_bank import get_story
+
+    assert "- TUYỆT ĐỐI KHÔNG:" not in build_story_outline_prompt(load_bank(), get_story(1), "full")

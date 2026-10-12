@@ -452,6 +452,15 @@ def build_story_outline_prompt(bank, story, fmt: str = "full") -> str:
         chapters_rule = f"đúng {TARGET_CHAPTERS} chương"
 
     rules = "\n".join(f"- {r}" for r in bank.writing_rules)
+    # Điều cấm RIÊNG của chủ đề (vd hoc_duong có nhân vật học sinh vị thành
+    # niên). Nhánh kho không đi qua build_topic_outline_prompt nên phải chèn ở
+    # đây; các mảng bão hoà chung đã được người biên tập né khi viết kho.
+    from scripts.topics import SATURATED_MOTIFS, TOPICS
+
+    topic = TOPICS.get(story.topic)
+    extra_bans = [m for m in (topic.banned_motifs if topic else ()) if m not in SATURATED_MOTIFS]
+    if extra_bans:
+        rules += "\n" + "\n".join(f"- TUYỆT ĐỐI KHÔNG: {m}." for m in extra_bans)
 
     series_block = ""
     info = bank.series_for(story)

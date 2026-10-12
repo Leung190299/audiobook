@@ -17,7 +17,7 @@ from scripts.topics import (
     topic_for_date,
 )
 
-TOPIC_IDS = {"ho_hang_viet", "nghe_la_hong_bien", "bo_me_trong_sinh"}
+TOPIC_IDS = {"ho_hang_viet", "nghe_la_hong_bien", "bo_me_trong_sinh", "hoc_duong"}
 
 
 def test_registry_du_3_chu_de():
@@ -46,7 +46,14 @@ def test_moi_chu_de_du_truong_bat_buoc(topic_id):
 
 def test_nen_thumbnail_moi_chu_de_mot_mau():
     backgrounds = {t.thumb_palette[0] for t in TOPICS.values()}
-    assert len(backgrounds) == 3
+    assert len(backgrounds) == len(TOPICS)
+
+
+def test_hoc_duong_chua_vao_lich_xoay_vong():
+    """Chủ đề thử (12/10): chỉ dựng tay bằng --story, chưa tự chạy hằng ngày."""
+    from scripts.topics import DEFAULT_ROTATION
+
+    assert "hoc_duong" in TOPICS and "hoc_duong" not in DEFAULT_ROTATION
 
 
 @pytest.mark.parametrize("topic_id", sorted(TOPIC_IDS))
@@ -79,7 +86,7 @@ def test_thumb_text_bi_cat_con_12_chu():
 
 def test_rotation_mac_dinh_7_ngay_hop_le():
     assert len(DEFAULT_ROTATION) == 7
-    assert set(DEFAULT_ROTATION) == TOPIC_IDS
+    assert set(DEFAULT_ROTATION) == TOPIC_IDS - {"hoc_duong"}  # chủ đề thử, chưa vào lịch
     assert parse_rotation("") == DEFAULT_ROTATION
 
 

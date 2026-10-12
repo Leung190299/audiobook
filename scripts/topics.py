@@ -1,5 +1,5 @@
 # scripts/topics.py
-"""Registry 3 chủ đề trọng tâm của kênh (spec 24/09/2026).
+"""Registry chủ đề của kênh (spec 24/09/2026; thêm `hoc_duong` 12/10 để thử).
 
 Một chủ đề = một "dòng sản phẩm": cùng kiểu nhân vật chính, cùng giọng kể, cùng
 màu thumbnail, cùng playlist. Id dùng làm khoá ở mọi nơi: CLI (`--topic`),
@@ -174,6 +174,51 @@ TOPICS: dict[str, Topic] = {
         playlist_env="YOUTUBE_PLAYLIST_BO_ME",
         hashtags=("#trongsinh", "#bomegia"),
         vietnam_only=False,
+    ),
+    # Thêm 12/10 để chạy thử, CHƯA có trong DEFAULT_ROTATION: dựng bằng
+    # `run_daily.sh --story <id>` rồi xem kết quả trước khi cho vào lịch.
+    "hoc_duong": Topic(
+        id="hoc_duong",
+        name="Học đường: phụ huynh, ký túc xá, lớp học",
+        protagonist=(
+            "ngôi 'tôi', một trong ba vai tuỳ series: mẹ phụ huynh 30–40 tuổi mỏ hỗn "
+            "(hoặc cô chủ nhiệm trẻ); sinh viên năm hai 19–21 tuổi; học sinh lớp 11 "
+            "16–17 tuổi lanh lợi, thích bằng chứng"
+        ),
+        settings=(
+            "họp phụ huynh đầu năm, ban phụ huynh thu quỹ lớp cao bất thường",
+            "nhóm Zalo phụ huynh cãi nhau nửa đêm vì quà 20/11",
+            "phụ huynh có quyền thế ép cô chủ nhiệm sửa điểm cho con",
+            "phụ huynh so bì con nhà người ta trong buổi tổng kết",
+            "ký túc xá: bạn cùng phòng xài chùa đồ và đổ lỗi cho người khác",
+            "làm bài tập nhóm ở đại học, cả nhóm chỉ ghi tên không làm",
+            "sinh viên tỉnh lẻ bị chê quê vì mang đồ ăn mẹ gửi",
+            "trưởng phòng ký túc xá livestream ồn ào cả đêm",
+            "lớp trưởng cấp 3 tiêu quỹ lớp rồi đổ cho thủ quỹ",
+            "học sinh bị vu quay cóp trong bài kiểm tra",
+            "nhóm chat lớp nói xấu một bạn hiền",
+            "cả trường chê tiết mục văn nghệ của lớp là quê mùa",
+        ),
+        title_formulas=(
+            "[Kẻ cực phẩm ở trường] + [làm X], + [tôi làm Y] — vd 'Hội Phụ Huynh Thu Quỹ 5 Triệu, Tôi Đòi Xem Sổ Sách'",
+            "[Bị oan/bị chê X], + [tôi đáp trả bằng Y] — vd 'Bị Vu Quay Cóp, Tôi Xin Thi Lại Trước Cả Lớp'",
+        ),
+        tone="hài 70% / vả mặt 30%, kết ấm (kẻ xấu bẽ mặt bằng sự thật, không ai bị huỷ hoại)",
+        comment_question_style=(
+            "Câu hỏi CHỌN PHE có đúng 2 lựa chọn đánh số, gợi kỷ niệm trường lớp hoặc chuyện "
+            "làm phụ huynh của người nghe. Dạng: 'Nếu là bạn, bạn có <X> không? 1 = <A>, 2 = <B>'."
+        ),
+        thumb_palette=("#FFF3B0", "#E4572E", "#5B3FC0"),
+        thumb_stickers=("truyen-hay", "co-len"),
+        playlist_env="YOUTUBE_PLAYLIST_HOC_DUONG",
+        hashtags=("#truyenhocduong", "#hocduong"),
+        # Nhân vật học sinh là trẻ vị thành niên: chặn thẳng trong prompt.
+        banned_motifs=SATURATED_MOTIFS
+        + (
+            "yêu đương, hẹn hò, cảnh thân mật với nhân vật học sinh",
+            "bạo lực học đường tả chi tiết, đánh hội đồng, tự hại",
+            "học sinh bị làm nhục trên mạng / lộ ảnh riêng tư",
+        ),
     ),
 }
 

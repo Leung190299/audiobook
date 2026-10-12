@@ -78,7 +78,7 @@ def test_mau_nen_khac_nhau_theo_chu_de():
     for topic_id in TOPICS:
         png = compose_sticker_thumbnail(None, "Tôi Làm Chủ Trọ", [], TOPICS[topic_id].thumb_palette)
         pixels.add(Image.open(io.BytesIO(png)).convert("RGB").getpixel((WIDTH - 3, HEIGHT - 3)))
-    assert len(pixels) == 3
+    assert len(pixels) == len(TOPICS)
 
 
 def test_tach_nen_trang_thanh_trong_suot():

@@ -127,7 +127,7 @@ def main() -> None:
     group.add_argument(
         "--topic",
         help="Chủ đề trong scripts/topics.py (ho_hang_viet | nghe_la_hong_bien | "
-        "bo_me_trong_sinh) hoặc 'auto' (xoay vòng theo AUDIOBOOK_TOPIC_ROTATION).",
+        "bo_me_trong_sinh | hoc_duong) hoặc 'auto' (xoay vòng theo AUDIOBOOK_TOPIC_ROTATION).",
     )
     parser.add_argument(
         "--label",
