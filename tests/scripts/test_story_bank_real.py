@@ -18,12 +18,12 @@ def state(tmp_path):
     return tmp_path / "state.json"
 
 
-def test_kho_that_dung_112_truyen_va_topic_khop_registry():
+def test_kho_that_dung_113_truyen_va_topic_khop_registry():
     from scripts.topics import TOPICS
 
     bank = load_bank()
 
-    assert len(bank.stories) == 112
+    assert len(bank.stories) == 113
     assert {s.topic for s in bank.stories} <= set(TOPICS)
 
 

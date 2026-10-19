@@ -1925,6 +1925,22 @@
       "timing": "Quanh 20/11",
       "priority": "A",
       "publish_date": null
+    },
+    {
+      "id": 113,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Cho Đồng Nghiệp Ở Nhờ Phòng Trọ, Bài Học Đắt Giá Về Lòng Tốt",
+      "premise": "Ngân 28 tuổi, nhân viên kế hoạch ở Bình Thạnh, vừa thuê được phòng trọ sạch sẽ yên tĩnh sau hai năm tích cóp. Đồng nghiệp Thuý khéo miệng, than bị chủ nhà đuổi, xin tá túc '1–2 tuần'. Tuần đầu biết điều, rồi dần xài chùa đồ ăn, mỹ phẩm, quần áo, không chia tiền điện nước, dẫn bạn về tụ tập tới khuya, lên công ty lại nói xấu Ngân 'keo kiệt, khó tính'.",
+      "twist": "Ngân không cãi mà âm thầm gom bằng chứng: hoá đơn điện tăng gấp ba, tin nhắn Thuý mượn danh Ngân ghi nợ tiền nước với chủ trọ, đoạn camera cửa phòng. Cao trào: đối chất văn minh ngay trước chủ trọ và đúng mấy đồng nghiệp Thuý từng kể xấu; Thuý phải trả đủ tiền, xin lỗi, tự dọn đi trong ngày. Kết: lòng tốt cần đi kèm ranh giới.",
+      "hook": "Thuý kéo vali vào phòng tôi, nói đúng một câu 'chỉ hai tuần thôi', và tôi đã ngây thơ tin đó là đơn vị thời gian.",
+      "comment_question": "Nếu là bạn, bạn có cho đồng nghiệp ở nhờ không? 1 = Có, giúp được thì giúp, 2 = Không, giữ ranh giới",
+      "thumb_keywords": [
+        "Bài Học Đắt Giá"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
     }
   ]
 }
