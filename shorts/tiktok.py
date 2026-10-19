@@ -3,6 +3,7 @@
 
     uv run python -m shorts.tiktok <tts_metadata_json> --script <script_json>
     # Đã render TikTok: output/tiktok/<trope>-<ts>.mp4  (+ .txt caption để dán)
+    uv run python -m shorts.tiktok --all   # mọi truyện full đã dựng/đăng chưa có clip
 
 Khác short YouTube (30-55 giây, đoạn HÀI, mồi về video dài): TikTok ưu tiên
 video kể chuyện dài, nên clip lấy trọn một màn cao trào -- bị dồn ép, đối chất,
@@ -239,12 +240,60 @@ def _run(tts_metadata_path: Path, script_path: Path) -> Path:
     return video_path
 
 
+DONE_INDEX = OUTPUT_DIR / "done.json"
+EPISODES_DIR = REPO_ROOT / "output" / "episodes"
+
+
+def pending_stories(
+    episodes_dir: Path = EPISODES_DIR, done_index: Path = DONE_INDEX, audio_dir: Path = AUDIO_DIR
+) -> list[tuple[str, Path, Path]]:
+    """(tiêu đề, metadata TTS, kịch bản) của mọi truyện FULL đã dựng mà chưa
+    có clip TikTok. Truyện dựng nhiều lần thì lấy bản mới nhất."""
+    done = json.loads(done_index.read_text(encoding="utf-8")) if done_index.exists() else {}
+    found: dict[str, tuple[str, Path, Path]] = {}
+    for manifest in sorted(episodes_dir.glob("*-full.json")):
+        try:
+            d = json.loads(manifest.read_text(encoding="utf-8"))
+            script = Path(d["script_path"])
+        except (OSError, json.JSONDecodeError, KeyError):
+            continue
+        tts = find_tts_metadata(d.get("trope", ""), d.get("title", ""), audio_dir)
+        if d.get("title") in done or tts is None or not script.exists():
+            continue
+        found[d["title"]] = (d["title"], tts, script)
+    return list(found.values())
+
+
+def _mark_done(title: str, video: Path, done_index: Path = DONE_INDEX) -> None:
+    done = json.loads(done_index.read_text(encoding="utf-8")) if done_index.exists() else {}
+    done[title] = str(video)
+    done_index.write_text(json.dumps(done, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def run_all() -> None:
+    todo = pending_stories()
+    print(f"{len(todo)} truyện chưa có clip TikTok")
+    for n, (title, tts, script) in enumerate(todo, 1):
+        print(f"== [{n}/{len(todo)}] {title}", flush=True)
+        try:
+            _mark_done(title, _run(tts, script))
+        except Exception as exc:  # noqa: BLE001 -- một truyện hỏng không chặn cả lô
+            print(f"LỖI: {title}: {exc}", flush=True)
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description="Clip TikTok 3-5 phút: đoạn kịch tính nhất của truyện.")
-    p.add_argument("tts_metadata", type=Path, help="Metadata stage 2 (output/audio/<trope>-<ts>.json)")
-    p.add_argument("--script", type=Path, required=True, help="Kịch bản stage 1")
+    p.add_argument("tts_metadata", type=Path, nargs="?", help="Metadata stage 2 (output/audio/<trope>-<ts>.json)")
+    p.add_argument("--script", type=Path, help="Kịch bản stage 1")
+    p.add_argument("--all", action="store_true", help="Làm cho mọi truyện full đã dựng chưa có clip")
     a = p.parse_args()
-    _run(a.tts_metadata, a.script)
+    if a.all:
+        run_all()
+    elif a.tts_metadata and a.script:
+        meta = json.loads(a.tts_metadata.read_text(encoding="utf-8"))
+        _mark_done(meta["title"], _run(a.tts_metadata, a.script))
+    else:
+        p.error("cần <tts_metadata> --script <kịch bản>, hoặc --all")
 
 
 if __name__ == "__main__":

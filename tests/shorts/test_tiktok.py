@@ -118,3 +118,18 @@ async def test_claude_loi_thi_dung_doan_du_phong(capsys):
     assert (pick.start, pick.end) == tiktok.fallback_span(s)
     assert pick.hook == "Tiêu đề"
     assert "CẢNH BÁO" in capsys.readouterr().out
+
+
+def test_all_bo_qua_truyen_da_co_clip_va_lay_ban_dung_moi_nhat(tmp_path):
+    ep, audio = tmp_path / "ep", tmp_path / "audio"
+    ep.mkdir(); audio.mkdir()
+    script = tmp_path / "s.json"; script.write_text("{}", encoding="utf-8")
+    for stem, title in [("a-1", "Một"), ("a-2", "Hai"), ("a-3", "Một")]:
+        (ep / f"{stem}-full.json").write_text(json.dumps({"trope": "a", "title": title, "script_path": str(script)}), encoding="utf-8")
+        (audio / f"{stem}.json").write_text(json.dumps({"trope": "a", "title": title}), encoding="utf-8")
+    done = tmp_path / "done.json"
+    done.write_text(json.dumps({"Hai": "x.mp4"}), encoding="utf-8")
+
+    todo = tiktok.pending_stories(ep, done, audio)
+
+    assert [(t, tts.name) for t, tts, _ in todo] == [("Một", "a-3.json")]
