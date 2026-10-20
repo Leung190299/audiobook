@@ -377,7 +377,7 @@ def test_moi_stage_ghi_log_rieng_de_lan_lai_khi_hong(tmp_path: Path):
     files = sorted(p.name for p in log_dirs[0].iterdir())
     assert files == [
         "00-trend.log", "01-script.log", "02-tts.log", "03-images.log",
-        "04-episodes.log", "05-thumbnail.log", "06-metadata.log", "07-short.log",
+        "04-episodes.log", "05-thumbnail.log", "06-metadata.log", "07-short.log", "07b-tiktok.log",
         "run.log",
     ]
 
@@ -572,3 +572,18 @@ def test_khong_co_video_nen_thi_van_sinh_anh_nhu_cu(tmp_path):
     assert run.exit_code == 0
     assert run.called("images.cli")
     assert "images" in (run.call_for("episodes.cli") or "")
+
+
+def test_stage_7b_tiktok_nhan_audio_va_script(tmp_path: Path):
+    # Clip TikTok 3-5 phút (19/10) cắt từ cùng audio stage 2, cần kịch bản để
+    # biết chủ đề (hashtag).
+    run = _run(tmp_path)
+    assert run.call_for("shorts.tiktok") == f"shorts.tiktok {EXPECTED_AUDIO_JSON} --script {EXPECTED_SCRIPT}"
+
+
+def test_stage_7b_tiktok_hong_khong_lam_dung_luot_chay(tmp_path: Path):
+    run = _run(tmp_path, FAKE_FAIL_MODULE="shorts.tiktok")
+    assert run.exit_code == 0, run.proc.stderr
+    assert "CẢNH BÁO: Stage 7b" in run.stdout
+    assert not any(c.startswith("notify.cli failure") for c in run.calls)
+    assert any(c.startswith("notify.cli success") for c in run.calls)

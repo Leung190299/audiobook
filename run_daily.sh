@@ -335,6 +335,20 @@ else
   log "  Dựng lại tay: $RUNNER shorts.cli \"$AUDIO_JSON\" $IMAGES_JSON --script \"$SCRIPT_PATH\""
 fi
 
+# --- Stage 7b: clip TikTok 3-5 phút (không chặn lượt chạy nếu hỏng) ----------
+# Đoạn kịch tính nhất truyện, Claude chọn (shorts/tiktok.py). Ra
+# output/tiktok/<trope>-<ts>.mp4 + .txt caption; đăng TikTok là việc tay. Cùng
+# luật với stage 7: video dài đã xong, clip phụ hỏng không làm hỏng lượt chạy.
+TIKTOK_LOG="$LOG_DIR/07b-tiktok.log"
+log "▶ Stage 7b: TikTok"
+if $RUNNER shorts.tiktok "$AUDIO_JSON" --script "$SCRIPT_PATH" >"$TIKTOK_LOG" 2>&1; then
+  cat "$TIKTOK_LOG" >>"$LOG_FILE"
+else
+  cat "$TIKTOK_LOG" >>"$LOG_FILE"
+  log "CẢNH BÁO: Stage 7b: TikTok THẤT BẠI, video dài và short vẫn ổn. Xem $TIKTOK_LOG"
+  log "  Dựng lại tay: $RUNNER shorts.tiktok \"$AUDIO_JSON\" --script \"$SCRIPT_PATH\""
+fi
+
 # Ghi tiền tố short vào chỉ mục metadata. Stage 7 đặt tên short theo một dấu
 # thời gian RIÊNG, lệch dấu thời gian của chỉ mục (stage 6) vài phút, nên về sau
 # không thể dò ngược từ chỉ mục ra bộ short -- dò theo giờ là rủi ro đăng nhầm

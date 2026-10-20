@@ -123,6 +123,9 @@ case "$module" in
     echo "Metadata short: output/shorts/me_chong_giau_cua-20260813T015300Z-part-02.txt"
     echo "Đã render 2 short vào output/shorts"
     ;;
+  shorts.tiktok)
+    echo "Đã render TikTok: output/tiktok/me_chong_giau_cua-20260813T015400Z.mp4"
+    ;;
   upload.episodes_cli)
     if [[ $is_full -eq 1 ]]; then
       echo "Full: Mẹ chồng giấu sổ đỏ — https://youtu.be/FAKEFULL1 (lên sóng 2026-08-13 20:00)"
