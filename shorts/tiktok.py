@@ -155,6 +155,7 @@ def caption_text(
     air=None,
     keywords: list[str] | tuple[str, ...] = (),
     yt_hashtags: list[str] | tuple[str, ...] = (),
+    now=None,
 ) -> str:
     """Caption dán vào TikTok: tiêu đề, câu mồi, link video full YouTube (khi đã
     đăng), từ khoá cho ô tìm kiếm TikTok, hashtag.
@@ -169,7 +170,11 @@ def caption_text(
         lines.append(caption)
     if url:
         lines.append("")
-        when = f" (lên sóng {air:%H:%M %d/%m})" if air is not None else ""
+        from datetime import datetime, timezone
+
+        now = now or datetime.now(timezone.utc)
+        # Video đã chiếu thì không ghi giờ: "lên sóng 28/09" đọc như chưa chiếu.
+        when = f" (lên sóng {air:%H:%M %d/%m})" if air is not None and air > now else ""
         lines.append(f"▶ Nghe trọn truyện trên YouTube kênh Audio Truyện{when}: {url}")
     kws = list(dict.fromkeys(k.strip() for k in keywords if k.strip()))[:6]
     if kws:
@@ -242,7 +247,46 @@ def refresh_captions(done_index: Path | None = None, index_jsonl: Path | None = 
             encoding="utf-8",
         )
         linked += bool(row.get("url"))
+    write_seo_doc(done_index, rows)
     return linked
+
+
+SEO_DOC = OUTPUT_DIR / "SEO_TIKTOK.md"
+
+
+def write_seo_doc(done_index: Path, rows: dict[str, dict], out: Path | None = None, now=None) -> Path:
+    """Một file gom caption SEO của mọi clip, chia theo đã/chưa nên đăng, để chép
+    dán từng khối vào TikTok. Clip đăng trước giờ YouTube lên sóng thì link mở ra
+    video riêng tư, nên xếp nhóm theo giờ lên sóng."""
+    from datetime import datetime, timezone
+
+    out = out or done_index.parent / SEO_DOC.name
+    now = now or datetime.now(timezone.utc)
+    done = json.loads(done_index.read_text(encoding="utf-8"))
+    groups: dict[str, list] = {
+        "ĐĂNG ĐƯỢC NGAY (video YouTube đã lên sóng)": [],
+        "CHỜ — đăng sau giờ YouTube lên sóng": [],
+        "CHƯA ĐĂNG — truyện chưa có trên YouTube": [],
+    }
+    names = list(groups)
+    for title, video in done.items():
+        raw = rows.get(title, {}).get("publishAt")
+        air = datetime.fromisoformat(raw) if raw else None
+        key = names[2] if air is None else (names[0] if air <= now else names[1])
+        groups[key].append((air.isoformat() if air else "", title, Path(video)))
+    lines = [f"# SEO TikTok — {len(done)} clip", "",
+             "Chép nguyên khối dán vào ô mô tả TikTok. File video nằm trong `output/tiktok/`.", ""]
+    n = 0
+    for name, items in groups.items():
+        lines += [f"## {name} ({len(items)})", ""]
+        for air, title, video in sorted(items):
+            n += 1
+            when = f" — YouTube {air[11:16]} {air[8:10]}/{air[5:7]}" if air else ""
+            txt = video.with_suffix(".txt")
+            body = txt.read_text(encoding="utf-8").strip() if txt.exists() else title
+            lines += [f"### {n}. {title}{when}", f"File: `{video.name}`", "", "```", body, "```", ""]
+    out.write_text("\n".join(lines), encoding="utf-8")
+    return out
 
 
 def find_tts_metadata(trope: str, title: str, audio_dir: Path = AUDIO_DIR) -> Path | None:

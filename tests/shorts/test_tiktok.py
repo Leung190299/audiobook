@@ -91,6 +91,7 @@ def test_caption_tiktok_co_link_full_gio_len_song_va_tu_khoa():
         "Tiêu Đề", "Câu mồi", ("#truyenhai",),
         url="https://youtu.be/ABC", air=datetime.fromisoformat("2026-10-23T20:00:00+07:00"),
         keywords=["truyện audio", "drama phụ huynh", "truyện audio"], yt_hashtags=["#truyenhocduong"],
+        now=datetime.fromisoformat("2026-10-21T09:00:00+07:00"),
     )
     assert "https://youtu.be/ABC" in text
     assert "20:00 23/10" in text
@@ -116,6 +117,8 @@ def test_lam_moi_caption_theo_link_youtube_da_dang(tmp_path):
     assert n == 1
     assert "Câu mồi của Claude" in text and "https://youtu.be/A1" in text
     assert "drama họ hàng" in text and "#hohangcucpham" in text
+    doc = (out / "SEO_TIKTOK.md").read_text(encoding="utf-8")
+    assert "Truyện A" in doc and "https://youtu.be/A1" in doc and "x-1.mp4" in doc
 
 
 def test_tim_metadata_tts_theo_tieu_de(tmp_path):
@@ -168,3 +171,13 @@ def test_all_bo_qua_truyen_da_co_clip_va_lay_ban_dung_moi_nhat(tmp_path):
     todo = tiktok.pending_stories(ep, done, audio)
 
     assert [(t, tts.name) for t, tts, _ in todo] == [("Một", "a-3.json")]
+
+
+def test_video_da_chieu_thi_khong_ghi_gio_len_song():
+    from datetime import datetime
+
+    text = tiktok.caption_text(
+        "T", "", url="https://youtu.be/A", air=datetime.fromisoformat("2026-09-28T20:00:00+07:00"),
+        now=datetime.fromisoformat("2026-10-21T09:00:00+07:00"),
+    )
+    assert "https://youtu.be/A" in text and "lên sóng" not in text
