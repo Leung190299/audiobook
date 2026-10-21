@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import pytest
 
@@ -113,12 +114,13 @@ def test_lam_moi_caption_theo_link_youtube_da_dang(tmp_path):
 
     n = tiktok.refresh_captions(done_index=out / "done.json", index_jsonl=index)
 
-    text = video.with_suffix(".txt").read_text(encoding="utf-8")
+    moved = Path(json.loads((out / "done.json").read_text(encoding="utf-8"))["Truyện A"])
+    text = moved.with_suffix(".txt").read_text(encoding="utf-8")
     assert n == 1
     assert "Câu mồi của Claude" in text and "https://youtu.be/A1" in text
     assert "drama họ hàng" in text and "#hohangcucpham" in text
     doc = (out / "SEO_TIKTOK.md").read_text(encoding="utf-8")
-    assert "Truyện A" in doc and "https://youtu.be/A1" in doc and "x-1.mp4" in doc
+    assert "Truyện A" in doc and "https://youtu.be/A1" in doc and "2026-10-23_truyen-a.mp4" in doc
 
 
 def test_tim_metadata_tts_theo_tieu_de(tmp_path):
@@ -181,3 +183,34 @@ def test_video_da_chieu_thi_khong_ghi_gio_len_song():
         now=datetime.fromisoformat("2026-10-21T09:00:00+07:00"),
     )
     assert "https://youtu.be/A" in text and "lên sóng" not in text
+
+
+def _clip(tmp_path, title, index_rows):
+    out = tmp_path / "tiktok"; out.mkdir(exist_ok=True)
+    video = out / "nghe_la-20261020T001500Z.mp4"; video.write_bytes(b"v")
+    video.with_suffix(".txt").write_text(f"{title}\nCâu mồi\n\n#fyp\n", encoding="utf-8")
+    (out / "done.json").write_text(json.dumps({title: str(video)}), encoding="utf-8")
+    index = tmp_path / "index.jsonl"
+    index.write_text("".join(json.dumps(r) + "\n" for r in index_rows), encoding="utf-8")
+    return out, index
+
+
+def test_doi_ten_clip_theo_ngay_len_song_va_ten_truyen(tmp_path):
+    title = "Cho Đồng Nghiệp Ở Nhờ Phòng Trọ"
+    out, index = _clip(tmp_path, title, [{"story_title": title, "url": "https://youtu.be/A", "publishAt": "2026-10-30T20:00:00+07:00"}])
+
+    tiktok.refresh_captions(done_index=out / "done.json", index_jsonl=index)
+    tiktok.refresh_captions(done_index=out / "done.json", index_jsonl=index)  # chạy lại không đổi gì
+
+    names = sorted(p.name for p in out.iterdir() if p.suffix in (".mp4", ".txt"))
+    assert names == ["2026-10-30_cho-dong-nghiep-o-nho-phong-tro.mp4", "2026-10-30_cho-dong-nghiep-o-nho-phong-tro.txt"]
+    done = json.loads((out / "done.json").read_text(encoding="utf-8"))
+    assert done[title].endswith("2026-10-30_cho-dong-nghiep-o-nho-phong-tro.mp4")
+    assert "2026-10-30_cho-dong-nghiep-o-nho-phong-tro.mp4" in (out / "SEO_TIKTOK.md").read_text(encoding="utf-8")
+
+
+def test_chua_dang_youtube_thi_ten_bat_dau_bang_chua_dang(tmp_path):
+    out, index = _clip(tmp_path, "Truyện B", [])
+    tiktok.refresh_captions(done_index=out / "done.json", index_jsonl=index)
+    assert (out / "chua-dang-youtube_truyen-b.mp4").exists()
+    assert (out / "chua-dang-youtube_truyen-b.txt").exists()

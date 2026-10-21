@@ -209,6 +209,26 @@ def _old_caption(txt: Path, title: str) -> str:
     return ""
 
 
+def posting_name(title: str, publish_at: str | None) -> str:
+    """Tên file dễ đăng: ngày video YouTube lên sóng + tên truyện. Sắp theo tên
+    là ra đúng thứ tự đăng; truyện chưa lên YouTube thì dồn về cuối."""
+    from metadata.filename import slugify
+
+    prefix = publish_at[:10] if publish_at else "chua-dang-youtube"
+    return f"{prefix}_{slugify(title, max_length=80)}"
+
+
+def _rename_for_posting(video: Path, title: str, publish_at: str | None) -> Path:
+    target = video.with_name(posting_name(title, publish_at) + ".mp4")
+    if target == video or not video.exists():
+        return video if video.exists() else target
+    for ext in (".mp4", ".txt"):
+        src = video.with_suffix(ext)
+        if src.exists():
+            src.replace(target.with_suffix(ext))
+    return target
+
+
 def refresh_captions(done_index: Path | None = None, index_jsonl: Path | None = None) -> int:
     """Viết lại .txt của mọi clip TikTok theo link + SEO YouTube hiện có. Chạy sau
     mỗi lượt đăng YouTube (upload/episodes_cli.py gọi). Trả về số clip có link."""
@@ -222,9 +242,12 @@ def refresh_captions(done_index: Path | None = None, index_jsonl: Path | None = 
         return 0
     rows = _youtube_rows(index_jsonl)
     linked = 0
-    for title, video in json.loads(done_index.read_text(encoding="utf-8")).items():
-        txt = Path(video).with_suffix(".txt")
+    done = json.loads(done_index.read_text(encoding="utf-8"))
+    for title, video in list(done.items()):
         row = rows.get(title, {})
+        video = _rename_for_posting(Path(video), title, row.get("publishAt"))
+        done[title] = str(video)
+        txt = video.with_suffix(".txt")
         seo: dict = {}
         if row.get("index"):
             try:
@@ -247,6 +270,7 @@ def refresh_captions(done_index: Path | None = None, index_jsonl: Path | None = 
             encoding="utf-8",
         )
         linked += bool(row.get("url"))
+    done_index.write_text(json.dumps(done, ensure_ascii=False, indent=2), encoding="utf-8")
     write_seo_doc(done_index, rows)
     return linked
 
