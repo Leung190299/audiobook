@@ -76,11 +76,46 @@ def test_phu_de_quy_ve_goc_0():
     assert len(part.captions) == 51
 
 
-def test_caption_tiktok_khong_nhac_youtube():
+def test_caption_tiktok_chua_dang_youtube_thi_chua_co_link():
     text = tiktok.caption_text("Tiêu Đề", "Lòng tốt cần ranh giới", ("#hohangcucpham", "#truyenhai"))
     assert "Tiêu Đề" in text and "#truyenaudio" in text and "#hohangcucpham" in text
-    assert "youtube" not in text.lower()
+    assert "youtu" not in text.lower()
+    # Chữ TRÊN VIDEO vẫn không nhắc YouTube (TikTok hạn chế hiển thị); link chỉ ở caption.
     assert "youtube" not in tiktok.TIKTOK_CTA.lower()
+
+
+def test_caption_tiktok_co_link_full_gio_len_song_va_tu_khoa():
+    from datetime import datetime
+
+    text = tiktok.caption_text(
+        "Tiêu Đề", "Câu mồi", ("#truyenhai",),
+        url="https://youtu.be/ABC", air=datetime.fromisoformat("2026-10-23T20:00:00+07:00"),
+        keywords=["truyện audio", "drama phụ huynh", "truyện audio"], yt_hashtags=["#truyenhocduong"],
+    )
+    assert "https://youtu.be/ABC" in text
+    assert "20:00 23/10" in text
+    assert "truyện audio | drama phụ huynh" in text
+    assert "#truyenhocduong" in text
+    tags = text.strip().splitlines()[-1].split()
+    assert len(tags) == len(set(tags)) <= 10
+
+
+def test_lam_moi_caption_theo_link_youtube_da_dang(tmp_path):
+    out = tmp_path / "tiktok"; out.mkdir()
+    video = out / "x-1.mp4"; video.write_bytes(b"")
+    video.with_suffix(".txt").write_text("Truyện A\nCâu mồi của Claude\n\n#truyenaudio #fyp\n", encoding="utf-8")
+    (out / "done.json").write_text(json.dumps({"Truyện A": str(video)}), encoding="utf-8")
+    meta = tmp_path / "a-full.json"
+    meta.write_text(json.dumps({"topic": "ho_hang_viet", "tags": ["drama họ hàng"], "hashtags": ["#hohangcucpham"]}), encoding="utf-8")
+    index = tmp_path / "index.jsonl"
+    index.write_text(json.dumps({"story_title": "Truyện A", "url": "https://youtu.be/A1", "publishAt": "2026-10-23T20:00:00+07:00", "index": str(meta)}) + "\n", encoding="utf-8")
+
+    n = tiktok.refresh_captions(done_index=out / "done.json", index_jsonl=index)
+
+    text = video.with_suffix(".txt").read_text(encoding="utf-8")
+    assert n == 1
+    assert "Câu mồi của Claude" in text and "https://youtu.be/A1" in text
+    assert "drama họ hàng" in text and "#hohangcucpham" in text
 
 
 def test_tim_metadata_tts_theo_tieu_de(tmp_path):

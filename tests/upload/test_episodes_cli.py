@@ -464,3 +464,28 @@ def test_video_dai_da_cong_khai_thi_short_cong_khai_ngay(tmp_path, monkeypatch):
 
     assert goi["publish_at"] is None
     assert goi["privacy_status"] == "public"
+
+
+def test_dang_xong_thi_cap_nhat_caption_tiktok(monkeypatch):
+    """Caption TikTok cần link video full: có link ngay khi video dài đăng xong."""
+    from upload import episodes_cli as ec
+
+    calls = []
+    monkeypatch.setattr(ec, "run", lambda *a, **k: calls.append("run"))
+    monkeypatch.setattr("shorts.tiktok.refresh_captions", lambda: calls.append("captions") or 0)
+    monkeypatch.setattr("sys.argv", ["episodes_cli", "x.json"])
+    ec.main()
+    assert calls == ["run", "captions"]
+
+
+def test_cap_nhat_caption_hong_khong_lam_hong_luot_dang(monkeypatch, capsys):
+    from upload import episodes_cli as ec
+
+    def boom():
+        raise OSError("đĩa đầy")
+
+    monkeypatch.setattr(ec, "run", lambda *a, **k: None)
+    monkeypatch.setattr("shorts.tiktok.refresh_captions", boom)
+    monkeypatch.setattr("sys.argv", ["episodes_cli", "x.json"])
+    ec.main()
+    assert "CẢNH BÁO" in capsys.readouterr().out

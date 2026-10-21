@@ -420,6 +420,14 @@ def main() -> None:
         )
     except (EpisodesUploadError, SeriesUploadError, YouTubeAuthError) as exc:
         raise SystemExit(str(exc))
+    # Caption clip TikTok kèm link video full: cập nhật ngay khi có link. Bước
+    # phụ -- hỏng thì chỉ cảnh báo, video đã đăng xong rồi.
+    try:
+        from shorts import tiktok
+
+        tiktok.refresh_captions()
+    except Exception as exc:  # noqa: BLE001
+        print(f"CẢNH BÁO: không cập nhật được caption TikTok ({exc}).")
 
 
 if __name__ == "__main__":

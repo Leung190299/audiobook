@@ -4,6 +4,7 @@
     uv run python -m shorts.tiktok <tts_metadata_json> --script <script_json>
     # Đã render TikTok: output/tiktok/<trope>-<ts>.mp4  (+ .txt caption để dán)
     uv run python -m shorts.tiktok --all   # mọi truyện full đã dựng/đăng chưa có clip
+    uv run python -m shorts.tiktok --captions   # caption kèm link YouTube + SEO
 
 Khác short YouTube (30-55 giây, đoạn HÀI, mồi về video dài): TikTok ưu tiên
 video kể chuyện dài, nên clip lấy trọn một màn cao trào -- bị dồn ép, đối chất,
@@ -141,13 +142,107 @@ def make_part(sentences: list[dict], i: int, j: int, hook: str) -> ShortPart:
     )
 
 
-def caption_text(title: str, caption: str, topic_hashtags: tuple[str, ...] = ()) -> str:
-    tags = list(dict.fromkeys([*BASE_HASHTAGS, *topic_hashtags, "#fyp"]))
+MAX_HASHTAGS = 10
+INDEX_JSONL = REPO_ROOT / "output" / "metadata" / "index.jsonl"
+
+
+def caption_text(
+    title: str,
+    caption: str,
+    topic_hashtags: tuple[str, ...] = (),
+    *,
+    url: str | None = None,
+    air=None,
+    keywords: list[str] | tuple[str, ...] = (),
+    yt_hashtags: list[str] | tuple[str, ...] = (),
+) -> str:
+    """Caption dán vào TikTok: tiêu đề, câu mồi, link video full YouTube (khi đã
+    đăng), từ khoá cho ô tìm kiếm TikTok, hashtag.
+
+    Link nằm ở CAPTION theo yêu cầu kênh (21/10), không đè lên video: chữ trên
+    video nhắc nền tảng khác thì TikTok hạn chế hiển thị. Link trong caption
+    TikTok không bấm được -- người xem phải chép, nên kèm cả tên kênh để tìm."""
+    tags = list(dict.fromkeys([*BASE_HASHTAGS, *yt_hashtags, *topic_hashtags, "#fyp"]))
+    tags = [t for t in tags if t != "#fyp"][: MAX_HASHTAGS - 1] + ["#fyp"]
     lines = [title]
     if caption:
         lines.append(caption)
+    if url:
+        lines.append("")
+        when = f" (lên sóng {air:%H:%M %d/%m})" if air is not None else ""
+        lines.append(f"▶ Nghe trọn truyện trên YouTube kênh Audio Truyện{when}: {url}")
+    kws = list(dict.fromkeys(k.strip() for k in keywords if k.strip()))[:6]
+    if kws:
+        lines.append("🔎 " + " | ".join(kws))
     lines += ["", " ".join(tags)]
     return "\n".join(lines) + "\n"
+
+
+def _youtube_rows(index_jsonl: Path) -> dict[str, dict]:
+    """story_title -> dòng index.jsonl mới nhất của video dài đã đăng."""
+    rows: dict[str, dict] = {}
+    if not index_jsonl.exists():
+        return rows
+    for line in index_jsonl.read_text(encoding="utf-8").splitlines():
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        key = row.get("story_title") or row.get("title")
+        if key and row.get("url"):
+            rows[key] = row
+    return rows
+
+
+def _old_caption(txt: Path, title: str) -> str:
+    """Câu mồi Claude viết lúc render, đọc lại từ .txt cũ (dòng thứ 2)."""
+    if not txt.exists():
+        return ""
+    lines = txt.read_text(encoding="utf-8").splitlines()
+    if len(lines) > 1 and lines[0] == title and lines[1] and not lines[1].startswith(("#", "▶", "🔎")):
+        return lines[1]
+    return ""
+
+
+def refresh_captions(done_index: Path | None = None, index_jsonl: Path | None = None) -> int:
+    """Viết lại .txt của mọi clip TikTok theo link + SEO YouTube hiện có. Chạy sau
+    mỗi lượt đăng YouTube (upload/episodes_cli.py gọi). Trả về số clip có link."""
+    from datetime import datetime
+
+    from scripts.topics import TOPICS
+
+    done_index = done_index or DONE_INDEX
+    index_jsonl = index_jsonl or INDEX_JSONL
+    if not done_index.exists():
+        return 0
+    rows = _youtube_rows(index_jsonl)
+    linked = 0
+    for title, video in json.loads(done_index.read_text(encoding="utf-8")).items():
+        txt = Path(video).with_suffix(".txt")
+        row = rows.get(title, {})
+        seo: dict = {}
+        if row.get("index"):
+            try:
+                seo = json.loads(Path(row["index"]).read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                seo = {}
+        topic = TOPICS.get(seo.get("topic") or row.get("topic") or "")
+        air = None
+        if row.get("publishAt"):
+            try:
+                air = datetime.fromisoformat(row["publishAt"])
+            except ValueError:
+                air = None
+        txt.write_text(
+            caption_text(
+                title, _old_caption(txt, title), topic.hashtags if topic else (),
+                url=row.get("url"), air=air, keywords=seo.get("tags") or (),
+                yt_hashtags=seo.get("hashtags") or (),
+            ),
+            encoding="utf-8",
+        )
+        linked += bool(row.get("url"))
+    return linked
 
 
 def find_tts_metadata(trope: str, title: str, audio_dir: Path = AUDIO_DIR) -> Path | None:
@@ -286,12 +381,17 @@ def main() -> None:
     p.add_argument("tts_metadata", type=Path, nargs="?", help="Metadata stage 2 (output/audio/<trope>-<ts>.json)")
     p.add_argument("--script", type=Path, help="Kịch bản stage 1")
     p.add_argument("--all", action="store_true", help="Làm cho mọi truyện full đã dựng chưa có clip")
+    p.add_argument("--captions", action="store_true", help="Viết lại caption .txt kèm link YouTube + SEO")
     a = p.parse_args()
-    if a.all:
+    if a.captions:
+        print(f"Đã cập nhật caption; {refresh_captions()} clip có link YouTube")
+    elif a.all:
         run_all()
+        refresh_captions()  # truyện đã đăng thì caption có link ngay
     elif a.tts_metadata and a.script:
         meta = json.loads(a.tts_metadata.read_text(encoding="utf-8"))
         _mark_done(meta["title"], _run(a.tts_metadata, a.script))
+        refresh_captions()
     else:
         p.error("cần <tts_metadata> --script <kịch bản>, hoặc --all")
 
