@@ -14,6 +14,9 @@
     <string>-i</string>
     <string>/bin/bash</string>
     <string>/Users/lee/Project/Apps/audiobook/run_daily.sh</string>
+    <!-- Từ 26/10 dựng xong đăng luôn (yêu cầu của kênh): private + hẹn 20h tối
+         trống gần nhất, 3 short hẹn 20:05. Bỏ dòng này để quay về chỉ dựng. -->
+    <string>--upload</string>
   </array>
 
   <key>WorkingDirectory</key>

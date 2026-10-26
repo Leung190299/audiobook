@@ -38,7 +38,7 @@ Layout code: `remotion/src/MainVideo.tsx` → `BrandedLayout.tsx` (centre box wi
 ./run_daily.sh --upload        # build, then upload long video + Shorts
 ```
 
-`launchd/com.lee.audiobook.daily.plist` runs `./run_daily.sh` at **09:00 daily, build only**. Uploading stays a human step on purpose: it is the one checkpoint before content goes public, and it has caught real problems.
+`launchd/com.lee.audiobook.daily.plist` runs `./run_daily.sh --upload` at **09:00 daily: build, then upload** (since 26/10, at the channel's request — before that uploading was a deliberate human checkpoint). Remove the `--upload` line from the plist to go back to build-only. Upload needs a live OAuth token; in Testing mode it dies every 7 days.
 
 **Prefer `run_daily.sh` over driving stages by hand.** Each stage prints the path the next one needs; `run_daily.sh` parses those lines with BSD `sed -E`. **Changing any stage's `print()` silently breaks the chain** — update the pattern in `run_daily.sh` and `tests/fake_stage.sh`, then run `uv run pytest tests/test_run_daily.py` (~5 s).
 
