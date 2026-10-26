@@ -71,3 +71,26 @@ def test_scopes_co_quyen_sua_video_da_dang():
     # Thiếu force-ssl thì videos.update trả 403 "insufficient authentication
     # scopes" -- gặp thật 16/09 khi phải đổi link trong mô tả 5 short.
     assert "https://www.googleapis.com/auth/youtube.force-ssl" in auth.SCOPES
+
+
+def test_force_xin_quyen_lai_du_token_con_song(tmp_path, monkeypatch):
+    """Project Testing: refresh token chết 7 ngày sau lần ĐỒNG Ý, làm mới access
+    token không kéo dài hạn đó. --force xin quyền lại để đặt lại đồng hồ 7 ngày."""
+    calls = []
+
+    class _Flow:
+        def run_local_server(self, **kwargs):
+            calls.append(kwargs)
+            return _FreshCreds()
+
+    class _Valid:
+        valid = True
+
+    monkeypatch.setattr(auth.Credentials, "from_authorized_user_file", lambda *_a, **_k: _Valid())
+    monkeypatch.setattr(auth.InstalledAppFlow, "from_client_secrets_file", lambda *_a, **_k: _Flow())
+    token = tmp_path / "token.json"; token.write_text("{}", encoding="utf-8")
+    secret = tmp_path / "secret.json"; secret.write_text("{}", encoding="utf-8")
+
+    creds = auth.load_credentials(token_path=token, client_secret_path=secret, interactive=True, force=True)
+
+    assert creds.refresh_token == "moi" and calls == [{"port": 0, "prompt": "consent"}]

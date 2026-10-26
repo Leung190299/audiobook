@@ -41,10 +41,14 @@ def load_credentials(
     token_path: Path = TOKEN_PATH,
     client_secret_path: Path = CLIENT_SECRET_PATH,
     interactive: bool = False,
+    force: bool = False,
 ) -> Credentials:
     credentials: Credentials | None = None
 
-    if token_path.exists():
+    # force: bỏ qua token đang có, xin quyền lại từ đầu. Project ở chế độ
+    # Testing: refresh token chết 7 ngày sau lần ĐỒNG Ý, làm mới access token
+    # không kéo dài hạn đó -- chỉ đồng ý lại mới đặt lại đồng hồ.
+    if token_path.exists() and not (force and interactive):
         credentials = Credentials.from_authorized_user_file(str(token_path), SCOPES)
 
     if credentials and credentials.valid:
@@ -96,7 +100,11 @@ def _save(credentials: Credentials, token_path: Path) -> None:
 
 
 def main() -> None:
-    credentials = load_credentials(interactive=True)
+    import argparse
+
+    p = argparse.ArgumentParser(description="Cấp quyền YouTube cho pipeline đăng video.")
+    p.add_argument("--force", action="store_true", help="Xin quyền lại dù token còn sống (đặt lại hạn 7 ngày)")
+    credentials = load_credentials(interactive=True, force=p.parse_args().force)
     if not credentials.refresh_token:
         raise SystemExit(
             "Cấp quyền xong nhưng Google không trả refresh_token — lượt chạy tự động "
