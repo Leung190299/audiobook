@@ -366,3 +366,39 @@ async def test_chuong_qua_dai_thi_viet_gon_va_nhac_chuong_sau(monkeypatch):
     assert "Viết lại CHÍNH chương đó" in prompts[2]
     assert "LƯU Ý ĐỘ DÀI" not in prompts[3], "chương 1 sau khi viết gọn đã vừa"
     assert "dài 21 từ, VƯỢT trần 20" in prompts[4]
+
+
+async def test_ban_full_co_chuong_mo_dau_ke_truoc_doan_gay_can():
+    """26/10: truyện mở bằng đoạn gay cấn nhất rồi mới quay lại kể từ đầu.
+    Viết SAU khi xong truyện để khớp cao trào; thành chương 1 'Mở đầu'."""
+    from scripts.models import PROLOGUE_HEADING
+
+    prologue = " ".join(["gay"] * 120) + " Nhưng để hiểu vì sao, phải kể lại từ đầu."
+    chapters = [f"Nội dung chương {i}." for i in range(1, 4)]
+    fake_client, fake_chat = _make_fake_client(_outline_json(3), chapters + [prologue])
+
+    script = await generate_script("t", "T", "m", client=fake_client, fmt="full")
+
+    assert [c.heading for c in script.chapters][0] == PROLOGUE_HEADING
+    assert [c.index for c in script.chapters] == [1, 2, 3, 4]
+    assert script.chapters[0].text == prologue
+    assert script.chapters[1].text == "Nội dung chương 1."
+    last_prompt = fake_chat.send_message.call_args_list[-1].args[0]
+    assert "DỪNG NGAY TRƯỚC" in last_prompt
+
+
+async def test_mo_dau_hong_thi_bo_qua_khong_lam_hong_truyen(capsys):
+    chapters = [f"Nội dung chương {i}." for i in range(1, 4)]
+    fake_client, _ = _make_fake_client(_outline_json(3), chapters + ["ngắn", "vẫn ngắn"])
+
+    script = await generate_script("t", "T", "m", client=fake_client, fmt="full")
+
+    assert len(script.chapters) == 3 and script.chapters[0].heading == "Chương 1"
+    assert "CẢNH BÁO" in capsys.readouterr().out
+
+
+async def test_ban_tap_khong_co_mo_dau():
+    chapters = [f"Nội dung chương {i}." for i in range(1, 4)]
+    fake_client, fake_chat = _make_fake_client(_outline_json(3), chapters)
+    script = await generate_script("t", "T", "m", client=fake_client, fmt="episodes")
+    assert fake_chat.send_message.call_count == 4 and len(script.chapters) == 3

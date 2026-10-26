@@ -24,7 +24,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from shorts.audio_cut import cut_wav
-from scripts.models import Script
+from scripts.models import Script, without_prologue
 from scripts.topics import TOPICS
 from shorts.planner import plan_beat_shorts, plan_teasers, short_title_from_line
 from episodes import backgrounds
@@ -97,10 +97,12 @@ def _run(
     )
     # Kịch bản chủ đề (24/09/2026): 3 Shorts từ 3 đoạn hài/sảng nhất, mở bằng
     # câu thoại. Không có short_beats: trích đoạn mời nghe rải đều như trước.
+    # Bỏ chương "Mở đầu": nó kể trước cao trào, dò đoạn trích sẽ trúng nó.
+    story_metadata = without_prologue(tts_metadata)
     if script is not None and script.short_beats:
-        parts = plan_beat_shorts(tts_metadata, script.short_beats)
+        parts = plan_beat_shorts(story_metadata, script.short_beats)
     else:
-        parts = plan_teasers(tts_metadata)
+        parts = plan_teasers(story_metadata)
     is_full = script is not None and script.format == "full"
     cta_text = FULL_CTA_TEXT if is_full else None
     topic = TOPICS.get(script.topic) if script is not None else None

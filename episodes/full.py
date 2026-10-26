@@ -21,6 +21,7 @@ from pathlib import Path
 
 from episodes.cutter import ColdOpen, EpisodeCut, EpisodeCutError, pick_cold_open
 from episodes.plan import EpisodeRange
+from scripts.models import PROLOGUE_HEADING
 from scripts.text_tools import locate_quote, span_within
 
 FULL_COLD_OPEN_MIN_SECONDS = 20.0
@@ -69,6 +70,16 @@ def plan_full_cut(tts_metadata: dict, chapter_count: int, short_beats: list[str]
             raise EpisodeCutError(f"Metadata TTS thiếu chương {index}.")
 
     cold_open = None
+    # Truyện đã mở bằng chương "Mở đầu" kể trước đoạn gay cấn (26/10): không ghép
+    # thêm trích đoạn audio nữa, người nghe sẽ nghe hai lần mở đầu liền nhau.
+    if tts_metadata.get("chapters") and tts_metadata["chapters"][0].get("heading") == PROLOGUE_HEADING:
+        return EpisodeCut(
+            episode=ep,
+            body_source_start_seconds=float(chapters_by_index[1]["start_seconds"]),
+            body_source_end_seconds=float(chapters_by_index[chapter_count]["end_seconds"]),
+            cold_open=None,
+            outro_seconds=FULL_OUTRO_SECONDS,
+        )
     if short_beats:
         cold_open = cold_open_from_beat(short_beats[0], sentences)
         if cold_open is None:

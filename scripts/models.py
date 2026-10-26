@@ -1,5 +1,22 @@
 from dataclasses import dataclass, field
 
+# Chương đầu kể trước đoạn gay cấn nhất rồi dẫn về đầu truyện (26/10). Mọi bước
+# dò đoạn trích (cold open, short, TikTok) phải bỏ chương này: nó kể lại cao trào
+# nên dò sẽ trúng bản kể trước thay vì cao trào thật.
+PROLOGUE_HEADING = "Mở đầu"
+
+
+def without_prologue(tts_metadata: dict) -> dict:
+    """Bản sao metadata stage 2 đã bỏ chương 'Mở đầu' và các câu của nó."""
+    skip = {c["index"] for c in tts_metadata.get("chapters", []) if c.get("heading") == PROLOGUE_HEADING}
+    if not skip:
+        return tts_metadata
+    return {
+        **tts_metadata,
+        "chapters": [c for c in tts_metadata.get("chapters", []) if c["index"] not in skip],
+        "sentences": [s for s in tts_metadata.get("sentences", []) if s["chapter_index"] not in skip],
+    }
+
 
 @dataclass
 class Chapter:

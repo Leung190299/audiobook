@@ -220,6 +220,25 @@ def build_length_note(words: int, lo: int, hi: int) -> str:
     return ""
 
 
+PROLOGUE_WORDS = (100, 150)
+
+
+def build_prologue_prompt() -> str:
+    """Đoạn "Mở đầu" (26/10): hỏi SAU khi truyện đã viết xong trong cùng hội
+    thoại, để chi tiết kể trước khớp đúng cao trào đã viết."""
+    lo, hi = PROLOGUE_WORDS
+    return f"""Truyện đã viết xong. Giờ viết ĐOẠN MỞ ĐẦU đặt TRƯỚC chương 1, để giữ người nghe ngay từ giây đầu.
+
+YÊU CẦU BẮT BUỘC:
+- {lo}-{hi} từ (đếm theo tiếng cách nhau bởi dấu cách), ngôi 'tôi', cùng giọng kể với truyện.
+- Thả người nghe vào giữa KHOẢNH KHẮC GAY CẤN NHẤT của truyện (ngay trước màn lật tẩy ở cao trào):
+  ai đang đối đầu ai, ở đâu, căng tới mức nào -- bằng hành động và thoại, không tóm tắt.
+- DỪNG NGAY TRƯỚC kết quả: KHÔNG tiết lộ ai thắng, bằng chứng là gì, cú lật ra sao.
+- Câu cuối cùng là câu dẫn quay về đầu truyện, dạng: 'Nhưng để hiểu vì sao <...>, phải kể lại từ <cái ngày/lúc ...>.'
+- Tên người, chi tiết phải KHỚP đúng với truyện vừa viết.
+- CHỈ trả về văn xuôi của đoạn mở đầu, KHÔNG tiêu đề, KHÔNG giải thích."""
+
+
 def build_shorten_prompt(words: int, lo: int, hi: int) -> str:
     return (
         f"Chương vừa viết dài {words} từ, vượt quá trần {hi} từ. Viết lại CHÍNH chương đó "

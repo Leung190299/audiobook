@@ -1,6 +1,6 @@
 import re
 
-from scripts.models import Script
+from scripts.models import PROLOGUE_HEADING, Script
 
 MIN_WORDS = 9000
 # Đo trên 25 kịch bản đã dựng: dài nhất 13.982 từ, tức trần 14.000 cũ nằm ngay
@@ -96,7 +96,7 @@ def validate_script(script: Script) -> None:
             errors.append(
                 f"Chương {chapter.index} là lời từ chối của Gemini, không phải nội dung truyện."
             )
-        elif chapter.word_count < MIN_CHAPTER_WORDS:
+        elif chapter.word_count < MIN_CHAPTER_WORDS and chapter.heading != PROLOGUE_HEADING:
             errors.append(
                 f"Chương {chapter.index} chỉ có {chapter.word_count} từ, dưới sàn {MIN_CHAPTER_WORDS}."
             )

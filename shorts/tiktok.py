@@ -358,7 +358,10 @@ def _run(tts_metadata_path: Path, script_path: Path) -> Path:
     tts_metadata_path = tts_metadata_path.resolve()
     meta = json.loads(tts_metadata_path.read_text(encoding="utf-8"))
     script = Script.from_dict(json.loads(script_path.read_text(encoding="utf-8")))
-    sentences = meta.get("sentences") or []
+    from scripts.models import without_prologue
+
+    # Bỏ chương "Mở đầu" (kể trước cao trào): clip phải lấy cao trào thật.
+    sentences = without_prologue(meta).get("sentences") or []
     if not sentences:
         raise TikTokRenderError("Metadata TTS không có mốc câu; chạy lại stage 2.")
 

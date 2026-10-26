@@ -7,7 +7,7 @@ from gemini_webapi.exceptions import APIError, AuthError, GeminiError
 
 from scripts.llm import make_client
 
-from scripts.models import Chapter, Script
+from scripts.models import PROLOGUE_HEADING, Chapter, Script
 from scripts.prompts import (
     MAX_HOOK_WORDS,
     MAX_QUESTION_WORDS,
@@ -15,6 +15,7 @@ from scripts.prompts import (
     SHORT_BEAT_COUNT,
     build_chapter_prompt,
     build_length_note,
+    build_prologue_prompt,
     build_shorten_prompt,
     chapter_words_range,
     build_outline_prompt,
@@ -277,6 +278,13 @@ async def generate_script(
     if topic_mode or story_mode:
         short_beats = await _ask_short_beats(chat, beat_plans, chapters)
 
+    if fmt == "full":
+        prologue = await _ask_prologue(chat)
+        if prologue:
+            chapters = [Chapter(index=1, heading=PROLOGUE_HEADING, text=prologue)] + [
+                Chapter(index=c.index + 1, heading=c.heading, text=c.text) for c in chapters
+            ]
+
     return Script(
         trope=trope_id,
         title=title,
@@ -287,6 +295,28 @@ async def generate_script(
         short_beats=short_beats,
         **extra,
     )
+
+
+# Sàn/trần số từ chấp nhận cho đoạn "Mở đầu" (prompt xin 100-150).
+PROLOGUE_MIN_WORDS = 60
+PROLOGUE_MAX_WORDS = 260
+
+
+async def _ask_prologue(chat) -> str:
+    """Đoạn "Mở đầu" kể trước khoảnh khắc gay cấn nhất (26/10). Không bắt buộc:
+    hỏng hai lần thì trả "" và video giữ cách mở cũ (trích đoạn audio)."""
+    words = 0
+    for _ in range(2):
+        try:
+            text = (await chat.send_message(build_prologue_prompt())).text.strip()
+        except Exception as exc:  # noqa: BLE001 -- bước phụ, không được làm hỏng kịch bản
+            print(f"CẢNH BÁO: không viết được đoạn mở đầu ({exc}); giữ cách mở cũ.")
+            return ""
+        words = len(text.split())
+        if not looks_like_refusal(text) and PROLOGUE_MIN_WORDS <= words <= PROLOGUE_MAX_WORDS:
+            return text
+    print(f"CẢNH BÁO: đoạn mở đầu không dùng được ({words} từ); giữ cách mở cũ.")
+    return ""
 
 
 async def _ask_short_beats(chat, beat_plans: list[str], chapters: list[Chapter]) -> list[str]:

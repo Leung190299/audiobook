@@ -104,3 +104,15 @@ def test_cli_kich_ban_cu_khong_co_format_van_chia_tap(patched, capsys):
     manifest_path = episodes_cli._run(sandbox["script_path"], sandbox["tts_path"], sandbox["images_path"])
     assert manifest_path.name.endswith("-episodes.json")
     assert json.loads(manifest_path.read_text(encoding="utf-8"))["format"] == "episodes"
+
+
+def test_truyen_co_chuong_mo_dau_thi_khong_ghep_trich_doan_audio():
+    """Đã có chương 'Mở đầu' kể trước đoạn gay cấn: ghép thêm cold open nữa là
+    người nghe nghe hai lần mở đầu liền nhau."""
+    from scripts.models import PROLOGUE_HEADING
+
+    tts = _long_tts(5)
+    tts["chapters"][0]["heading"] = PROLOGUE_HEADING
+    cut = plan_full_cut(tts, 5, ["Câu 3.2. Câu 3.3. Câu 3.4."])
+    assert cut.cold_open is None
+    assert cut.body_source_start_seconds == tts["chapters"][0]["start_seconds"]

@@ -214,3 +214,18 @@ def test_chua_dang_youtube_thi_ten_bat_dau_bang_chua_dang(tmp_path):
     tiktok.refresh_captions(done_index=out / "done.json", index_jsonl=index)
     assert (out / "chua-dang-youtube_truyen-b.mp4").exists()
     assert (out / "chua-dang-youtube_truyen-b.txt").exists()
+
+
+def test_bo_chuong_mo_dau_khi_do_doan_trich():
+    """Short/TikTok dò đoạn trích trong audio: phải bỏ chương 'Mở đầu' (kể trước
+    cao trào), kẻo dò trúng bản kể trước thay vì cao trào thật."""
+    from scripts.models import PROLOGUE_HEADING, without_prologue
+
+    meta = {"chapters": [{"index": 1, "heading": PROLOGUE_HEADING}, {"index": 2, "heading": "C2"}],
+            "sentences": _sentences(80)}
+    out = without_prologue(meta)
+    assert [c["index"] for c in out["chapters"]] == [2]
+    assert all(s["chapter_index"] == 2 for s in out["sentences"]) and len(out["sentences"]) == 40
+    assert len(meta["sentences"]) == 80, "không sửa metadata gốc"
+    plain = {"chapters": [{"index": 1, "heading": "C1"}], "sentences": _sentences(40)}
+    assert without_prologue(plain) == plain

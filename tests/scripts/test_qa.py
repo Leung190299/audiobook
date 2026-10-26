@@ -179,3 +179,15 @@ def test_validate_script_chan_tieu_de_tuc():
 
     with pytest.raises(ScriptQAError, match="Tiêu đề"):
         validate_script(script)
+
+
+def test_chuong_mo_dau_ngan_hon_san_van_qua():
+    from scripts.models import PROLOGUE_HEADING
+    from scripts.qa import MIN_CHAPTER_WORDS, validate_script
+
+    body = " ".join(["chữ"] * 700)
+    chapters = [Chapter(index=1, heading=PROLOGUE_HEADING, text=" ".join(["mở"] * 140))]
+    chapters += [Chapter(index=i, heading=f"C{i}", text=body) for i in range(2, 17)]
+    script = Script(trope="t", title="Tiêu đề", chapters=chapters)
+    assert chapters[0].word_count < MIN_CHAPTER_WORDS
+    validate_script(script)  # không ném lỗi
