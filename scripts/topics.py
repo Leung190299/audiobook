@@ -175,8 +175,7 @@ TOPICS: dict[str, Topic] = {
         hashtags=("#trongsinh", "#bomegia"),
         vietnam_only=False,
     ),
-    # Thêm 12/10 để chạy thử, CHƯA có trong DEFAULT_ROTATION: dựng bằng
-    # `run_daily.sh --story <id>` rồi xem kết quả trước khi cho vào lịch.
+    # Thêm 12/10 để chạy thử; từ 27/10 vào lịch mỗi thứ Bảy (DEFAULT_ROTATION).
     "hoc_duong": Topic(
         id="hoc_duong",
         name="Học đường: phụ huynh, ký túc xá, lớp học",
@@ -222,13 +221,15 @@ TOPICS: dict[str, Topic] = {
     ),
 }
 
+# Thứ Hai -> Chủ nhật. Thứ Bảy là học đường từ 27/10 (trước là họ hàng): thử
+# #101 xong, kênh quyết định chạy mỗi tuần một tối.
 DEFAULT_ROTATION = (
     "ho_hang_viet",
     "nghe_la_hong_bien",
     "ho_hang_viet",
     "bo_me_trong_sinh",
     "nghe_la_hong_bien",
-    "ho_hang_viet",
+    "hoc_duong",
     "bo_me_trong_sinh",
 )
 

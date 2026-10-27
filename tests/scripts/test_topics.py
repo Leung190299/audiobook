@@ -49,11 +49,10 @@ def test_nen_thumbnail_moi_chu_de_mot_mau():
     assert len(backgrounds) == len(TOPICS)
 
 
-def test_hoc_duong_chua_vao_lich_xoay_vong():
-    """Chủ đề thử (12/10): chỉ dựng tay bằng --story, chưa tự chạy hằng ngày."""
+def test_hoc_duong_moi_tuan_mot_toi():
     from scripts.topics import DEFAULT_ROTATION
 
-    assert "hoc_duong" in TOPICS and "hoc_duong" not in DEFAULT_ROTATION
+    assert DEFAULT_ROTATION.count("hoc_duong") == 1
 
 
 @pytest.mark.parametrize("topic_id", sorted(TOPIC_IDS))
@@ -86,7 +85,7 @@ def test_thumb_text_bi_cat_con_12_chu():
 
 def test_rotation_mac_dinh_7_ngay_hop_le():
     assert len(DEFAULT_ROTATION) == 7
-    assert set(DEFAULT_ROTATION) == TOPIC_IDS - {"hoc_duong"}  # chủ đề thử, chưa vào lịch
+    assert set(DEFAULT_ROTATION) == TOPIC_IDS
     assert parse_rotation("") == DEFAULT_ROTATION
 
 
