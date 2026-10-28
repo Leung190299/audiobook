@@ -39,6 +39,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 from datetime import datetime, timedelta, timezone, time as dtime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -216,6 +217,34 @@ def fill_links(description: str, next_url: str | None, playlist_url: str | None)
 
 def _state_path(index_path: Path) -> Path:
     return index_path.with_name(index_path.name.removesuffix(".json") + "-upload-state.json")
+
+
+def _move_to_trash(paths: list[Path]) -> None:
+    # Thùng rác chứ không xoá hẳn: lỡ cần dựng lại thì vẫn lấy về được tới khi
+    # dọn thùng rác. /usr/bin/trash có sẵn từ macOS 14.
+    subprocess.run(["/usr/bin/trash", *map(str, paths)], check=True, capture_output=True)
+
+
+def trash_uploaded(index_path: Path, shorts_prefix: Path | None = None, *, trasher=_move_to_trash) -> list[Path]:
+    """Đăng xong thì dọn video đã lên YouTube (27/10: 217 GB output, ổ còn 13%).
+
+    Chỉ dọn file .mp4 có tên trong upload-state (đăng THÀNH CÔNG); giữ .json,
+    ảnh bìa, audio và clip TikTok. Chạy lại lệnh đăng sau khi dọn vẫn đúng: tập
+    và trích đoạn có trong state được bỏ qua trước khi đụng tới file video.
+    """
+    index_path = Path(index_path)
+    index = json.loads(index_path.read_text(encoding="utf-8"))
+    state_path = _state_path(index_path)
+    done = json.loads(state_path.read_text(encoding="utf-8"))["uploaded"] if state_path.exists() else {}
+    files = [Path(ep["video_path"]) for ep in index.get("episodes", []) if str(ep["number"]) in done]
+    if shorts_prefix is not None:
+        shorts_prefix = Path(shorts_prefix)
+        shorts_done = series_cli._load_state(series_cli._state_path(shorts_prefix))["uploaded"]
+        files += [shorts_prefix.parent / f"{shorts_prefix.name}-part-{int(n):02d}.mp4" for n in shorts_done]
+    files = [f for f in files if f.exists()]
+    if files:
+        trasher(files)
+    return files
 
 
 def run(
@@ -401,6 +430,8 @@ def main() -> None:
                         choices=["private", "unlisted", "public"])
     parser.add_argument("--category-id", default=os.getenv("YOUTUBE_CATEGORY_ID", "24"))
     parser.add_argument("--playlist-url", default=None)
+    parser.add_argument("--keep-files", action="store_true",
+                        help="Không chuyển video đã đăng vào Thùng rác")
     args = parser.parse_args()
     first_air = None
     if args.first_air:
@@ -428,6 +459,14 @@ def main() -> None:
         tiktok.refresh_captions()
     except Exception as exc:  # noqa: BLE001
         print(f"CẢNH BÁO: không cập nhật được caption TikTok ({exc}).")
+    if args.keep_files:
+        return
+    try:
+        moved = trash_uploaded(args.index_path, args.shorts_prefix)
+        if moved:
+            print(f"Đã chuyển {len(moved)} video đã đăng vào Thùng rác.")
+    except Exception as exc:  # noqa: BLE001
+        print(f"CẢNH BÁO: không dọn được video đã đăng ({exc}).")
 
 
 if __name__ == "__main__":

@@ -489,3 +489,56 @@ def test_cap_nhat_caption_hong_khong_lam_hong_luot_dang(monkeypatch, capsys):
     monkeypatch.setattr("sys.argv", ["episodes_cli", "x.json"])
     ec.main()
     assert "CẢNH BÁO" in capsys.readouterr().out
+
+
+def _run(ix, up):
+    return episodes_cli.run(ix["index"], shorts_prefix=ix["prefix"], uploader=up, commenter=lambda *a: "c",
+                            description_updater=lambda *a: True, credentials_loader=lambda: "creds",
+                            now=datetime(2026, 9, 23, 9, 0, tzinfo=LOCAL_TZ))
+
+
+def test_dang_xong_thi_don_video_vao_thung_rac_va_dang_lai_khong_hong(tmp_path):
+    """28/10: đăng xong thì dọn video (ổ đầy). Chỉ dọn .mp4 đã đăng thành công;
+    giữ .json/ảnh bìa để lần chạy lại vẫn đọc được state và bỏ qua đúng."""
+    ix = _index(tmp_path)
+    up = FakeUploader(fail_on="truyen-tap-3.mp4")
+    with pytest.raises(episodes_cli.EpisodesUploadError):
+        _run(ix, up)
+    trashed = []
+
+    def trasher(paths):
+        trashed.extend(paths)
+        for p in paths:
+            p.unlink()
+
+    episodes_cli.trash_uploaded(ix["index"], ix["prefix"], trasher=trasher)
+    assert sorted(p.name for p in trashed) == ["truyen-tap-1.mp4", "truyen-tap-2.mp4"], "tập 3 chưa đăng thì giữ"
+
+    up.fail_on = None
+    _run(ix, up)
+    episodes_cli.trash_uploaded(ix["index"], ix["prefix"], trasher=trasher)
+    assert {p.name for p in trashed} == {
+        "truyen-tap-1.mp4", "truyen-tap-2.mp4", "truyen-tap-3.mp4",
+        "t-20260922T000000Z-part-01.mp4", "t-20260922T000000Z-part-02.mp4",
+    }
+    assert (tmp_path / "t-20260922T000000Z-part-01.json").exists() and (tmp_path / "t-ep-01.png").exists()
+
+    calls_before = len(up.calls)
+    _run(ix, up)  # chạy lại sau khi đã dọn: không đăng trùng, không đòi file đã dọn
+    assert len(up.calls) == calls_before
+
+
+def test_main_don_video_tru_khi_keep_files(monkeypatch, capsys):
+    from upload import episodes_cli as ec
+
+    seen = []
+    monkeypatch.setattr(ec, "run", lambda *a, **k: None)
+    monkeypatch.setattr("shorts.tiktok.refresh_captions", lambda: 0)
+    monkeypatch.setattr(ec, "trash_uploaded", lambda *a: seen.append(a) or [Path("a.mp4")])
+    monkeypatch.setattr("sys.argv", ["episodes_cli", "x.json", "--shorts-prefix", "s/p"])
+    ec.main()
+    assert seen == [(Path("x.json"), Path("s/p"))]
+    assert "Thùng rác" in capsys.readouterr().out
+    monkeypatch.setattr("sys.argv", ["episodes_cli", "x.json", "--keep-files"])
+    ec.main()
+    assert len(seen) == 1
