@@ -16,7 +16,9 @@ OUTPUT_DIR = Path(__file__).resolve().parent.parent / "output" / "audio"
 def _load_model():
     from vieneu import Vieneu
 
-    return Vieneu(backend="onnx")
+    # Từ vieneu 3.4.0 mặc định là fp32, chậm hơn ~27% trên CPU máy này; int8
+    # (mặc định cũ) nghe ngang và nhanh hơn, nên ghim lại cho rõ.
+    return Vieneu(backend="onnx", precision="int8")
 
 
 def _run(script_path: Path, model=None) -> None:
