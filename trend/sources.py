@@ -23,9 +23,12 @@ import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
+
+from trend.outliers import ChannelVideo, Outlier, find_outliers
 
 GOOGLE_TRENDS_RSS = "https://trends.google.com/trending/rss?geo={region}"
 YOUTUBE_CHANNEL_FEED = "https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
@@ -33,6 +36,8 @@ YOUTUBE_CHANNEL_FEED = "https://www.youtube.com/feeds/videos.xml?channel_id={cha
 _USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) audiobook-pipeline/1.0"
 _HT_NS = "{https://trends.google.com/trending/rss}"
 _ATOM_NS = "{http://www.w3.org/2005/Atom}"
+_YT_NS = "{http://www.youtube.com/xml/schemas/2015}"
+_MEDIA_NS = "{http://search.yahoo.com/mrss/}"
 _TIMEOUT = 20
 
 
@@ -74,6 +79,8 @@ class TrendSignals:
     feeds: dict[str, list[str]] = field(default_factory=dict)
     google_trends: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
+    # Video kênh đối thủ có view gấp nhiều lần trung vị của chính kênh đó.
+    outliers: list[Outlier] = field(default_factory=list)
 
     @property
     def is_empty(self) -> bool:
@@ -126,6 +133,36 @@ def fetch_feed(url: str, limit: int = 25) -> list[str]:
     return _parse_titles(_fetch(url), limit)
 
 
+def _parse_channel_videos(raw: bytes) -> list[ChannelVideo]:
+    """Feed Atom của kênh YouTube -> video kèm lượt xem (<media:statistics views>).
+
+    Mục thiếu ngày đăng hay lượt xem thì bỏ: không chấm bội số được.
+    """
+    root = ET.fromstring(raw)
+    channel = (root.findtext(f"{_ATOM_NS}title") or "").strip()
+    videos = []
+    for entry in root.findall(f"{_ATOM_NS}entry"):
+        title = (entry.findtext(f"{_ATOM_NS}title") or "").strip()
+        published = entry.findtext(f"{_ATOM_NS}published")
+        stats = entry.find(f".//{_MEDIA_NS}statistics")
+        if not title or not published or stats is None or stats.get("views") is None:
+            continue
+        videos.append(
+            ChannelVideo(
+                channel=channel,
+                title=title,
+                video_id=(entry.findtext(f"{_YT_NS}videoId") or "").strip(),
+                published=datetime.fromisoformat(published),
+                views=int(stats.get("views")),
+            )
+        )
+    return videos
+
+
+def fetch_channel_videos(channel_id: str) -> list[ChannelVideo]:
+    return _parse_channel_videos(_fetch(YOUTUBE_CHANNEL_FEED.format(channel_id=channel_id)))
+
+
 def fetch_google_trends(region: str, limit: int = 20) -> list[str]:
     root = ET.fromstring(_fetch(GOOGLE_TRENDS_RSS.format(region=region)))
 
@@ -160,16 +197,19 @@ def collect_signals(config: TrendConfig) -> TrendSignals:
         else:
             signals.errors.append(f"{feed.name}: tải được nhưng không có mục nào")
 
+    videos_by_channel: dict[str, list[ChannelVideo]] = {}
     for channel_id in config.youtube_channels:
         try:
-            titles = fetch_feed(
-                YOUTUBE_CHANNEL_FEED.format(channel_id=channel_id), config.max_items_per_feed
-            )
-        except (urllib.error.URLError, ET.ParseError, OSError, EOFError) as exc:
+            videos = fetch_channel_videos(channel_id)
+        except (urllib.error.URLError, ET.ParseError, OSError, EOFError, ValueError) as exc:
             signals.errors.append(f"Kênh YouTube {channel_id} lỗi: {exc}")
             continue
-        if titles:
-            signals.feeds[f"Kênh YouTube {channel_id}"] = titles
+        if videos:
+            signals.feeds[f"Kênh YouTube {channel_id}"] = [
+                v.title for v in videos[: config.max_items_per_feed]
+            ]
+            videos_by_channel[channel_id] = videos
+    signals.outliers, _ = find_outliers(videos_by_channel, datetime.now(timezone.utc))
 
     if config.use_google_trends:
         try:

@@ -78,6 +78,9 @@ TIME_TRAVEL_MARKERS = (
     "quay về quá khứ", "kiếp trước", "một đời nữa",
 )
 
+# Số video vượt trội tối đa đưa vào prompt: đủ thấy khuôn chung, không lấn át [B].
+OUTLIERS_IN_PROMPT = 8
+
 # Số tập gần nhất xét khi cấm: 3 => khuôn xuyên không tối đa 1 trong 4 tập.
 BAN_WINDOW = 3
 
@@ -133,6 +136,17 @@ def build_idea_prompt(signals: TrendSignals, recent_titles: list[str]) -> str:
         (channel_blocks if name.startswith("Kênh YouTube") else news_blocks).append(block)
     news_text = "\n\n".join(news_blocks) or "(không lấy được nguồn nào)"
     channels_text = "\n\n".join(channel_blocks) or "(không lấy được kênh nào)"
+    # Bội số so với trung vị CHÍNH kênh đó (trend/outliers.py): khuôn đã được
+    # khán giả kiểm chứng, mạnh hơn hẳn "tiêu đề mới nhất". Bỏ vỏ bọc và tên
+    # kênh vì Gemini hay chép nguyên sang tiêu đề kênh mình.
+    if signals.outliers:
+        outlier_lines = "\n".join(
+            f"- {o.multiple:.1f}x | {clean_title(o.video.title)}" for o in signals.outliers[:OUTLIERS_IN_PROMPT]
+        )
+        channels_text += (
+            "\n\n### VƯỢT TRỘI: view gấp nhiều lần trung vị của chính kênh đăng nó "
+            "-- khuôn đã được khán giả kiểm chứng, ưu tiên học các tiêu đề này\n" + outlier_lines
+        )
 
     trends_text = "\n".join(f"- {t}" for t in signals.google_trends) or "(không có dữ liệu)"
 

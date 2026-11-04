@@ -149,6 +149,16 @@ Tìm channel_id: mở một video của kênh, bấm vào tên kênh, id nằm t
 `/channel/UCxxxxxxxxxxxxxxxxxxxxxx`. Nếu URL hiện dạng `@tenkenh` thì xem mã nguồn
 trang và tìm chuỗi `UC` dài 24 ký tự.
 
+Feed kênh có sẵn lượt xem từng video, nên `trend/outliers.py` chấm thêm **bội số so
+với trung vị của chính kênh đó** (bỏ video dưới 3 ngày tuổi vì view còn đang lên).
+Video từ 2x trở lên được đưa vào prompt thành mục "VƯỢT TRỘI" — khuôn đã được khán
+giả kiểm chứng, mạnh hơn "tiêu đề mới nhất". Xem bảng xếp hạng, và soát luôn kênh
+nào có feed chết:
+
+```bash
+uv run python -m trend.outliers            # --min 3 để chỉ xem cú nổ lớn
+```
+
 `trend/idea_generator.py` đưa tất cả vào Gemini kèm ràng buộc: truyện **hư cấu hoàn
 toàn**, chỉ mượn *dạng* xung đột chứ không mượn tình tiết của vụ việc nào, không người
 thật, không thương hiệu thật, và không lặp lại motif của 15 tập gần nhất (đọc từ
@@ -156,6 +166,23 @@ thật, không thương hiệu thật, và không lặp lại motif của 15 t�
 
 Nguồn nào chết thì bỏ qua nguồn đó. Chết hết thì `trend.cli` thoát với lỗi rõ ràng
 thay vì bịa bừa — lúc đó chạy `./run_daily.sh --trope <trope_id>`.
+
+---
+
+## Đọc tỷ lệ giữ chân
+
+Data API (`metadata.report`) không có số giữ chân, nên phải tải CSV từ Studio: video
+→ Số liệu phân tích → Mức độ tương tác → biểu đồ tỷ lệ giữ chân → nút tải xuống.
+
+```bash
+uv run python -m metadata.retention ~/Downloads/<file>.csv --video <video_id>
+```
+
+Báo ba thứ: **rơi đầu** (mất bao nhiêu trong 30s đầu — lỗi cold open/tiêu đề),
+**vực** (đoạn tụt dốc hẳn, in luôn chương và câu đang đọc ở đó) và **trượt** (mất
+đều mỗi phút — lỗi nhịp, sửa bằng cắt). `--video` nối qua `output/metadata/index.jsonl`
+tới mốc câu trong `output/episodes/<stem>-props.json` và lưu báo cáo vào
+`output/metadata/retention-<video_id>.md`. Video ngoài index thì dùng `--duration <giây>`.
 
 ---
 
