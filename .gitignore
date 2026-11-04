@@ -6,3 +6,18 @@ __pycache__/
 output/
 uv.lock.bak
 remotion/node_modules/
+
+config/youtube_client_secret.json
+config/youtube_token.json
+
+.DS_Store
+_to_delete/
+.superpowers/
+
+# Sản phẩm của `npx remotion bundle`; render không cần. Đã từng phình 89GB vì
+# public-dir là repo root nên mỗi lần bundle lại lồng chính nó vào trong.
+remotion/build/
+config/drive_token.json
+
+# Video nền tải về (hàng trăm MB, dữ liệu chứ không phải mã nguồn).
+assets/backgrounds/

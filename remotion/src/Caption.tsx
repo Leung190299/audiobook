@@ -6,28 +6,6 @@ interface CaptionProps {
   chapters: ChapterProps[];
 }
 
-const CHUNK_CHAR_BUDGET = 80;
-
-function splitIntoChunks(text: string): string[] {
-  const words = text.split(/\s+/).filter(Boolean);
-  const chunks: string[] = [];
-  let current = "";
-
-  for (const word of words) {
-    const candidate = current ? `${current} ${word}` : word;
-    if (candidate.length > CHUNK_CHAR_BUDGET && current) {
-      chunks.push(current);
-      current = word;
-    } else {
-      current = candidate;
-    }
-  }
-  if (current) {
-    chunks.push(current);
-  }
-  return chunks;
-}
-
 export const Caption: React.FC<CaptionProps> = ({ chapters }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -38,22 +16,15 @@ export const Caption: React.FC<CaptionProps> = ({ chapters }) => {
     return null;
   }
 
-  const chunks = splitIntoChunks(chapter.text);
-  const totalChars = chunks.reduce((sum, c) => sum + c.length, 0) || 1;
-  const chapterDuration = chapter.endSeconds - chapter.startSeconds;
+  // Giữ nguyên phụ đề của câu trước trong khoảng nghỉ giữa hai câu thay vì tắt
+  // hẳn: dùng "startSeconds gần nhất đã qua" chứ không so cả startSeconds lẫn
+  // endSeconds, giống hệt ShortVideo.tsx và vì cùng lý do -- nếu không chữ sẽ
+  // chớp tắt trong khoảng nghỉ giữa các câu.
+  const activeSentence = [...chapter.sentences]
+    .reverse()
+    .find((s) => seconds >= s.startSeconds);
 
-  let cursor = chapter.startSeconds;
-  let activeChunk: string | null = null;
-  for (const chunk of chunks) {
-    const chunkDuration = (chunk.length / totalChars) * chapterDuration;
-    if (seconds >= cursor && seconds < cursor + chunkDuration) {
-      activeChunk = chunk;
-      break;
-    }
-    cursor += chunkDuration;
-  }
-
-  if (!activeChunk) {
+  if (!activeSentence) {
     return null;
   }
 
@@ -72,7 +43,7 @@ export const Caption: React.FC<CaptionProps> = ({ chapters }) => {
         borderRadius: 12,
       }}
     >
-      {activeChunk}
+      {activeSentence.text}
     </div>
   );
 };

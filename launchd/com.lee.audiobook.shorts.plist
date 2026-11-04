@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.lee.audiobook.shorts</string>
+
+  <!-- 20:05 mỗi tối: đăng 3 short của truyện vừa lên sóng lúc 20:00.
+       Năm phút trễ là cố ý -- video dài tự công khai đúng 20:00, short trỏ vào
+       video còn private là link chết đúng mấy giờ nó ăn view mạnh nhất.
+       Tối nào không có truyện nào lên sóng thì thoát êm, không làm gì. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/lee/Project/Apps/audiobook/scripts/post_shorts.sh</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/lee/Project/Apps/audiobook</string>
+
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>20</integer>
+    <key>Minute</key><integer>5</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/Users/lee/Project/Apps/audiobook/output/daily/shorts.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/lee/Project/Apps/audiobook/output/daily/shorts.err.log</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>LANG</key><string>en_US.UTF-8</string>
+    <key>LC_ALL</key><string>en_US.UTF-8</string>
+  </dict>
+
+  <!-- Tải lên ba file 16-20 MB; đừng để macOS bóp CPU hay giết giữa chừng. -->
+  <key>ProcessType</key>
+  <string>Interactive</string>
+  <key>ExitTimeOut</key>
+  <integer>0</integer>
+
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>

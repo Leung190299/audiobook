@@ -1,0 +1,1946 @@
+{
+  "version": "2026-09-24",
+  "channel": "Audio Truyện",
+  "publish_hour": 20,
+  "writing_rules": [
+    "Ngôi 'tôi'; câu đầu tiên của chương 1 là đúng câu trong 'hook', không chào hỏi.",
+    "Mỗi chương ≥1 miếng hài và ≥1 nhịp 'sảng' nhỏ; cao trào vả mặt ở 2–3 chương cuối; kết có hậu hoặc ấm.",
+    "Tên người, địa danh, món ăn, phong tục Việt Nam. Kẻ xấu bị bẽ mặt bằng sự thật/bằng chứng, không bằng bạo lực.",
+    "Không khiêu gợi, không bạo lực chi tiết, không đưa trẻ vị thành niên vào tình huống người lớn.",
+    "Tránh motif bão hoà: cá mặn hậu cung, tiệm vàng mã/cõi âm, hệ thống thất đức, ảnh đế/showbiz, xem bói hào môn.",
+    "Nếu truyện có 'outline': giữ đúng số chương và nội dung từng chương, chỉ mở rộng lời kể và thoại."
+  ],
+  "series": {
+    "Nhà Họ Trần": {
+      "topic": "ho_hang_viet",
+      "narrator": "Thảo (tôi), 27 tuổi, kế toán, mỏ hỗn nhưng tử tế, luôn chuẩn bị giấy tờ/bằng chứng",
+      "cast": {
+        "Bác Cả (Trần Văn Lợi)": "sĩ diện, thích làm giàu nhanh, hay vay; không ác, chỉ tham và nói nhiều",
+        "Thím Hai (Nguyệt)": "nghiện so sánh con cái, mồm mép nhưng thương con",
+        "Cô Út Hằng": "32 tuổi, hồn nhiên vô tri, câu hỏi ngây ngô luôn trúng tim đen",
+        "Bà nội": "80 tuổi, tinh quái, đồng minh bí mật của Thảo, át chủ bài cuối truyện",
+        "Tuấn": "con bác Cả, quý tử được chiều, trưởng thành dần qua series",
+        "Bố Thảo": "hiền, ngại va chạm",
+        "Mẹ Thảo": "hay lo"
+      },
+      "setting": "một làng ven Hà Nội; bữa cơm Chủ nhật, giỗ, Tết ở nhà bà nội"
+    },
+    "Khu Trọ Cô Ba": {
+      "topic": "nghe_la_hong_bien",
+      "narrator": "Ngọc (tôi), gọi là cô Ba, 30 tuổi, thừa kế dãy trọ 10 phòng của dì Tư ở Gò Vấp; xởi lởi, mỏ hỗn, thích hóng nhưng giữ bí mật cho khách",
+      "cast": {
+        "Bà Sáu (phòng 1)": "bà cụ nuôi mèo Mập, hay giả lẫn",
+        "Cặp đôi phòng 3": "cãi nhau đúng 20h15 mỗi tối",
+        "Anh Tín (phòng 5)": "biết tuốt, hay nợ tiền nhà, trả bằng tin tức",
+        "Khoa (phòng 7)": "sinh viên sĩ diện, giỏi tra cứu",
+        "Chị Hoa (phòng 8)": "bán vé số, nhớ mặt cả phường",
+        "Phòng 10": "bí ẩn, dì Tư dặn không cho thuê"
+      },
+      "setting": "dãy trọ 10 phòng, sân chung có cây khế, Gò Vấp, Sài Gòn"
+    },
+    "Mẹ Chồng Trọng Sinh": {
+      "topic": "bo_me_trong_sinh",
+      "narrator": "mẹ chồng 55–65 tuổi (tôi), mỗi truyện một nhân vật khác",
+      "cast": {},
+      "setting": "gia đình Việt, mỗi truyện độc lập"
+    },
+    "Hội Phụ Huynh Lớp 5A": {
+      "topic": "hoc_duong",
+      "narrator": "Hà (tôi), 34 tuổi, kế toán, mẹ bé Bông lớp 5A trường tiểu học Kim Đồng (Hà Nội); thẳng tính, mỏ hỗn, soi sổ sách giỏi hơn soi gương",
+      "setting": "lớp 5A, nhóm Zalo 'Phụ huynh 5A thân yêu' 38 thành viên, cổng trường giờ đón con",
+      "cast": {
+        "Chị Diệu Linh": "trưởng ban phụ huynh, khoe của, mê thu quỹ, nói câu nào cũng có chữ 'vì các con'",
+        "Mẹ Tít": "hiền, ngại va chạm, hay bị giao việc không công",
+        "Bố Cún": "dân IT ít nói, chỉ nhắn bằng bảng tính",
+        "Cô Mai": "chủ nhiệm 26 tuổi, công tâm, hay bị phụ huynh ép",
+        "Bé Bông": "con tôi, 10 tuổi, lém, nói thật đúng lúc nhất"
+      }
+    },
+    "Phòng 402 Ký Túc Xá": {
+      "topic": "hoc_duong",
+      "narrator": "Trang (tôi), 20 tuổi, sinh viên năm hai ngành kế toán, quê Thái Bình, ở ký túc xá khu B Thủ Đức; tiết kiệm, mỏ hỗn, nhớ dai từng nghìn đồng",
+      "setting": "phòng 402 ký túc xá khu B, 4 giường tầng, một ổ cắm chung, căn tin dưới tầng trệt",
+      "cast": {
+        "Vy": "tiểu thư Sài Gòn, xài chùa đồ của cả phòng, xin lỗi bằng sticker",
+        "Hoài": "quê Nghệ An, chăm, nghèo, hiền đến mức bị bắt nạt",
+        "Ngân": "trưởng phòng, mê livestream bán hàng lúc nửa đêm",
+        "Cô Lành": "quản lý ký túc xá, nghiêm, thích bằng chứng"
+      }
+    },
+    "Lớp 11A2": {
+      "topic": "hoc_duong",
+      "narrator": "Minh Anh (tôi), 16 tuổi, lớp 11A2 trường THPT Phan Châu Trinh (Đà Nẵng); học khá, lanh, thích ghi chép và bằng chứng, nói ít nhưng câu nào cũng trúng",
+      "setting": "lớp 11A2, giờ sinh hoạt lớp chiều thứ Bảy, nhóm chat lớp, sân trường có cây phượng",
+      "cast": {
+        "Khánh": "lớp trưởng, con thầy hiệu phó, kiêu, thích ra lệnh",
+        "Tùng": "bàn cuối, nghịch nhưng tốt bụng, nghĩ ra trò nào cũng buồn cười",
+        "Diệp": "bạn thân tôi, hiền, hát chèo hay",
+        "Cô Thảo": "chủ nhiệm môn Văn, nghiêm nhưng công bằng"
+      }
+    }
+  },
+  "stories": [
+    {
+      "id": 1,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Tết Nào Cũng Bị Hỏi Lương, Năm Nay Tôi Hỏi Lại Cả Họ",
+      "premise": "Thảo 27 tuổi, kế toán, năm nào về quê ăn Tết cũng bị cả họ tra hỏi lương, người yêu, bao giờ mua nhà. Năm nay cô chuẩn bị sẵn 'bảng hỏi ngược' cho từng người trong mâm cơm mùng Hai.",
+      "twist": "Bác Cả khoe con trai lương 50 triệu; Thảo hỏi nhẹ sao em Tuấn vay cô ba lần chưa trả. Cả mâm im bặt, bà nội cười to nhất.",
+      "hook": "Bác Cả vừa gắp miếng giò, tôi đã mở sổ: 'Bác ơi, năm nay bác lãi bao nhiêu ạ?'",
+      "comment_question": "Tết vừa rồi bạn bị hỏi câu gì nhiều nhất?",
+      "thumb_keywords": [
+        "Hỏi Lại Cả Họ"
+      ],
+      "timing": "Trước Tết (T1/2027)",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 2,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Bác Cả Đòi Chia Đất Của Bố, Tôi Livestream Luôn",
+      "premise": "Bác Cả mang tờ giấy viết tay đòi chia mảnh đất bố Thảo tự mua. Thảo đề nghị 'họp gia đình cho minh bạch' và lặng lẽ bật livestream cho cả xóm xem.",
+      "twist": "Ngay trên sóng, bà nội kể bác Cả đã bán phần đất của mình từ 20 năm trước để trả nợ đề. 300 người xem thả haha.",
+      "hook": "Mắt camera sáng đỏ, 300 người đang xem, bác Cả vẫn chưa biết.",
+      "comment_question": "Chuyện đất đai trong nhà: nói thẳng hay giữ hoà khí?",
+      "thumb_keywords": [
+        "Livestream Luôn"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-09-28",
+      "outline": [
+        "Bữa cơm Chủ nhật, bác Cả đặt tờ giấy viết tay lên mâm: 'năm 2003 ông nội hứa chia đôi mảnh đất'. Bố Thảo hiền, im lặng. Thảo tự giới thiệu và cả nhà họ Trần (bà nội, thím Hai, cô Út Hằng, Tuấn).",
+        "Lai lịch mảnh đất 120m²: bố mua năm 2005 bằng tiền đi làm thuê ở Bình Dương, hồi đó bác Cả chê 'đất ruộng'. Nay có đường vành đai, giá tăng 10 lần. Miếng hài: bác Cả tự đo đất bằng bước chân, mỗi lần đo ra một số.",
+        "Bác Cả leo thang: kéo thím Hai làm 'nhân chứng', tung tin trong nhóm Zalo họ. Mẹ Thảo lo mất ngủ, bố muốn nhường cho yên nhà.",
+        "Thảo lên phường xin trích lục: sổ đỏ đứng tên bố, còn giữ giấy mua bán gốc. Cô Út vô tri hỏi giữa đám đông: 'Đất của bác sao sổ không có tên bác?'",
+        "Bác Cả đổi chiêu tình cảm: khóc kể khổ, Tuấn sắp cưới cần nhà. Vài người trong họ nghiêng về bác. Cliffhanger: bác đòi 'họp gia đình' Chủ nhật tới để chốt.",
+        "Thảo đồng ý họp nhưng đặt luật minh bạch: họp ở nhà bà nội, mời trưởng thôn. Cô nói công khai sẽ livestream cho họ hàng ở Sài Gòn theo dõi; bác Cả hăng hái đồng ý 'cho cả thiên hạ biết'.",
+        "Cuộc họp mở màn: bác Cả diễn thuyết như đọc diễn văn, trình tờ giấy. Bình luận livestream nhảy liên tục; một người hỏi sao chữ ký ông nội giống chữ bác thế.",
+        "Thảo hỏi từng câu nhẹ nhàng: giấy viết năm 2003 nhưng là giấy vở kẻ ô có logo hãng mới ra năm 2019. Mắt xem tăng lên 300.",
+        "Thím Hai phản đòn, lôi chuyện Thảo 27 tuổi chưa chồng. Thảo đáp mỏ hỗn nhưng lễ phép; livestream cười nghiêng ngả.",
+        "Bác Cả tung 'nhân chứng' là ông bạn nhậu. Ông lỡ miệng hỏi bao giờ nhận 10 triệu tiền 'làm chứng'.",
+        "Bà nội, im lặng từ đầu, sai Thảo lấy chiếc hộp thiếc dưới gầm giường.",
+        "Bà kể: năm 2001 ông đã chia riêng cho bác Cả một mảnh; bác bán năm 2004 trả nợ đề, giấy bán còn trong hộp. Cả họ sững sờ; Thảo lặng lẽ tắt livestream vì đây là chuyện riêng của bà.",
+        "Bác Cả xấu hổ bỏ về. Tối đó Tuấn nhắn tin xin lỗi Thảo, kể bố đang nợ nên mới làm liều.",
+        "Thảo và bố quyết không làm to: cho Tuấn thuê một góc đất mở tiệm sửa xe, tiền thuê trừ dần nợ cho bác. Điều kiện duy nhất: bác xin lỗi công khai trong nhóm Zalo họ.",
+        "Bác Cả gửi tin nhắn thoại xin lỗi dài 4 phút, giọng run. Bà nội là người thả tim đầu tiên. Thảo ẩn video livestream.",
+        "Chủ nhật sau, bác Cả mang giò sang, hỏi: 'Năm nay cháu lương bao nhiêu?' Thảo mở sổ. Thím Hai giơ điện thoại khoe con gái bên Úc — mở màn truyện sau. Câu hỏi bình luận."
+      ]
+    },
+    {
+      "id": 3,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Thím Hai Thích So Sánh Con, Tôi Cho Thím So Tới Bến",
+      "premise": "Đám giỗ nào thím Hai cũng mang con gái du học Úc ra so với Thảo. Lần này Thảo đồng ý 'so công khai' từng hạng mục trước cả họ.",
+      "twist": "Em họ bên Úc gọi video cầu cứu vì đã bỏ học đi làm nail; Thảo che cho em, dẫn dắt để thím tự nhận mình ép con quá mức và hai mẹ con làm lành.",
+      "hook": "Thím Hai giơ điện thoại: 'Nhìn con tao đây, rồi nhìn lại mày đi.'",
+      "comment_question": "Bố mẹ bạn có hay so sánh bạn với 'con nhà người ta' không?",
+      "thumb_keywords": [
+        "So Tới Bến"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-05"
+    },
+    {
+      "id": 4,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Cô Út Vô Tri Của Tôi Đi Xem Mắt Hộ Cả Họ",
+      "premise": "Cô Út Hằng 32 tuổi, hồn nhiên tới mức vô tri, bị cả họ ép đi xem mắt 5 anh liền. Thảo đi theo làm 'trợ lý'.",
+      "twist": "Mỗi buổi cô Út hỏi một câu ngây ngô mà vạch trần đúng một kiểu gia trưởng. Người cô chọn là anh shipper cả họ chê; bà nội đứng ra bảo lãnh.",
+      "hook": "Buổi xem mắt thứ ba, cô Út tôi hỏi anh kia: 'Anh có nợ xấu không ạ?'",
+      "comment_question": "Bạn từng bị ép đi xem mắt chưa? Kể mình nghe!",
+      "thumb_keywords": [
+        "Xem Mắt Hộ Cả Họ"
+      ],
+      "timing": "Mùa cưới (T10–T12)",
+      "priority": "A",
+      "publish_date": "2026-10-12"
+    },
+    {
+      "id": 5,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Em Họ Quý Tử Vay Tiền Cưới Vợ, Tôi Đòi Sổ Đỏ Thế Chấp",
+      "premise": "Tuấn, quý tử nhà bác Cả, hỏi vay Thảo 200 triệu cưới vợ vì 'người nhà cần gì giấy tờ'. Thảo mang luôn hợp đồng công chứng tới.",
+      "twist": "Cô dâu tương lai biết chuyện, đứng về phía Thảo, bắt Tuấn đi làm trả nợ trước khi cưới. Bác Cả lần đầu cứng họng trước con dâu.",
+      "hook": "'Chị ơi, người nhà với nhau…' — 'Ừ, người nhà nên chị mới chuẩn bị sẵn công chứng.'",
+      "comment_question": "Cho người thân vay tiền, bạn có làm giấy tờ không?",
+      "thumb_keywords": [
+        "Đòi Sổ Đỏ"
+      ],
+      "timing": "Mùa cưới (T10–T12)",
+      "priority": "B",
+      "publish_date": "2026-10-19"
+    },
+    {
+      "id": 6,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Bà Nội 80 Tuổi Mở Nhóm Zalo Bóc Phốt Cả Họ",
+      "premise": "Bà nội vừa học dùng Zalo, lập nhóm 'Họ Trần Nói Thật' và mỗi tối gửi một ghi âm kể sự thật về một người con cháu.",
+      "twist": "Thảo phát hiện bà làm vậy để thử lòng trước khi chia tài sản; cô trở thành 'trợ lý kỹ thuật' bí mật của bà.",
+      "hook": "1 giờ sáng, nhóm Zalo họ Trần hiện thông báo: Bà nội đã gửi một tin nhắn thoại.",
+      "comment_question": "Ông bà bạn có dùng Zalo, Facebook không? Có vui không?",
+      "thumb_keywords": [
+        "Bóc Phốt Cả Họ"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 7,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Giỗ Ông, Cả Họ Tranh Nhau Giữ Quỹ Họ",
+      "premise": "Năm nay ai đứng ra lo giỗ ông sẽ được giữ quỹ họ. Ba nhà tranh nhau; Thảo làm kế toán được giao kiểm sổ.",
+      "twist": "Sổ quỹ thiếu 80 triệu, dấu vết dẫn đúng tới người hăng hái nhất. Thảo công khai sổ ngay trên mâm cỗ.",
+      "hook": "Ông mất 10 năm, năm nào giỗ cũng vui, chỉ có sổ quỹ là buồn.",
+      "comment_question": "Nhà bạn có quỹ họ không? Ai giữ?",
+      "thumb_keywords": [
+        "Giữ Quỹ Họ"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 8,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Đám Cưới Em Họ, Tôi Ngồi Bàn Phụ Nhưng Cầm Micro",
+      "premise": "Vì 'chưa chồng', Thảo bị thím Hai xếp ngồi bàn cạnh nhà vệ sinh trong đám cưới em họ. MC nhờ cô lên phát biểu thay người bỏ về.",
+      "twist": "Bài phát biểu hài hước khiến cả hội trường cười; nhà trai nhận ra cô là sếp tổng của chú rể. Thím Hai vội mời cô lên bàn chính.",
+      "hook": "'Mày chưa chồng thì ngồi tạm bàn kia nhé.' Bàn kia cách nhà vệ sinh đúng một bước chân.",
+      "comment_question": "Đi đám cưới bạn hay bị hỏi câu gì nhất?",
+      "thumb_keywords": [
+        "Cầm Micro"
+      ],
+      "timing": "Mùa cưới (T10–T12)",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 9,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Bác Cả Rủ Cả Họ Góp Vốn Làm Giàu, Tôi Góp Một Cái Camera",
+      "premise": "Bác Cả rủ cả họ góp tiền vào dự án 'nuôi yến lãi 30%/tháng'. Thảo xin đi cùng buổi hội thảo, mang theo camera.",
+      "twist": "Thảo vạch ra đây là mô hình đa cấp, cứu được sổ tiết kiệm của bà nội; bác Cả vừa xấu hổ vừa biết ơn.",
+      "hook": "'Lãi 30% một tháng, cháu góp không?' — 'Cháu góp ạ. Góp cái camera.'",
+      "comment_question": "Bạn có người thân từng dính đa cấp không?",
+      "thumb_keywords": [
+        "Góp Một Cái Camera"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 10,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Cả Họ Đòi Ở Nhờ Căn Hộ Mới Mua Của Tôi",
+      "premise": "Thảo vừa mua chung cư trả góp, họ hàng lên thành phố khám bệnh, đi học, đi chơi lần lượt đòi ở nhờ không thời hạn.",
+      "twist": "Thảo ban hành 'nội quy homestay' kèm bảng giá; ai ở lâu nhất tự thu dọn đi trong ba ngày.",
+      "hook": "Chìa khoá nhà mới cầm chưa nóng tay, tin nhắn đầu tiên đã tới: 'Cháu ơi, tuần sau cả nhà bác lên.'",
+      "comment_question": "Họ hàng ở nhờ: bao lâu là quá lâu?",
+      "thumb_keywords": [
+        "Ở Nhờ Căn Hộ"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 11,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Thím Hai Mang Mâm Cỗ Sang Biếu, Kèm Luôn Hoá Đơn",
+      "premise": "Tết nào thím Hai cũng mang cỗ sang 'biếu' rồi nhắc khéo tiền chợ. Năm nay Thảo biếu lại đúng giá trị, có hoá đơn.",
+      "twist": "Hai bên đổi quà qua lại leo thang thành cuộc thi nấu cỗ; cuối cùng cả họ được ăn Tết to nhất 10 năm.",
+      "hook": "Thím đặt mâm cỗ xuống, rút tờ giấy từ túi áo: 'Thím ghi sẵn để cháu khỏi phải tính.'",
+      "comment_question": "Nhà bạn Tết có 'biếu qua biếu lại' không?",
+      "thumb_keywords": [
+        "Kèm Luôn Hoá Đơn"
+      ],
+      "timing": "Trước Tết (T1/2027)",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 12,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Họ Hàng Đòi Tôi Nhường Suất Du Lịch Cho Em Trai",
+      "premise": "Thảo thắng chuyến du lịch Nhật của công ty. Cả họ bảo 'con gái đi làm gì, nhường em Tuấn đi cho mở mang'.",
+      "twist": "Thảo đồng ý nhường nếu Tuấn làm thay cô một tuần việc nhà cho bà nội; Tuấn bỏ cuộc sau hai ngày.",
+      "hook": "'Con gái đi xa làm gì, nhường em đi cho nó mở mang.'",
+      "comment_question": "Bạn có từng bị bắt nhường chỉ vì là con gái/con chị?",
+      "thumb_keywords": [
+        "Nhường Suất Du Lịch"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 13,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Bác Cả Dạy Tôi Chuyện Lấy Chồng, Tôi Dạy Lại Chuyện Nợ",
+      "premise": "Mỗi lần gặp, bác Cả giảng một tràng về con gái phải lấy chồng trước 30. Thảo quyết định mở 'lớp tài chính gia đình' đáp lễ.",
+      "twist": "Buổi học lật ra khoản nợ tín dụng bác giấu vợ. Bác gái đứng về phía Thảo; bác Cả phải ký cam kết trả nợ.",
+      "hook": "'Con gái 27 tuổi là ế rồi.' — 'Vâng, còn nợ 3 năm là xấu rồi bác ạ.'",
+      "comment_question": "Câu 'khuyên' khó nghe nhất bạn từng nhận là gì?",
+      "thumb_keywords": [
+        "Dạy Lại Chuyện Nợ"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 14,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Mùng Hai Tết, Tôi Mở Quầy Lì Xì Có Điều Kiện",
+      "premise": "Họ hàng dắt con tới 'chúc Tết' Thảo để nhận lì xì to. Cô mở quầy lì xì: trả lời câu đố hoặc làm một việc tốt.",
+      "twist": "Trẻ con mê trò chơi, bố mẹ chúng tức; hoá ra người chơi say nhất là bác Cả.",
+      "hook": "Tôi dựng tấm bảng trước cửa: 'Lì xì theo năng lực. Không nhận chúc suông.'",
+      "comment_question": "Tết nhà bạn lì xì bao nhiêu là vừa?",
+      "thumb_keywords": [
+        "Lì Xì Có Điều Kiện"
+      ],
+      "timing": "Trước Tết (T1/2027)",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 15,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Cả Họ Tưởng Tôi Thất Nghiệp, Thật Ra Tôi Là Sếp Con Họ",
+      "premise": "Thảo làm việc từ xa, suốt ngày ở nhà nên cả họ đồn cô thất nghiệp và thương hại ra mặt.",
+      "twist": "Tuấn đi phỏng vấn và gặp người phỏng vấn cuối cùng chính là Thảo. Bác Cả gửi giỏ quà sang nhà xin lỗi.",
+      "hook": "'Con Thảo ở nhà cả tuần, chắc bị đuổi việc rồi.' Tôi đang họp với 40 người qua Zoom.",
+      "comment_question": "Làm việc ở nhà có bị người nhà hiểu lầm không?",
+      "thumb_keywords": [
+        "Tôi Là Sếp"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 16,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Bà Nội Giả Vờ Lẫn, Chia Tài Sản Không Ai Ngờ",
+      "premise": "Bà nội bỗng 'lẫn', gọi nhầm tên con cháu, và tuyên bố sẽ chia đất theo ai chăm bà nhiều nhất.",
+      "twist": "Thảo phát hiện bà giả vờ và thành đồng phạm; người được chia nhiều nhất là cô Út vô tri, người duy nhất không toan tính.",
+      "hook": "Bà nhìn tôi, nháy một mắt, rồi quay sang bác Cả: 'Anh là ai đấy?'",
+      "comment_question": "Nếu là bà, bạn sẽ chia tài sản thế nào?",
+      "thumb_keywords": [
+        "Giả Vờ Lẫn"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 17,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Cô Út Mở Quán Bún Đậu, Cả Họ Ăn Chịu Ba Năm",
+      "premise": "Cô Út mở quán bún đậu, họ hàng ăn toàn ghi sổ 'người nhà mà'. Quán sắp đóng cửa vì lỗ.",
+      "twist": "Thảo dán mã QR và bảng 'Vinh danh người trả nợ'. Cả họ thi nhau trả để được lên bảng; quán sống lại.",
+      "hook": "Quyển sổ nợ dày hơn quyển thực đơn.",
+      "comment_question": "Đi ăn quán người quen, bạn có trả tiền không?",
+      "thumb_keywords": [
+        "Ăn Chịu Ba Năm"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 18,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Nhà Họ Trần Đi Du Lịch Chung, Tôi Làm Trưởng Đoàn",
+      "premise": "20 người họ Trần đi Đà Lạt 3 ngày, mỗi người một kiểu: người ngủ muộn, người mặc cả, người lạc.",
+      "twist": "Chuyến đi hỗn loạn lại giúp bác Cả và bố Thảo làm lành sau 5 năm giận nhau.",
+      "hook": "Ngày đầu tiên, đoàn 20 người, 3 người lạc, 1 người quên chứng minh thư.",
+      "comment_question": "Du lịch với họ hàng: vui hay mệt?",
+      "thumb_keywords": [
+        "Tôi Làm Trưởng Đoàn"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 19,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Người Yêu Ra Mắt Họ Trần, Cả Họ Phỏng Vấn Như Thi Tuyển",
+      "premise": "Thảo dẫn bạn trai về ra mắt; anh phải qua 5 'vòng thi' của 5 người họ hàng.",
+      "twist": "Anh giả vờ nghèo để thử lòng, bị cả họ chê; cuối cùng anh là người giúp bác Cả thoát vụ nợ, cả họ đổi thái độ.",
+      "hook": "'Vòng 1: lương. Vòng 2: nhà. Vòng 3: bố mẹ làm gì. Mời cháu ngồi.'",
+      "comment_question": "Lần đầu ra mắt nhà người yêu, bạn bị hỏi gì?",
+      "thumb_keywords": [
+        "Phỏng Vấn Như Thi Tuyển"
+      ],
+      "timing": "Mùa cưới (T10–T12)",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 20,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Đám Cưới Tôi, Bác Cả Đòi Thu Tiền Mừng Hộ",
+      "premise": "Kết series: đám cưới của Thảo. Bác Cả xung phong đứng thu tiền mừng 'cho an toàn'.",
+      "twist": "Cả họ, từng người từng bị Thảo 'xử đẹp', âm thầm phối hợp bảo vệ hòm tiền mừng; bác Cả lần đầu thật lòng chúc phúc.",
+      "hook": "'Để bác giữ hòm tiền cho, người ngoài không tin được.'",
+      "comment_question": "Tiền mừng cưới nhà bạn ai giữ?",
+      "thumb_keywords": [
+        "Thu Tiền Mừng Hộ"
+      ],
+      "timing": "Mùa cưới (T10–T12)",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 21,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Chị Dâu Mỏ Hỗn Nhất Xóm, Cả Nhà Chồng Phải Nể",
+      "premise": "Người kể là em chồng. Nhà có anh cả hiền, mẹ và các chị em ăn bám; chị dâu mới về mỏ hỗn, sắc sảo.",
+      "twist": "Chị dâu dẹp văn hoá ăn bám, dựng lại kinh tế cả nhà; người em chồng từ ghét thành fan cứng.",
+      "hook": "Ngày đầu về làm dâu, chị ấy nhìn mâm cơm 12 người rồi hỏi: 'Ai đi làm?'",
+      "comment_question": "Nhà bạn có chị dâu/em dâu 'đỉnh' không?",
+      "thumb_keywords": [
+        "Chị Dâu Mỏ Hỗn"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-09-30",
+      "outline": [
+        "Ngày đầu chị dâu Hạnh về, nhìn mâm cơm 12 người rồi hỏi: 'Ai đi làm?' Linh (tôi, em chồng 24 tuổi, bán hàng online lười) giới thiệu cả nhà: mẹ, anh Quân hiền gánh cả nhà, chị Loan và anh Phát ở nhờ, em út Tùng 26 tuổi chơi game.",
+        "Bức tranh ăn bám: lương kỹ sư của anh Quân nuôi 12 miệng ăn. Cả nhà bàn nhau 'dằn mặt' chị dâu mới.",
+        "Màn dằn mặt đầu tiên: mẹ giao rửa bát cho 12 người. Chị Hạnh dán bảng phân công lên tủ lạnh, lý do 'nhà đông chia đều mới công bằng'.",
+        "Chị Loan đòi chị dâu nộp lương; chị Hạnh mở bảng chi tiêu, hỏi mỗi người góp gì. Không ai trả lời được.",
+        "Tùng xin tiền nạp game; chị Hạnh (trưởng phòng kinh doanh công ty nội thất) giao Tùng chụp ảnh sản phẩm thử, trả công theo ảnh.",
+        "Cả nhà họp kín chống chị dâu; Linh được cử làm 'gián điệp'.",
+        "Linh theo dõi và phát hiện chị Hạnh lặng lẽ trả nợ thẻ tín dụng mẹ giấu (nợ vì cho chị Loan vay). Linh bắt đầu dao động.",
+        "Anh Phát mượn danh anh Quân vay nóng; chủ nợ kéo đến nhà giữa buổi trưa.",
+        "Chị Hạnh đối đầu chủ nợ bằng giấy tờ và cái miệng sắc, đuổi được họ đi; cả xóm đứng xem và nể.",
+        "Sự thật: vợ chồng chị Loan bị lừa đầu tư. Chị Hạnh không bỏ mặc, ra điều kiện: đi làm ở xưởng quen và trả dần.",
+        "Tùng hoá ra chụp ảnh có tài, cầm đồng lương đầu tiên 3 triệu, mua cho mẹ đôi dép.",
+        "Chị Hạnh chỉ Linh làm shop online bài bản; đơn hàng tăng gấp ba.",
+        "Mẹ chồng vẫn tức vì mất 'quyền'; bà hàng xóm xúi đuổi con dâu.",
+        "Mẹ ốm phải nằm viện; người trực đêm là chị Hạnh, viện phí trả bằng quỹ gia đình chị lập từ tiền mọi người tự làm ra.",
+        "Mẹ xin lỗi con dâu; chị Hạnh đáp: 'Mẹ xin lỗi thì con tăng tiền chợ cho mẹ' — cả phòng bệnh bật cười.",
+        "Một năm sau, mâm cơm vẫn 12 người nhưng ai cũng đi làm. Linh thành fan cứng của chị dâu. Câu hỏi bình luận."
+      ]
+    },
+    {
+      "id": 22,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Nhà Vợ Chê Tôi Làm Thợ Điện, Đến Khi Cả Xóm Mất Điện",
+      "premise": "Người kể là nam, thợ điện, bị nhà vợ chê kém sang so với anh rể làm ngân hàng.",
+      "twist": "Đêm 30 Tết cả xóm mất điện, chỉ anh cứu được; hoá ra anh là chủ công ty điện lạnh 30 thợ.",
+      "hook": "Bố vợ gắp cho anh rể miếng ngon nhất, gắp cho tôi cái xương.",
+      "comment_question": "Con rể làm nghề tay chân có bị coi thường không?",
+      "thumb_keywords": [
+        "Cả Xóm Mất Điện"
+      ],
+      "timing": "Trước Tết (T1/2027)",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 23,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Anh Rể Khoe Giàu, Tôi Hỏi Đúng Một Câu Về Khoản Vay",
+      "premise": "Anh rể lái xe mới về quê, khoe nhà, khoe xe, chê em vợ nghèo.",
+      "twist": "Em vợ làm ngân hàng, hỏi đúng một câu về lịch trả góp; anh rể lộ nợ ngập đầu, chị gái được giải thoát khỏi áp lực giả vờ.",
+      "hook": "Chiếc xe còn mới mùi da, anh rể vỗ vào nắp capo: 'Chú bao giờ mới mua được?'",
+      "comment_question": "Bạn có người thân thích khoe không?",
+      "thumb_keywords": [
+        "Hỏi Đúng Một Câu"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 24,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Cậu Đi Xuất Khẩu Lao Động Về, Cả Họ Xếp Hàng Vay Tiền",
+      "premise": "Cậu đi Hàn 8 năm về quê, cả họ tưởng giàu, xếp hàng vay tiền. Cậu giả vờ nghèo để xem ai thật lòng.",
+      "twist": "Người duy nhất tới hỏi thăm sức khoẻ cậu là đứa cháu bị cả họ coi thường; cậu đầu tư cho cháu mở xưởng.",
+      "hook": "Cậu về đến ngõ, hàng xóm chưa kịp chào, họ hàng đã kịp hỏi vay.",
+      "comment_question": "Người thân đi xa về có hay bị hỏi vay tiền không?",
+      "thumb_keywords": [
+        "Xếp Hàng Vay Tiền"
+      ],
+      "timing": "Trước Tết (T1/2027)",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 25,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Mẹ Vợ Tương Lai Đòi Sính Lễ 500 Triệu, Tôi Trả Giá",
+      "premise": "Người kể là nam, dân kinh doanh chợ; mẹ người yêu đòi sính lễ 500 triệu. Anh trả giá như đi chợ, rất lễ phép.",
+      "twist": "Cuộc 'mặc cả' hài hước làm lộ ra mẹ vợ cần tiền trả nợ cho con trai; anh giúp giải quyết, được lòng cả nhà.",
+      "hook": "'500 triệu, cháu thấy sao?' — 'Dạ, cô bớt cho cháu chút tiền ship được không?'",
+      "comment_question": "Sính lễ bao nhiêu là hợp lý?",
+      "thumb_keywords": [
+        "Sính Lễ 500 Triệu"
+      ],
+      "timing": "Mùa cưới (T10–T12)",
+      "priority": "A",
+      "publish_date": "2026-10-03"
+    },
+    {
+      "id": 26,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Chị Họ Làm Influencer, Bắt Cả Nhà Diễn Hạnh Phúc",
+      "premise": "Chị họ có 1 triệu follow, về quê ăn Tết bắt cả nhà quay clip 'gia đình hạnh phúc' theo kịch bản.",
+      "twist": "Hậu trường lộ ra chị đang nợ nần và kiệt sức; cả nhà thật sự đứng ra giúp, clip thật lại viral nhất.",
+      "hook": "Cảnh 12, lần quay thứ 7: 'Bà ơi, bà cười tự nhiên hơn chút ạ.'",
+      "comment_question": "Bạn có thấy áp lực sống ảo trên mạng không?",
+      "thumb_keywords": [
+        "Diễn Hạnh Phúc"
+      ],
+      "timing": "Trước Tết (T1/2027)",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 27,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Em Chồng Ăn Bám Ba Năm, Tôi Mở Lớp Dạy Kiếm Tiền",
+      "premise": "Em chồng 28 tuổi ở nhà chơi game, xin tiền chị dâu. Chị dâu mở 'lớp kiếm tiền tại gia' bắt buộc.",
+      "twist": "Em chồng dần kiếm được đồng lương đầu tiên và thành người bảo vệ chị dâu trước mẹ chồng.",
+      "hook": "'Chị ơi cho em 500 nghìn.' — 'Được, bài tập hôm nay đây.'",
+      "comment_question": "Nhà bạn có người lớn rồi vẫn ăn bám không?",
+      "thumb_keywords": [
+        "Mở Lớp Dạy Kiếm Tiền"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 28,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Ông Chú Thích Làm Mai, Tôi Gài Ông Tự Mai Cho Mình",
+      "premise": "Chú góa vợ suốt ngày mai mối cho cháu gái. Cô cháu gài ngược, sắp xếp cho chú gặp bà bán xôi đầu ngõ.",
+      "twist": "Chú và bà bán xôi nên duyên; đám cưới của hai người thành sự kiện vui nhất xóm.",
+      "hook": "Chú tôi đã mai mối 14 lần, thành công 0 lần, và chưa bao giờ nản.",
+      "comment_question": "Bạn có muốn bố mẹ/cô chú đơn thân tìm bạn đời mới không?",
+      "thumb_keywords": [
+        "Tự Mai Cho Mình"
+      ],
+      "timing": "Mùa cưới (T10–T12)",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 29,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Ra Mắt Nhà Người Yêu, Tôi Phát Hiện Cả Nhà Diễn Sâu",
+      "premise": "Cả nhà người yêu đóng vai giàu có để thử cô; cô nhận ra và diễn nghèo ngược lại.",
+      "twist": "Hai bên diễn qua lại tới khi bà nội bên nhà trai bật cười thú nhận; hai gia đình thành thân như ruột.",
+      "hook": "Bữa cơm ra mắt có tôm hùm, nhưng cái đĩa vẫn còn tem giá.",
+      "comment_question": "Bạn có từng thử lòng người yêu không?",
+      "thumb_keywords": [
+        "Cả Nhà Diễn Sâu"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-07"
+    },
+    {
+      "id": 30,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Họ Hàng Quê Lên Phố Dạy Hội Chị Em Chung Cư Cách Sống",
+      "premise": "Bà ngoại quê và dì lên ở chung cư, bị hội hàng xóm sang chảnh coi thường.",
+      "twist": "Bà ngoại dùng kinh nghiệm quê cứu cả toà nhà trong một đêm mất nước; hội chị em xin học làm tương, muối dưa.",
+      "hook": "Tin nhắn nhóm cư dân: 'Ai cho nhà 12B phơi cá khô ngoài ban công vậy?'",
+      "comment_question": "Ở chung cư bạn có hay va chạm với hàng xóm?",
+      "thumb_keywords": [
+        "Hội Chị Em Chung Cư"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 31,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Bị Giục Sinh Con Trai, Tôi Mời Nhà Chồng Học Sinh Học",
+      "premise": "Nhà chồng giục con dâu phải đẻ con trai. Cô mời cả họ tới 'buổi học sinh học' do bác sĩ bạn cô đứng lớp.",
+      "twist": "Cả họ vỡ lẽ: giới tính con do bố quyết định. Mẹ chồng quay sang trách con trai; bố chồng xin lỗi con dâu.",
+      "hook": "'Năm nay phải có cháu đích tôn đấy.' — 'Vâng, mời cả nhà thứ Bảy đi học.'",
+      "comment_question": "Bạn có bị giục sinh con trai không?",
+      "thumb_keywords": [
+        "Học Sinh Học"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-10"
+    },
+    {
+      "id": 32,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Mẹ Chồng Và Tôi Lập Liên Minh Đuổi Em Chồng Ăn Bám",
+      "premise": "Cô em chồng về ở nhờ, đòi hỏi đủ thứ. Mẹ chồng và nàng dâu, vốn không hợp, bất ngờ bắt tay.",
+      "twist": "Liên minh mẹ chồng–nàng dâu vừa đuổi được em chồng về nhà mình vừa giúp cô ấy tự lập; hai người thành bạn thân.",
+      "hook": "Lần đầu tiên sau 5 năm, mẹ chồng kéo tôi vào bếp thì thầm: 'Con có kế gì chưa?'",
+      "comment_question": "Mẹ chồng bạn có từng là 'đồng minh' không?",
+      "thumb_keywords": [
+        "Lập Liên Minh"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-14"
+    },
+    {
+      "id": 33,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Cả Họ Chê Tôi Bỏ Phố Về Quê Nuôi Gà, Năm Sau Xin Việc",
+      "premise": "Người kể là nam, bỏ việc văn phòng về quê làm trang trại gà, bị cả họ chê 'học đại học để nuôi gà'.",
+      "twist": "Trang trại thành công, bán hàng online khắp nước; người chê nhiều nhất tới xin việc cho con.",
+      "hook": "'Học 4 năm đại học để về nuôi gà à?' — 'Dạ, gà nó không hỏi bằng cấp ạ.'",
+      "comment_question": "Bạn có muốn bỏ phố về quê không?",
+      "thumb_keywords": [
+        "Bỏ Phố Về Quê"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-17"
+    },
+    {
+      "id": 34,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Bố Vợ Khó Tính Và Chàng Rể Biết Chơi Cờ Tướng",
+      "premise": "Bố vợ cựu giáo viên khó tính không nhận con rể. Chàng rể xin được chơi một ván cờ tướng.",
+      "twist": "Mỗi tuần một ván, con rể thua có tính toán để nghe bố vợ tâm sự; bố vợ phát hiện và nhận anh làm 'đệ tử' lẫn con rể.",
+      "hook": "'Anh thắng tôi một ván thì tôi gả con gái.' Tôi chưa từng thắng ai ván nào.",
+      "comment_question": "Bố bạn/bố vợ bạn có sở thích gì để 'lấy lòng'?",
+      "thumb_keywords": [
+        "Chơi Cờ Tướng"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-21"
+    },
+    {
+      "id": 35,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Họ Hàng Đồn Tôi Lấy Chồng Già Giàu, Tôi Mời Cả Họ Đến",
+      "premise": "Cô lấy chồng hơn 12 tuổi, bị đồn đào mỏ. Cô mời cả họ đến nhà ăn tân gia.",
+      "twist": "Chồng là thầy giáo lương bình thường, người giàu là cô; họ hàng quay ngoắt 180 độ, cô cười cho qua.",
+      "hook": "'Lấy ông già thế chắc nhiều tiền lắm.' Chồng tôi lương 9 triệu.",
+      "comment_question": "Chênh lệch tuổi bao nhiêu thì bạn thấy ổn?",
+      "thumb_keywords": [
+        "Lấy Chồng Già Giàu"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 36,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Chia Tiền Đền Bù Giải Tỏa, Anh Em Suýt Từ Mặt",
+      "premise": "Nhà bố mẹ bị giải tỏa, 4 anh em tranh nhau tiền đền bù. Người em út (người kể) đứng giữa.",
+      "twist": "Bố mẹ đã chuẩn bị di chúc và 'bài kiểm tra' từ trước; ai tham nhất nhận phần nhỏ nhất, cả nhà cười ra nước mắt.",
+      "hook": "Tờ quyết định đền bù về, 4 anh em cùng lúc gọi cho mẹ.",
+      "comment_question": "Tiền bạc có làm anh em nhà bạn xa cách không?",
+      "thumb_keywords": [
+        "Suýt Từ Mặt"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 37,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Năm Nào Cũng Về Quê Nội Ăn Tết, Năm Nay Tôi Rủ Chồng Trốn",
+      "premise": "Tết nào cũng về nội làm dâu 5 ngày; năm nay cô đề xuất về ngoại, cả nhà chồng phản đối.",
+      "twist": "Chồng đứng về phía vợ, còn mẹ chồng lại xách vali đi theo về ngoại vì 'ở nhà mệt quá'.",
+      "hook": "Năm thứ 7 làm dâu, tôi lần đầu nói câu: 'Tết này nhà mình về ngoại.'",
+      "comment_question": "Tết nội hay Tết ngoại: nhà bạn chia thế nào?",
+      "thumb_keywords": [
+        "Rủ Chồng Trốn"
+      ],
+      "timing": "Trước Tết (T1/2027)",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 38,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Đám Hỏi Em Gái, Nhà Trai Mang Mâm Quả Đi Thuê",
+      "premise": "Nhà trai sĩ diện, mâm quả, xe, cả người bưng lễ đều đi thuê. Chị gái cô dâu (người kể) phát hiện.",
+      "twist": "Thay vì làm lớn, cô giúp nhà trai giữ thể diện và bắt chú rể hứa sống thật; đám cưới sau đó giản dị mà vui.",
+      "hook": "Người bưng mâm quả thứ ba nháy mắt với tôi. Anh ta là bạn cùng phòng trọ của tôi.",
+      "comment_question": "Đám hỏi cần làm to hay làm vừa?",
+      "thumb_keywords": [
+        "Mâm Quả Đi Thuê"
+      ],
+      "timing": "Mùa cưới (T10–T12)",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 39,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Nhóm Zalo Gia Đình 47 Người, Chỉ Mình Tôi Đọc Tin",
+      "premise": "Nhóm Zalo đại gia đình ngập ảnh chúc buổi sáng. Chỉ người kể đọc hết và phát hiện một đường link đầu tư lạ.",
+      "twist": "Cô chặn được vụ lừa đảo nhắm vào các bác lớn tuổi; từ đó được phong 'trưởng ban an ninh mạng' của họ.",
+      "hook": "Nhóm Zalo nhà tôi mỗi sáng có 32 ảnh bông hoa và 1 đường link lạ.",
+      "comment_question": "Nhóm gia đình của bạn gửi gì mỗi sáng?",
+      "thumb_keywords": [
+        "Nhóm Zalo Gia Đình"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-24"
+    },
+    {
+      "id": 40,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Họ Hàng Nhờ Xin Việc Cho Con, Tôi Mở Luôn Lớp Phỏng Vấn",
+      "premise": "Chị làm nhân sự, bị cả họ nhờ 'xin việc' cho con cháu. Chị mở lớp luyện phỏng vấn miễn phí thay vì đi cửa sau.",
+      "twist": "Đứa cháu được bố mẹ chiều nhất trượt thẳng; đứa cháu ít được để ý nhất đỗ vào công ty lớn nhờ tự luyện.",
+      "hook": "Tin nhắn Zalo thứ 9 tuần này: 'Cháu làm nhân sự, xin cho em nó một chân nhé.'",
+      "comment_question": "Xin việc qua người quen: bạn nghĩ sao?",
+      "thumb_keywords": [
+        "Mở Luôn Lớp Phỏng Vấn"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 41,
+      "topic": "nghe_la_hong_bien",
+      "series": "Khu Trọ Cô Ba",
+      "title": "Tôi Làm Chủ Trọ, Mười Phòng Mười Drama",
+      "premise": "Ba, 30 tuổi, bỏ việc văn phòng về thừa kế dãy trọ 10 phòng ở Gò Vấp của dì. Tháng đầu tiên, cô thu tiền nhà và thu luôn đủ loại drama.",
+      "twist": "Cô dần biết bí mật từng phòng và quyết định biến dãy trọ thành 'một nhà'; mở đầu series.",
+      "hook": "Ngày đầu nhận dãy trọ, tôi thu được 7 phòng tiền nhà và 10 câu chuyện.",
+      "comment_question": "Bạn từng ở trọ chưa? Chủ trọ của bạn thế nào?",
+      "thumb_keywords": [
+        "Mười Phòng Mười Drama"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-09-29",
+      "outline": [
+        "Ngọc (cô Ba), 30 tuổi, bỏ việc văn phòng nhận dãy trọ 10 phòng ở Gò Vấp dì Tư để lại. Lời dặn của dì: đừng tăng giá, đừng đuổi ai, đọc sổ tay.",
+        "Cuốn sổ tay của dì: mỗi phòng một trang ghi chú kỳ quặc ('phòng 5: nợ thì cho nợ, tin của nó đáng tiền'). Miếng hài liên tục.",
+        "Vòng thu tiền đầu tiên: phòng 1 bà Sáu nuôi mèo Mập trả tiền lẻ gói giấy báo; phòng 2 công nhân ca đêm đang ngủ, dán giấy 'đừng gõ'.",
+        "Phòng 3: cặp đôi đang cãi nhau, kéo Ngọc vào làm trọng tài giữa chừng (gieo cho truyện sau).",
+        "Phòng 5: anh Tín 'biết tuốt' nợ tiền, xin trả bằng tin: 'chủ trọ mới sắp bị lừa đấy'.",
+        "Phòng 7 sinh viên Khoa sĩ diện, phòng 8 chị Hoa bán vé số; phòng 10 khoá chặt, dì dặn không cho ai thuê.",
+        "Ông Lâm, môi giới lịch sự, đề nghị mua cả dãy trọ giá cao, hạn trả lời 7 ngày.",
+        "Ngọc phân vân: bán thì đủ tiền về quê mở tiệm. Anh Tín kể ông Lâm từng ép một bà cụ bán nhà rẻ.",
+        "Cả dãy trọ nghe tin sắp bán; mỗi người một phản ứng, lộ dần lý do họ bám nơi này.",
+        "Ngọc đọc kỹ hợp đồng: điều khoản đặt cọc gài bẫy; trong sổ tay dì có trang 'Lâm — đừng tin'.",
+        "Cả dãy trọ lập kế: chị Hoa theo dõi, Khoa tra công ty, bà Sáu giả lẫn để câu giờ. Hài hước và vụng về.",
+        "Buổi ký hợp đồng: màn diễn của cả dãy trọ; mèo Mập nhảy lên bàn làm đổ mực đúng trang quan trọng.",
+        "Lật tẩy: công ty của ông Lâm không có thật, chính ông từng lừa dì Tư năm xưa. Anh Tín báo phường; ông Lâm bỏ chạy.",
+        "Ngọc quyết định ở lại, không tăng giá, lập 'quỹ chung' của dãy trọ.",
+        "Tối liên hoan trong sân trọ; phòng 3 lại cãi nhau đúng 20h15, cả sân vỗ tay.",
+        "Ngọc mở phòng 10, thấy thư dì: 'Con đọc thư này nghĩa là con đã ở lại.' Có người gõ cửa xin thuê phòng 10, trả trước một năm. Câu hỏi bình luận."
+      ]
+    },
+    {
+      "id": 42,
+      "topic": "nghe_la_hong_bien",
+      "series": "Khu Trọ Cô Ba",
+      "title": "Khách Trọ Phòng 5 Nợ Tiền Nhà, Trả Bằng Tin Đồn",
+      "premise": "Anh phòng 5 nợ tiền nhà, xin trả bằng 'tin tức'; anh biết mọi chuyện trong phường.",
+      "twist": "Một tin tưởng như tầm phào giúp cô Ba phát hiện người định lừa mua lại dãy trọ.",
+      "hook": "'Tháng này em chưa có tiền, nhưng em có tin nóng, chị nghe không?'",
+      "comment_question": "Hàng xóm bạn có ai 'biết tuốt' không?",
+      "thumb_keywords": [
+        "Trả Bằng Tin Đồn"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": "2026-10-06"
+    },
+    {
+      "id": 43,
+      "topic": "nghe_la_hong_bien",
+      "series": "Khu Trọ Cô Ba",
+      "title": "Cặp Đôi Phòng 3 Cãi Nhau Mỗi Tối, Tôi Làm Trọng Tài",
+      "premise": "Cặp đôi phòng 3 cãi nhau tối nào cũng như có lịch. Cả dãy trọ đặt cược xem ai thắng.",
+      "twist": "Cô Ba làm 'trọng tài' có luật, giúp hai người nói thật; cuối truyện họ cưới nhau ngay trong sân trọ.",
+      "hook": "20h15, phòng 3 bắt đầu. 20h16, phòng 4 mở cửa pha trà ngồi nghe.",
+      "comment_question": "Cãi nhau với người yêu, bạn là người xin lỗi trước?",
+      "thumb_keywords": [
+        "Làm Trọng Tài"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-13"
+    },
+    {
+      "id": 44,
+      "topic": "nghe_la_hong_bien",
+      "series": "Khu Trọ Cô Ba",
+      "title": "Chủ Trọ Đối Diện Tăng Giá, Tôi Tặng Cơm Cho Khách",
+      "premise": "Dãy trọ đối diện tăng giá và giành khách. Cô Ba đáp trả bằng suất cơm tối 20 nghìn cho khách trọ.",
+      "twist": "Cuộc chiến leo thang thành cuộc thi ai tử tế hơn; hai chủ trọ thành bạn, cả phố có lợi.",
+      "hook": "Tấm băng rôn bên kia đường: 'Phòng mới, máy lạnh, chủ không nhiều chuyện.'",
+      "comment_question": "Tiêu chí chọn phòng trọ quan trọng nhất của bạn?",
+      "thumb_keywords": [
+        "Tặng Cơm Cho Khách"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": "2026-10-20"
+    },
+    {
+      "id": 45,
+      "topic": "nghe_la_hong_bien",
+      "series": "Khu Trọ Cô Ba",
+      "title": "Có Kẻ Trộm Quần Áo Trong Khu Trọ, Tôi Lập Đội Điều Tra",
+      "premise": "Quần áo phơi trong khu trọ liên tục mất. Cô Ba lập 'đội điều tra' gồm những khách trọ lắm chuyện nhất.",
+      "twist": "Thủ phạm bất ngờ là con mèo của bà cụ phòng 1, và đống quần áo được tìm thấy trên mái nhà hàng xóm.",
+      "hook": "Tuần này mất 4 cái áo, 2 cái quần, và 1 chiếc tất đơn độc.",
+      "comment_question": "Bạn từng mất đồ ở chỗ trọ chưa?",
+      "thumb_keywords": [
+        "Lập Đội Điều Tra"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 46,
+      "topic": "nghe_la_hong_bien",
+      "series": "Khu Trọ Cô Ba",
+      "title": "Mẹ Khách Trọ Lên Thăm, Cả Dãy Trọ Diễn Giàu Hộ",
+      "premise": "Cậu sinh viên phòng 7 nói dối mẹ ở quê là đã mua nhà. Mẹ bất ngờ lên thăm, cả dãy trọ đóng vai giúp.",
+      "twist": "Mẹ biết hết từ đầu nhưng im lặng vì thương con; buổi chia tay khiến cả dãy trọ khóc.",
+      "hook": "'Chị Ba ơi, mẹ em đang ở bến xe. Chị làm giúp việc cho em một hôm được không?'",
+      "comment_question": "Bạn có từng giấu bố mẹ chuyện khó khăn không?",
+      "thumb_keywords": [
+        "Diễn Giàu Hộ"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 47,
+      "topic": "nghe_la_hong_bien",
+      "series": "Khu Trọ Cô Ba",
+      "title": "Khách Trọ Lạ Mặt Trả Tiền Trước Một Năm",
+      "premise": "Người đàn ông ít nói thuê phòng 10, trả trước một năm tiền mặt. Cả dãy trọ đoán già đoán non.",
+      "twist": "Anh là con trai của bà chủ trọ cũ, quay về để tìm lại bức thư mẹ giấu trong tường.",
+      "hook": "Tôi đếm tiền ba lần. Đúng 12 tháng. Anh ta không hỏi giá wifi.",
+      "comment_question": "Người lạ ở cạnh nhà, bạn có tò mò không?",
+      "thumb_keywords": [
+        "Trả Tiền Trước Một Năm"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 48,
+      "topic": "nghe_la_hong_bien",
+      "series": "Khu Trọ Cô Ba",
+      "title": "Tết Này, Cả Khu Trọ Không Ai Về Quê",
+      "premise": "Tết năm nay vì nhiều lý do, cả 10 phòng đều ở lại Sài Gòn. Cô Ba tổ chức Tết chung trong sân.",
+      "twist": "Mỗi người góp một món quê nhà; bữa cơm 30 Tết tiết lộ lý do thật của từng người và gắn kết họ.",
+      "hook": "30 Tết, 10 phòng sáng đèn, 10 người không ai muốn nói vì sao mình ở lại.",
+      "comment_question": "Bạn từng ăn Tết xa nhà chưa?",
+      "thumb_keywords": [
+        "Không Ai Về Quê"
+      ],
+      "timing": "Trước Tết (T1/2027)",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 49,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Chạy Xe Ôm Ca Đêm, Khách Nào Cũng Có Bí Mật",
+      "premise": "Người kể là nam, chạy xe công nghệ ca đêm ở Hà Nội; mỗi chuyến xe là một câu chuyện.",
+      "twist": "Một khách quen hay đi viện lúc 2 giờ sáng hoá ra là bác sĩ; anh giúp cô ấy bắt được kẻ đòi nợ thuê bám theo.",
+      "hook": "2 giờ sáng, cuốc thứ 11. Khách lên xe, câu đầu tiên: 'Anh chạy vòng vòng đi, đừng về nhà em.'",
+      "comment_question": "Bạn từng có chuyến xe nào đáng nhớ?",
+      "thumb_keywords": [
+        "Chạy Xe Ôm Ca Đêm"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-02"
+    },
+    {
+      "id": 50,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Tôi Mở Tiệm Giặt Ủi, Nhìn Quần Áo Đoán Được Chuyện Nhà",
+      "premise": "Cô chủ tiệm giặt ủi đoán được đời sống khách qua quần áo: vết son, hoá đơn quên trong túi.",
+      "twist": "Cô giúp một bà vợ hiền phát hiện chồng giấu quỹ đen và dạy bà cách lấy lại quyền tài chính trong nhà.",
+      "hook": "Túi áo sơ mi của khách quen có một tờ hoá đơn nhà nghỉ. Ngày ghi trên đó là sinh nhật vợ anh ta.",
+      "comment_question": "Bạn có bao giờ quên đồ trong túi quần áo mang đi giặt?",
+      "thumb_keywords": [
+        "Tiệm Giặt Ủi"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-09"
+    },
+    {
+      "id": 51,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Làm Giúp Việc Theo Giờ Cho Nhà Giàu, Tôi Thành Quân Sư",
+      "premise": "Cô sinh viên làm giúp việc theo giờ cho một gia đình giàu mà rối ren.",
+      "twist": "Cô dùng sự tinh ý giải quyết từng mâu thuẫn trong nhà; cuối truyện được bà chủ tài trợ học bổng.",
+      "hook": "Ngày đầu, bà chủ dặn: 'Lau nhà, nấu cơm, và đừng nghe thấy gì cả.'",
+      "comment_question": "Người giúp việc có nên can thiệp chuyện nhà chủ không?",
+      "thumb_keywords": [
+        "Thành Quân Sư"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-23"
+    },
+    {
+      "id": 52,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Tôi Livestream Bán Rau, Lỡ Tay Bóc Phốt Chợ Đầu Mối",
+      "premise": "Cô bán rau sạch livestream mỗi sáng; một lần lỡ quay cảnh rau bị ngâm hoá chất ở chợ đầu mối.",
+      "twist": "Clip viral, cô bị đe doạ nhưng được cả khu chợ nhỏ bảo vệ; đầu nậu bị xử lý.",
+      "hook": "Tôi livestream 4 giờ sáng, 12 người xem, đến khi camera quay trúng cái thùng xanh.",
+      "comment_question": "Bạn mua rau ở chợ hay siêu thị?",
+      "thumb_keywords": [
+        "Livestream Bán Rau"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 53,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Nhân Viên Cầm Đồ Ca Đêm, Mỗi Món Đồ Một Câu Chuyện",
+      "premise": "Người kể là nam, làm tiệm cầm đồ ca đêm; mỗi món đồ mang theo một hoàn cảnh.",
+      "twist": "Chiếc nhẫn cưới một cụ bà mang cầm để mua thuốc cho chồng; anh bí mật giữ lại và giúp bà chuộc về.",
+      "hook": "Món đồ thứ ba đêm nay là một chiếc nhẫn cưới đã mòn vành.",
+      "comment_question": "Bạn có món đồ nào không bao giờ bán?",
+      "thumb_keywords": [
+        "Mỗi Món Đồ Một Câu Chuyện"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 54,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Tôi Làm Shipper, Giao Hàng Trúng Hiện Trường Đánh Ghen",
+      "premise": "Nữ shipper giao đơn và liên tục rơi vào giữa những vụ đánh ghen, tranh cãi của khách.",
+      "twist": "Nhờ bằng chứng ghi âm vô tình, cô giúp một cô gái bị vu oan làm tiểu tam được minh oan.",
+      "hook": "Đơn hàng: 1 bó hoa. Người nhận: đang cầm dép.",
+      "comment_question": "Shipper có nên can thiệp khi thấy chuyện bất bình?",
+      "thumb_keywords": [
+        "Hiện Trường Đánh Ghen"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 55,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Dịch Vụ Dọn Nhà Thuê, Tôi Dọn Luôn Người Yêu Cũ Của Khách",
+      "premise": "Cô làm dịch vụ dọn nhà; khách thuê dọn nhà sau chia tay và nhờ 'dọn luôn' người yêu cũ đang ăn vạ không đi.",
+      "twist": "Cô dùng chiêu trò hài hước để người yêu cũ tự ra về; khách tặng cô hợp đồng dọn văn phòng cả năm.",
+      "hook": "Hợp đồng ghi: dọn 3 phòng, 1 bếp, và 1 người yêu cũ.",
+      "comment_question": "Chia tay xong bạn có giữ đồ của người cũ không?",
+      "thumb_keywords": [
+        "Dọn Luôn Người Yêu Cũ"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 56,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Tôi Làm MC Đám Cưới, Chuyên Cứu Những Đám Cưới Sắp Vỡ",
+      "premise": "Nữ MC đám cưới có biệt tài xử lý sự cố: sui gia cãi nhau, chú rể say, người yêu cũ phá tiệc.",
+      "twist": "Đám cưới căng nhất mùa được cô cứu bằng một màn ứng biến khiến cả hai họ bật cười làm lành.",
+      "hook": "Còn 5 phút làm lễ, mẹ cô dâu tuyên bố: 'Hủy.'",
+      "comment_question": "Đám cưới bạn dự có sự cố gì nhớ đời?",
+      "thumb_keywords": [
+        "Đám Cưới Sắp Vỡ"
+      ],
+      "timing": "Mùa cưới (T10–T12)",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 57,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Tôi Sửa Điện Thoại, Khách Tự Khai Hết Bí Mật",
+      "premise": "Cô chủ tiệm sửa điện thoại không bao giờ xem máy khách, nhưng khách cứ ngồi chờ là tự kể hết.",
+      "twist": "Cô vô tình nối lại được một gia đình: bố con giận nhau 5 năm cùng mang máy tới sửa một ngày.",
+      "hook": "'Chị ơi, sửa được thì sửa, nhưng chị đừng mở ảnh nhé.' Tôi còn chưa hỏi mật khẩu.",
+      "comment_question": "Điện thoại của bạn có ai được biết mật khẩu không?",
+      "thumb_keywords": [
+        "Khách Tự Khai"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 58,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Làm Tài Xế Riêng Cho Sếp Tổng, Tôi Nghe Hết Chuyện Công Ty",
+      "premise": "Người kể là nam, tài xế riêng của nữ tổng giám đốc; ghế lái là nơi nghe được mọi cuộc gọi.",
+      "twist": "Anh phát hiện phó giám đốc định chiếm công ty và giúp sếp lật ngược tình thế bằng một chi tiết lộ trình.",
+      "hook": "Sếp nói với tôi: 'Anh lái xe, còn tai thì để ở nhà.'",
+      "comment_question": "Bạn có từng biết bí mật mà không được nói ra?",
+      "thumb_keywords": [
+        "Tài Xế Riêng"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 59,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Tôi Bán Xôi Đầu Ngõ, Cả Khu Phố Nhờ Phân Xử",
+      "premise": "Cô bán xôi sáng đầu ngõ, xởi lởi, mỏ hỗn; cả khu phố có chuyện gì cũng đến nhờ phân xử.",
+      "twist": "Vụ tranh chấp lối đi giữa hai nhà được cô xử bằng một mẹo hài hước; hai nhà thành thông gia.",
+      "hook": "5 giờ sáng: một gói xôi, một câu chuyện, và một vụ kiện nhỏ.",
+      "comment_question": "Khu bạn ở có 'trưởng phố không chính thức' nào không?",
+      "thumb_keywords": [
+        "Nhờ Phân Xử"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 60,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Tôi Làm Bảo Vệ Chung Cư, Cư Dân Nào Cũng Muốn Mua Chuộc",
+      "premise": "Người kể là nam, bảo vệ chung cư cao cấp; cư dân thi nhau 'nhờ vả' anh giấu chuyện.",
+      "twist": "Anh từ chối mọi phong bì và phát hiện ban quản lý ăn chặn phí; cư dân bầu anh vào ban đại diện.",
+      "hook": "Tháng đầu làm bảo vệ, tôi nhận 7 lời nhờ và 3 cái phong bì.",
+      "comment_question": "Ở chung cư, bạn có thân với bảo vệ không?",
+      "thumb_keywords": [
+        "Muốn Mua Chuộc"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 61,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Mở Lớp Dạy Nấu Ăn Cho Đàn Ông Bị Vợ Bắt Nấu",
+      "premise": "Cô đầu bếp mở lớp nấu ăn chỉ dành cho đàn ông, học viên toàn các ông chồng 'bị ép'.",
+      "twist": "Mỗi học viên một câu chuyện hài; bữa tiệc tốt nghiệp các ông nấu cho vợ khiến nhiều bà vợ khóc.",
+      "hook": "Buổi đầu, 12 học viên, 11 người không biết bật bếp ga.",
+      "comment_question": "Nhà bạn ai nấu cơm?",
+      "thumb_keywords": [
+        "Dạy Nấu Ăn Cho Đàn Ông"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 62,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Tôi Làm Nghề Xếp Hàng Thuê, Nghe Hết Chuyện Thiên Hạ",
+      "premise": "Cô làm dịch vụ xếp hàng thuê: bệnh viện, làm giấy tờ, mua vé concert.",
+      "twist": "Một lần xếp hàng khám bệnh thuê, cô phát hiện đường dây phe vé bệnh viện và giúp tố cáo.",
+      "hook": "Nghề của tôi: đứng chờ. Lương: theo giờ. Phụ cấp: chuyện thiên hạ.",
+      "comment_question": "Bạn từng phải xếp hàng lâu nhất là bao lâu?",
+      "thumb_keywords": [
+        "Xếp Hàng Thuê"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 63,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Thợ Cắt Tóc Vỉa Hè Và Hội Các Ông Bàn Chuyện Thế Giới",
+      "premise": "Ông thợ cắt tóc vỉa hè 60 tuổi và hội khách quen toàn các ông về hưu bàn chuyện thế giới mỗi sáng.",
+      "twist": "Hội các ông hợp sức giúp một cậu thanh niên bị lừa tiền; ông thợ lộ quá khứ từng là cảnh sát.",
+      "hook": "Một cái ghế, một cái gương, và năm ông già bàn chuyện Liên Hợp Quốc.",
+      "comment_question": "Bố/ông bạn có hội bạn 'bàn chuyện thế giới' không?",
+      "thumb_keywords": [
+        "Thợ Cắt Tóc Vỉa Hè"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 64,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Tôi Làm Tổng Đài Viên, Khách Gọi Toàn Chuyện Không Tưởng",
+      "premise": "Cô tổng đài viên chăm sóc khách hàng nhận những cuộc gọi dở khóc dở cười.",
+      "twist": "Một cụ ông gọi mỗi ngày chỉ để có người nói chuyện; cô tìm ra con cháu cụ và nối lại gia đình.",
+      "hook": "Cuộc gọi thứ 83 trong ngày: 'Cháu ơi, hôm nay trời có mưa không?'",
+      "comment_question": "Bạn gọi tổng đài gặp chuyện gì buồn cười nhất?",
+      "thumb_keywords": [
+        "Tổng Đài Viên"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 65,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Tôi Làm Kế Toán Thuê Cho Chợ, Bóc Sổ Nợ Cả Chợ",
+      "premise": "Cô kế toán nhận làm sổ sách cho các tiểu thương trong chợ; mỗi quầy một kiểu nợ nần.",
+      "twist": "Cô phát hiện ban quản lý chợ thu phí sai, giúp cả chợ đòi lại tiền.",
+      "hook": "Quầy cá nợ quầy rau, quầy rau nợ quầy thịt, quầy thịt nợ… tôi.",
+      "comment_question": "Bạn có hay mua chịu ở chợ không?",
+      "thumb_keywords": [
+        "Bóc Sổ Nợ Cả Chợ"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 66,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Mở Tiệm Trà Sữa Cạnh Đại Học, Tôi Thành Chuyên Gia Tình Yêu",
+      "premise": "Cô chủ tiệm trà sữa cạnh trường đại học bị sinh viên coi là 'chuyên gia tình yêu'.",
+      "twist": "Chính cô, người khuyên ai cũng trúng, lại ế; anh shipper quen giao nguyên liệu mới là chuyện tình của cô.",
+      "hook": "Order hôm nay: 1 trà sữa trân châu, ít đá, và 1 lời khuyên chia tay.",
+      "comment_question": "Lời khuyên tình yêu hay nhất bạn từng nghe?",
+      "thumb_keywords": [
+        "Chuyên Gia Tình Yêu"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 67,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Làm Người Mẫu Ảnh Cưới Thuê, Tôi Suýt Thành Cô Dâu Thật",
+      "premise": "Cô làm mẫu ảnh cưới thuê cho studio; một lần chụp mẫu với anh thợ ảnh bị khách tưởng là vợ chồng.",
+      "twist": "Tin đồn lan tới hai gia đình; họ diễn cho qua chuyện rồi dần thành thật.",
+      "hook": "Chụp 200 tấm ảnh cưới, tôi chưa từng có người yêu.",
+      "comment_question": "Bạn thích chụp ảnh cưới kiểu gì?",
+      "thumb_keywords": [
+        "Suýt Thành Cô Dâu Thật"
+      ],
+      "timing": "Mùa cưới (T10–T12)",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 68,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Tôi Trông Xe Bệnh Viện, Thấy Đủ Kiểu Người Nhà",
+      "premise": "Người kể là nam, trông xe ở bệnh viện tỉnh; nhìn người ra vào mà biết cả chuyện đời.",
+      "twist": "Anh phát hiện đứa con 'hiếu thảo' nhất đang lén bán nhà của bố mẹ nằm viện và báo cho người em.",
+      "hook": "Người vào thăm hỏi nhiều nhất không phải người ở lại lâu nhất.",
+      "comment_question": "Bạn thấy điều gì ở bệnh viện khiến bạn nhớ mãi?",
+      "thumb_keywords": [
+        "Trông Xe Bệnh Viện"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 69,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Bán Vé Số Dạo, Tôi Phát Hiện Tờ Vé Trúng Bị Tráo",
+      "premise": "Cô bán vé số dạo nhớ từng khách quen; một bà cụ trúng số nhưng tờ vé bị người nhà tráo.",
+      "twist": "Nhờ trí nhớ về dãy số đã bán, cô giúp bà cụ lấy lại tiền trúng; kẻ tráo vé bị cả xóm tẩy chay.",
+      "hook": "Tôi bán tờ vé số đó cho bà Sáu lúc 3 giờ chiều. Số đuôi 27. Tôi nhớ rõ.",
+      "comment_question": "Bạn có hay mua vé số không? Trúng lần nào chưa?",
+      "thumb_keywords": [
+        "Vé Trúng Bị Tráo"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 70,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Nhận Viết Thư Tay Thuê Dịp 20/10, Tôi Đọc Đủ Chuyện",
+      "premise": "Cô sinh viên văn nhận viết thư tay thuê dịp 20/10 cho các anh chồng, con trai vụng về.",
+      "twist": "Một khách đặt thư cho 'vợ cũ'; cô giúp anh viết lời xin lỗi thật lòng và hai người làm lành.",
+      "hook": "Đơn đầu tiên: 'Viết giúp anh một lá thư, đừng quá sến, nhưng đủ để vợ anh khóc.'",
+      "comment_question": "20/10 này bạn định tặng gì?",
+      "thumb_keywords": [
+        "Viết Thư Tay Thuê"
+      ],
+      "timing": "Trước 20/10",
+      "priority": "A",
+      "publish_date": "2026-10-16"
+    },
+    {
+      "id": 71,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Trọng Sinh Năm 60 Tuổi, Tôi Không Chia Nhà Cho Con Nữa",
+      "premise": "Kiếp trước bà Hạnh chia nhà cho con trai rồi bị đưa vào viện dưỡng lão. Bà mở mắt, thấy mình đang ngồi trước tờ giấy sang tên.",
+      "twist": "Bà giữ nhà, sống cho mình; con dâu bị coi là 'ác' lại là người duy nhất thật lòng chăm bà.",
+      "hook": "Cây bút đã chạm mặt giấy. Tôi nhớ ra mình đã chết trong viện dưỡng lão như thế nào.",
+      "comment_question": "Bố mẹ có nên chia tài sản cho con khi còn sống?",
+      "thumb_keywords": [
+        "Không Chia Nhà"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-01"
+    },
+    {
+      "id": 72,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Kiếp Trước Nuôi Con Trai Quý Tử, Kiếp Này Đầu Tư Con Gái",
+      "premise": "Kiếp trước bà dồn hết cho con trai, con gái phải nghỉ học; về già chỉ con gái chăm. Bà sống lại năm con gái đỗ đại học.",
+      "twist": "Bà bán mảnh ruộng cho con gái đi học; con trai lần đầu phải tự lập và trưởng thành theo.",
+      "hook": "Kiếp trước, người ngồi cạnh giường bệnh của tôi là đứa con tôi bắt nghỉ học.",
+      "comment_question": "Nhà bạn có trọng nam khinh nữ không?",
+      "thumb_keywords": [
+        "Đầu Tư Con Gái"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-08"
+    },
+    {
+      "id": 73,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Bố Tôi Trọng Sinh, Việc Đầu Tiên Là Đòi Nợ Bác Cả",
+      "premise": "Người kể là con gái; bố 62 tuổi sau cơn ốm tỉnh dậy như người khác, việc đầu tiên là đi đòi món nợ 20 năm.",
+      "twist": "Hoá ra bố đã trọng sinh và biết trước bác Cả sắp lừa cả nhà; ông ra tay chặn trước từng bước.",
+      "hook": "Bố tôi tỉnh dậy, không hỏi con cháu, chỉ hỏi: 'Hôm nay ngày bao nhiêu?'",
+      "comment_question": "Bạn có dám đòi nợ người thân không?",
+      "thumb_keywords": [
+        "Đòi Nợ Bác Cả"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-15"
+    },
+    {
+      "id": 74,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Trọng Sinh Về Ngày Nghỉ Hưu, Tôi Đi Du Lịch Một Mình",
+      "premise": "Kiếp trước bà nghỉ hưu là thành 'osin không lương' trông cháu cho ba đứa con. Kiếp này bà mua vé đi Phú Quốc.",
+      "twist": "Con cái cuống cuồng; chính những ngày vắng bà giúp các con biết trân trọng và san sẻ.",
+      "hook": "Ngày nhận sổ hưu, tôi không về nhà. Tôi ra thẳng sân bay.",
+      "comment_question": "Nghỉ hưu rồi bố mẹ bạn muốn làm gì nhất?",
+      "thumb_keywords": [
+        "Đi Du Lịch Một Mình"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-22"
+    },
+    {
+      "id": 75,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Kiếp Trước Trông Cháu Không Công, Kiếp Này Tôi Tính Lương",
+      "premise": "Bà nội trọng sinh về ngày con dâu sinh, quyết định trông cháu nhưng có 'hợp đồng' và lương rõ ràng.",
+      "twist": "Hợp đồng tưởng lạnh lùng lại khiến cả nhà rạch ròi, bớt giận hờn; bà dùng tiền lương lập quỹ học cho cháu.",
+      "hook": "'Mẹ trông cháu giúp con nhé.' — 'Được. Ký đây.'",
+      "comment_question": "Ông bà trông cháu có nên được trả tiền?",
+      "thumb_keywords": [
+        "Tôi Tính Lương"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 76,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Ông Già Trọng Sinh Mở Quán Cà Phê, Con Trai Hối Hận",
+      "premise": "Ông 65 tuổi, kiếp trước bị con trai coi là gánh nặng; sống lại, ông dùng lương hưu mở quán cà phê sách.",
+      "twist": "Quán thành điểm hẹn của cả khu; con trai làm ăn thất bại phải về xin làm phục vụ cho bố.",
+      "hook": "Kiếp trước con tôi bảo: 'Bố già rồi, ngồi yên cho con nhờ.' Kiếp này tôi không ngồi yên.",
+      "comment_question": "Người lớn tuổi có nên khởi nghiệp không?",
+      "thumb_keywords": [
+        "Mở Quán Cà Phê"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 77,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Trọng Sinh Về Tuổi 55, Tôi Ly Hôn Ông Chồng Gia Trưởng",
+      "premise": "Kiếp trước bà nhịn ông chồng gia trưởng cả đời. Sống lại năm 55 tuổi, bà nộp đơn ly hôn.",
+      "twist": "Các con ban đầu phản đối rồi đứng về phía mẹ; ông chồng lần đầu phải tự nấu cơm và thay đổi.",
+      "hook": "Ba mươi năm tôi rót trà cho ông. Sáng nay, tôi rót cho mình.",
+      "comment_question": "Ly hôn tuổi xế chiều: bạn ủng hộ không?",
+      "thumb_keywords": [
+        "Ly Hôn Ông Chồng"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 78,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Kiếp Trước Bán Đất Cho Con Làm Ăn, Kiếp Này Tôi Tự Làm",
+      "premise": "Bà bán đất cho con trai làm ăn, con thua lỗ trắng tay. Sống lại, bà giữ đất và tự làm vườn trái cây.",
+      "twist": "Vườn cây thành nguồn thu lớn; bà dạy con trai làm ăn từ đầu thay vì đưa tiền.",
+      "hook": "Kiếp này, sổ đỏ tôi cất trong nồi cơm điện.",
+      "comment_question": "Bố mẹ có nên đưa vốn cho con làm ăn?",
+      "thumb_keywords": [
+        "Tôi Tự Làm"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 79,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Trọng Sinh Ngày Con Rể Đòi Mượn Sổ Đỏ",
+      "premise": "Ông bà ngoại trọng sinh đúng hôm con rể đến mượn sổ đỏ thế chấp; kiếp trước nhà mất trắng.",
+      "twist": "Hai ông bà diễn già lẩm cẩm để câu giờ, lật tẩy con rể vay nặng lãi và giúp con gái thoát ra.",
+      "hook": "Con rể đặt giỏ cam lên bàn. Kiếp trước, giỏ cam đó giá bằng một căn nhà.",
+      "comment_question": "Có nên cho con cái mượn sổ đỏ?",
+      "thumb_keywords": [
+        "Mượn Sổ Đỏ"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 80,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Bà Nội Trọng Sinh, Lần Này Không Để Cháu Gái Chịu Thiệt",
+      "premise": "Kiếp trước cháu gái bị ép nghỉ học đi làm nuôi em trai. Bà nội sống lại, đứng ra bảo vệ cháu.",
+      "twist": "Bà dùng uy của 'trưởng họ' đổi cả nếp nhà; cháu gái đỗ đại học, cả họ nể bà.",
+      "hook": "Kiếp này tôi sống lại không phải vì tôi. Vì con bé ấy.",
+      "comment_question": "Ông bà bạn có ai 'đứng về phía' bạn không?",
+      "thumb_keywords": [
+        "Không Để Cháu Gái Chịu Thiệt"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 81,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Kiếp Trước Hầu Cả Nhà Chồng, Kiếp Này Tôi Nghỉ Hưu Sớm",
+      "premise": "Bà 58 tuổi, cả đời làm dâu hầu hạ. Sống lại, bà tuyên bố 'nghỉ hưu làm dâu'.",
+      "twist": "Cả nhà chồng loạn lên trong một tuần; cuối cùng ai cũng biết tự làm, và bà được sống cho mình.",
+      "hook": "Sáng mùng Một, tôi không dậy nấu cỗ. Tôi dậy đi tập dưỡng sinh.",
+      "comment_question": "Mẹ bạn có được 'nghỉ hưu' khỏi việc nhà chưa?",
+      "thumb_keywords": [
+        "Nghỉ Hưu Sớm"
+      ],
+      "timing": "Trước Tết (T1/2027)",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 82,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Trọng Sinh Làm Bố, Tôi Dạy Con Trai Biết Thương Vợ",
+      "premise": "Kiếp trước ông dạy con trai gia trưởng như mình, con bị vợ bỏ. Sống lại, ông dạy lại từ đầu.",
+      "twist": "Ông làm gương bằng cách thay đổi chính mình với vợ; con trai học theo, cả nhà hạnh phúc.",
+      "hook": "Tôi tưởng mình dạy con làm đàn ông. Thật ra tôi dạy nó cô đơn.",
+      "comment_question": "Bố bạn dạy bạn điều gì về hôn nhân?",
+      "thumb_keywords": [
+        "Dạy Con Trai"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 83,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Trọng Sinh Về Thập Niên 90, Tôi Làm Giàu Từ Gánh Bún Riêu",
+      "premise": "Bà bán bún riêu sống lại năm 1996, mang theo ký ức 30 năm; quyết không để chồng đem tiền đi cờ bạc.",
+      "twist": "Từ gánh bún ven đường, bà dựng chuỗi quán, nuôi ba con ăn học, đúng thời điểm từng mốc kinh tế.",
+      "hook": "Tôi mở mắt, thấy gánh bún riêu và tờ lịch năm 1996.",
+      "comment_question": "Bạn nhớ gì về Việt Nam thập niên 90?",
+      "thumb_keywords": [
+        "Thập Niên 90"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 84,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Trọng Sinh Về Năm 1998, Tôi Không Lấy Ông Chồng Cờ Bạc",
+      "premise": "Bà sống lại đúng ngày dạm ngõ với người chồng cờ bạc kiếp trước.",
+      "twist": "Bà từ hôn, tự lập nghiệp; ba mươi năm sau gặp lại người chồng cũ đang nợ nần.",
+      "hook": "Mâm trầu cau đã đặt lên bàn. Tôi đứng dậy.",
+      "comment_question": "Nếu được chọn lại, bạn có thay đổi quyết định lớn nào?",
+      "thumb_keywords": [
+        "Năm 1998"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 85,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Con Gửi Tôi Vào Viện Dưỡng Lão, Kiếp Này Tôi Mở Viện",
+      "premise": "Kiếp trước bà cô đơn trong viện dưỡng lão tồi tệ. Sống lại, bà mở một 'nhà chung' cho người già.",
+      "twist": "Nhà chung của bà thành nơi ai cũng muốn vào; những đứa con từng bỏ rơi bố mẹ phải xếp hàng xin chỗ.",
+      "hook": "Kiếp trước, tôi đếm từng ô gạch trên trần viện dưỡng lão. Có 312 ô.",
+      "comment_question": "Bạn nghĩ sao về viện dưỡng lão?",
+      "thumb_keywords": [
+        "Tôi Mở Viện"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 86,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Bố Mẹ Trọng Sinh Cùng Lúc, Con Trai Tưởng Bị Ma Nhập",
+      "premise": "Người kể là con trai; bố mẹ sau một đêm bỗng thay đổi hẳn: đòi lại tiền, đi nhảy dân vũ, không trông cháu.",
+      "twist": "Hoá ra cả hai cùng trọng sinh và ngầm hợp tác; cậu con trai hốt hoảng đi mời thầy cúng, màn hài kịch bắt đầu.",
+      "hook": "Sáng nay bố tôi nói tiếng Anh, mẹ tôi đòi đi Hàn. Tôi gọi thầy.",
+      "comment_question": "Nếu bố mẹ bạn đột nhiên thay đổi hẳn, bạn làm gì?",
+      "thumb_keywords": [
+        "Tưởng Bị Ma Nhập"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 87,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Trọng Sinh Ngày Con Rủ Đầu Tư Tiền Ảo, Tôi Nói Không",
+      "premise": "Kiếp trước ông mất hết tiền hưu vì nghe con đầu tư tiền ảo. Sống lại, ông dùng hiểu biết tương lai để cứu cả nhà.",
+      "twist": "Ông giả vờ đồng ý, gài để con tự nhận ra đó là lừa đảo trước khi quá muộn.",
+      "hook": "'Bố ơi, lãi gấp đôi trong ba tháng.' Kiếp trước tôi đã tin câu này.",
+      "comment_question": "Người lớn tuổi nhà bạn có từng bị lừa đầu tư?",
+      "thumb_keywords": [
+        "Đầu Tư Tiền Ảo"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 88,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Ông Nội Trọng Sinh, Dạy Đám Cháu Hư Cách Kiếm Tiền",
+      "premise": "Ông nội sống lại, thấy đám cháu nội sau này phá hết gia sản. Ông mở 'trường làm người' cuối tuần.",
+      "twist": "Bằng cách hài hước và nghiêm khắc, ông biến đám cháu ăn chơi thành người biết làm ăn.",
+      "hook": "Kiếp trước, căn nhà tổ bị bán vì một ván bài của thằng cháu đích tôn.",
+      "comment_question": "Ông bà bạn dạy bạn bài học tiền bạc nào?",
+      "thumb_keywords": [
+        "Dạy Đám Cháu Hư"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 89,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Trọng Sinh Trước Tiệc Mừng Thọ 70, Tôi Hủy Tiệc",
+      "premise": "Con cái tổ chức mừng thọ linh đình chỉ để khoe. Bà sống lại, hủy tiệc, dùng tiền làm điều bà muốn.",
+      "twist": "Bà xây cầu cho xóm và đi thăm bạn cũ; người con giả tạo lộ mặt, đứa cháu thật lòng được bà thương.",
+      "hook": "Kiếp trước, trong tiệc mừng thọ, không ai hỏi tôi có mệt không.",
+      "comment_question": "Tiệc mừng thọ bố mẹ: làm to hay làm ấm cúng?",
+      "thumb_keywords": [
+        "Hủy Tiệc"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 90,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Kiếp Trước Nhường Hết Cho Em, Kiếp Này Chị Cả Sống Cho Mình",
+      "premise": "Chị cả 52 tuổi, cả đời nhường nhịn các em. Sống lại, chị từ chối làm 'ngân hàng' của cả nhà.",
+      "twist": "Các em lần đầu tự lo; một cô em nhận ra chị đã hy sinh thế nào và đứng về phía chị.",
+      "hook": "Tin nhắn thứ 5 trong tuần: 'Chị ơi, em xoay giúp 20 triệu.' Tôi tắt máy.",
+      "comment_question": "Làm con cả có thiệt thòi không?",
+      "thumb_keywords": [
+        "Chị Cả Sống Cho Mình"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 91,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Bà Ngoại Trọng Sinh Đi Học Livestream Bán Hàng",
+      "premise": "Kiếp trước bà ngoại 63 tuổi bị con cháu chê 'lạc hậu'. Sống lại, bà học livestream bán mắm, bán tương quê.",
+      "twist": "Bà nói chuyện duyên dáng, thành 'hiện tượng mạng'; con cháu từng chê giờ xin làm trợ lý cho bà.",
+      "hook": "'Chào cả nhà, hôm nay bà bán mắm tép. Ai chê thì… vẫn mua giúp bà nhé.'",
+      "comment_question": "Ông bà bạn có dùng mạng xã hội giỏi không?",
+      "thumb_keywords": [
+        "Livestream Bán Hàng"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 92,
+      "topic": "bo_me_trong_sinh",
+      "series": "Mẹ Chồng Trọng Sinh",
+      "title": "Trọng Sinh Về Tết Năm Ấy, Tôi Không Để Con Dâu Khóc",
+      "premise": "Mẹ chồng trọng sinh về cái Tết con dâu khóc trong bếp, cái Tết khiến hai mẹ con xa nhau 20 năm.",
+      "twist": "Bà đổi hết: chia việc cho con trai, đưa con dâu về ngoại sớm; con dâu từ sợ thành thương bà.",
+      "hook": "Kiếp trước, 30 Tết, tôi nghe tiếng con dâu khóc trong bếp mà giả vờ không biết.",
+      "comment_question": "Tết ở nhà chồng, bạn có từng khóc không?",
+      "thumb_keywords": [
+        "Không Để Con Dâu Khóc"
+      ],
+      "timing": "Trước Tết (T1/2027)",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 93,
+      "topic": "bo_me_trong_sinh",
+      "series": "Mẹ Chồng Trọng Sinh",
+      "title": "Mẹ Chồng Trọng Sinh, Kiếp Này Tôi Bênh Con Dâu",
+      "premise": "Kiếp trước bà bênh con trai, con dâu bỏ đi, cháu thiếu mẹ. Sống lại, bà đứng về phía con dâu từ ngày đầu.",
+      "twist": "Bà cùng con dâu 'dạy dỗ' con trai lười biếng; cả xóm ngỡ ngàng thấy mẹ chồng nàng dâu như mẹ con ruột.",
+      "hook": "Con trai tôi đập bàn: 'Mẹ bênh ai?' Tôi đáp: 'Bênh người đúng.'",
+      "comment_question": "Mẹ chồng lý tưởng trong mắt bạn là người thế nào?",
+      "thumb_keywords": [
+        "Tôi Bênh Con Dâu"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-04"
+    },
+    {
+      "id": 94,
+      "topic": "bo_me_trong_sinh",
+      "series": "Mẹ Chồng Trọng Sinh",
+      "title": "Kiếp Trước Tôi Là Mẹ Chồng Ác, Kiếp Này Tôi Chuộc Lỗi",
+      "premise": "Bà từng hành hạ con dâu, về già bị bỏ rơi và hối hận. Sống lại, bà quyết chuộc lỗi.",
+      "twist": "Con dâu ban đầu nghi ngờ; từng việc nhỏ bà làm dần gỡ bỏ khoảng cách, hai người cùng mở tiệm may.",
+      "hook": "Kiếp trước, người cuối cùng nắm tay tôi là đứa con dâu tôi ghét nhất.",
+      "comment_question": "Bạn có tin người ta có thể thay đổi không?",
+      "thumb_keywords": [
+        "Mẹ Chồng Ác"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-11"
+    },
+    {
+      "id": 95,
+      "topic": "bo_me_trong_sinh",
+      "series": "Mẹ Chồng Trọng Sinh",
+      "title": "Mẹ Chồng Trọng Sinh, Việc Đầu Tiên Là Dạy Lại Con Trai",
+      "premise": "Kiếp trước con trai bà vô tâm, vợ bỏ. Sống lại, bà bắt con trai học làm chồng.",
+      "twist": "Khoá 'huấn luyện' hài hước của mẹ biến anh chồng vô tâm thành người chồng biết chia sẻ.",
+      "hook": "Tôi đặt cây chổi vào tay con trai: 'Bài một: nhà này không có osin.'",
+      "comment_question": "Chồng bạn có biết làm việc nhà không?",
+      "thumb_keywords": [
+        "Dạy Lại Con Trai"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-18"
+    },
+    {
+      "id": 96,
+      "topic": "bo_me_trong_sinh",
+      "series": "Mẹ Chồng Trọng Sinh",
+      "title": "Con Trai Ngoại Tình, Mẹ Chồng Trọng Sinh Đứng Về Phía Dâu",
+      "premise": "Bà sống lại đúng ngày phát hiện con trai ngoại tình. Kiếp trước bà bao che; kiếp này bà giúp con dâu.",
+      "twist": "Bà giúp con dâu giữ tài sản, quyền nuôi con; con trai bị cả nhà 'cách ly' đến khi thật sự hối lỗi.",
+      "hook": "Kiếp trước tôi nói với con dâu: 'Đàn ông ai chẳng thế.' Kiếp này tôi đưa nó số điện thoại luật sư.",
+      "comment_question": "Mẹ chồng có nên can thiệp chuyện vợ chồng con?",
+      "thumb_keywords": [
+        "Đứng Về Phía Dâu"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": "2026-10-25"
+    },
+    {
+      "id": 97,
+      "topic": "bo_me_trong_sinh",
+      "series": "Mẹ Chồng Trọng Sinh",
+      "title": "Mẹ Chồng Trọng Sinh Cùng Con Dâu Mở Quán Ăn",
+      "premise": "Mẹ chồng giỏi nấu ăn, con dâu giỏi kinh doanh; kiếp trước họ ghét nhau. Kiếp này bà rủ con dâu hợp tác.",
+      "twist": "Quán ăn thành công vang dội, hai mẹ con cãi nhau vì công thức nhưng thương nhau thật.",
+      "hook": "Kiếp trước chúng tôi tranh nhau cái bếp. Kiếp này chúng tôi mở hẳn một cái bếp.",
+      "comment_question": "Bạn có muốn làm ăn chung với mẹ/mẹ chồng không?",
+      "thumb_keywords": [
+        "Mở Quán Ăn"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 98,
+      "topic": "bo_me_trong_sinh",
+      "series": "Mẹ Chồng Trọng Sinh",
+      "title": "Mẹ Chồng Tôi Học Tiếng Anh Để Cãi Nhau Với Thông Gia Tây",
+      "premise": "Con gái lấy chồng Tây, mẹ chồng (bà ngoại) trọng sinh quyết học tiếng Anh để không bị lép vế.",
+      "twist": "Hai bà thông gia Việt–Tây cãi nhau bằng tiếng bồi rồi thành bạn thân nhất; hài từ đầu tới cuối.",
+      "hook": "Kiếp trước, trong đám cưới con gái, tôi chỉ biết cười. Kiếp này tôi học 'excuse me'.",
+      "comment_question": "Nhà bạn có con dâu/rể nước ngoài không?",
+      "thumb_keywords": [
+        "Học Tiếng Anh"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 99,
+      "topic": "bo_me_trong_sinh",
+      "series": "Mẹ Chồng Trọng Sinh",
+      "title": "Hai Bà Thông Gia Cùng Trọng Sinh, Kiếp Này Thành Chị Em",
+      "premise": "Kiếp trước hai bà thông gia đấu nhau làm con cái ly hôn. Cả hai cùng sống lại và nhận ra nhau.",
+      "twist": "Hai bà bí mật lập liên minh cứu cuộc hôn nhân của con, vừa hài vừa cảm động.",
+      "hook": "Bà thông gia nhìn tôi, tôi nhìn bà ấy. Cả hai cùng biết: người kia cũng đã sống lại.",
+      "comment_question": "Hai bà thông gia nhà bạn có hợp nhau không?",
+      "thumb_keywords": [
+        "Hai Bà Thông Gia"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 100,
+      "topic": "bo_me_trong_sinh",
+      "series": "Mẹ Chồng Trọng Sinh",
+      "title": "Mẹ Chồng Trọng Sinh Bắt Con Trai Làm Việc Nhà Mỗi Ngày",
+      "premise": "Bà lập 'bảng phân công' trong nhà, con trai phải rửa bát, giặt đồ mỗi ngày.",
+      "twist": "Con trai phản đối rồi dần quen; con dâu có thời gian học thêm và được thăng chức.",
+      "hook": "Bảng phân công dán trên tủ lạnh. Tên con trai tôi xuất hiện 14 lần.",
+      "comment_question": "Nhà bạn chia việc nhà thế nào?",
+      "thumb_keywords": [
+        "Làm Việc Nhà"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 101,
+      "topic": "hoc_duong",
+      "series": "Hội Phụ Huynh Lớp 5A",
+      "title": "Hội Phụ Huynh Thu Quỹ 5 Triệu, Tôi Đòi Xem Sổ Sách",
+      "premise": "Họp phụ huynh đầu năm, chị Diệu Linh thông báo quỹ lớp 5 triệu một cháu 'vì các con'. Hà là kế toán, giơ tay xin bảng thu chi năm ngoái, cả hội nhìn chị như người ngoài hành tinh.",
+      "twist": "Bảng tính bố Cún lập từ hoá đơn ảnh chụp cho thấy quà 20/11 năm ngoái được khai gấp ba giá thật; cô Mai xác nhận chưa từng nhận 'phong bì cả lớp'. Hội bầu lại ban phụ huynh ngay tại chỗ.",
+      "hook": "Chị Diệu Linh vừa đọc xong con số năm triệu một cháu, tôi đã giơ tay: 'Chị cho em xin bảng thu chi năm ngoái ạ.'",
+      "comment_question": "Nếu là bạn, bạn có đứng lên đòi xem sổ quỹ lớp không? 1 = Có, đòi luôn, 2 = Thôi, nộp cho yên",
+      "thumb_keywords": [
+        "Đòi Xem Sổ Sách"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 102,
+      "topic": "hoc_duong",
+      "series": "Hội Phụ Huynh Lớp 5A",
+      "title": "Phụ Huynh Khoe Quà 20/11 Hàng Hiệu, Con Tôi Tặng Cô Lá Thư",
+      "premise": "Nhóm Zalo lớp 5A thi nhau khoe quà 20/11: túi hiệu, nước hoa, phiếu spa. Bé Bông chỉ viết tay một lá thư, chị Diệu Linh chụp màn hình chê 'mẹ kế toán mà keo'.",
+      "twist": "Cô Mai đọc lá thư của Bông trước lớp vì nó kể đúng hôm cô ở lại kèm cả lớp mất điện; cô trả hết quà hiệu về nhóm kèm lời cảm ơn, chỉ giữ lá thư.",
+      "hook": "Nhóm Zalo lớp con tôi vừa nổ ba trăm tin nhắn, toàn ảnh túi hiệu, còn con tôi đang ngồi nắn nót viết thư bằng bút mực tím.",
+      "comment_question": "Nếu là bạn, bạn chọn quà 20/11 nào cho con tặng cô? 1 = Quà đắt tiền, 2 = Thư tay",
+      "thumb_keywords": [
+        "Tặng Cô Lá Thư"
+      ],
+      "timing": "Quanh 20/11",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 103,
+      "topic": "hoc_duong",
+      "series": "Hội Phụ Huynh Lớp 5A",
+      "title": "Nhóm Zalo Phụ Huynh Cãi Nhau Nửa Đêm, Tôi Làm Biên Bản",
+      "premise": "Hai giờ sáng, nhóm Zalo phụ huynh cãi nhau vì chuyện xếp chỗ ngồi, ai cũng đòi con mình ngồi bàn đầu. Hà mất ngủ, quyết định ghi lại từng câu thành 'biên bản họp trực tuyến'.",
+      "twist": "Biên bản cho thấy chính chị Diệu Linh đã đổi chỗ con mình lên bàn đầu từ tuần trước mà không báo ai; mẹ Tít lần đầu lên tiếng, đề xuất bốc thăm, cả nhóm thả tim.",
+      "hook": "Đúng hai giờ sáng, điện thoại tôi rung lần thứ bốn mươi, và tôi quyết định đã không ngủ được thì làm thư ký.",
+      "comment_question": "Nếu là bạn, bạn có tắt thông báo nhóm Zalo phụ huynh không? 1 = Tắt luôn, 2 = Không dám tắt",
+      "thumb_keywords": [
+        "Tôi Làm Biên Bản"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 104,
+      "topic": "hoc_duong",
+      "series": "Truyện lẻ",
+      "title": "Làm Cô Chủ Nhiệm Năm Đầu, Tôi Bị Phụ Huynh Ép Sửa Điểm",
+      "premise": "Người kể là cô Mai (tôi), 26 tuổi, năm đầu làm chủ nhiệm. Một phụ huynh quyền thế mang giỏ quà đến phòng giáo viên, nhờ 'nâng nhẹ' điểm Toán cho con để đủ danh hiệu học sinh giỏi.",
+      "twist": "Cô Mai mời phụ huynh ngồi chấm lại bài cùng mình, từng câu một; chính phụ huynh phát hiện con chép bài bạn. Cuối năm cậu bé tự xin thi lại và đạt điểm thật.",
+      "hook": "Giỏ quà vừa đặt xuống bàn tôi, cái phong bì đã thò ra một góc như sợ người ta không thấy.",
+      "comment_question": "Nếu là cô giáo, bạn xử lý phụ huynh xin sửa điểm thế nào? 1 = Từ chối thẳng, 2 = Mời cùng chấm lại",
+      "thumb_keywords": [
+        "Ép Sửa Điểm"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 105,
+      "topic": "hoc_duong",
+      "series": "Phòng 402 Ký Túc Xá",
+      "title": "Bạn Cùng Phòng Xài Chùa Đồ, Tôi Lập Sổ Thu Chi Cả Phòng",
+      "premise": "Phòng 402 hết dầu gội, sữa rửa mặt, mì gói liên tục; Vy luôn nói 'chắc Hoài dùng'. Trang quyết định lập sổ thu chi cả phòng, dán lên cửa tủ.",
+      "twist": "Sổ đối chiếu với giờ tắm và hoá đơn căn tin cho thấy Vy dùng chùa hơn một triệu; Vy đòi đi kiện cô quản lý thì cô Lành đọc to sổ của Trang trước cả tầng.",
+      "hook": "Chai dầu gội mới mua hôm thứ Hai, đến thứ Tư chỉ còn đúng một lớp bọt dưới đáy, và tôi bắt đầu nghi ngờ nó tự bay hơi.",
+      "comment_question": "Nếu là bạn, bạn có lập sổ chia tiền với bạn cùng phòng không? 1 = Có, rõ ràng, 2 = Không, kỳ lắm",
+      "thumb_keywords": [
+        "Sổ Thu Chi"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 106,
+      "topic": "hoc_duong",
+      "series": "Phòng 402 Ký Túc Xá",
+      "title": "Bài Nhóm Bốn Người, Ba Người Chỉ Ghi Tên Cho Có",
+      "premise": "Trang làm bài tập nhóm môn Kế toán quản trị một mình suốt ba tuần, ba thành viên còn lại chỉ nhắn 'cảm ơn bà nha'. Hôm thuyết trình, cả ba xin đứng nói phần mở đầu.",
+      "twist": "Trang đưa giảng viên lịch sử chỉnh sửa tài liệu trực tuyến; thầy cho mỗi người tự thuyết trình đúng phần mình làm. Ba người đứng im, cả lớp cười, thầy chấm điểm riêng từng người.",
+      "hook": "Mười một giờ đêm trước hạn nộp, nhóm chat bốn người có đúng một người đang gõ, và người đó là tôi.",
+      "comment_question": "Nếu là bạn, bạn có báo giảng viên chuyện bạn cùng nhóm không làm không? 1 = Báo luôn, 2 = Gánh hết cho xong",
+      "thumb_keywords": [
+        "Chỉ Ghi Tên Cho Có"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 107,
+      "topic": "hoc_duong",
+      "series": "Phòng 402 Ký Túc Xá",
+      "title": "Trưởng Phòng Livestream Cả Đêm, Tôi Bán Luôn Vé Xem",
+      "premise": "Ngân livestream bán son lúc nửa đêm, bật đèn vòng chói cả phòng. Nhắc mãi không được, Trang quyết định 'góp vui' theo kiểu của mình.",
+      "twist": "Trang ngồi phía sau quay ngược lên, bình luận hài từng thỏi son, lượt xem tăng gấp mười; Ngân hiểu ra người xem thích Trang hơn, cả hai thoả thuận livestream ở phòng sinh hoạt chung lúc tám giờ tối.",
+      "hook": "Đèn vòng của Ngân bật lúc nửa đêm, sáng đến mức con muỗi trong phòng cũng phải nheo mắt.",
+      "comment_question": "Nếu là bạn, bạn xử lý bạn cùng phòng ồn ào ban đêm thế nào? 1 = Nói thẳng, 2 = Báo quản lý",
+      "thumb_keywords": [
+        "Bán Luôn Vé Xem"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 108,
+      "topic": "hoc_duong",
+      "series": "Phòng 402 Ký Túc Xá",
+      "title": "Bị Chê Quê Vì Mang Đồ Ăn Mẹ Gửi, Cuối Kỳ Cả Phòng Xin Ăn",
+      "premise": "Mỗi tuần mẹ Trang gửi lên một thùng: cá kho, ruốc, dưa cà. Vy chê phòng ám mùi quê, đòi Trang để thùng ngoài hành lang.",
+      "twist": "Mùa thi cuối kỳ, căn tin đóng cửa vì sửa chữa, cả tầng hết tiền ăn; thùng đồ ăn của mẹ Trang nuôi cả phòng, Vy là người xin thêm cơm đầu tiên và tự gọi điện cảm ơn mẹ Trang.",
+      "hook": "Vy vừa bịt mũi kêu phòng có mùi cá kho, tôi đã bình tĩnh đậy nắp nồi lại: mùi đó tên là mẹ tôi.",
+      "comment_question": "Nếu là bạn, bạn có mang đồ ăn quê lên ký túc xá không? 1 = Có, tự hào, 2 = Ngại lắm",
+      "thumb_keywords": [
+        "Đồ Ăn Mẹ Gửi"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 109,
+      "topic": "hoc_duong",
+      "series": "Lớp 11A2",
+      "title": "Lớp Trưởng Tiêu Quỹ Lớp, Tôi Trình Biên Lai Trước Cô",
+      "premise": "Quỹ lớp 11A2 hụt một triệu hai, Khánh đổ cho thủ quỹ Diệp làm mất. Minh Anh nhớ từng lần Khánh mua trà sữa cho nhóm bạn mình bằng tiền quỹ.",
+      "twist": "Minh Anh xin lại hoá đơn điện tử ở quán trà sữa có tên lớp; cô Thảo đối chiếu trong giờ sinh hoạt. Khánh xin lỗi Diệp trước lớp và tự bù quỹ bằng tiền làm thêm dịp hè.",
+      "hook": "Khánh vừa nói 'quỹ hụt là do thủ quỹ', Diệp đã đỏ mắt, còn tôi lặng lẽ mở cuốn sổ ghi chép năm trang.",
+      "comment_question": "Nếu là bạn, bạn có đứng ra bênh bạn bị đổ oan trước lớp không? 1 = Có ngay, 2 = Nói riêng với cô",
+      "thumb_keywords": [
+        "Trình Biên Lai"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 110,
+      "topic": "hoc_duong",
+      "series": "Lớp 11A2",
+      "title": "Bị Vu Quay Cóp Bài Kiểm Tra, Tôi Xin Thi Lại Trước Cả Lớp",
+      "premise": "Minh Anh được điểm 10 bài kiểm tra Lý, Khánh tố với thầy là thấy cô nhìn điện thoại. Cả lớp xì xào, thầy định huỷ bài.",
+      "twist": "Minh Anh xin làm lại một đề khác ngay trên bảng trước lớp và giải đúng hết; Tùng nhớ ra chiếc điện thoại 'bị nhìn' là đồng hồ treo tường. Khánh tự nhận đã nghĩ sai.",
+      "hook": "Thầy vừa cầm bài mười điểm của tôi lên thì Khánh nói to: 'Em thấy bạn ấy nhìn điện thoại ạ', và cả lớp quay lại như xem phim.",
+      "comment_question": "Nếu là bạn, bạn có dám xin thi lại trước cả lớp để chứng minh không? 1 = Dám, 2 = Không dám",
+      "thumb_keywords": [
+        "Xin Thi Lại"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 111,
+      "topic": "hoc_duong",
+      "series": "Lớp 11A2",
+      "title": "Nhóm Chat Lớp Nói Xấu Bạn Tôi, Tôi Đọc To Giờ Sinh Hoạt",
+      "premise": "Diệp bị một nhóm trong lớp lập nhóm chat riêng chế ảnh chê giọng quê. Minh Anh không cãi trên mạng, cô in nguyên văn các tin nhắn chê bai, không kèm ảnh.",
+      "twist": "Trong giờ sinh hoạt, Minh Anh xin cô Thảo cho đọc to từng câu chê, không nêu tên người viết; cả nhóm đỏ mặt vì nghe lại lời mình. Cô Thảo cho cả lớp viết một điều tốt về Diệp, nhóm kia viết dài nhất.",
+      "hook": "Tôi gấp tờ giấy in làm tư, bước lên bục và nói: 'Em xin phép đọc một bài văn tập thể của lớp mình.'",
+      "comment_question": "Nếu là bạn, bạn xử lý nhóm chat nói xấu bạn mình thế nào? 1 = Công khai trước lớp, 2 = Báo riêng cô",
+      "thumb_keywords": [
+        "Đọc To Giờ Sinh Hoạt"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 112,
+      "topic": "hoc_duong",
+      "series": "Lớp 11A2",
+      "title": "Bị Chê Văn Nghệ Quê Mùa, Lớp Tôi Hát Chèo Đoạt Giải Nhất",
+      "premise": "Hội diễn 20/11, các lớp nhảy nhạc Hàn rầm rộ, Khánh chê ý tưởng hát chèo của Diệp là 'quê, mất mặt lớp'. Minh Anh và Tùng đứng về phía Diệp.",
+      "twist": "Tiết mục chèo pha rap do Tùng viết lời về chuyện thi cử làm cả trường cười rồi vỗ tay đứng dậy; ban giám khảo là nghệ sĩ chèo về hưu chấm giải nhất. Khánh xin vào vai đánh trống năm sau.",
+      "hook": "Khánh vừa nói 'hát chèo thì thà cả lớp đứng im', Diệp đã cầm quạt mo lên và hát luôn một câu ngay giữa lớp.",
+      "comment_question": "Nếu lớp bạn diễn văn nghệ, bạn chọn gì? 1 = Nhảy nhạc trend, 2 = Hát dân ca",
+      "thumb_keywords": [
+        "Hát Chèo Đoạt Giải"
+      ],
+      "timing": "Quanh 20/11",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 113,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Cho Đồng Nghiệp Ở Nhờ Phòng Trọ, Bài Học Đắt Giá Về Lòng Tốt",
+      "premise": "Ngân 28 tuổi, nhân viên kế hoạch ở Bình Thạnh, vừa thuê được phòng trọ sạch sẽ yên tĩnh sau hai năm tích cóp. Đồng nghiệp Thuý khéo miệng, than bị chủ nhà đuổi, xin tá túc '1–2 tuần'. Tuần đầu biết điều, rồi dần xài chùa đồ ăn, mỹ phẩm, quần áo, không chia tiền điện nước, dẫn bạn về tụ tập tới khuya, lên công ty lại nói xấu Ngân 'keo kiệt, khó tính'.",
+      "twist": "Ngân không cãi mà âm thầm gom bằng chứng: hoá đơn điện tăng gấp ba, tin nhắn Thuý mượn danh Ngân ghi nợ tiền nước với chủ trọ, đoạn camera cửa phòng. Cao trào: đối chất văn minh ngay trước chủ trọ và đúng mấy đồng nghiệp Thuý từng kể xấu; Thuý phải trả đủ tiền, xin lỗi, tự dọn đi trong ngày. Kết: lòng tốt cần đi kèm ranh giới.",
+      "hook": "Thuý kéo vali vào phòng tôi, nói đúng một câu 'chỉ hai tuần thôi', và tôi đã ngây thơ tin đó là đơn vị thời gian.",
+      "comment_question": "Nếu là bạn, bạn có cho đồng nghiệp ở nhờ không? 1 = Có, giúp được thì giúp, 2 = Không, giữ ranh giới",
+      "thumb_keywords": [
+        "Bài Học Đắt Giá"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    }
+  ]
+}

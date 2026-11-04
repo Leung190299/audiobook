@@ -25,8 +25,8 @@ class _FakeModel:
         self.result = result
         self.calls = []
 
-    def infer(self, text, voice=None, style=None, ref_audio=None, denoise=None):
-        self.calls.append((text, voice, style, ref_audio, denoise))
+    def infer(self, text, voice=None, style=None):
+        self.calls.append((text, voice, style))
         return self.result
 
 
@@ -39,22 +39,27 @@ def test_synthesize_chapter_returns_audio_array():
 
     assert isinstance(audio, np.ndarray)
     assert audio.shape == (1000,)
-    assert model.calls == [
-        ("Nội dung chương một.", "Ngọc Linh", "doc_truyen", None, None)
-    ]
+    assert model.calls == [("Nội dung chương một.", "Ngọc Linh", "doc_truyen")]
 
 
-def test_synthesize_chapter_uses_ref_audio_when_voice_clone_configured():
+def test_synthesize_chapter_khong_dung_ref_audio_du_ref_audio_path_duoc_cau_hinh():
+    # synthesize_chapter không còn biết gì về ref_audio_path -- việc enroll
+    # giọng nhân bản và gán voice_profile.voice thành tên đã enroll là việc
+    # của tts/cli.py, làm một lần trước vòng lặp từng câu (xem finding #1: enroll
+    # lại mỗi câu qua ref_audio= từng khiến stage 2 chậm gấp đôi). Ở đây chỉ cần
+    # xác nhận hàm luôn gọi infer bằng voice_profile.voice, không có tham số
+    # ref_audio/denoise nào được truyền, dù ref_audio_path vẫn còn trên profile.
     chapter = Chapter(index=1, heading="Chương 1", text="Nội dung chương một.")
     fake_audio = np.zeros(1000, dtype=np.float32)
     model = _FakeModel(fake_audio)
-    ref_audio_path = Path("/tmp/female_ngochuyen.mp3")
+    profile = _voice_profile(ref_audio_path=Path("/tmp/female_ngochuyen.mp3"))
+    profile.voice = "__cloned_reference__"  # mô phỏng cli.py đã gán sau khi enroll
 
-    audio = synthesize_chapter(chapter, model, _voice_profile(ref_audio_path))
+    audio = synthesize_chapter(chapter, model, profile)
 
     assert isinstance(audio, np.ndarray)
     assert model.calls == [
-        ("Nội dung chương một.", None, "doc_truyen", str(ref_audio_path), True)
+        ("Nội dung chương một.", "__cloned_reference__", "doc_truyen")
     ]
 
 

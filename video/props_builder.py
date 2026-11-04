@@ -24,6 +24,12 @@ def build_video_props(
                 f"{source_name}: {source['trope']!r}/{source['title']!r})"
             )
 
+    if "sentences" not in tts_metadata:
+        raise PropsBuildError(
+            "Metadata TTS thiếu mảng 'sentences' — tập này dựng trước khi stage 2 "
+            "biết ghi mốc câu. Muốn render lại, hãy chạy lại stage 2."
+        )
+
     script_indices = {c.index for c in script.chapters}
     tts_by_index = {c["index"]: c for c in tts_metadata["chapters"]}
     images_by_index = {c["index"]: c for c in images_metadata["chapters"]}
@@ -36,18 +42,52 @@ def build_video_props(
             f"{sorted(missing_in_tts)}, thiếu trong images: {sorted(missing_in_images)}"
         )
 
+    sentences_by_chapter: dict[int, list[dict]] = {}
+    for sentence in tts_metadata["sentences"]:
+        sentences_by_chapter.setdefault(sentence["chapter_index"], []).append(sentence)
+
     chapters = []
     for chapter in script.chapters:
         tts_chapter = tts_by_index[chapter.index]
         image_chapter = images_by_index[chapter.index]
+        chapter_sentences = sentences_by_chapter.get(chapter.index)
+        if not chapter_sentences:
+            raise PropsBuildError(
+                f"Chương {chapter.index} không có câu nào trong metadata TTS — tập này "
+                "dựng trước khi stage 2 biết ghi mốc câu. Muốn render lại, hãy chạy lại stage 2."
+            )
+        image_scenes = image_chapter.get("scenes")
+        if not image_scenes:
+            raise PropsBuildError(
+                f"Metadata ảnh của chương {chapter.index} không có mảng 'scenes' — tập này "
+                "dựng trước khi stage 3 biết chia cảnh. Muốn render lại, hãy chạy lại stage 3."
+            )
         chapters.append(
             {
                 "index": chapter.index,
                 "heading": chapter.heading,
-                "text": chapter.text,
                 "startSeconds": tts_chapter["start_seconds"],
                 "endSeconds": tts_chapter["end_seconds"],
-                "imagePath": str((images_dir / image_chapter["filename"]).relative_to(repo_root)),
+                # Mốc cảnh giữ trục toàn tập, cùng lý do với mốc câu bên dưới.
+                "scenes": [
+                    {
+                        "number": scene["number"],
+                        "startSeconds": scene["start_seconds"],
+                        "endSeconds": scene["end_seconds"],
+                        "imagePath": str(
+                            (images_dir / scene["filename"]).relative_to(repo_root)
+                        ),
+                    }
+                    for scene in image_scenes
+                ],
+                "sentences": [
+                    {
+                        "text": s["text"],
+                        "startSeconds": s["start_seconds"],
+                        "endSeconds": s["end_seconds"],
+                    }
+                    for s in chapter_sentences
+                ],
             }
         )
 

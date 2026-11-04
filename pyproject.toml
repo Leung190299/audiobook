@@ -7,13 +7,21 @@ dependencies = [
     "gemini-webapi>=1.0.0",
     "pyyaml>=6.0",
     "python-dotenv>=1.0.0",
-    "vieneu",
+    "vieneu>=3.8.3",
+    # huggingface-hub 2.x lưu blob bằng symlink sang kho chung, onnxruntime từ
+    # chối đọc file .data ngoài thư mục model -> vieneu không nạp được graph.
+    "huggingface-hub<2",
     "torch",       # CPU only: needed by vieneu's ONNX speaker-embedding path for voice cloning (fbank extraction), not for TTS inference itself
     "torchaudio",  # CPU only: same reason as torch above
     "pyloudnorm>=0.1.1",
     "soundfile>=0.12.1",
     "mflux",
     "Pillow",
+    "google-api-python-client>=2.100.0",  # upload/: videos.insert + thumbnails.set; trend/: search.list
+    "google-auth-oauthlib>=1.2.0",        # upload/auth.py: OAuth desktop flow một lần
+    "google-auth-httplib2>=0.2.0",        # transport cho google-api-python-client
+    "scipy>=1.17.1",
+    "anthropic>=1.12.0",
 ]
 
 [dependency-groups]

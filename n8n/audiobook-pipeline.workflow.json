@@ -1,0 +1,515 @@
+{
+  "name": "Audiobook Video Pipeline",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Bắt đầu (chạy thủ công)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1280,
+        -120
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "schedule",
+      "name": "Lịch hằng ngày 09:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1280,
+        120
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "notes": "Chỉ dùng nhánh này nếu chạy pipeline bằng n8n. Nếu đã cài launchd (launchd/com.lee.audiobook.daily.plist) thì TẮT node này đi, không thì mỗi ngày chạy hai lượt."
+    },
+    {
+      "id": "exec-0",
+      "name": "Stage 0: Bắt trend",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -1040,
+        0
+      ],
+      "parameters": {
+        "command": "cd /Users/lee/Project/Apps/audiobook && uv run python -m trend.cli"
+      },
+      "notes": "Sinh ý tưởng truyện bám trend hôm nay. Muốn chạy theo trope cố định thay vì bắt trend thì bỏ node này và node Parse Stage 0, nối thẳng trigger vào Stage 1 với tham số trope_id."
+    },
+    {
+      "id": "parse-0",
+      "name": "Parse Stage 0",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const stdout = $input.item.json.stdout || '';\nconst idea = stdout.match(/Đã lưu ý tưởng: (\\S+\\.txt)/);\nconst slug = stdout.match(/Slug: (.+)/);\nif (!idea || !slug) {\n  throw new Error('Không parse được output bắt trend:\\n' + stdout + '\\n' + ($input.item.json.stderr || ''));\n}\nreturn [{\n  json: {\n    idea_file: idea[1],\n    slug: slug[1].trim(),\n  }\n}];"
+      }
+    },
+    {
+      "id": "exec-1",
+      "name": "Stage 1: Kịch bản",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        0
+      ],
+      "parameters": {
+        "command": "=cd /Users/lee/Project/Apps/audiobook && uv run python -m scripts.cli --idea-file {{ $json.idea_file }} --label {{ $json.slug }}"
+      }
+    },
+    {
+      "id": "parse-1",
+      "name": "Parse Stage 1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const stdout = $input.item.json.stdout || '';\nconst m = stdout.match(/Đã lưu kịch bản: (\\S+\\.json)/);\nif (!m) {\n  throw new Error('Không parse được đường dẫn kịch bản từ output:\\n' + stdout + '\\n' + ($input.item.json.stderr || ''));\n}\nreturn [{\n  json: {\n    ...$('Parse Stage 0').item.json,\n    script_path: m[1],\n  }\n}];"
+      }
+    },
+    {
+      "id": "exec-2",
+      "name": "Stage 2: TTS",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        0
+      ],
+      "parameters": {
+        "command": "=cd /Users/lee/Project/Apps/audiobook && uv run python -m tts.cli {{ $json.script_path }}"
+      }
+    },
+    {
+      "id": "parse-2",
+      "name": "Parse Stage 2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const stdout = $input.item.json.stdout || '';\nconst wav = stdout.match(/Đã lưu audio: (\\S+\\.wav)/);\nconst meta = stdout.match(/Metadata: (\\S+\\.json)/);\nif (!wav || !meta) {\n  throw new Error('Không parse được output TTS:\\n' + stdout + '\\n' + ($input.item.json.stderr || ''));\n}\nreturn [{\n  json: {\n    ...$('Parse Stage 1').item.json,\n    audio_wav: wav[1],\n    audio_json: meta[1],\n  }\n}];"
+      }
+    },
+    {
+      "id": "exec-3",
+      "name": "Stage 3: Ảnh nền",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "parameters": {
+        "command": "=cd /Users/lee/Project/Apps/audiobook && uv run python -m images.cli {{ $json.script_path }} {{ $json.audio_json }}"
+      }
+    },
+    {
+      "id": "parse-3",
+      "name": "Parse Stage 3",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const stdout = $input.item.json.stdout || '';\nconst meta = stdout.match(/Metadata: (\\S+\\.json)/);\nif (!meta) {\n  throw new Error('Không parse được output ảnh:\\n' + stdout + '\\n' + ($input.item.json.stderr || ''));\n}\nreturn [{\n  json: {\n    ...$('Parse Stage 2').item.json,\n    images_json: meta[1],\n  }\n}];"
+      }
+    },
+    {
+      "id": "exec-4",
+      "name": "Stage 4: Render video",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "command": "=cd /Users/lee/Project/Apps/audiobook && uv run python -m video.cli {{ $json.script_path }} {{ $json.audio_json }} {{ $json.images_json }}"
+      }
+    },
+    {
+      "id": "parse-4",
+      "name": "Parse Stage 4",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const stdout = $input.item.json.stdout || '';\nconst m = stdout.match(/Đã render video vào (\\S+\\.mp4)/);\nif (!m) {\n  throw new Error('Không parse được output video:\\n' + stdout + '\\n' + ($input.item.json.stderr || ''));\n}\nreturn [{\n  json: {\n    ...$('Parse Stage 3').item.json,\n    video_path: m[1],\n  }\n}];"
+      }
+    },
+    {
+      "id": "exec-5",
+      "name": "Stage 5: Thumbnail",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        0
+      ],
+      "parameters": {
+        "command": "=cd /Users/lee/Project/Apps/audiobook && uv run python -m thumbnail.cli {{ $json.script_path }}"
+      }
+    },
+    {
+      "id": "parse-5",
+      "name": "Parse Stage 5",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const stdout = $input.item.json.stdout || '';\nconst m = stdout.match(/Đã lưu thumbnail: (\\S+\\.png)/);\nif (!m) {\n  throw new Error('Không parse được output thumbnail:\\n' + stdout + '\\n' + ($input.item.json.stderr || ''));\n}\nreturn [{\n  json: {\n    ...$('Parse Stage 4').item.json,\n    thumbnail_path: m[1],\n  }\n}];"
+      }
+    },
+    {
+      "id": "exec-6",
+      "name": "Stage 6: SEO Metadata",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        0
+      ],
+      "parameters": {
+        "command": "=cd /Users/lee/Project/Apps/audiobook && uv run python -m metadata.cli {{ $json.script_path }} {{ $json.audio_json }} {{ $json.video_path }}"
+      }
+    },
+    {
+      "id": "parse-6",
+      "name": "Parse Stage 6",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const stdout = $input.item.json.stdout || '';\nconst txt = stdout.match(/Đã lưu metadata SEO: (\\S+\\.txt)/);\nconst meta = stdout.match(/JSON: (\\S+\\.json)/);\nconst renamed = stdout.match(/Video đã đổi tên: (\\S+\\.mp4)/);\nif (!txt || !meta) {\n  throw new Error('Không parse được output metadata:\\n' + stdout + '\\n' + ($input.item.json.stderr || ''));\n}\nconst prev = $('Parse Stage 5').item.json;\nreturn [{\n  json: {\n    ...prev,\n    metadata_txt: txt[1],\n    metadata_json: meta[1],\n    // Stage 6 đổi tên file .mp4 tại chỗ — tên cũ không còn tồn tại.\n    final_video_path: renamed ? renamed[1] : prev.video_path,\n  }\n}];"
+      }
+    },
+    {
+      "id": "exec-7-short",
+      "name": "Stage 7: Short",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2320,
+        0
+      ],
+      "parameters": {
+        "command": "=cd /Users/lee/Project/Apps/audiobook && uv run python -m shorts.cli {{ $json.audio_json }} {{ $json.images_json }}"
+      },
+      "onError": "continueRegularOutput",
+      "notes": "Cắt cả tập thành series ~30 short đánh số, gói theo mốc câu (từ stage 2) không bắc cầu qua chương. Cần audio_json (mốc câu từ Parse Stage 2, đã đi theo suốt chuỗi) và images_json — không cần script_path nữa. Giống run_daily.sh: stage này KHÔNG được chặn lượt chạy — video dài, thumbnail, metadata SEO đã dựng xong hết rồi, short hỏng chỉ đáng ghi nhận chứ không đáng huỷ cả tập. \"onError\": \"continueRegularOutput\" làm node này lỗi vẫn cho luồng đi tiếp (n8n truyền nguyên item đầu vào — tức output Parse Stage 6 — sang node kế, không có stdout)."
+    },
+    {
+      "id": "parse-7-short",
+      "name": "Parse Stage 7",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2560,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const stdout = $input.item.json.stdout || '';\nconst m = stdout.match(/Đã render ([0-9]+) short vào (\\S+)/);\nif (!m) {\n  throw new Error('Không parse được output short:\\n' + stdout + '\\n' + ($input.item.json.stderr || ''));\n}\nreturn [{\n  json: {\n    ...$('Parse Stage 6').item.json,\n    short_count: m[1],\n  }\n}];"
+      },
+      "onError": "continueRegularOutput",
+      "notes": "Parse dòng tổng kết cuối stdout (\"Đã render <N> short vào ...\") lấy số phần đã render vào short_count — không còn bắt từng cặp .mp4/.txt vì stage 7 in một cặp cho mỗi phần trong ~30 phần. Nếu Stage 7: Short lỗi hoặc không parse được output, node này ném lỗi như bình thường, nhưng \"onError\": \"continueRegularOutput\" khiến n8n không dừng workflow — truyền nguyên item đầu vào (vẫn còn đủ script_path, final_video_path, metadata_json, thumbnail_path từ Parse Stage 6) sang Stage 8, y hệt cách run_daily.sh chỉ cảnh báo rồi đi tiếp khi Stage 7 hỏng."
+    },
+    {
+      "id": "exec-7",
+      "name": "Stage 8: Upload YouTube",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2800,
+        0
+      ],
+      "parameters": {
+        "command": "=cd /Users/lee/Project/Apps/audiobook && uv run python -m upload.cli {{ $json.final_video_path }} {{ $json.metadata_json }} --thumbnail {{ $json.thumbnail_path }}"
+      },
+      "notes": "TUỲ CHỌN — mặc định pipeline chỉ dựng video, người dùng tự đăng YouTube. Muốn bật thì cần config/youtube_token.json (chạy `uv run python -m upload.auth` một lần). Không dùng thì xoá node này và node Parse Stage 8, nối thẳng Parse Stage 7 vào Báo Telegram."
+    },
+    {
+      "id": "parse-7",
+      "name": "Parse Stage 8 (kết quả cuối)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3040,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const stdout = $input.item.json.stdout || '';\nconst url = stdout.match(/Đã upload: (\\S+)/);\nconst privacy = stdout.match(/Trạng thái: (.+)/);\nif (!url) {\n  throw new Error('Không parse được output upload:\\n' + stdout + '\\n' + ($input.item.json.stderr || ''));\n}\nreturn [{\n  json: {\n    ...$('Parse Stage 7').item.json,\n    video_url: url[1],\n    privacy_status: privacy ? privacy[1].trim() : 'unknown',\n    thumbnail_set: /Thumbnail: đã đặt/.test(stdout),\n  }\n}];"
+      }
+    },
+    {
+      "id": "exec-notify",
+      "name": "Báo khi xong",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        3280,
+        0
+      ],
+      "parameters": {
+        "command": "=cd /Users/lee/Project/Apps/audiobook && uv run python -m notify.cli text --text \"✅ Đã dựng xong tập {{ $json.slug }}\""
+      }
+    }
+  ],
+  "connections": {
+    "Bắt đầu (chạy thủ công)": {
+      "main": [
+        [
+          {
+            "node": "Stage 0: Bắt trend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lịch hằng ngày 09:00": {
+      "main": [
+        [
+          {
+            "node": "Stage 0: Bắt trend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stage 0: Bắt trend": {
+      "main": [
+        [
+          {
+            "node": "Parse Stage 0",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Stage 0": {
+      "main": [
+        [
+          {
+            "node": "Stage 1: Kịch bản",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stage 1: Kịch bản": {
+      "main": [
+        [
+          {
+            "node": "Parse Stage 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Stage 1": {
+      "main": [
+        [
+          {
+            "node": "Stage 2: TTS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stage 2: TTS": {
+      "main": [
+        [
+          {
+            "node": "Parse Stage 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Stage 2": {
+      "main": [
+        [
+          {
+            "node": "Stage 3: Ảnh nền",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stage 3: Ảnh nền": {
+      "main": [
+        [
+          {
+            "node": "Parse Stage 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Stage 3": {
+      "main": [
+        [
+          {
+            "node": "Stage 4: Render video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stage 4: Render video": {
+      "main": [
+        [
+          {
+            "node": "Parse Stage 4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Stage 4": {
+      "main": [
+        [
+          {
+            "node": "Stage 5: Thumbnail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stage 5: Thumbnail": {
+      "main": [
+        [
+          {
+            "node": "Parse Stage 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Stage 5": {
+      "main": [
+        [
+          {
+            "node": "Stage 6: SEO Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stage 6: SEO Metadata": {
+      "main": [
+        [
+          {
+            "node": "Parse Stage 6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Stage 6": {
+      "main": [
+        [
+          {
+            "node": "Stage 7: Short",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stage 7: Short": {
+      "main": [
+        [
+          {
+            "node": "Parse Stage 7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Stage 7": {
+      "main": [
+        [
+          {
+            "node": "Stage 8: Upload YouTube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stage 8: Upload YouTube": {
+      "main": [
+        [
+          {
+            "node": "Parse Stage 8 (kết quả cuối)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Stage 8 (kết quả cuối)": {
+      "main": [
+        [
+          {
+            "node": "Báo khi xong",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionTimeout": -1
+  }
+}

@@ -1,0 +1,41 @@
+# Cấu hình module bắt trend (trend/) — toàn bộ nguồn đều công khai, không cần API key.
+region: VN
+max_items_per_feed: 25
+
+# Google Trends: bối cảnh xã hội chung. Yếu cho thể loại này (phần lớn là bóng đá và
+# tin quốc tế) nên chỉ làm chất liệu phụ. Tắt đi cũng không mất gì nhiều.
+use_google_trends: true
+
+# Nguồn chính. Tiêu đề ở các mục tâm sự/đời sống/pháp luật chính là dạng xung đột mà
+# khán giả truyện audio quan tâm — sát thể loại hơn hẳn từ khoá thịnh hành chung.
+# Thứ tự trong danh sách chính là thứ tự ưu tiên đưa vào prompt.
+feeds:
+  - name: "Tâm sự tình cảm (Dân Trí)"
+    url: "https://dantri.com.vn/rss/tinh-yeu-gioi-tinh.rss"
+  - name: "Bạn đọc (Dân Trí)"
+    url: "https://dantri.com.vn/rss/ban-doc.rss"
+  - name: "Đời sống (Dân Trí)"
+    url: "https://dantri.com.vn/rss/doi-song.rss"
+  - name: "Pháp luật (Dân Trí)"
+    url: "https://dantri.com.vn/rss/phap-luat.rss"
+  - name: "Tâm sự (VnExpress)"
+    url: "https://vnexpress.net/rss/tam-su.rss"
+  - name: "Đời sống (VnExpress)"
+    url: "https://vnexpress.net/rss/gia-dinh.rss"
+
+# Kênh YouTube đối thủ — tuỳ chọn, cũng không cần key.
+# Lấy channel_id: mở kênh, xem mã nguồn trang, tìm chuỗi bắt đầu bằng "UC" dài 24 ký tự;
+# hoặc mở một video của kênh, bấm tên kênh, channel_id nằm trong URL /channel/UC...
+# Cập nhật 2026-08-26: 4/6 kênh chọn hồi 14/08 đã trả 404/500 — ID chết hoặc kênh
+# đổi tên. Danh sách dưới lấy lại từ YouTube search "truyện audio full" sắp theo
+# lượt xem, đã kiểm từng feed. Nên soát lại định kỳ: trend/sources.py bỏ qua feed
+# lỗi trong im lặng, nên nguồn mục dần mà không ai biết.
+youtube_channels:
+  - "UC7YH0uq6YOyp4p38aNj58Ew"  # Mạn Mạn Audio — học đường hài, ra hằng tuần, 21-67k/tập
+  - "UC-RAdFZPwRKErOZJW29AkFw"  # Vả Mặt Audio — xuyên vào thiên kim thật, 231k/tháng
+  - "UCyC15_A0DDcjfTyPgeXbTdQ"  # Kẹo Bông Gòn Audio — tiếng lòng + trà xanh
+  - "UC11nn9xseTJhOkfvLhvqhZw"  # Dứa Audio — hóng biến hào môn, 470k
+  - "UC8tmsjm0xizsJcr_dqo3AaA"  # ChuChu Audio — thái tử gia, 584k
+  - "UCL4ynttwa-zrht5a9jiU1yw"  # Truyện Audio - TTH — hôn ước từ bé, 381k
+  - "UCtKs32_gREWCFUu46PATSVg"  # Mèo Cưng Audio
+  - "UC8qO-bJSNgNyHCk9BdLUjhA"  # AnAn Audio

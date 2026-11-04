@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.lee.audiobook.daily</string>
+
+  <!-- caffeinate -i: giữ máy thức chừng nào job còn chạy. Hai lượt (15/09 và
+       18/09) chết giữa stage 3-4 không lỗi, đúng kiểu máy ngủ khi rảnh tay.
+       Không chống được việc đóng nắp máy. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/caffeinate</string>
+    <string>-i</string>
+    <string>/bin/bash</string>
+    <string>/Users/lee/Project/Apps/audiobook/run_daily.sh</string>
+    <!-- Từ 26/10 dựng xong đăng luôn (yêu cầu của kênh): private + hẹn 20h tối
+         trống gần nhất, 3 short hẹn 20:05. Bỏ dòng này để quay về chỉ dựng. -->
+    <string>--upload</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/lee/Project/Apps/audiobook</string>
+
+  <!-- Chạy 09:00 mỗi ngày. Máy ngủ vào giờ này thì launchd chạy bù ngay khi máy thức. -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>9</integer>
+    <key>Minute</key><integer>0</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/Users/lee/Project/Apps/audiobook/output/daily/launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/lee/Project/Apps/audiobook/output/daily/launchd.err.log</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>LANG</key><string>en_US.UTF-8</string>
+    <key>LC_ALL</key><string>en_US.UTF-8</string>
+  </dict>
+
+  <!-- Lượt chạy kéo dài hơn một tiếng; không để macOS giết tiến trình giữa chừng. -->
+  <key>ExitTimeOut</key>
+  <integer>0</integer>
+  <!-- KHÔNG dùng Background: macOS bóp CPU tiến trình nền, đo 06-07/09 cả lượt
+       mất 9h24m-10h54m (stage 4 render 4h13m thay vì 21 phút, stage 7 5h thay
+       vì 36 phút). Interactive chạy đúng tốc độ như khi gọi tay: ~1h50. -->
+  <key>ProcessType</key>
+  <string>Interactive</string>
+
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>

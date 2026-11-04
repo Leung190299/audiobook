@@ -1,101 +1,118 @@
 ---
 name: generating-audiobook-video
-description: Use when asked to produce, render, or generate a finished audiobook video (MP4) for this project from a trope/story idea — e.g. "tạo video truyện", "render video cho trope X", "chạy full pipeline", "làm 1 tập truyện audio".
+description: Use when asked to produce, render, upload, or schedule a finished audiobook video (MP4) or its Shorts for this project — e.g. "tạo video truyện", "làm video hôm nay", "chạy truyện #42", "dựng lại video", "đăng short", "up lên YouTube", "chạy full pipeline", "đổi video nền", "làm lại avatar/linh vật". Covers the daily story-bank run, the branded on-screen layout, background videos, the frog mascot, uploads and the nightly Shorts job.
 ---
 
 # Generating an Audiobook Video
 
-## Overview
+## What the channel ships (since 2026-10-05)
 
-Chains this repo's six pipeline modules — `scripts` → `tts` → `images` → `video` → `thumbnail` → `metadata` — into one finished MP4 (plus a thumbnail PNG). Each module is a CLI that reads the previous module's JSON output and writes its own JSON + asset output; there is no single orchestrator command, so each stage's exact output path must be captured and passed to the next.
+One **35–50 min long video per day** + **3 Shorts**, Vietnamese family-drama stories read by TTS. The look copies the *layout* of top audiobook channels (reference: Dứa Audio, 2.38M views on a 38-min video) — **never their branding**:
 
-## When to Use
-
-- User names a trope (or asks to pick one) and wants a video produced end-to-end.
-- User asks to "run the pipeline" / "render a video" without specifying which stage.
-
-**Not for:** re-running a single stage in isolation (just run that module's CLI directly) or debugging a stage's internals (read that module's own code/tests instead).
-
-## Prerequisites (check once per environment, not per run)
-
-- `.env` exists with real `SECURE_1PSID`/`SECURE_1PSIDTS` (Gemini cookies) — required by `scripts` and `images`. **This is the one that actually breaks in practice.** Without it, stage 1 crashes with a raw `KeyError: 'SECURE_1PSID'` traceback (not a clean auth-error message — `scripts/generator.py` does `os.environ["SECURE_1PSID"]` with no try/except). Check `.env` exists (not just `.env.example`) before running anything. No API key is needed for stage 3 (images) — it runs `mflux-generate-flux2` locally, not a hosted API.
-- `cd remotion && npm install` has been run at least once — needed by stage 4 only.
-- Pick a `trope_id` from `config/tropes.yaml` (or ask the user which one).
-
-(`uv run` auto-syncs the Python venv itself on first use — no separate `uv sync` step needed.)
-
-**Stage 3 (images) runs `mflux-generate-flux2` locally on-device** (FLUX.2 Klein 4B, quantized) — no `TOGETHER_API_KEY` or any API key required. First run on a machine downloads ~4.3GB of weights (`Runpod/FLUX.2-klein-4B-mflux-4bit`) from HuggingFace — no `HF_TOKEN` needed, this repo isn't gated. Every run (including after the weights are cached) reloads the model from scratch **per chapter** (16×), so stage 3 takes roughly 10 minutes for a full 16-chapter script — this is normal, not a hang. (Measured 2026-07-22: 8 images took ~5 minutes, so ~40s per image. An earlier version of this doc claimed 20-25 minutes for 8 images; that was an estimate, never a measurement, and it was wrong by ~4×.)
-
-If `.env` is missing, stop and tell the user to create it from `.env.example` with real cookie values — don't guess credentials or silently skip the stage.
-
-## The Six Stages
-
-Run from the repo root. Each command prints the path(s) it wrote — capture those from stdout, don't guess filenames. Every stage's output filename embeds its own fresh UTC timestamp (`<trope>-<timestamp>.json`), independently per stage, so stage N's timestamp will NOT match stage N+1's.
-
-| # | Command | Reads | Writes (path printed to stdout) |
-|---|---------|-------|----------------------------------|
-| 1 | `uv run python -m scripts.cli <trope_id>` | `config/tropes.yaml` | `output/scripts/<trope>-<ts>.json` |
-| 2 | `uv run python -m tts.cli <script_path>` | stage 1's JSON | `output/audio/<trope>-<ts>.wav` + `.json` (line 2 of stdout, after "Metadata:") |
-| 3 | `uv run python -m images.cli <script_path>` | stage 1's JSON | `output/images/<trope>-<ts>.json` + 8 `.png` (metadata path after "Metadata:") |
-| 4 | `uv run python -m video.cli <script_path> <tts_metadata_path> <images_metadata_path>` | stage 1 + 2 + 3's JSON | `output/video/<trope>-<ts>.mp4` |
-| 5 | `uv run python -m thumbnail.cli <script_path>` | stage 1's JSON only | `output/thumbnails/<trope>-<ts>.png` |
-| 6 | `uv run python -m metadata.cli <script_path> <tts_metadata_path> <video_path>` | stage 1 + 2 + 4's output | `output/metadata/<trope>-<ts>.txt` + `.json`; also renames stage 4's `.mp4` in place to an SEO slug |
-
-Stage 2 and 3 both take stage 1's script path directly — they don't depend on each other and could run in parallel, but running them sequentially is simpler to reason about and this repo has no orchestration for concurrent runs.
-
-**Stage 2 runs entirely CPU-side** (VieNeu-TTS v3 Turbo via ONNX Runtime, `Vieneu(backend="onnx")`) — one `tts.cli` process loads the model once and synthesizes every chapter sequentially, no per-chapter mode or merge step needed. A single 865-word chapter synthesizes in ~30 seconds in isolation (RTF 0.136), but a real full end-to-end run of all 16 chapters (model load + sequential synthesis + loudness normalization + concatenation) measured **~14 minutes** on the operator's 16GB MacBook Air (2026-07-30, `trong_sinh_mat_the`, 3158s of output audio) — still far faster than OmniVoice, just not as fast as the single-chapter number alone suggests. (The previous OmniVoice engine needed ~12 min/chapter and a 2-process-parallel + merge workaround to stay under ~3.2 hours for 16 chapters; that workaround, including `tts/merge_cli.py`, is gone.)
-
-**Voice is configured in `config/voice.yaml`**, two modes: a built-in preset (`voice: "<name>"`, e.g. `"Thục Đoan"` — pick from `vieneu.list_preset_voices()`, 14 available across Bắc/Trung/Nam) or voice cloning from a reference clip (`ref_audio_path: "config/voices/<file>.mp3"`, overrides `voice` when set). The TTS engine itself stays ONNX/CPU either way; cloning additionally needs `torch`/`torchaudio` (both project dependencies) purely for the reference-audio speaker-embedding feature extraction (CPU only, ~1-4s, no MPS/GPU involved) — not for the synthesis engine, which is unaffected by which mode is active.
-
-## SEO metadata (stage 6)
-
-Stage 6 automates the parts of YouTube SEO that can be derived from data already in the pipeline: title, description (with real chapter timestamps), tags, and hashtags — written to `output/metadata/<trope>-<ts>.txt` (copy-paste ready) and `.json`. It also renames the final `.mp4` to an SEO-friendly slug.
-
-**Manual checklist — do these yourself in YouTube Studio at upload time, this pipeline does not automate them:**
-
-- **Uploading the generated thumbnail**: stage 5 generates `output/thumbnails/<trope>-<ts>.png` automatically — you still have to upload it as the video's thumbnail in YouTube Studio yourself (no API upload).
-- **Cards & End Screens**: add in YouTube Studio after upload, pointing to related videos/playlists and a subscribe prompt.
-- **Pinned comment**: pin a high-value comment or discussion question yourself after publishing.
-- **Early engagement**: encourage likes/comments/shares in the first 24-48 hours — this is on you, not automatable.
-- **Keyword research tools** (TubeBuddy/VidIQ/Semrush): stage 6's tags/hashtags come from Gemini reading the story content only, with no real search-volume/competition data. Cross-check with a real tool before publishing if ranking matters for that video.
-
-## Thumbnail (stage 5)
-
-Stage 5 generates one `output/thumbnails/<trope>-<ts>.png` (1280×720): mflux renders a dramatic close-up emotional portrait (different style from the background images in stage 3 — those explicitly forbid close-up faces, thumbnails want the opposite), then a short Vietnamese hook phrase (2-4 words, from Gemini) is drawn on top with Pillow using a bundled bold Vietnamese font (`assets/fonts/BeVietnamPro-Black.ttf`) — mflux is never trusted to render the text itself.
-
-Stage 5 only needs the script JSON — it does not depend on stages 2-4's output, so it can run any time after stage 1, though the natural point in a full run is right after stage 4 (video render) finishes.
-
-## Example
-
-```bash
-uv run python -m scripts.cli trong_sinh_bao_thu
-# Đã lưu kịch bản: output/scripts/trong_sinh_bao_thu-20260722T090000Z.json (...)
-
-uv run python -m tts.cli output/scripts/trong_sinh_bao_thu-20260722T090000Z.json
-# Đã lưu audio: output/audio/trong_sinh_bao_thu-20260722T091500Z.wav (...)
-# Metadata: output/audio/trong_sinh_bao_thu-20260722T091500Z.json
-
-uv run python -m images.cli output/scripts/trong_sinh_bao_thu-20260722T090000Z.json
-# Đã lưu 8 ảnh vào output/images
-# Metadata: output/images/trong_sinh_bao_thu-20260722T093000Z.json
-
-uv run python -m video.cli \
-  output/scripts/trong_sinh_bao_thu-20260722T090000Z.json \
-  output/audio/trong_sinh_bao_thu-20260722T091500Z.json \
-  output/images/trong_sinh_bao_thu-20260722T093000Z.json
-# Đã render video vào output/video/trong_sinh_bao_thu-20260722T094500Z.mp4
-
-uv run python -m thumbnail.cli output/scripts/trong_sinh_bao_thu-20260722T090000Z.json
-# Đã lưu thumbnail: output/thumbnails/trong_sinh_bao_thu-20260722T094600Z.png
+```
+┌──────────── 1920 x 1080 ─────────────┐
+│ 🐸 vẫy tay │                │ 🐸 đọc truyện│
+│            │  VIDEO "THỦ    │  Audio       │
+│ Đăng ký    │  CÔNG" GIỮA    │  Truyện      │
+│ kênh, 20h  │  (lặp suốt     │ Truyện hư cấu│
+│ mỗi tối    │   cả tập)      │ ...do AI tạo │
+│ 🐸 kính râm│                │ 🐸 kính râm  │
+└──────────────────────────────────────┘
 ```
 
-If a printed path is missed, recover the newest file instead of re-running: `ls -t output/<stage_dir>/*.json | head -1`.
+- **Static frame start to end.** No burned-in captions, chapter titles, avatar, waveform, hook text or end card. Viewers who want captions turn on YouTube's auto-captions. The cold open still *plays* (it is an audio edit); only its text overlay is gone.
+- **Centre = a background video**, picked at random per episode from `assets/backgrounds/`. The centre box follows the clip's aspect ratio: vertical clips (most Douyin clips) show uncropped and the side panels widen; landscape clips are capped at 66% of the width and cropped at the sides.
+- **Side panels = channel brand**: cream background, two **frog stickers** per panel. Left: "Đừng quên Đăng ký nhé!" sign, card "Truyện mới 20h mỗi tối", "Like nhé!". Right: the "AUDIO TRUYỆN" logo sticker (it carries the channel name — no name text any more), the fixed AI disclosure card, the headphones-reading frog.
+- **One mascot everywhere**: a chubby green frog wearing a Vietnamese conical hat (*nón lá*). It is on the avatar, every thumbnail and both side panels. Since 07/10 panels and thumbnails use the channel's own 4×4 sticker sheet (`assets/brand/sticker-sheet.webp`), not FLUX drawings. It was designed (spec 24/09) to differ from competitors' white duck / capybara — do not swap it for a competitor-looking character.
 
-## Common Mistakes
+**Output quality**: long video renders at **1920×1080** (was 1024×576 until 05/10 — SD, and it threw away over half the vertical detail of the 1024–1280 px Douyin sources). Remotion's intermediate frames are JPEG 95 (`backgrounds.RENDER_JPEG_QUALITY`; default 80 smeared text edges). 1080p renders ~33% slower than 576p. `BrandPanel` scales all its size clamps by `height / 576`, so changing the frame size keeps the layout.
 
-- **Assuming timestamps match across stages.** They don't — always read the printed path, never construct one from a previous stage's timestamp.
-- **Passing the wrong JSON to `video.cli`.** It takes 3 paths in this order: script, TTS metadata, images metadata — not the `.wav`/`.png` files themselves.
-- **Expecting this to be fast.** A full 16-chapter run still takes tens of minutes, now dominated by stage 3 (images) and stage 4 (video render), not stage 2 (TTS with VieNeu-TTS measured at ~14 minutes for a full 16-chapter script, vs ~3.2 hours for the old OmniVoice engine). Image generation reloads the mflux model from scratch per chapter (~10 min total for stage 3's 16 images, more on the very first run while weights download) — don't assume a hang is a failure.
-- **Running without a real `.env`.** `scripts`/`images` call Gemini via cookie auth; without real `SECURE_1PSID`/`SECURE_1PSIDTS` they crash with a raw `KeyError` traceback (not a clean error message) — check `.env` exists before starting, don't wait for the crash to notice.
-- **Using the Agent/subagent tool to run a long image/video job in the background.** Subagents that start a `run_in_background: true` Bash command and then end their own turn cause that background job to vanish silently sometime later — no traceback, no exit code, no crash report. Launch these jobs directly from the main session's own `Bash` tool with `run_in_background: true` instead — that has run reliably for every long job in this project (image generation, video rendering).
-- **Running stage 6 (metadata) before stage 4.** It needs the actual rendered `.mp4` path to rename, and the real TTS metadata for chapter timestamps — both only exist after stages 2 and 4 finish. Stage 5 (thumbnail) has no such ordering requirement — it only needs stage 1's script JSON.
+Layout code: `remotion/src/MainVideo.tsx` → `BrandedLayout.tsx` (centre box width) → `BrandPanel.tsx` (panels, colours, AI text) + `BackgroundVideo.tsx` (looped centre clip). Shorts (`ShortVideo.tsx`) keep their own older layout with captions.
+
+## Run it
+
+```bash
+./run_daily.sh                 # next story from the bank, build only (no upload)
+./run_daily.sh --story 42      # a specific story id from data/story_bank.json
+./run_daily.sh --dry-run-pick  # print the next 7 days' picks, build nothing
+./run_daily.sh --upload        # build, then upload long video + Shorts
+```
+
+`launchd/com.lee.audiobook.daily.plist` runs `./run_daily.sh --upload` at **09:00 daily: build, then upload** (since 26/10, at the channel's request — before that uploading was a deliberate human checkpoint). Remove the `--upload` line from the plist to go back to build-only. Upload needs a live OAuth token; in Testing mode it dies every 7 days.
+
+**Prefer `run_daily.sh` over driving stages by hand.** Each stage prints the path the next one needs; `run_daily.sh` parses those lines with BSD `sed -E`. **Changing any stage's `print()` silently breaks the chain** — update the pattern in `run_daily.sh` and `tests/fake_stage.sh`, then run `uv run pytest tests/test_run_daily.py` (~5 s).
+
+## Stages (measured 03–05/10 on an M4 / 16 GB)
+
+| # | Module | ~Time | Notes |
+|---|--------|-------|-------|
+| 1 | `scripts.cli --story <id>` | ~15 min (Claude) / 2 min (Gemini) | Writer chosen by `STORY_LLM` (`claude` / `gemini`, `--llm` overrides; unset → Claude when `ANTHROPIC_API_KEY` is in `.env`) — `scripts/llm.py`. Claude = `claude-opus-5-5`, effort `high`, one multi-turn conversation with prompt caching, server-side refusal fallback. Title, hook, comment question, thumb keywords come **from the bank**, not the model. Approved outline → chapter N follows line N, but **chapter headings come from the model** (outline lines are internal notes like "Miếng hài: …"). |
+| 2 | `tts.cli` | 5.5 min | VieNeu-TTS, ONNX on CPU. |
+| 3 | `images.cli` | 31 min | **Skipped whenever `assets/backgrounds/` has a video** — long video and Shorts both run on background video. Only runs (FLUX via mflux) as the fallback when that folder is empty. |
+| 4 | `episodes.cli` | 27–41 min | Remotion render; picks the background here. Images arg is optional — omitted when stage 3 is skipped. |
+| 5 | `thumbnail.cli` | seconds | Frog sticker left + almost-full title right in Anton, keywords coloured. Stickers come from the topic's `thumb_stickers` (A, B) in `scripts/topics.py` — no FLUX. |
+| 6 | `metadata.cli` | 5 s | Minimal description (below). Renames the mp4 to the title slug. |
+| 7 | `shorts.cli --script` | 1–2 min | 3 Shorts from `short_beats`, each on its own background video (vertical clips preferred). **Failure only warns**, never fails the run. |
+| 8 | `upload.episodes_cli` | — | Only with `--upload`. |
+
+After stage 7, `run_daily.sh` records `shorts_prefix` into the metadata index and marks the story `built` in the bank (see Gotchas).
+
+## Background videos
+
+Drop `.mp4` files into `assets/backgrounds/` — that's all. Each episode picks one at random (seeded by the episode stem, so a re-render keeps the same clip). New files are picked up automatically.
+
+Each source is prepared **once** by ffmpeg into `assets/backgrounds/.prepared/`: `<name>-h1080.mp4` for the long video and, for vertical sources only, `<name>-h1920.mp4` for Shorts (Short frame is 1080×1920). Aspect kept, **audio stripped** (Douyin music would fight the narration), 30 fps. Shorts prefer vertical clips; a landscape clip squeezed into a vertical frame keeps only the middle ~32%.
+
+With videos present `run_daily.sh` **skips stage 3 entirely** and calls stages 4 and 7 without an images file — a run drops from ~70 to ~40 min. Empty folder → stage 3 runs and everything uses images as before. A source that fails ffmpeg is skipped and the episode falls back to the stage-3 images — one bad clip never kills an hour-long run. `assets/backgrounds/` is gitignored (hundreds of MB).
+
+## Mascot, avatar, brand assets
+
+`uv run python -m scripts.cut_sticker_sheet` cuts `assets/brand/sticker-sheet.webp` into 16 transparent stickers in `assets/brand/stickers/<name>.png` (logo, nghe-truyen, hay-qua, thu-gian, dang-ky, ngu, cung-nghe, cam-on, hum, truyen-hay, like, chill, moi-luc, co-len, kien-thuc, hen-gap) and copies the four the panels use to `remotion/public/sticker-*.png`. The sheet's white background equals the stickers' white rim, so the rim is removed with the background and redrawn by `thumbnail.sticker.sticker()`. A new sheet with the same 4×4 layout: replace the file and rerun; a different layout: edit `NAMES`. To change which stickers appear: `MASCOT` in `remotion/src/BrandPanel.tsx`, `thumb_stickers` in `scripts/topics.py` (prefer stickers with short speech text — long text fights the title).
+
+`uv run python -m scripts.make_brand_mascots` now only draws the FLUX avatar `assets/brand/avatar-frog.png` (800×800); its cut-out is cached as `avatar-frog-raw.png`.
+
+The avatar must be uploaded **by hand in YouTube Studio** — the API cannot change a channel's profile picture.
+
+## Metadata & disclosure
+
+- **Title**: `[Truyện Audio] <story title> | <CHANNEL_NAME>`.
+- **Description** (`metadata.full.build_minimal_description`): title → `⚠️ Truyện hư cấu. Kịch bản, giọng đọc và hình ảnh do AI tạo ra.` → `Hashtags:` (topic tags first, ≤15 — over 15 and YouTube ignores all) → `Keywords:`. No chapters, summary, playlist link or question, matching the reference. The side-picking question lives in the pinned comment.
+- **AI disclosure** appears in three places: description line 2, fixed on the right side panel, and YouTube's own flag `status.containsSyntheticMedia = true` set at upload. **That flag only takes effect on `videos.insert`, and `videos.list` never returns it** — reading it back always gives `None` even when it is on. Verify in Studio, never by read-back.
+
+## Uploading
+
+`upload.episodes_cli <metadata-index>` uploads the long video as `private` with `publishAt` = the story's `publish_date` at 20:00 (+07:00). **A date already in the past rolls forward** to the next 20:00 with a warning, instead of producing a past `publishAt`. Without a `publish_date`, `--first-air 2026-10-07T20:00` sets it — check it does not collide with an already-scheduled video. It adds the video to its topic playlist (`YOUTUBE_PLAYLIST_*` in `.env`, link or bare `PL…` id — a playlist *name* is rejected) and marks the story `published` with its `video_id`.
+
+**Shorts are uploaded and scheduled together with the long video.** Pass `--shorts-prefix <prefix>` (stored as `shorts_prefix` in the metadata index; `run_daily.sh --upload` does it) and the 3 Shorts go up immediately as `private` with `publishAt` = the long video's publish time **+ 5 min**, titled `<story title> — Trích đoạn N/3` from the start. YouTube flips them public by itself — nothing has to be awake or authenticated on air night. The publish time is read from the long video's **saved upload state**, never recomputed (a hand-picked `--first-air` date would otherwise drift). If that time has already passed, Shorts go up public immediately (YouTube rejects a past `publishAt`). Re-running for a long video already uploaded skips it and only uploads the Shorts.
+
+`launchd/com.lee.audiobook.shorts.plist` still runs `scripts.post_shorts` at **20:05 every night** as a safety net: for today's story it makes any already-uploaded Shorts public and fixes their titles, and uploads them if they were never uploaded. It refuses while the long video is still private — a Short pointing at a private video is a dead link exactly when Shorts get most views.
+
+## Gotchas that have actually bitten
+
+- **Quota resets at midnight Pacific (~14:00 Vietnam), not local midnight.** `videos.insert` = 1,600 regardless of size. The default limit is 10,000/day, **but on 05/10 about 21,000 units' worth of calls (1 long video + 12 Shorts + updates) went through in one Pacific day with no quota error** — this project's real limit is higher. Check Google Cloud Console → YouTube Data API v3 → Quotas before planning around 10,000. `series_cli` stops cleanly on `quotaExceeded` and saves progress, so a rerun the next day picks up where it stopped.
+- **OAuth token dies every 7 days** (project in Testing mode). Symptom: `invalid_grant` in `output/daily/shorts.err.log` or the upload log. Fix: `uv run python -m upload.auth` — the browser consent is the operator's to click, never Claude's.
+- **`run_daily.sh` runs on macOS `/bin/bash` 3.2.** Under `set -u`, expanding an empty array as `"${arr[@]}"` is an "unbound variable" error that kills the run. Use `${arr[@]+"${arr[@]}"}`. And never edit `run_daily.sh` while a run is executing it — bash reads the file as it goes.
+- **Prologue "Mở đầu" (26/10, full format):** after all chapters, stage 1 asks (same conversation) for a 100–150-word flash-forward into the climax that stops before the payoff and ends with a bridge back to the start; it becomes chapter 1 (`scripts.models.PROLOGUE_HEADING`). With a prologue there is no audio cold open (`episodes/full.py`), QA exempts it from the 300-word floor, and cold open / Shorts / TikTok quote-matching skip it (`without_prologue`) — otherwise they match the retelling instead of the real climax. If the prologue fails twice it is skipped and the old cold open is used.
+- **Claude counts Vietnamese compound words as one word** and overshot the 590–770 chapter limit (944) until the chapter prompt said to count by syllable ("con gái" = 2). Even so, Claude's dialogue-heavy prose (~39 paragraphs/chapter vs Gemini's ~11) reads at ~3.75 words/s, not 4.25: story #43 had 11,913 words and came out 53:47. `scripts/prompts.py words_per_second()` now picks the rate by `STORY_LLM`, so Claude is asked for 7,900–10,100 words (530–670/chapter) and QA's full-format floor scales with it. Measured on one story — re-measure after a few more. Stages 3/5/6 still use Gemini cookies even when stage 1 writes with Claude.
+- **Only 16 GB RAM.** Never run a second FLUX job (mascots, `mac-image-ai`) while stage 3 or 5 is running, or while a Remotion render is going — swap thrash slows everything and can kill a stage. Check `memory_pressure` first.
+- **Don't edit Remotion or stage-4 Python while stage 4 is starting.** Remotion bundles the source once at render start; once `chrome-headless-shell` processes exist, editing is safe for that render.
+- **Built-but-unuploaded stories must be marked**, or `--story auto` rebuilds them the next day. Since 02/10 `run_daily.sh` marks `built` after stage 7. A run that dies before stage 7 leaves the story unmarked — check `output/story_bank_state.json` after any failed run.
+- **Renaming no longer crashes on a name clash**: a stale earlier build with the same slug makes stage 6 write `<slug>-2.mp4`. Clean old files up by hand; nothing deletes them.
+- **Tests must not touch real data.** `tests/conftest.py` blocks YouTube calls and points `assets/backgrounds/` at an empty dir. Resolve path defaults at call time (`x = x or DEFAULT`), not in the signature — a default bound at import makes `monkeypatch` silently miss, and twice that let a test reach real files or the real API.
+- **Long jobs from Claude**: background Bash jobs are killed after ~10 min. For a 20-min+ render, launch with `nohup caffeinate -i <script> > log 2>&1 < /dev/null & disown` and watch the log with `Monitor`.
+- **Gemini cookies** (`SECURE_1PSID`/`SECURE_1PSIDTS` in `.env`) expire; stages 1, 3 and 6 need them. `AuthError: Failed to refresh cookies` in the log is the early warning.
+- Before a long unattended run: `uv run python -m preflight.cli --deep` (~10 s).
+
+## Re-rendering a story in the current style
+
+Stages 1–3 are the slow, reusable part. To rebuild only the visuals:
+
+```bash
+uv run python -m episodes.cli <script.json> <audio.json> [<images.json>]   # prints Manifest:
+uv run python -m metadata.cli <script.json> --episodes <manifest.json>     # prints Danh sách:
+uv run python -m shorts.cli <audio.json> [<images.json>] --script <script.json>
+uv run python -m scripts.post_shorts --record <metadata-index.json> <shorts-prefix>
+uv run python -m scripts.story_bank --mark-used <id>
+```
+
+Leave out `<images.json>` to render on background video. The input paths are in `output/daily/<date>/01-*.log` and `02-*.log` (`Đã lưu kịch bản:` / `Metadata:`), plus `03-*.log` when stage 3 ran.

@@ -20,8 +20,43 @@ def test_load_voice_profile_reads_all_fields(tmp_path):
         target_lufs=-16.0,
         sample_rate=48000,
         gap_seconds=0.5,
+        sentence_gap_seconds=0.15,
         ref_audio_path=None,
     )
+
+
+def test_load_voice_profile_mac_dinh_sentence_gap_seconds_khi_thieu_trong_cau_hinh(tmp_path):
+    # Cấu hình cũ chưa có sentence_gap_seconds -> vẫn phải nạp được, dùng mặc định.
+    yaml_path = tmp_path / "voice.yaml"
+    yaml_path.write_text(
+        'voice: "Ngọc Linh"\n'
+        'style: "doc_truyen"\n'
+        "target_lufs: -16.0\n"
+        "sample_rate: 48000\n"
+        "gap_seconds: 0.5\n",
+        encoding="utf-8",
+    )
+
+    profile = load_voice_profile(yaml_path)
+
+    assert profile.sentence_gap_seconds == 0.15
+
+
+def test_load_voice_profile_doc_sentence_gap_seconds_tuy_chinh(tmp_path):
+    yaml_path = tmp_path / "voice.yaml"
+    yaml_path.write_text(
+        'voice: "Ngọc Linh"\n'
+        'style: "doc_truyen"\n'
+        "target_lufs: -16.0\n"
+        "sample_rate: 48000\n"
+        "gap_seconds: 0.5\n"
+        "sentence_gap_seconds: 0.2\n",
+        encoding="utf-8",
+    )
+
+    profile = load_voice_profile(yaml_path)
+
+    assert profile.sentence_gap_seconds == 0.2
 
 
 def test_load_voice_profile_resolves_relative_ref_audio_path(tmp_path):

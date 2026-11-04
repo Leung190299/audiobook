@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import soundfile as sf
 
-from tts.audio_postprocess import ChapterTiming
+from tts.audio_postprocess import ChapterTiming, SentenceTiming
 
 
 def save_audio(
@@ -14,6 +14,7 @@ def save_audio(
     audio: np.ndarray,
     sample_rate: int,
     timings: list[ChapterTiming],
+    sentence_timings: list[SentenceTiming],
     output_dir: Path,
 ) -> tuple[Path, Path]:
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -35,6 +36,16 @@ def save_audio(
                 "end_seconds": t.end_seconds,
             }
             for t in timings
+        ],
+        "sentences": [
+            {
+                "chapter_index": s.chapter_index,
+                "index": s.index,
+                "text": s.text,
+                "start_seconds": s.start_seconds,
+                "end_seconds": s.end_seconds,
+            }
+            for s in sentence_timings
         ],
     }
     metadata_path.write_text(
