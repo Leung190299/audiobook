@@ -10,6 +10,7 @@ Sau đó refresh token nằm ở config/youtube_token.json và mọi lượt ch�
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from google.auth.exceptions import RefreshError
@@ -32,6 +33,14 @@ SCOPES = [
     "https://www.googleapis.com/auth/youtube.force-ssl",
 ]
 
+# Đọc tỷ lệ giữ chân (metadata/retention.py). Tách khỏi SCOPES có chủ đích:
+# lượt làm mới token gửi kèm danh sách quyền, xin một quyền chưa từng được đồng
+# ý là Google trả invalid_scope -- thêm thẳng vào SCOPES thì token cũ chết ngay
+# và lượt đăng 09:00 hỏng theo. Nên chỉ lần ĐỒNG Ý mới xin thêm quyền này;
+# đăng video vẫn làm mới bằng SCOPES như cũ, đọc số liệu thì hỏi has_scope trước.
+ANALYTICS_SCOPE = "https://www.googleapis.com/auth/yt-analytics.readonly"
+CONSENT_SCOPES = SCOPES + [ANALYTICS_SCOPE]
+
 
 class YouTubeAuthError(Exception):
     pass
@@ -42,6 +51,7 @@ def load_credentials(
     client_secret_path: Path = CLIENT_SECRET_PATH,
     interactive: bool = False,
     force: bool = False,
+    scopes: list[str] = SCOPES,
 ) -> Credentials:
     credentials: Credentials | None = None
 
@@ -49,7 +59,7 @@ def load_credentials(
     # Testing: refresh token chết 7 ngày sau lần ĐỒNG Ý, làm mới access token
     # không kéo dài hạn đó -- chỉ đồng ý lại mới đặt lại đồng hồ.
     if token_path.exists() and not (force and interactive):
-        credentials = Credentials.from_authorized_user_file(str(token_path), SCOPES)
+        credentials = Credentials.from_authorized_user_file(str(token_path), scopes)
 
     if credentials and credentials.valid:
         return credentials
@@ -87,15 +97,36 @@ def load_credentials(
             "rồi tải file JSON về đúng đường dẫn này."
         )
 
-    flow = InstalledAppFlow.from_client_secrets_file(str(client_secret_path), SCOPES)
+    flow = InstalledAppFlow.from_client_secrets_file(str(client_secret_path), CONSENT_SCOPES)
     credentials = flow.run_local_server(port=0, prompt="consent")
     _save(credentials, token_path)
     return credentials
 
 
+def has_scope(scope: str, token_path: Path = TOKEN_PATH) -> bool:
+    """Token đã lưu có quyền `scope` chưa (đọc trường "scopes" trong file token)."""
+    try:
+        granted = json.loads(token_path.read_text(encoding="utf-8")).get("scopes") or []
+    except (OSError, json.JSONDecodeError):
+        return False
+    return scope in granted
+
+
 def _save(credentials: Credentials, token_path: Path) -> None:
     token_path.parent.mkdir(parents=True, exist_ok=True)
-    token_path.write_text(credentials.to_json(), encoding="utf-8")
+    data = json.loads(credentials.to_json())
+    # Lượt đăng làm mới token chỉ với SCOPES, to_json() ghi lại đúng 3 quyền đó;
+    # giữ các quyền đã ghi trước (yt-analytics) để has_scope không quên chúng --
+    # refresh token vẫn mang đủ mọi quyền đã đồng ý.
+    if token_path.exists():
+        try:
+            old = json.loads(token_path.read_text(encoding="utf-8")).get("scopes") or []
+        except json.JSONDecodeError:
+            old = []
+        merged = list(dict.fromkeys((data.get("scopes") or []) + old))
+        if merged:
+            data["scopes"] = merged
+    token_path.write_text(json.dumps(data), encoding="utf-8")
     token_path.chmod(0o600)
 
 

@@ -95,8 +95,8 @@ def _run(
         if script_path is not None
         else None
     )
-    # Kịch bản chủ đề (24/09/2026): 3 Shorts từ 3 đoạn hài/sảng nhất, mở bằng
-    # câu thoại. Không có short_beats: trích đoạn mời nghe rải đều như trước.
+    # Kịch bản chủ đề (24/09/2026): Shorts từ các đoạn hài/sảng nhất, mở bằng
+    # câu thoại (số lượng: TEASER_COUNT). Không có short_beats: trích đoạn mời nghe rải đều như trước.
     # Bỏ chương "Mở đầu": nó kể trước cao trào, dò đoạn trích sẽ trúng nó.
     story_metadata = without_prologue(tts_metadata)
     if script is not None and script.short_beats:
@@ -235,6 +235,7 @@ def _run(
             OUTPUT_DIR,
             title_override=short_title_from_line(part.hook_line) if part.hook_line else None,
             tags=short_tags,
+            comment_question=script.comment_question if script is not None else None,
         )
 
         # In ngay sau khi mỗi phần xong, không dồn đến cuối -- một tập ra ~30

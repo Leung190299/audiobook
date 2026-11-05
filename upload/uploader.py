@@ -262,6 +262,43 @@ def update_description(credentials, video_id: str, description: str) -> bool:
         return False
 
 
+def list_status(credentials, video_ids: list[str]) -> dict[str, dict]:
+    """status của nhiều video (privacyStatus, publishAt, uploadStatus...), 50 id
+    một lượt, 1 đơn vị hạn mức mỗi lượt. Video không đọc được thì vắng mặt."""
+    youtube = build("youtube", "v3", credentials=credentials, cache_discovery=False)
+    out: dict[str, dict] = {}
+    for i in range(0, len(video_ids), 50):
+        resp = youtube.videos().list(part="status", id=",".join(video_ids[i : i + 50])).execute()
+        for item in resp.get("items", []):
+            out[item["id"]] = item.get("status", {})
+    return out
+
+
+def update_status(credentials, video_id: str, publish_at: "datetime | None") -> bool:
+    """Hẹn giờ công chiếu (private + publishAt) hoặc BỎ hẹn (private, không
+    publishAt) cho video đã đăng. videos.update đè cả phần status, nên đọc về
+    trước rồi chỉ đổi hai trường đó -- giữ nguyên license, embeddable...
+    Trả False (không ném lỗi) nếu hỏng."""
+    if publish_at is not None and publish_at.tzinfo is None:
+        raise UploadError("publish_at phải có múi giờ (aware datetime).")
+    youtube = build("youtube", "v3", credentials=credentials, cache_discovery=False)
+    try:
+        current = youtube.videos().list(part="status", id=video_id).execute()
+        items = current.get("items") or []
+        if not items:
+            print(f"[upload] Không tìm thấy video {video_id} để đổi lịch.")
+            return False
+        status = {k: v for k, v in items[0]["status"].items() if k != "publishAt"}
+        status["privacyStatus"] = "private"
+        if publish_at is not None:
+            status["publishAt"] = publish_at.isoformat()
+        youtube.videos().update(part="status", body={"id": video_id, "status": status}).execute()
+        return True
+    except HttpError as exc:
+        print(f"[upload] Không đổi được lịch {video_id} ({exc}).")
+        return False
+
+
 def add_to_playlist(credentials, playlist_id: str, video_id: str) -> bool:
     """Thêm video vào cuối playlist (playlistItems.insert, 50 đơn vị hạn mức).
     Trả False (không ném lỗi) nếu hỏng -- video đã lên rồi, thêm tay trong Studio."""

@@ -322,3 +322,14 @@ def test_cli_pick_dung_truoc_toi_trong(bank, tmp_path, capsys):
 
     assert rc == 0
     assert capsys.readouterr().out.strip() == "1"  # 16/10 có rồi -> dựng cho 17/10
+
+
+def test_set_air_time_dat_va_xoa_gio_chieu(tmp_path):
+    from scripts.story_bank import load_state, set_air_time
+
+    state = tmp_path / "state.json"
+    set_air_time(5, "2026-11-12T20:00:00+07:00", state_path=state)
+    assert load_state(state)["5"] == {"status": "published", "published_at": "2026-11-12T20:00:00+07:00"}
+    # Bỏ hẹn (về kho): xoá hẳn giờ, mark_used không làm được việc này.
+    set_air_time(5, None, state_path=state)
+    assert load_state(state)["5"] == {"status": "published"}

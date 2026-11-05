@@ -24,7 +24,9 @@ MAX_PART_SECONDS = 165.0
 # khi 1/5 của chính tập đó 423 -- ba cái tốt hơn năm cái loãng; và hạn mức
 # YouTube Data API (10.000 đơn vị/ngày, 1.600/lần đăng) chỉ đủ 3 tập + 3 trích
 # đoạn trong một lượt đăng (xem upload/episodes_cli.py).
-TEASER_COUNT = 3
+# 05/11/2026: xuống 2. Đánh giá kênh: ~500 Shorts gần cùng khuôn, phân phối về 0
+# từ 27/10; kế hoạch 30 ngày là 1 truyện + 2 Shorts mỗi ngày.
+TEASER_COUNT = 2
 
 # Vị trí (theo tỉ lệ thời lượng tập) của từng trích đoạn. Bắt đầu sớm ở 5% để
 # lấy được cú hook mở đầu, dừng ở 85% để chừa hẳn đoạn kết -- trích đoạn để mời

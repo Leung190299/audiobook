@@ -96,8 +96,8 @@ def test_khong_doc_duoc_video_dai_thi_bao_loi():
 
 def test_short_private_thi_bat_cong_khai_va_doi_tieu_de():
     yt = _yt([
-        _video("s1", "private", "Câu cụt một… #Shorts"),
-        _video("s2", "private", "Câu cụt hai… #Shorts"),
+        _video("s1", "private", "Câu cụt một… #Shorts", publish_at="2026-10-07T13:05:00Z"),
+        _video("s2", "private", "Câu cụt hai… #Shorts", publish_at="2026-10-07T13:05:00Z"),
     ])
 
     cs.chuan_hoa_short(yt, "Bà Nội 80 Tuổi", ["s1", "s2"])
@@ -121,7 +121,7 @@ def test_da_dung_roi_thi_khong_goi_update():
 
 
 def test_chi_thieu_cong_khai_thi_khong_dung_toi_snippet():
-    yt = _yt([_video("s1", "private", "Truyện X — Trích đoạn 1/1")])
+    yt = _yt([_video("s1", "private", "Truyện X — Trích đoạn 1/1", publish_at="2026-10-07T13:05:00Z")])
 
     cs.chuan_hoa_short(yt, "Truyện X", ["s1"])
 
@@ -129,8 +129,22 @@ def test_chi_thieu_cong_khai_thi_khong_dung_toi_snippet():
     assert part == "status" and "snippet" not in body
 
 
+def test_short_giu_rieng_tu_khong_hen_gio_thi_khong_bat_len(capsys):
+    # Từ 05/11 mỗi truyện chỉ nhả 2 short; cái thứ 3 nằm riêng tư không hẹn giờ
+    # và việc 20:05 không được bật nó lên.
+    yt = _yt([
+        _video("s1", "private", "T — Trích đoạn 1/3", publish_at="2026-11-12T13:05:00Z"),
+        _video("s3", "private", "Câu cụt… #Shorts"),
+    ])
+
+    cs.chuan_hoa_short(yt, "T", ["s1", "s3"])
+
+    assert [body["id"] for _, body in yt.updates] == ["s1"]
+    assert "s3: giữ riêng tư" in capsys.readouterr().out
+
+
 def test_short_bien_mat_thi_bo_qua_chu_khong_vo(capsys):
-    yt = _yt([_video("s1", "private", "x")])
+    yt = _yt([_video("s1", "private", "x", publish_at="2026-10-07T13:05:00Z")])
 
     cs.chuan_hoa_short(yt, "Truyện X", ["s1", "mat-tieu"])
 

@@ -187,6 +187,25 @@ def mark_used(
     )
 
 
+def set_air_time(
+    story_id: int, published_at: str | None, *, state_path: Path | None = None
+) -> None:
+    """Đặt hoặc XOÁ (None) giờ chiếu của truyện đã đăng -- upload/release.py gọi
+    khi hẹn một video trong kho lên sóng hoặc bỏ hẹn video đã hẹn quá xa.
+    mark_used không xoá được published_at (None nghĩa là "không đổi" ở đó)."""
+    state_path = state_path or DEFAULT_STATE_PATH
+    state = load_state(state_path)
+    entry = dict(state.get(str(story_id), {}))
+    entry["status"] = "published"
+    if published_at is None:
+        entry.pop("published_at", None)
+    else:
+        entry["published_at"] = published_at
+    state[str(story_id)] = entry
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+    state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 # --- chọn truyện -----------------------------------------------------------
 
 

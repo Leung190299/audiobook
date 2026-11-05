@@ -63,7 +63,7 @@ Một lượt:
 ├─ Stage 4  episodes.cli       ~25m   → output/episodes/<slug>-<ts>-ep-0N.mp4 (3 tập) + <slug>-<ts>-episodes.json
 ├─ Stage 5  thumbnail.cli      ~1m    → output/thumbnails/<slug>-<ts>.png + -ep-0N.png
 ├─ Stage 6  metadata.cli       ~30s   → output/metadata/<slug>-<ts>-ep-0N.txt/.json + <slug>-<ts>-episodes.json
-└─ Stage 7  shorts.cli         ~4m    → output/shorts/<slug>-<ts>-part-NN.mp4 + .txt (3 trích đoạn)
+└─ Stage 7  shorts.cli         ~4m    → output/shorts/<slug>-<ts>-part-NN.mp4 + .txt (2 trích đoạn, từ 05/11)
 ```
 
 Tổng khoảng **81–89 phút (đo 05/09: stage 3 46 phút, stage 4 25,5 phút cho bản full — 3 tập cộng lại xấp xỉ)** cộng ~4 phút Stage 7 (3 trích đoạn),
@@ -94,12 +94,46 @@ Sản phẩm cần cho việc đăng tay:
   `output/metadata/<slug>-<ts>-ep-0N.txt`, dán thẳng vào YouTube Studio. Đăng
   tay thì: hẹn giờ 20h mỗi ngày một tập, dán bình luận ghim rồi bấm Ghim, sau khi
   tập N+1 có link thì sửa dòng "▶️ Tập tiếp theo" trong mô tả tập N.
-- Video ngắn (Shorts, 3 trích đoạn mỗi truyện): `output/shorts/<slug>-<ts>-part-NN.mp4`
+- Video ngắn (Shorts, 2 trích đoạn mỗi truyện từ 05/11): `output/shorts/<slug>-<ts>-part-NN.mp4`
 - Tiêu đề + mô tả từng phần: `output/shorts/<slug>-<ts>-part-NN.txt`, dán thẳng
   vào YouTube Studio cho từng phần
 
 Log cả lượt ở `output/daily/<ngày>/run.log`, log riêng từng stage ở
 `output/daily/<ngày>/0N-<stage>.log`.
+
+---
+
+## Kho video và lịch 7 ngày (từ 05/11/2026)
+
+Đánh giá kênh 05/11: phân phối về ≈0 sau khi tải lên 9+ video một lúc (27/10) và
+hẹn sẵn 30 ngày × 4 video/ngày. Từ 05/11 lịch chỉ giữ **7 ngày tới**, 1 truyện +
+2 Shorts mỗi ngày:
+
+- Mọi video đăng lên đều vào **kho**: riêng tư, không hẹn giờ (`upload.episodes_cli
+  --no-schedule`). Kho là trạng thái thật trên YouTube (`videos.list`), sửa tay trong
+  Studio cũng không lệch.
+- Mỗi sáng `run_daily.sh --upload` gọi `upload.release` TRƯỚC khi dựng gì: bỏ hẹn
+  video hẹn quá 7 ngày (về kho), rồi hẹn đúng **một** video trong kho cho tối trống
+  gần nhất (20h, 2 short đầu 20h05; short thứ 3 của truyện cũ nằm im). Ưu tiên hai
+  chủ đề đang thắng (bố mẹ/mẹ chồng trọng sinh, họ hàng cực phẩm) xen kẽ, rồi học
+  đường, cuối cùng nghề lạ. Hẹn được hoặc lịch đã kín → thoát, **không dựng mới**.
+  Kho trống (mã 3) → dựng truyện mới như cũ, đăng vào kho, rồi Stage 9 hẹn giờ.
+
+```bash
+uv run python -m upload.release --dry-run        # xem kế hoạch, không đổi gì
+uv run python -m upload.release                  # bỏ hẹn quá 7 ngày + hẹn 1 video
+uv run python -m upload.release --unschedule-only
+```
+
+Mô tả video dài quay lại bản đầy đủ (hook, cảnh báo AI, câu hỏi, playlist, chương,
+hashtag; bỏ "Keywords:"); short dùng câu hỏi chọn phe của truyện. Video đã đăng
+trước đó sửa bằng:
+
+```bash
+uv run python -m metadata.redescribe --dry-run   # video riêng tư/đã hẹn
+uv run python -m metadata.redescribe --shorts    # kèm short (51 đơn vị hạn mức/video)
+uv run python -m metadata.redescribe --all --shorts
+```
 
 ---
 
@@ -171,18 +205,27 @@ thay vì bịa bừa — lúc đó chạy `./run_daily.sh --trope <trope_id>`.
 
 ## Đọc tỷ lệ giữ chân
 
-Data API (`metadata.report`) không có số giữ chân, nên phải tải CSV từ Studio: video
-→ Số liệu phân tích → Mức độ tương tác → biểu đồ tỷ lệ giữ chân → nút tải xuống.
+Data API (`metadata.report`) không có số giữ chân; lấy qua **YouTube Analytics API**:
 
 ```bash
-uv run python -m metadata.retention ~/Downloads/<file>.csv --video <video_id>
+uv run python -m metadata.retention --days 14           # bảng tổng hợp mọi video 14 ngày qua
+uv run python -m metadata.retention --video <video_id>  # một video
 ```
+
+Cần làm một lần: bật "YouTube Analytics API" trong Google Cloud Console (APIs &
+Services → Library) cho đúng project OAuth đang dùng, rồi `uv run python -m
+upload.auth --force` và đồng ý cả quyền xem báo cáo Analytics. Quyền này chỉ xin
+ở bước đồng ý, không xin khi làm mới token — token cũ chưa có nó vẫn đăng video
+bình thường. Analytics trễ 1-2 ngày nên `--days` bỏ video lên sóng chưa tới 2 ngày.
+
+Không dùng API thì tải CSV từ Studio (video → Số liệu phân tích → Mức độ tương tác
+→ biểu đồ tỷ lệ giữ chân → nút tải xuống) rồi `metadata.retention <file.csv> --video <id>`.
 
 Báo ba thứ: **rơi đầu** (mất bao nhiêu trong 30s đầu — lỗi cold open/tiêu đề),
 **vực** (đoạn tụt dốc hẳn, in luôn chương và câu đang đọc ở đó) và **trượt** (mất
-đều mỗi phút — lỗi nhịp, sửa bằng cắt). `--video` nối qua `output/metadata/index.jsonl`
-tới mốc câu trong `output/episodes/<stem>-props.json` và lưu báo cáo vào
-`output/metadata/retention-<video_id>.md`. Video ngoài index thì dùng `--duration <giây>`.
+đều mỗi phút — lỗi nhịp, sửa bằng cắt). Mốc câu lấy từ
+`output/episodes/<stem>-props.json`, nối qua `output/metadata/index.jsonl`. Báo cáo
+lưu ở `output/metadata/retention-<video_id>.md` và `retention-<ngày>.md` (bảng tổng hợp).
 
 ---
 

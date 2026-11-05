@@ -257,7 +257,8 @@ def _fmt_num(n: int) -> str:
     return f"{n:,}".replace(",", ".")
 
 
-SHORT_BEAT_COUNT = 3
+# 05/11/2026: 3 -> 2, cùng lý do với shorts/planner.py TEASER_COUNT.
+SHORT_BEAT_COUNT = 2
 # Câu hỏi chọn phe có hai vế đáp án ("1 = ..., 2 = ...") nên dài hơn câu hỏi cũ;
 # cắt ở 25 từ dễ mất vế 2.
 MAX_TOPIC_QUESTION_WORDS = 35

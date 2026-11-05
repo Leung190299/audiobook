@@ -1,11 +1,15 @@
 # metadata/retention.py
 """Đọc CSV "Tỷ lệ giữ chân khán giả" xuất từ YouTube Studio, chỉ ra người nghe bỏ ở ĐÂU.
 
-    uv run python -m metadata.retention <file.csv> --video <video_id>
-    uv run python -m metadata.retention <file.csv> --duration 2460   # video không có trong index
+    uv run python -m metadata.retention --days 14            # mọi video 14 ngày qua, qua Analytics API
+    uv run python -m metadata.retention --video <video_id>   # một video, qua Analytics API
+    uv run python -m metadata.retention <file.csv> --video <video_id>   # CSV tải tay từ Studio
+    uv run python -m metadata.retention <file.csv> --duration 2460      # video không có trong index
 
-Lấy file: Studio -> video -> Số liệu phân tích -> Mức độ tương tác -> biểu đồ
-tỷ lệ giữ chân -> nút tải xuống. (Data API/report.py không có số này.)
+Analytics API cần quyền yt-analytics.readonly (upload.auth xin ở lần đồng ý)
+và API "YouTube Analytics API" bật trong Google Cloud Console. Data API
+(report.py) không có số này. Không có API thì tải CSV: Studio -> video -> Số
+liệu phân tích -> Mức độ tương tác -> biểu đồ tỷ lệ giữ chân -> nút tải xuống.
 
 Ba vấn đề khác nhau, ba cách sửa khác nhau (ý từ yt-retention trong
 github.com/Jakeschincariol/chatgpt-youtube-agent-skill, viết lại cho kênh mình):
@@ -28,6 +32,7 @@ import json
 import re
 import statistics
 from dataclasses import dataclass, field
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -188,18 +193,34 @@ def analyze(points: list[tuple[float, float]], duration: float) -> RetentionRepo
 # --- nối video_id -> mốc câu trên trục video --------------------------------
 
 
-def find_props(video_id: str, index_jsonl: Path = INDEX_JSONL, episodes_dir: Path = EPISODES_DIR) -> Path | None:
+def index_rows(index_jsonl: Path = INDEX_JSONL) -> list[dict]:
     if not index_jsonl.exists():
-        return None
+        return []
+    rows = []
     for line in index_jsonl.read_text(encoding="utf-8").splitlines():
         try:
             row = json.loads(line)
         except json.JSONDecodeError:
             continue
-        if row.get("video_id") == video_id and row.get("index"):
-            props = episodes_dir / f"{Path(row['index']).stem}-props.json"
-            return props if props.exists() else None
-    return None
+        if row.get("video_id"):
+            rows.append(row)
+    return rows
+
+
+def find_row(video_id: str, index_jsonl: Path = INDEX_JSONL) -> dict | None:
+    return next((r for r in index_rows(index_jsonl) if r["video_id"] == video_id), None)
+
+
+def props_for(row: dict, episodes_dir: Path = EPISODES_DIR) -> Path | None:
+    if not row.get("index"):
+        return None
+    props = episodes_dir / f"{Path(row['index']).stem}-props.json"
+    return props if props.exists() else None
+
+
+def find_props(video_id: str, index_jsonl: Path = INDEX_JSONL, episodes_dir: Path = EPISODES_DIR) -> Path | None:
+    row = find_row(video_id, index_jsonl)
+    return props_for(row, episodes_dir) if row else None
 
 
 def video_duration(props: dict) -> float:
@@ -265,35 +286,160 @@ def render_markdown(report: RetentionReport, title: str = "", props: dict | None
     return "\n".join(lines) + "\n"
 
 
+# --- lấy số qua YouTube Analytics API ----------------------------------------
+
+
+def analytics_credentials():
+    from upload.auth import ANALYTICS_SCOPE, CONSENT_SCOPES, has_scope, load_credentials
+
+    if not has_scope(ANALYTICS_SCOPE):
+        raise RetentionError(
+            "Token YouTube chưa có quyền đọc Analytics. Chạy `uv run python -m upload.auth --force` "
+            "và bấm đồng ý cả quyền xem báo cáo YouTube Analytics."
+        )
+    return load_credentials(scopes=CONSENT_SCOPES)
+
+
+def fetch_retention(credentials, video_id: str, start: date, end: date) -> list[tuple[float, float]]:
+    """-> [(vị trí % 0-100, giữ chân %)] từ YouTube Analytics, cùng dạng load_retention_csv.
+
+    audienceWatchRatio là tỉ lệ (1.0 = 100%, có thể >1 khi người xem tua lại);
+    elapsedVideoTimeRatio là vị trí 0.01-1.0. Số liệu trễ 1-2 ngày.
+    """
+    from googleapiclient.discovery import build
+    from googleapiclient.errors import HttpError
+
+    yta = build("youtubeAnalytics", "v2", credentials=credentials, cache_discovery=False)
+    try:
+        resp = yta.reports().query(
+            ids="channel==MINE",
+            startDate=start.isoformat(),
+            endDate=end.isoformat(),
+            metrics="audienceWatchRatio",
+            dimensions="elapsedVideoTimeRatio",
+            filters=f"video=={video_id}",
+            sort="elapsedVideoTimeRatio",
+        ).execute()
+    except HttpError as exc:
+        # str(HttpError) chỉ có "403 Forbidden"; lý do thật nằm trong thân phản hồi.
+        detail = (exc.content or b"").decode("utf-8", errors="ignore")
+        if "accessNotConfigured" in detail or "SERVICE_DISABLED" in detail or "has not been used" in detail:
+            raise RetentionError(
+                "YouTube Analytics API chưa bật cho project OAuth: vào Google Cloud Console -> "
+                "APIs & Services -> Library -> \"YouTube Analytics API\" -> Enable."
+            ) from exc
+        raise RetentionError(f"Analytics API lỗi với video {video_id}: {exc}") from exc
+    points = [(float(r[0]) * 100, float(r[1]) * 100) for r in resp.get("rows") or []]
+    if len(points) < 8:
+        raise RetentionError(f"Video {video_id} chưa đủ số liệu giữ chân ({len(points)} điểm) -- chờ thêm vài ngày.")
+    return points
+
+
+def _publish_date(row: dict, fallback: date) -> date:
+    try:
+        return datetime.fromisoformat(row["publishAt"]).date()
+    except (KeyError, ValueError):
+        return fallback
+
+
+def report_for_video(credentials, row: dict, today: date) -> tuple[RetentionReport, str, dict | None]:
+    props_path = props_for(row)
+    props = json.loads(props_path.read_text(encoding="utf-8")) if props_path else None
+    if props is None:
+        raise RetentionError(f"Không tìm thấy props của video {row['video_id']} -- không biết độ dài video.")
+    points = fetch_retention(credentials, row["video_id"], _publish_date(row, today - timedelta(days=30)), today)
+    title = props.get("title") or row.get("story_title", "")
+    return analyze(points, video_duration(props)), title, props
+
+
+def render_summary(results: list[tuple[dict, RetentionReport | None, str]], today: date) -> str:
+    lines = [
+        f"# Tỷ lệ giữ chân — {today.isoformat()}",
+        "",
+        "| Lên sóng | Truyện | Rơi 30s đầu | Vực lớn nhất | Trượt/phút | Cuối video |",
+        "|---|---|---:|---|---:|---:|",
+    ]
+    for row, report, note in results:
+        aired = (row.get("publishAt") or "")[:10]
+        title = row.get("story_title") or row.get("title", "")
+        if report is None:
+            lines.append(f"| {aired} | {title} | {note} | | | |")
+            continue
+        cliff = (f"-{report.cliffs[0].lost:.1f} @ {_clock(report.cliffs[0].start_seconds)}"
+                 if report.cliffs else "không")
+        lines.append(
+            f"| {aired} | {title} | {report.hook_leak:.1f} [{report.hook_verdict}] | {cliff} | "
+            f"{report.slide_per_minute:.2f} | {report.end:.1f}% |"
+        )
+    lines += ["", "Chi tiết từng video (chương và câu ở mỗi vực): `retention-<video_id>.md` cùng thư mục."]
+    return "\n".join(lines) + "\n"
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Phân tích CSV tỷ lệ giữ chân từ YouTube Studio.")
-    parser.add_argument("csv", type=Path)
-    parser.add_argument("--video", help="video_id trên YouTube -- để in câu đang đọc ở mỗi vực")
-    parser.add_argument("--duration", type=float, help="độ dài video (giây), khi không dùng --video")
+    parser = argparse.ArgumentParser(description="Phân tích tỷ lệ giữ chân: CSV từ Studio hoặc tự lấy qua Analytics API.")
+    parser.add_argument("csv", type=Path, nargs="?", help="CSV tải từ Studio; bỏ trống thì lấy qua Analytics API")
+    parser.add_argument("--video", help="video_id trên YouTube")
+    parser.add_argument("--days", type=int, help="mọi video lên sóng trong N ngày qua (qua Analytics API)")
+    parser.add_argument("--duration", type=float, help="độ dài video (giây), khi CSV không thuộc video nào trong index")
     parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args()
-
-    props, title = None, ""
-    if args.video:
-        props_path = find_props(args.video)
-        if props_path is None:
-            raise SystemExit(f"Không tìm thấy props của video {args.video} qua {INDEX_JSONL}.")
-        props = json.loads(props_path.read_text(encoding="utf-8"))
-        title = props.get("title", "")
-    duration = args.duration or (video_duration(props) if props else None)
-    if not duration:
-        raise SystemExit("Cần --video (video của kênh) hoặc --duration <giây>.")
+    today = date.today()
 
     try:
-        report = analyze(load_retention_csv(args.csv), duration)
+        if args.days:
+            _run_recent(args.days, today, args.out)
+            return
+        if args.csv is None and not args.video:
+            raise RetentionError("Cần CSV, --video <id> hoặc --days <N>.")
+
+        row = find_row(args.video) if args.video else None
+        if args.video and row is None:
+            raise RetentionError(f"Không có video {args.video} trong {INDEX_JSONL}.")
+        if args.csv is None:
+            report, title, props = report_for_video(analytics_credentials(), row, today)
+        else:
+            props_path = props_for(row) if row else None
+            props = json.loads(props_path.read_text(encoding="utf-8")) if props_path else None
+            title = props.get("title", "") if props else ""
+            duration = args.duration or (video_duration(props) if props else None)
+            if not duration:
+                raise RetentionError("Cần --video (video của kênh) hoặc --duration <giây>.")
+            report = analyze(load_retention_csv(args.csv), duration)
     except RetentionError as exc:
         raise SystemExit(str(exc)) from exc
+
     text = render_markdown(report, title, props)
     print(text)
     if args.out or args.video:
         out = args.out or INDEX_JSONL.parent / f"retention-{args.video}.md"
         out.write_text(text, encoding="utf-8")
         print(f"Đã lưu: {out}")
+
+
+def _run_recent(days: int, today: date, out: Path | None) -> None:
+    # Analytics trễ 1-2 ngày: video lên sóng chưa tới 2 ngày chưa có số.
+    newest = today - timedelta(days=2)
+    oldest = today - timedelta(days=days)
+    rows = [r for r in index_rows() if oldest <= _publish_date(r, today) <= newest]
+    if not rows:
+        raise RetentionError(f"Không có video nào lên sóng từ {oldest} tới {newest}.")
+    credentials = analytics_credentials()
+    results = []
+    for row in sorted(rows, key=lambda r: r.get("publishAt", "")):
+        try:
+            report, title, props = report_for_video(credentials, row, today)
+        except RetentionError as exc:
+            results.append((row, None, str(exc).split(" -- ")[0][:60]))
+            continue
+        (INDEX_JSONL.parent / f"retention-{row['video_id']}.md").write_text(
+            render_markdown(report, title, props), encoding="utf-8"
+        )
+        results.append((row, report, ""))
+    text = render_summary(results, today)
+    print(text)
+    out = out or INDEX_JSONL.parent / f"retention-{today.isoformat()}.md"
+    out.write_text(text, encoding="utf-8")
+    print(f"Đã lưu: {out}")
 
 
 if __name__ == "__main__":
