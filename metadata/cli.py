@@ -110,13 +110,17 @@ def _run_full(script: Script, seo, manifest: dict, stem: str, thumbnails_dir: Pa
     title = full_title(story_title)
     question = manifest.get("comment_question") or script.comment_question
     hashtags = topic_hashtags(topic.hashtags if topic else None, seo.hashtags)
-    # Mô tả tối giản theo format tham khảo (05/10): tiêu đề, cảnh báo AI,
-    # hashtag, từ khoá. Hashtag của chủ đề đứng trước (YouTube hiện 3 cái đầu
-    # trên tiêu đề), rồi mới tới hashtag Gemini gợi ý.
-    description = build_minimal_description(
-        title,
-        hashtags=hashtags + list(seo.hashtags),
-        keywords=list(seo.tags),
+    # Mô tả đầy đủ: hook, cảnh báo AI, tóm tắt, câu hỏi, playlist, CTA, chương,
+    # hashtag. Bản tối giản 05/10 (tiêu đề + "Keywords: 10 từ khoá") bị đánh giá
+    # kênh 05/11 xếp vào nhóm nguyên nhân sụt phân phối -- quay lại bản đầu
+    # tháng 10. build_minimal_description giữ lại, không dùng ở đây nữa.
+    description = build_full_description(
+        seo,
+        hook=manifest.get("hook") or script.hook,
+        comment_question=question,
+        chapter_lines=youtube_chapter_lines(ep["chapters"]),
+        hashtags=hashtags,
+        series=script.series,
     )
     new_video_path = rename_video_file(Path(ep["video_path"]), slugify(story_title))
     thumb_a, thumb_b = _find_full_thumbnails(thumbnails_dir, script.trope)

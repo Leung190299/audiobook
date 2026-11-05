@@ -414,9 +414,54 @@ def test_topic_auto_format_full_co_upload(tmp_path: Path):
     run = _run(tmp_path, ["--topic", "auto", "--format", "full", "--upload"], legacy=False)
     assert run.exit_code == 0, run.proc.stderr + run.stdout
     assert run.call_for("upload.episodes_cli") == (
-        f"upload.episodes_cli {EXPECTED_FULL_INDEX} --shorts-prefix {EXPECTED_SHORTS_PREFIX}"
+        f"upload.episodes_cli {EXPECTED_FULL_INDEX} --shorts-prefix {EXPECTED_SHORTS_PREFIX} --no-schedule"
     )
     assert "--url https://youtu.be/FAKEFULL1" in run.call_for("notify.cli")
+
+
+# --- kho video và lịch 7 ngày (05/11/2026) ---
+
+
+def test_full_upload_kho_con_video_thi_hen_roi_thoi_khong_dung(tmp_path: Path):
+    run = _run(tmp_path, ["--upload"], legacy=False, FAKE_RELEASE="scheduled")
+    assert run.exit_code == 0, run.proc.stderr + run.stdout
+    assert run.calls == ["upload.release"]
+    assert "không dựng truyện mới" in run.stdout
+
+
+def test_full_upload_lich_kin_cung_khong_dung(tmp_path: Path):
+    run = _run(tmp_path, ["--upload"], legacy=False, FAKE_RELEASE="full")
+    assert run.exit_code == 0
+    assert not run.called("scripts.cli")
+
+
+def test_full_upload_kho_trong_thi_dung_dang_vao_kho_roi_hen(tmp_path: Path):
+    run = _run(tmp_path, ["--upload"], legacy=False)
+    assert run.exit_code == 0, run.proc.stderr + run.stdout
+    assert [c for c in run.calls if c.startswith("upload.release")] == ["upload.release", "upload.release"]
+    assert run.called("scripts.cli")
+    assert run.call_for("upload.episodes_cli").endswith("--no-schedule")
+    assert run.calls.index("upload.release", 1) > run.calls.index(run.call_for("upload.episodes_cli"))
+
+
+def test_kho_loi_that_thi_dung_va_bao(tmp_path: Path):
+    run = _run(tmp_path, ["--upload"], legacy=False, FAKE_FAIL_MODULE="upload.release")
+    assert run.exit_code == 1
+    assert not run.called("scripts.cli")
+    assert "--stage Kho & lịch 7 ngày" in run.call_for("notify.cli")
+
+
+def test_khong_upload_thi_khong_dong_toi_kho(tmp_path: Path):
+    run = _run(tmp_path, legacy=False)
+    assert run.exit_code == 0, run.proc.stderr
+    assert not run.called("upload.release")
+
+
+def test_format_episodes_van_hen_gio_kieu_cu_khong_qua_kho(tmp_path: Path):
+    run = _run(tmp_path, ["--upload"])  # legacy: --format episodes
+    assert run.exit_code == 0, run.proc.stderr
+    assert not run.called("upload.release")
+    assert "--no-schedule" not in run.call_for("upload.episodes_cli")
 
 
 def test_topic_chi_dinh_va_format_tu_env(tmp_path: Path):

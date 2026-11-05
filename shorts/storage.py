@@ -64,6 +64,12 @@ FULL_EPISODE_PLACEHOLDER = "Nghe trọn tập trên kênh — link ở phần m�
 # Câu hỏi kéo bình luận cho short: ngắn, trả lời được một chữ.
 SHORT_COMMENT_HOOK = "Bạn đoán cô ấy làm gì tiếp? Comment nhé 👇"
 
+
+def short_comment_line(comment_question: str | None) -> str:
+    """Dòng kéo bình luận: câu hỏi chọn phe của truyện nếu có, không thì câu chung."""
+    q = " ".join((comment_question or "").split())
+    return f"❓ {q}" if q else SHORT_COMMENT_HOOK
+
 SHORT_TAGS = [
     "truyện audio",
     "truyện trọng sinh",
@@ -82,24 +88,27 @@ def save_short_metadata(
     output_dir: Path,
     title_override: str | None = None,
     tags: list[str] | None = None,
+    comment_question: str | None = None,
 ) -> tuple[Path, Path]:
     """Ghi cả `.txt` (đọc tay) lẫn `.json` (upload/series_cli.py đọc máy) cho
     một phần, cùng nội dung tiêu đề/mô tả. Trả về (txt_path, json_path).
 
     `title_override` (Shorts từ short_beats, 24/09/2026): tiêu đề là câu thoại
-    mở đầu + "#Shorts" (spec); mô tả vẫn trỏ về video full qua dòng giữ chỗ."""
+    mở đầu + "#Shorts" (spec); mô tả vẫn trỏ về video full qua dòng giữ chỗ.
+    `comment_question`: câu hỏi chọn phe CỦA TRUYỆN thay cho câu chung -- đánh
+    giá kênh 05/11: mọi short đều "Bạn đoán cô ấy làm gì tiếp?" kể cả truyện
+    nhân vật nam/bà nội."""
     output_dir.mkdir(parents=True, exist_ok=True)
     part_label = f"Trích đoạn {number}/{total}"
+    hook_line = short_comment_line(comment_question)
     if title_override:
         title = title_override
-        description = (
-            f"{episode_title}.\n{FULL_EPISODE_PLACEHOLDER}\n{SHORT_COMMENT_HOOK}"
-        )
+        description = f"{episode_title}.\n{FULL_EPISODE_PLACEHOLDER}\n{hook_line}"
     else:
         title = f"{episode_title} — {part_label}"
         # Không hashtag: YouTube nhận diện Shorts qua khung 9:16 và thời lượng dưới
         # 3 phút, "#shorts" không còn tác dụng; người dùng không muốn dấu # trong mô tả.
-        description = f"{title}.\n{FULL_EPISODE_PLACEHOLDER}\n{SHORT_COMMENT_HOOK}"
+        description = f"{title}.\n{FULL_EPISODE_PLACEHOLDER}\n{hook_line}"
     video_filename = f"{part_stem}.mp4"
 
     txt_path = output_dir / f"{part_stem}.txt"

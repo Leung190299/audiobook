@@ -321,8 +321,8 @@ def test_plan_teasers_khong_bao_gio_lay_doan_ket_thuc_tap():
 
 
 def test_plan_teasers_tap_it_phan_hon_5_thi_lay_het():
-    # Tập ngắn chỉ chia được 2 phần: trả cả hai, không bịa thêm.
-    metadata = _episode(chapter_count=2, sentences_per_chapter=20)
+    # Tập ngắn chia được ít phần hơn TEASER_COUNT: trả hết, không bịa thêm.
+    metadata = _episode(chapter_count=1, sentences_per_chapter=8)
     assert len(plan_parts(metadata)) < TEASER_COUNT
 
     teasers = plan_teasers(metadata)

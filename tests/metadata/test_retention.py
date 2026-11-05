@@ -143,3 +143,96 @@ def test_tim_props_qua_index_theo_video_id(tmp_path):
     )
     assert find_props("abc", index, episodes) == episodes / "bo_me-20261101T0000Z-full-props.json"
     assert find_props("khong-co", index, episodes) is None
+
+
+# --- Analytics API ------------------------------------------------------------
+
+
+class _FakeQuery:
+    def __init__(self, resp=None, error=None):
+        self.resp, self.error, self.kwargs = resp, error, None
+
+    def reports(self):
+        return self
+
+    def query(self, **kwargs):
+        self.kwargs = kwargs
+        return self
+
+    def execute(self):
+        if self.error:
+            raise self.error
+        return self.resp
+
+
+def _patch_build(monkeypatch, fake):
+    import googleapiclient.discovery
+
+    monkeypatch.setattr(googleapiclient.discovery, "build", lambda *a, **k: fake)
+
+
+def test_fetch_retention_doi_ti_le_ra_phan_tram(monkeypatch):
+    from datetime import date
+
+    from metadata.retention import fetch_retention
+
+    fake = _FakeQuery({"rows": [[i / 100, 1.2 - i / 100] for i in range(1, 101)]})
+    _patch_build(monkeypatch, fake)
+    points = fetch_retention(object(), "abc", date(2026, 10, 1), date(2026, 11, 4))
+    assert points[0] == pytest.approx((1.0, 119.0))
+    assert points[-1] == pytest.approx((100.0, 20.0))
+    assert fake.kwargs["filters"] == "video==abc"
+    assert fake.kwargs["dimensions"] == "elapsedVideoTimeRatio"
+    assert fake.kwargs["startDate"] == "2026-10-01"
+
+
+def test_fetch_retention_chua_co_so_lieu_thi_bao_cho_them(monkeypatch):
+    from datetime import date
+
+    from metadata.retention import fetch_retention
+
+    _patch_build(monkeypatch, _FakeQuery({"rows": []}))
+    with pytest.raises(RetentionError, match="chờ thêm"):
+        fetch_retention(object(), "abc", date(2026, 11, 3), date(2026, 11, 4))
+
+
+def test_api_chua_bat_thi_chi_cach_bat(monkeypatch):
+    from datetime import date
+
+    from googleapiclient.errors import HttpError
+
+    from metadata.retention import fetch_retention
+
+    class _Resp(dict):
+        status = 403
+        reason = "Forbidden"
+
+    err = HttpError(_Resp(), b'{"error": {"errors": [{"reason": "accessNotConfigured"}]}}')
+    _patch_build(monkeypatch, _FakeQuery(error=err))
+    with pytest.raises(RetentionError, match="YouTube Analytics API"):
+        fetch_retention(object(), "abc", date(2026, 11, 1), date(2026, 11, 4))
+
+
+def test_token_chua_co_quyen_analytics_thi_bao_chay_upload_auth(monkeypatch):
+    import upload.auth
+
+    from metadata.retention import analytics_credentials
+
+    monkeypatch.setattr(upload.auth, "has_scope", lambda *a, **k: False)
+    with pytest.raises(RetentionError, match="upload.auth --force"):
+        analytics_credentials()
+
+
+def test_bang_tong_hop_nhieu_video():
+    from datetime import date
+
+    from metadata.retention import render_summary
+
+    report = analyze(_curve(cliff_at=50), DURATION)
+    rows = [
+        ({"publishAt": "2026-10-30T20:00:00+07:00", "story_title": "Truyện A"}, report, ""),
+        ({"publishAt": "2026-11-01T20:00:00+07:00", "story_title": "Truyện B"}, None, "chưa đủ số liệu"),
+    ]
+    text = render_summary(rows, date(2026, 11, 4))
+    assert "| 2026-10-30 | Truyện A | 20.0 [ổn] | -6.2 @ 8:10 |" in text
+    assert "| 2026-11-01 | Truyện B | chưa đủ số liệu |" in text

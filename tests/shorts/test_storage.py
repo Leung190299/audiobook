@@ -160,3 +160,17 @@ def test_so_phan_ngoai_khoang_1_99_thi_bao_loi():
 
     with pytest.raises(ValueError, match="1-99"):
         part_stem("abc-20260823T010000Z", 0)
+
+
+def test_mo_ta_short_dung_cau_hoi_cua_truyen_khi_co(tmp_path: Path):
+    from shorts.storage import SHORT_COMMENT_HOOK, short_comment_line
+
+    _, json_path = save_short_metadata(
+        "s-part-01", trope="bo_me", episode_title="Bà Nội Trọng Sinh", number=1, total=2,
+        output_dir=tmp_path, comment_question="Ông bà trông cháu có nên được trả tiền?  1 = nên, 2 = không",
+    )
+    data = json.loads(json_path.read_text(encoding="utf-8"))
+    assert data["description"].splitlines()[-1] == "❓ Ông bà trông cháu có nên được trả tiền? 1 = nên, 2 = không"
+    assert SHORT_COMMENT_HOOK not in data["description"]
+    # Không có câu hỏi (kịch bản cũ) thì vẫn là câu chung.
+    assert short_comment_line("") == SHORT_COMMENT_HOOK

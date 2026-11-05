@@ -148,6 +148,11 @@ def chuan_hoa_short(yt, story: str, ids: list[str]) -> None:
             print(f"CẢNH BÁO: không đọc được short {vid}, bỏ qua.")
             continue
         snip, status = got["snippet"], got["status"]
+        # Short riêng tư mà KHÔNG hẹn giờ là short bị giữ lại có chủ ý (từ 05/11
+        # mỗi truyện chỉ ra 2 short, cái thứ 3 nằm im) -- không được bật lên.
+        if status.get("privacyStatus") == "private" and not status.get("publishAt"):
+            print(f"{vid}: giữ riêng tư (không hẹn giờ), bỏ qua")
+            continue
         moi = f"{story} — Trích đoạn {n}/{len(ids)}"
         viec = []
         body: dict = {"id": vid}

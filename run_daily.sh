@@ -15,8 +15,9 @@
 # chọn theo ngày LÊN SÓNG chứ không phải ngày dựng). Hết truyện phù hợp thì rơi về
 # --topic auto kiểu cũ và in cảnh báo. Chủ đề xoay vòng theo thứ trong tuần
 # (AUDIOBOOK_TOPIC_ROTATION trong .env) và định dạng FULL (AUDIOBOOK_FORMAT, mặc
-# định full): 1 video 35-45 phút có cold open + card kết, 2 thumbnail A/B, 3 Shorts
-# từ 3 đoạn hài/sảng nhất. Với --upload: private + hẹn giờ 20h, vào playlist chủ đề.
+# định full): 1 video 35-45 phút có cold open + card kết, 2 thumbnail A/B, 2 Shorts
+# từ 2 đoạn hài/sảng nhất. Với --upload: vào kho riêng tư rồi upload.release hẹn
+# 20h cho tối trống gần nhất trong 7 ngày (chỉ dựng mới khi kho trống).
 # --format episodes giữ nguyên dây chuyền 3 tập của 22/09.
 #
 # Mỗi lượt ghi log vào output/daily/<ngày>/. Lỗi ở bất kỳ stage nào cũng dừng ngay
@@ -171,6 +172,29 @@ require() {
 }
 
 log "=== Bắt đầu lượt chạy $RUN_DATE (định dạng: $FORMAT) ==="
+
+# --- Kho video và lịch 7 ngày (05/11/2026) -----------------------------------
+# Có --upload và định dạng full: trước khi dựng gì, bỏ hẹn video nào hẹn quá 7
+# ngày (về kho riêng tư) rồi hẹn ĐÚNG MỘT video trong kho cho tối trống gần
+# nhất. Hẹn được, hoặc lịch 7 ngày đã kín, thì thôi -- chỉ dựng truyện mới khi
+# kho trống (mã thoát 3). Đánh giá kênh 05/11: tải lên hàng loạt + hẹn sẵn 30
+# ngày là một trong các nguyên nhân phân phối về 0.
+if [[ "$DO_UPLOAD" -eq 1 && "$FORMAT" == "full" ]]; then
+  RELEASE_LOG="$LOG_DIR/00-release.log"
+  log "▶ Kho & lịch 7 ngày"
+  $RUNNER upload.release >"$RELEASE_LOG" 2>&1
+  RELEASE_CODE=$?
+  cat "$RELEASE_LOG" >>"$LOG_FILE"
+  if (( RELEASE_CODE == 0 )); then
+    log "✔ Kho còn video: không dựng truyện mới hôm nay."
+    exit 0
+  elif (( RELEASE_CODE != 3 )); then
+    log "✖ Kho & lịch 7 ngày THẤT BẠI"
+    notify_failure "Kho & lịch 7 ngày" "$RELEASE_LOG"
+    exit 1
+  fi
+  log "Kho trống: dựng truyện mới."
+fi
 
 # --- Stage 0: chọn chủ đề -----------------------------------------------------
 TOPIC_ID=""
@@ -395,10 +419,17 @@ fi
 UPLOAD_LOG="$LOG_DIR/08-upload.log"
 UPLOAD_ARGS=("$METADATA_INDEX")
 [[ -n "$SHORTS_PREFIX" ]] && UPLOAD_ARGS+=(--shorts-prefix "$SHORTS_PREFIX")
+# full: vào KHO (riêng tư, không hẹn giờ); Stage 9 mới hẹn giờ từ kho.
+[[ "$FORMAT" == "full" ]] && UPLOAD_ARGS+=(--no-schedule)
 run_stage "Stage 8: Upload YouTube" "$UPLOAD_LOG" \
   $RUNNER upload.episodes_cli "${UPLOAD_ARGS[@]}"
 VIDEO_URL="$(extract 'Đã upload: ([^[:space:]]+)' "$UPLOAD_LOG")"
 require "$VIDEO_URL" "Stage 8: Upload YouTube" "$UPLOAD_LOG"
+
+# --- Stage 9: hẹn giờ từ kho (chỉ full) --------------------------------------
+if [[ "$FORMAT" == "full" ]]; then
+  run_stage "Stage 9: Hẹn giờ từ kho" "$LOG_DIR/09-release.log" $RUNNER upload.release
+fi
 
 DURATION="$(human_duration $(($(date +%s) - START_TS)))"
 log "✔ Hoàn thành: $VIDEO_URL ($DURATION)"

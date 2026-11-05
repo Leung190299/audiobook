@@ -93,17 +93,19 @@ async def test_run_full_ghi_metadata_index_va_doi_ten(tmp_path, monkeypatch, cap
 
     meta = json.loads(open(ep["metadata_path"], encoding="utf-8").read())
     desc = meta["description"]
-    # Mô tả tối giản theo format tham khảo (05/10): tiêu đề -> cảnh báo AI ->
-    # hashtag (chủ đề trước, Gemini sau) -> từ khoá.
+    # Mô tả đầy đủ (quay lại từ 05/11): hook -> cảnh báo AI -> tóm tắt 2 câu ->
+    # câu hỏi -> playlist -> CTA -> chương -> hashtag. Không "Keywords:".
     from metadata.full import AI_NOTICE_SHORT
 
     khoi = desc.split("\n\n")
-    assert khoi[0] == f"[Truyện Audio] {STORY} | Audio Truyện"
+    assert khoi[0] == "Bác Cả đòi đất, tôi bật live."
     assert khoi[1] == AI_NOTICE_SHORT
-    assert khoi[2].startswith("Hashtags: #truyenaudio #hohangcucpham #truyenhai")
-    assert khoi[3].startswith("Keywords: ")
-    assert "❓" not in desc and TOPIC_PLAYLIST_PLACEHOLDER not in desc
-    # Câu hỏi chọn phe vẫn sống ở bình luận ghim, chỉ rời khỏi mô tả.
+    assert khoi[2] == "Câu một giới thiệu. Câu hai hấp dẫn!"
+    assert khoi[3] == f"❓ {QUESTION}"
+    assert TOPIC_PLAYLIST_PLACEHOLDER in desc
+    assert "Chương:\n0:00 Mở đầu\n0:25 Chương 1" in desc
+    assert desc.rstrip().endswith("#truyenaudio #hohangcucpham #truyenhai")
+    assert "Keywords:" not in desc
     assert meta["pinned_comment"].startswith(f"❓ {QUESTION}")
     assert "1 = cho, 2 = không" in meta["pinned_comment"]
 

@@ -94,3 +94,35 @@ def test_force_xin_quyen_lai_du_token_con_song(tmp_path, monkeypatch):
     creds = auth.load_credentials(token_path=token, client_secret_path=secret, interactive=True, force=True)
 
     assert creds.refresh_token == "moi" and calls == [{"port": 0, "prompt": "consent"}]
+
+
+def test_cap_quyen_xin_them_analytics_nhung_lam_moi_khong_xin():
+    # Làm mới token kèm quyền chưa từng đồng ý -> invalid_scope, lượt đăng 09:00
+    # hỏng. Nên yt-analytics chỉ được xin ở bước đồng ý.
+    assert auth.ANALYTICS_SCOPE in auth.CONSENT_SCOPES
+    assert auth.ANALYTICS_SCOPE not in auth.SCOPES
+
+
+def test_luu_token_sau_khi_lam_moi_khong_lam_mat_quyen_analytics(tmp_path):
+    import json
+
+    token = tmp_path / "token.json"
+    token.write_text(json.dumps({"scopes": auth.CONSENT_SCOPES}), encoding="utf-8")
+
+    class _Refreshed:
+        def to_json(self):
+            return json.dumps({"refresh_token": "r", "scopes": auth.SCOPES})
+
+    auth._save(_Refreshed(), token)
+
+    assert auth.has_scope(auth.ANALYTICS_SCOPE, token)
+    assert json.loads(token.read_text())["refresh_token"] == "r"
+
+
+def test_has_scope_token_cu_hoac_thieu_file(tmp_path):
+    import json
+
+    token = tmp_path / "token.json"
+    assert not auth.has_scope(auth.ANALYTICS_SCOPE, token)
+    token.write_text(json.dumps({"scopes": auth.SCOPES}), encoding="utf-8")
+    assert not auth.has_scope(auth.ANALYTICS_SCOPE, token)

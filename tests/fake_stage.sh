@@ -126,6 +126,18 @@ case "$module" in
   shorts.tiktok)
     echo "Đã render TikTok: output/tiktok/me_chong_giau_cua-20260813T015400Z.mp4"
     ;;
+  upload.release)
+    # Trước khi đăng gì: kho trống -> mã 3 để run_daily dựng truyện mới (FAKE_RELEASE=
+    # scheduled/full ép "đã hẹn"/"lịch kín" -> 0). Sau khi upload.episodes_cli đã
+    # chạy trong cùng lượt: hẹn được -> 0.
+    if [[ "${FAKE_RELEASE:-}" == "scheduled" ]] || grep -q '^upload.episodes_cli' "${FAKE_LOG:-/dev/null}"; then
+      echo "Đã hẹn: Mẹ chồng giấu sổ đỏ — https://youtu.be/FAKEFULL1 (lên sóng 2026-11-12 20:00); kho còn 3 video."
+      exit 0
+    fi
+    [[ "${FAKE_RELEASE:-}" == "full" ]] && { echo "Lịch 7 ngày đã kín, kho còn 3 video."; exit 0; }
+    echo "Kho trống: tối 2026-11-12 chưa có video."
+    exit 3
+    ;;
   upload.episodes_cli)
     if [[ $is_full -eq 1 ]]; then
       echo "Full: Mẹ chồng giấu sổ đỏ — https://youtu.be/FAKEFULL1 (lên sóng 2026-08-13 20:00)"
