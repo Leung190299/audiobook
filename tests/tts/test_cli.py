@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from scripts.models import Chapter, Script
 from tts import cli
@@ -175,3 +176,34 @@ def test_main_parses_argv_and_calls_run(monkeypatch):
     cli.main()
 
     assert calls == [Path("some/script.json")]
+
+
+def test_run_tang_toc_doc_theo_speed_va_co_moc_thoi_gian(tmp_path, monkeypatch, capsys):
+    import shutil
+
+    import soundfile as sf
+
+    if shutil.which("ffmpeg") is None:
+        pytest.skip("không có ffmpeg")
+    script = Script(
+        trope="demo", title="T",
+        chapters=[Chapter(index=1, heading="Chương 1", text="Một. Hai."), Chapter(index=2, heading="Chương 2", text="Ba.")],
+    )
+    script_path = tmp_path / "script.json"
+    script_path.write_text(json.dumps(script.to_dict(), ensure_ascii=False), encoding="utf-8")
+    voice_path = _voice_yaml(tmp_path, gap_seconds="0.5", sentence_gap_seconds="0.1")
+    voice_path.write_text(voice_path.read_text(encoding="utf-8") + "speed: 1.25\n", encoding="utf-8")
+    monkeypatch.setattr(cli, "VOICE_CONFIG_PATH", voice_path)
+    monkeypatch.setattr(cli, "OUTPUT_DIR", tmp_path / "output")
+
+    cli._run(script_path, model=_FakeModel())  # mỗi câu 1.0s
+
+    (wav,) = list((tmp_path / "output").glob("*.wav"))
+    (meta,) = list((tmp_path / "output").glob("*.json"))
+    data = json.loads(meta.read_text(encoding="utf-8"))
+    # Gốc: 1 + 0.1 + 1 + 0.5 + 1 = 3.6s -> sau x1.25 = 2.88s
+    assert abs(sf.info(wav).duration - 2.88) < 0.05
+    assert abs(data["chapters"][1]["end_seconds"] - 2.88) < 0.01
+    assert abs(data["sentences"][1]["start_seconds"] - 1.1 / 1.25) < 0.01
+    out = capsys.readouterr().out
+    assert "Đã tăng tốc đọc x1.25" in out and "2.9 giây" in out

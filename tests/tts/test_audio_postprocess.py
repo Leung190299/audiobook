@@ -184,3 +184,42 @@ def test_concatenate_sentences_text_va_chapter_index_duoc_giu_dung():
         start_seconds=0.0,
         end_seconds=1.0,
     )
+
+
+def test_scale_timings_chia_moi_moc_cho_toc_do():
+    from tts.audio_postprocess import ChapterTiming, SentenceTiming, scale_timings
+
+    ch = [ChapterTiming(1, "C1", 0.0, 10.0)]
+    se = [SentenceTiming(1, 1, "a", 0.0, 4.0), SentenceTiming(1, 2, "b", 5.0, 10.0)]
+    ch2, se2 = scale_timings(ch, se, 1.25)
+    assert (ch2[0].start_seconds, ch2[0].end_seconds) == (0.0, 8.0)
+    assert [(s.start_seconds, s.end_seconds) for s in se2] == [(0.0, 3.2), (4.0, 8.0)]
+    assert se2[1].text == "b" and se2[1].chapter_index == 1
+    assert scale_timings(ch, se, 1.0) == (ch, se)  # 1.0: trả nguyên, không sao chép
+
+
+def test_time_stretch_file_rut_ngan_file_theo_toc_do_va_giu_sample_rate(tmp_path):
+    import shutil
+
+    import soundfile as sf
+
+    from tts.audio_postprocess import time_stretch_file
+
+    if shutil.which("ffmpeg") is None:
+        pytest.skip("không có ffmpeg")
+    sr = 48000
+    t = np.linspace(0, 4.0, 4 * sr, endpoint=False)
+    path = tmp_path / "a.wav"
+    sf.write(path, (0.2 * np.sin(2 * np.pi * 440 * t)).astype(np.float32), sr)
+    assert time_stretch_file(path, 1.25) == path
+    info = sf.info(path)
+    assert info.samplerate == sr
+    assert abs(info.duration - 3.2) < 0.05
+    assert not (tmp_path / "a.atempo.wav").exists()
+
+
+def test_time_stretch_file_toc_do_1_khong_dung_den_file(tmp_path):
+    from tts.audio_postprocess import time_stretch_file
+
+    path = tmp_path / "khong-ton-tai.wav"
+    assert time_stretch_file(path, 1.0) == path

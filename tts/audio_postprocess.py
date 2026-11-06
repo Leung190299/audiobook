@@ -1,4 +1,7 @@
-from dataclasses import dataclass
+import shutil
+import subprocess
+from dataclasses import dataclass, replace
+from pathlib import Path
 
 import numpy as np
 import pyloudnorm as pyln
@@ -108,3 +111,39 @@ def concatenate_sentences(
 
     full_audio = np.concatenate(segments) if segments else np.zeros(0, dtype=np.float32)
     return full_audio, chapter_timings, sentence_timings
+
+
+def scale_timings(
+    chapter_timings: list[ChapterTiming], sentence_timings: list[SentenceTiming], speed: float
+) -> tuple[list[ChapterTiming], list[SentenceTiming]]:
+    """Mốc thời gian sau khi audio được tăng tốc `speed` lần: mọi mốc chia cho speed."""
+    if speed == 1.0:
+        return chapter_timings, sentence_timings
+    return (
+        [replace(t, start_seconds=t.start_seconds / speed, end_seconds=t.end_seconds / speed) for t in chapter_timings],
+        [replace(t, start_seconds=t.start_seconds / speed, end_seconds=t.end_seconds / speed) for t in sentence_timings],
+    )
+
+
+def time_stretch_file(audio_path: Path, speed: float, ffmpeg: str = "ffmpeg") -> Path:
+    """Tăng tốc file audio TẠI CHỖ bằng ffmpeg atempo (giữ cao độ, WSOLA).
+
+    Làm trên file thay vì trên mảng numpy: một tập 45 phút @48kHz float32 ~500MB,
+    librosa/rubberband sẽ cần thêm 2-3 bản sao; ffmpeg chạy theo luồng. atempo
+    nhận 0.5-100 nên 1.25 là một bước. Ghi ra file tạm cạnh bên rồi đổi tên đè
+    để lỗi giữa chừng không làm mất bản gốc.
+    """
+    if speed == 1.0:
+        return audio_path
+    if not 0.5 <= speed <= 100:
+        raise ValueError(f"speed phải trong khoảng 0.5-100 (atempo), nhận {speed}.")
+    if shutil.which(ffmpeg) is None:
+        raise RuntimeError(f"Không thấy {ffmpeg} trong PATH để tăng tốc audio.")
+    tmp = audio_path.with_name(audio_path.stem + ".atempo" + audio_path.suffix)
+    subprocess.run(
+        [ffmpeg, "-y", "-loglevel", "error", "-i", str(audio_path),
+         "-filter:a", f"atempo={speed}", "-c:a", "pcm_s16le", str(tmp)],
+        check=True,
+    )
+    tmp.replace(audio_path)
+    return audio_path

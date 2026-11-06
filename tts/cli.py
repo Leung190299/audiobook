@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 from scripts.models import Chapter, Script
-from tts.audio_postprocess import concatenate_sentences, normalize_loudness
+from tts.audio_postprocess import concatenate_sentences, normalize_loudness, scale_timings, time_stretch_file
 from tts.sentences import split_sentences
 from tts.storage import save_audio
 from tts.synthesizer import synthesize_chapter
@@ -89,6 +89,9 @@ def _run(script_path: Path, model=None) -> None:
     # là bản audio chưa chuẩn hoá còn sống song song với full_audio.
     del raw_audio
 
+    # Tăng tốc đọc (voice.yaml: speed) sau khi ghép và chuẩn hoá: mốc câu/chương
+    # ghi vào metadata phải là mốc SAU tăng tốc, vì stage 3/4/7 cắt theo mốc đó.
+    chapter_timings, sentence_timings = scale_timings(chapter_timings, sentence_timings, voice_profile.speed)
     audio_path, metadata_path = save_audio(
         trope=script.trope,
         title=script.title,
@@ -98,8 +101,13 @@ def _run(script_path: Path, model=None) -> None:
         sentence_timings=sentence_timings,
         output_dir=OUTPUT_DIR,
     )
-
     duration_seconds = len(full_audio) / voice_profile.sample_rate
+    del full_audio
+    if voice_profile.speed != 1.0:
+        time_stretch_file(audio_path, voice_profile.speed)
+        duration_seconds /= voice_profile.speed
+        print(f"Đã tăng tốc đọc x{voice_profile.speed:g} (ffmpeg atempo).")
+
     print(
         f"Đã lưu audio: {audio_path} ({duration_seconds:.1f} giây, "
         f"{len(script.chapters)} chương, {total_sentences} câu)\n"

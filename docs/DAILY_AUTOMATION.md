@@ -58,7 +58,7 @@ Một lượt:
 ```
 ├─ Stage 0  trend.cli          ~30s   → output/ideas/<slug>-<ts>.txt
 ├─ Stage 1  scripts.cli        ~5m    → output/scripts/<slug>-<ts>.json
-├─ Stage 2  tts.cli            ~14m   → output/audio/<slug>-<ts>.wav + .json
+├─ Stage 2  tts.cli            ~14m   → output/audio/<slug>-<ts>.wav + .json (từ 06/11: đọc xong tăng tốc x1.25 bằng ffmpeg atempo, `speed` trong config/voice.yaml; mốc câu/chương đã chia theo tốc độ)
 ├─ Stage 3  images.cli         ~46m (đo 05/09: 66 ảnh)   → output/images/<slug>-<ts>.json + ~64 png
 ├─ Stage 4  episodes.cli       ~25m   → output/episodes/<slug>-<ts>-ep-0N.mp4 (3 tập) + <slug>-<ts>-episodes.json
 ├─ Stage 5  thumbnail.cli      ~1m    → output/thumbnails/<slug>-<ts>.png + -ep-0N.png
