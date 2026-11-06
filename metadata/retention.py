@@ -335,11 +335,12 @@ def fetch_retention(credentials, video_id: str, start: date, end: date) -> list[
     return points
 
 
-def _publish_date(row: dict, fallback: date) -> date:
+def _publish_date(row: dict) -> date | None:
+    """Ngày lên sóng theo chỉ mục; None nếu video đang nằm kho (publishAt null) hoặc thiếu."""
     try:
         return datetime.fromisoformat(row["publishAt"]).date()
-    except (KeyError, ValueError):
-        return fallback
+    except (KeyError, TypeError, ValueError):
+        return None
 
 
 def report_for_video(credentials, row: dict, today: date) -> tuple[RetentionReport, str, dict | None]:
@@ -347,7 +348,7 @@ def report_for_video(credentials, row: dict, today: date) -> tuple[RetentionRepo
     props = json.loads(props_path.read_text(encoding="utf-8")) if props_path else None
     if props is None:
         raise RetentionError(f"Không tìm thấy props của video {row['video_id']} -- không biết độ dài video.")
-    points = fetch_retention(credentials, row["video_id"], _publish_date(row, today - timedelta(days=30)), today)
+    points = fetch_retention(credentials, row["video_id"], _publish_date(row) or today - timedelta(days=30), today)
     title = props.get("title") or row.get("story_title", "")
     return analyze(points, video_duration(props)), title, props
 
@@ -420,12 +421,12 @@ def _run_recent(days: int, today: date, out: Path | None) -> None:
     # Analytics trễ 1-2 ngày: video lên sóng chưa tới 2 ngày chưa có số.
     newest = today - timedelta(days=2)
     oldest = today - timedelta(days=days)
-    rows = [r for r in index_rows() if oldest <= _publish_date(r, today) <= newest]
+    rows = [r for r in index_rows() if (aired := _publish_date(r)) and oldest <= aired <= newest]
     if not rows:
         raise RetentionError(f"Không có video nào lên sóng từ {oldest} tới {newest}.")
     credentials = analytics_credentials()
     results = []
-    for row in sorted(rows, key=lambda r: r.get("publishAt", "")):
+    for row in sorted(rows, key=lambda r: r.get("publishAt") or ""):
         try:
             report, title, props = report_for_video(credentials, row, today)
         except RetentionError as exc:
