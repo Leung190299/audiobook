@@ -86,20 +86,20 @@ def test_video_upload_hong_khong_tinh_la_kho():
 
 def test_uu_tien_chu_de_thang_va_xen_ke_hai_chu_de():
     videos = [
-        _v("a1", "ho_hang_viet", TODAY + timedelta(days=1)),       # họ hàng vừa lên gần nhất
+        _v("a1", "nghe_la_hong_bien", TODAY + timedelta(days=1)),  # nghề lạ vừa lên gần nhất
         _v("b0", "bo_me_trong_sinh", TODAY - timedelta(days=3), privacy="public"),
-        _v("n1", "nghe_la_hong_bien"), _v("h1", "ho_hang_viet"), _v("b1", "bo_me_trong_sinh"),
+        _v("h1", "ho_hang_viet"), _v("n1", "nghe_la_hong_bien"), _v("b1", "bo_me_trong_sinh"),
         _v("d1", "hoc_duong"),
     ]
     assert pick_stock(videos).video_id == "b1"  # bố mẹ trọng sinh lên sóng xa hơn -> tới lượt
     videos.append(_v("b1x", "bo_me_trong_sinh", TODAY + timedelta(days=2)))
+    assert pick_stock(videos).video_id == "n1"
+
+
+def test_het_chu_de_thang_thi_toi_ho_hang_roi_hoc_duong():
+    videos = [_v("d1", "hoc_duong"), _v("h1", "ho_hang_viet"), _v("d0", "hoc_duong")]
     assert pick_stock(videos).video_id == "h1"
-
-
-def test_het_chu_de_thang_thi_toi_hoc_duong_roi_nghe_la():
-    videos = [_v("n1", "nghe_la_hong_bien"), _v("d1", "hoc_duong"), _v("n0", "nghe_la_hong_bien")]
-    assert pick_stock(videos).video_id == "d1"
-    assert pick_stock([_v("n1", "nghe_la_hong_bien"), _v("n0", "nghe_la_hong_bien")]).video_id == "n1"
+    assert pick_stock([_v("d1", "hoc_duong"), _v("d0", "hoc_duong")]).video_id == "d1"
 
 
 def test_cung_chu_de_thi_vao_kho_truoc_di_truoc():
