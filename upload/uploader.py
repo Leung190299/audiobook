@@ -254,7 +254,10 @@ def update_description(credentials, video_id: str, description: str) -> bool:
             print(f"[upload] Không tìm thấy video {video_id} để cập nhật mô tả.")
             return False
         snippet = items[0]["snippet"]
-        snippet["description"] = sanitize_description(description)
+        wanted = sanitize_description(description)
+        if snippet.get("description") == wanted:
+            return True  # đã đúng: không tốn 50 đơn vị update
+        snippet["description"] = wanted
         youtube.videos().update(part="snippet", body={"id": video_id, "snippet": snippet}).execute()
         return True
     except HttpError as exc:

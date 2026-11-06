@@ -236,3 +236,12 @@ def test_bang_tong_hop_nhieu_video():
     text = render_summary(rows, date(2026, 11, 4))
     assert "| 2026-10-30 | Truyện A | 20.0 [ổn] | -6.2 @ 8:10 |" in text
     assert "| 2026-11-01 | Truyện B | chưa đủ số liệu |" in text
+
+
+def test_publish_date_video_nam_kho_tra_none():
+    from datetime import date
+
+    from metadata import retention
+    assert retention._publish_date({"publishAt": None}) is None
+    assert retention._publish_date({}) is None
+    assert retention._publish_date({"publishAt": "2026-11-01T20:00:00+07:00"}) == date(2026, 11, 1)

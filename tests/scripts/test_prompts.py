@@ -37,6 +37,14 @@ def test_chapter_prompt_chuong_1_mo_thang_vao_xung_dot():
     assert "cliffhanger" not in prompt.lower()
 
 
+def test_chapter_prompt_chuong_1_phut_dau_o_li_trong_canh_ca_hai_dinh_dang():
+    """Analytics 06/11: vực chung ở 0:47-0:51 khi lời kể rời cảnh để nhắc chuyện cũ."""
+    for fmt in ("episodes", "full"):
+        prompt = build_chapter_prompt(1, 16, "Mở đầu", "Tóm tắt.", fmt=fmt)
+        assert "200 TỪ ĐẦU TIÊN" in prompt and "KHÔNG hồi tưởng" in prompt
+    assert "200 TỪ ĐẦU TIÊN" not in build_chapter_prompt(2, 16, "Giữa", "Tóm tắt.", fmt="full")
+
+
 def test_chapter_prompt_chuong_cuoi_tap_phai_cliffhanger():
     for n in (5, 11):
         prompt = build_chapter_prompt(n, 16, "Cuối tập", "Tóm tắt.")

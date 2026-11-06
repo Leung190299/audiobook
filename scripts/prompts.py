@@ -123,6 +123,7 @@ def build_chapter_prompt(
             "đang diễn ra trong xung đột (không giới thiệu nhân vật, không tả bối "
             "cảnh, không 'ngày xưa'). Người nghe phải biết ngay ai đang bị hại và bởi "
             "ai trước khi hết đoạn đầu tiên.\n"
+            + FIRST_MINUTE_RULE
         )
     elif chapter_number in CLIFFHANGER_CHAPTERS:
         structure_rule = (
@@ -221,6 +222,18 @@ def build_length_note(words: int, lo: int, hi: int) -> str:
 
 
 PROLOGUE_WORDS = (100, 150)
+# Analytics 06/11/2026: 4 video dài có số liệu đều mất người nghe nhiều nhất ở
+# 0:47-0:51, đúng lúc lời kể rời cảnh đang diễn ra để tả người / nhắc chuyện cũ
+# ("Hồi lớp mười hai, nó thi học kỳ...", "Đôi mắt ông, ba ngày nay nhắm nghiền...").
+FIRST_MINUTE_WORDS = 200
+FIRST_MINUTE_RULE = (
+    f"- {FIRST_MINUTE_WORDS} TỪ ĐẦU TIÊN (phút đầu của video) phải ở lì trong cảnh đang diễn ra: "
+    "chỉ hành động và thoại đối đáp, mỗi câu kể dưới 20 từ. Trong khúc này KHÔNG hồi tưởng, "
+    "KHÔNG kể lại chuyện cũ ('hồi đó', 'ba ngày nay', 'kiếp trước'), KHÔNG giải thích quan hệ, "
+    "KHÔNG tả ngoại hình quá một câu. Chuyện cũ chỉ được nhắc SAU khi nhân vật tôi đã đáp trả "
+    "lần đầu trong cảnh mở đầu.\n"
+)
+
 
 
 def build_prologue_prompt() -> str:
@@ -404,6 +417,7 @@ def _build_full_chapter_prompt(
         structure_rule = (
             "- Đây là CHƯƠNG MỞ ĐẦU: câu đầu tiên là tình huống xung đột đang diễn ra, câu thứ "
             "hai là một câu chọc cười. Không chào hỏi, không giới thiệu bản thân, không tả thời tiết.\n"
+            + FIRST_MINUTE_RULE
         )
     elif chapter_number == total_chapters:
         structure_rule = (

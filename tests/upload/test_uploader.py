@@ -121,3 +121,14 @@ def test_list_status_chia_lo_50_id(monkeypatch):
     out = uploader.list_status(None, [f"v{i}" for i in range(120)])
     assert [len(c) for c in calls] == [50, 50, 20]
     assert len(out) == 120 and out["v7"] == {"privacyStatus": "private"}
+
+
+def test_update_description_mo_ta_da_dung_thi_khong_goi_update(monkeypatch):
+    yt = MagicMock()
+    yt.videos.return_value.list.return_value.execute.return_value = {
+        "items": [{"snippet": {"title": "T", "description": "Mô tả cũ"}}]}
+    monkeypatch.setattr(uploader, "build", lambda *a, **kw: yt)
+    assert uploader.update_description(None, "v1", "Mô tả cũ") is True
+    yt.videos.return_value.update.assert_not_called()
+    assert uploader.update_description(None, "v1", "Mô tả mới") is True
+    yt.videos.return_value.update.assert_called_once()
