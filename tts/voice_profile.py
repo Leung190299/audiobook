@@ -20,6 +20,8 @@ class VoiceProfile:
     gap_seconds: float
     sentence_gap_seconds: float = 0.15
     ref_audio_path: Path | None = None
+    # Tăng tốc đọc sau khi ghép xong (1.25 = nhanh hơn 25%, giữ nguyên cao độ).
+    speed: float = 1.0
 
 
 def load_voice_profile(path: Path) -> VoiceProfile:
@@ -42,4 +44,5 @@ def load_voice_profile(path: Path) -> VoiceProfile:
         # data.get, không phải data[...]: cấu hình cũ chưa có trường này vẫn nạp được.
         sentence_gap_seconds=data.get("sentence_gap_seconds", 0.15),
         ref_audio_path=ref_audio_path,
+        speed=float(data.get("speed", 1.0)),
     )

@@ -94,3 +94,12 @@ def test_load_voice_profile_keeps_absolute_ref_audio_path(tmp_path):
     profile = load_voice_profile(yaml_path)
 
     assert profile.ref_audio_path == abs_path
+
+
+def test_load_voice_profile_speed_mac_dinh_1_va_doc_tu_cau_hinh(tmp_path):
+    base = 'voice: "A"\nstyle: "doc_truyen"\ntarget_lufs: -16.0\nsample_rate: 48000\ngap_seconds: 0.5\n'
+    yaml_path = tmp_path / "voice.yaml"
+    yaml_path.write_text(base, encoding="utf-8")
+    assert load_voice_profile(yaml_path).speed == 1.0
+    yaml_path.write_text(base + "speed: 1.25\n", encoding="utf-8")
+    assert load_voice_profile(yaml_path).speed == 1.25
