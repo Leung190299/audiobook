@@ -50,10 +50,12 @@ load_dotenv()
 WINDOW_DAYS = 7
 # Chỉ hẹn giờ short 1 và 2; từ cái thứ 3 trở đi giữ riêng tư.
 RELEASE_SHORT_PARTS = 2
-# Thứ tự ưu tiên chủ đề khi lấy từ kho. Hai cái đầu là "đang thắng" (05/11) và
-# được xen kẽ nhau; các chủ đề không có trong danh sách xếp cuối.
-WINNING_TOPICS = ("bo_me_trong_sinh", "ho_hang_viet")
-TOPIC_PRIORITY = WINNING_TOPICS + ("hoc_duong", "nghe_la_hong_bien")
+# Thứ tự ưu tiên chủ đề khi lấy từ kho. Hai cái đầu là "đang thắng" và được xen
+# kẽ nhau; các chủ đề không có trong danh sách xếp cuối. Xếp theo tỷ lệ short
+# "nổ" (metadata.topic_views, 06/11/2026): trọng sinh 58%, nghề lạ 56%, họ hàng
+# 42%, học đường 33% (3 mẫu).
+WINNING_TOPICS = ("bo_me_trong_sinh", "nghe_la_hong_bien")
+TOPIC_PRIORITY = WINNING_TOPICS + ("ho_hang_viet", "hoc_duong")
 # uploadStatus mà video coi như không dùng được.
 DEAD_UPLOAD_STATUS = {"failed", "rejected", "deleted"}
 
