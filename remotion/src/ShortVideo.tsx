@@ -11,7 +11,9 @@ import { SceneBackground } from "./SceneBackground";
 import type { ShortProps } from "./types";
 import { FONT_FAMILY, useBeVietnamPro } from "./fonts";
 
-// Hook chỉ hiện ở đầu video — sau đó nhường chỗ cho phụ đề.
+// Hook chỉ hiện ở đầu video. Từ 08/11 Short KHÔNG burn phụ đề nữa (như video
+// dài): người xem bật phụ đề tự động của YouTube/TikTok; props.captions vẫn được
+// stage 7 gửi lên (shorts/props_builder.py) nhưng không vẽ.
 const HOOK_SECONDS = 3;
 // Dissolve giữa hai cảnh, cùng giá trị với MainVideo.tsx.
 const CROSSFADE_SECONDS = 1.0;
@@ -22,7 +24,6 @@ export const ShortVideo: React.FC<ShortProps> = ({
   audioPath,
   scenes,
   hookText,
-  captions,
   audioDurationSeconds,
   ctaText,
   backgroundVideo,
@@ -36,15 +37,6 @@ export const ShortVideo: React.FC<ShortProps> = ({
   const crossfadeFrames = Math.round(CROSSFADE_SECONDS * fps);
 
   const inCta = seconds >= audioDurationSeconds;
-  // Giữ nguyên phụ đề của câu trước trong khoảng nghỉ 0.15s giữa hai câu (xem
-  // sentence_gap_seconds ở config/voice.yaml) thay vì tắt hẳn: dùng "startSeconds gần
-  // nhất đã qua" chứ không so cả startSeconds lẫn endSeconds, nếu không chữ sẽ
-  // chớp tắt khoảng chục lần mỗi short. inCta ở trên đã lo việc ẩn phụ đề khi
-  // sang card CTA.
-  const activeCaption = [...captions]
-    .reverse()
-    .find((c) => seconds >= c.startSeconds);
-
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       <AbsoluteFill style={{ overflow: "hidden" }}>
@@ -96,27 +88,6 @@ export const ShortVideo: React.FC<ShortProps> = ({
           }}
         >
           {hookText}
-        </div>
-      ) : null}
-
-      {!inCta && activeCaption ? (
-        <div
-          style={{
-            position: "absolute",
-            bottom: 320,
-            left: 60,
-            right: 60,
-            textAlign: "center",
-            color: "#fff",
-            fontFamily: FONT_FAMILY,
-            fontSize: 62,
-            lineHeight: 1.25,
-            padding: "24px 28px",
-            backgroundColor: "rgba(0,0,0,0.55)",
-            borderRadius: 24,
-          }}
-        >
-          {activeCaption.text}
         </div>
       ) : null}
 

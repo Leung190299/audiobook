@@ -27,7 +27,7 @@ One **35–50 min long video per day** + **3 Shorts**, Vietnamese family-drama s
 
 **Output quality**: long video renders at **1920×1080** (was 1024×576 until 05/10 — SD, and it threw away over half the vertical detail of the 1024–1280 px Douyin sources). Remotion's intermediate frames are JPEG 95 (`backgrounds.RENDER_JPEG_QUALITY`; default 80 smeared text edges). 1080p renders ~33% slower than 576p. `BrandPanel` scales all its size clamps by `height / 576`, so changing the frame size keeps the layout.
 
-Layout code: `remotion/src/MainVideo.tsx` → `BrandedLayout.tsx` (centre box width) → `BrandPanel.tsx` (panels, colours, AI text) + `BackgroundVideo.tsx` (looped centre clip). Shorts (`ShortVideo.tsx`) keep their own older layout with captions.
+Layout code: `remotion/src/MainVideo.tsx` → `BrandedLayout.tsx` (centre box width) → `BrandPanel.tsx` (panels, colours, AI text) + `BackgroundVideo.tsx` (looped centre clip). Shorts (`ShortVideo.tsx`) keep their own older layout: 3-second hook text + CTA card. **Since 08/11 Shorts burn no captions either** (channel request); `props.captions` is still sent by stage 7 but not drawn.
 
 ## Run it
 
