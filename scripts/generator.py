@@ -1,6 +1,7 @@
 # scripts/generator.py
 import asyncio
 import json
+import re
 
 import anthropic
 from gemini_webapi.exceptions import APIError, AuthError, GeminiError
@@ -266,11 +267,8 @@ async def generate_script(
         length_note = build_length_note(words, w_lo, w_hi)
 
         if story_mode and chapter_number == 1 and story.hook:
-            # Spec: câu đầu chương 1 phải là hook NGUYÊN VĂN. Prompt đã yêu cầu,
-            # nhưng Gemini hay mở bài bằng một câu dẫn -- ghép lại cho chắc.
-            first = " ".join(text.split())
-            if not first.startswith(story.hook):
-                text = f"{story.hook} {text}"
+            # Spec: câu đầu chương 1 phải là hook NGUYÊN VĂN (force_hook).
+            text = force_hook(text, story.hook)
 
         chapters.append(Chapter(index=chapter_number, heading=heading, text=text))
 
@@ -342,6 +340,39 @@ async def _ask_short_beats(chat, beat_plans: list[str], chapters: list[Chapter])
     if len(found) < len(beats):
         print(f"CẢNH BÁO: {len(beats) - len(found)} short_beat không khớp nguyên văn, đã bỏ.")
     return found[:SHORT_BEAT_COUNT]
+
+
+
+def force_hook(text: str, hook: str) -> str:
+    """Ép câu đầu chương 1 thành `hook` nguyên văn.
+
+    Mô hình hay làm hai kiểu: (a) mở bằng một câu dẫn rồi mới tới hook -> ghép hook
+    lên trước; (b) chép hook nhưng đổi vài chữ ('giỗ hết tang bố' thay vì 'giỗ bố')
+    -> thay câu gần giống đó bằng hook, KHÔNG ghép thêm. Trước 08/11 kiểu (b) bị ghép
+    thành hai câu hook liền nhau và TTS đọc hai lần (truyện #114).
+    """
+    if not hook:
+        return text
+    flat = " ".join(text.split())
+    if flat.startswith(hook):
+        return text
+
+    def _norm(w: str) -> str:
+        return w.strip(".,:;!?'\"“”‘’…-").lower()
+
+    hook_words = [_norm(w) for w in hook.split()]
+    hook_set = set(hook_words)
+    tokens = list(re.finditer(r"\S+", text))
+    n = len(hook_words)
+    # Câu gần giống kết thúc ở từ cuối của hook (vd "con.'") trong cửa sổ n-4..n+6 từ.
+    for k in range(max(1, n - 4), min(len(tokens), n + 6) + 1):
+        if _norm(tokens[k - 1].group()) != hook_words[-1]:
+            continue
+        head = {_norm(t.group()) for t in tokens[:k]}
+        if len(hook_set & head) / len(hook_set) >= 0.6:
+            rest = text[tokens[k - 1].end():].lstrip()
+            return f"{hook} {rest}" if rest else hook
+    return f"{hook} {text}"
 
 
 def _clip_words(text: str, max_words: int) -> str:

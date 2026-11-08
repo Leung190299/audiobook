@@ -402,3 +402,35 @@ async def test_ban_tap_khong_co_mo_dau():
     fake_client, fake_chat = _make_fake_client(_outline_json(3), chapters)
     script = await generate_script("t", "T", "m", client=fake_client, fmt="episodes")
     assert fake_chat.send_message.call_count == 4 and len(script.chapters) == 3
+
+
+# --- force_hook: câu đầu chương 1 (08/11/2026) ---------------------------------
+
+from scripts.generator import force_hook
+
+HOOK = "Giữa mâm cỗ giỗ bố, mẹ gõ đũa tuyên bố: 'Nhà này mẹ chỉ có thằng Đạt là con.'"
+
+
+def test_force_hook_giu_nguyen_khi_da_mo_dung_hook():
+    text = HOOK + "\n\nCả mâm im."
+    assert force_hook(text, HOOK) == text
+
+
+def test_force_hook_thay_cau_gan_giong_thay_vi_ghep_doi():
+    text = (
+        "Giữa mâm cỗ giỗ hết tang bố, mẹ gõ đũa tuyên bố: 'Nhà này mẹ chỉ có thằng Đạt là con.'"
+        " Cả mâm cỗ khựng lại.\n\nMẹ hất hàm."
+    )
+    out = force_hook(text, HOOK)
+    assert out.startswith(HOOK + " Cả mâm cỗ khựng lại.")
+    assert out.count("mẹ gõ đũa tuyên bố") == 1
+    assert out.endswith("\n\nMẹ hất hàm.")
+
+
+def test_force_hook_ghep_len_truoc_khi_mo_bang_cau_dan_khac():
+    text = "Hôm ấy trời mưa. Mẹ nhìn tôi.\n\nTôi im."
+    assert force_hook(text, HOOK) == f"{HOOK} {text}"
+
+
+def test_force_hook_hook_rong_khong_dong_den_van():
+    assert force_hook("Văn.", "") == "Văn."
