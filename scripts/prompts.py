@@ -283,7 +283,10 @@ def _fmt_num(n: int) -> str:
 
 
 # 05/11/2026: 3 -> 2, cùng lý do với shorts/planner.py TEASER_COUNT.
-SHORT_BEAT_COUNT = 2
+# 08/11/2026: lên 3 lại theo yêu cầu kênh, và stage 1 BẮT BUỘC trả đủ (xem
+# generator._ask_short_beats: hỏi lại tới SHORT_BEATS_ATTEMPTS lần, thiếu thì lỗi).
+# Lịch nhả kho vẫn chỉ hẹn 2 Short đầu (upload/release.py RELEASE_SHORT_PARTS).
+SHORT_BEAT_COUNT = 3
 # Câu hỏi chọn phe có hai vế đáp án ("1 = ..., 2 = ...") nên dài hơn câu hỏi cũ;
 # cắt ở 25 từ dễ mất vế 2.
 MAX_TOPIC_QUESTION_WORDS = 35
@@ -469,7 +472,29 @@ Mỗi đoạn:
 - Mở bằng một câu thoại buồn cười hoặc sảng, tự đứng được khi nghe riêng.
 - Đoạn thứ nhất là đoạn sảng nhất.
 
-Chỉ trả về DUY NHẤT một JSON: {{"short_beats": ["<đoạn 1>", "<đoạn 2>", "<đoạn 3>"]}}
+Chỉ trả về DUY NHẤT một JSON: {{"short_beats": [{_beats_placeholder(SHORT_BEAT_COUNT)}]}}
+{_JSON_QUOTE_RULE}
+"""
+
+
+def _beats_placeholder(n: int) -> str:
+    return ", ".join(f'"<đoạn {i}>"' for i in range(1, n + 1))
+
+
+def build_short_beats_retry_prompt(accepted: list[str], missing: int, problem: str) -> str:
+    """Hỏi lại khi lượt trước trả thiếu / trích sai (08/11). Nêu rõ đoạn đã nhận
+    để mô hình không gửi lại, và lý do bị loại để nó sửa đúng chỗ."""
+    kept = "\n".join(f"- {b}" for b in accepted) or "(chưa đoạn nào)"
+    return f"""Lượt vừa rồi CHƯA ĐỦ: {problem}.
+Đoạn đã nhận (KHÔNG gửi lại, KHÔNG chọn trùng/chồng lên các đoạn này):
+{kept}
+
+Hãy trích thêm ĐÚNG {missing} đoạn KHÁC trong các chương vừa viết, mỗi đoạn:
+- COPY NGUYÊN VĂN một đoạn liên tục 60-130 từ đúng từng chữ như trong chương -- mở trình soạn thảo trong đầu,
+  chép lại chứ không viết lại; không sửa chính tả, không gộp câu, không tóm tắt.
+- Mở bằng một câu thoại buồn cười hoặc sảng, tự đứng được khi nghe riêng.
+
+Chỉ trả về DUY NHẤT một JSON: {{"short_beats": [{_beats_placeholder(missing)}]}}
 {_JSON_QUOTE_RULE}
 """
 

@@ -48,8 +48,22 @@ def _outline(n: int) -> str:
     )
 
 
-def _client(outline_text: str, chapter_texts: list[str]):
+def _beats_from(chapter_texts: list[str]) -> str:
+    """Trả lời short_beats mặc định: 3 câu đầu tiên có thật trong các chương
+    (08/11: stage 1 ép đủ 3 đoạn khớp nguyên văn, thiếu là lỗi)."""
+    import json
+
+    from scripts.text_tools import split_sentences
+
+    sentences = [t for c in chapter_texts for t in split_sentences(c)]
+    return json.dumps({"short_beats": sentences[:3]}, ensure_ascii=False)
+
+
+def _client(outline_text: str, chapter_texts: list[str], beats_text: str | None = None):
     responses = [MagicMock(text=outline_text)] + [MagicMock(text=t) for t in chapter_texts]
+    if beats_text is None:
+        beats_text = _beats_from(chapter_texts)
+    responses.append(MagicMock(text=beats_text))
     chat = MagicMock()
     chat.send_message = AsyncMock(side_effect=responses)
     client = MagicMock()
@@ -97,7 +111,7 @@ def test_prompt_co_outline_thi_yeu_cau_bam_dung_dan_y():
 
 
 async def test_giu_nguyen_tieu_de_hook_cau_hoi_tu_kho_khong_lay_cua_gemini():
-    client, _ = _client(_outline(2), ["Nội dung chương một.", "Nội dung chương hai."])
+    client, _ = _client(_outline(2), ["Nội dung chương một. Bác Cả im bặt.", "Nội dung chương hai."])
 
     script = await generate_script("x", "y", "z", client=client, fmt="full",
                                    story=STORY, bank=BANK)
@@ -111,7 +125,7 @@ async def test_giu_nguyen_tieu_de_hook_cau_hoi_tu_kho_khong_lay_cua_gemini():
 
 
 async def test_cau_dau_chuong_1_la_hook_nguyen_van():
-    client, _ = _client(_outline(2), ["Gemini quên mất hook.", "Chương hai."])
+    client, _ = _client(_outline(2), ["Gemini quên mất hook. Rồi kể tiếp chuyện.", "Chương hai."])
 
     script = await generate_script("x", "y", "z", client=client, fmt="full",
                                    story=STORY, bank=BANK)
@@ -133,7 +147,7 @@ def _assert_no_dup_check(chat):
 
 
 async def test_khong_kiem_tra_trung_tieu_de():
-    client, chat = _client(_outline(2), ["Chương một.", "Chương hai."])
+    client, chat = _client(_outline(2), ["Chương một. Có thêm câu.", "Chương hai."])
     called = []
 
     await generate_script("x", "y", "z", client=client, fmt="full", story=STORY,
@@ -172,7 +186,7 @@ async def test_ten_chuong_khong_lay_nguyen_dong_dan_y():
         "Lai lịch mảnh đất 120m². Miếng hài: bác Cả tự đo đất bằng bước chân.",
         "Bác Cả leo thang. Cliffhanger: đòi họp gia đình Chủ nhật tới.",
     )})
-    client, _ = _client(_outline(2), ["Một.", "Hai."])
+    client, _ = _client(_outline(2), ["Một. Thêm câu nữa.", "Hai."])
 
     script = await generate_script("x", "y", "z", client=client, fmt="full",
                                    story=co, bank=BANK)
@@ -195,17 +209,17 @@ async def test_khong_co_outline_thi_dung_dan_y_cua_gemini():
 async def test_short_beats_van_hoi_nguyen_van_nhu_nhanh_chu_de():
     # Kho không có short_beats; stage 4/7 cần NGUYÊN VĂN để dò mốc thời gian,
     # nên chế độ kho vẫn chạy bước hỏi lại như nhánh --topic.
-    beats_json = '{"short_beats": ["Bác Cả im bặt.", "Cả mâm quay sang tôi."]}'
+    beats_json = '{"short_beats": ["Bác Cả im bặt.", "Cả mâm quay sang tôi.", "Tôi cười."]}'
     client, _ = _client(
         _outline(2),
-        ["Bác Cả im bặt. Không ai nói gì.", "Cả mâm quay sang tôi. Tôi cười."]
-        + [beats_json],
+        ["Bác Cả im bặt. Không ai nói gì.", "Cả mâm quay sang tôi. Tôi cười."],
+        beats_json,
     )
 
     script = await generate_script("x", "y", "z", client=client, fmt="full",
                                    story=STORY, bank=BANK)
 
-    assert script.short_beats == ["Bác Cả im bặt.", "Cả mâm quay sang tôi."]
+    assert script.short_beats == ["Bác Cả im bặt.", "Cả mâm quay sang tôi.", "Tôi cười."]
 
 
 # --- scripts/cli.py --story ---

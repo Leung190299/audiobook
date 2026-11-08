@@ -109,7 +109,7 @@ async def test_stage_1_truyen_that_co_outline_ra_dung_16_chuong_va_hook_dau(monk
     outline_json = f'{{"title": "khac", "short_beats": ["a","b","c"], "chapters": [{chapters_json}]}}'
     responses = [MagicMock(text=outline_json)] + [
         MagicMock(text=f"Nội dung chương {i}.") for i in range(1, 17)
-    ]
+    ] + [MagicMock(text='{"short_beats": ["Nội dung chương 1.", "Nội dung chương 2.", "Nội dung chương 3."]}')]
     chat = MagicMock()
     chat.send_message = AsyncMock(side_effect=responses)
     client = MagicMock()

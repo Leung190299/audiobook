@@ -26,7 +26,9 @@ MAX_PART_SECONDS = 165.0
 # đoạn trong một lượt đăng (xem upload/episodes_cli.py).
 # 05/11/2026: xuống 2. Đánh giá kênh: ~500 Shorts gần cùng khuôn, phân phối về 0
 # từ 27/10; kế hoạch 30 ngày là 1 truyện + 2 Shorts mỗi ngày.
-TEASER_COUNT = 2
+# 08/11/2026: lên 3 lại theo yêu cầu kênh (stage 1 ép đủ 3 short_beats). Lịch nhả
+# kho vẫn chỉ hẹn 2 Short đầu (upload/release.py RELEASE_SHORT_PARTS), Short 3 nằm kho.
+TEASER_COUNT = 3
 
 # Vị trí (theo tỉ lệ thời lượng tập) của từng trích đoạn. Bắt đầu sớm ở 5% để
 # lấy được cú hook mở đầu, dừng ở 85% để chừa hẳn đoạn kết -- trích đoạn để mời

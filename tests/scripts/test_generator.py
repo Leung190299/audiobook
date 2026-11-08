@@ -293,9 +293,10 @@ def _topic_outline(title="Bác Cả Đòi Chia Đất Của Bố, Tôi Livestrea
     )
 
 
-def _topic_client(outlines, chapter_texts, beats_text):
+def _topic_client(outlines, chapter_texts, *beats_texts):
+    """beats_texts: một trả lời cho mỗi lượt hỏi short_beats (lượt đầu + hỏi lại)."""
     responses = [MagicMock(text=o) for o in outlines] + [MagicMock(text=t) for t in chapter_texts] + [
-        MagicMock(text=beats_text)
+        MagicMock(text=b) for b in beats_texts
     ]
     chat = MagicMock()
     chat.send_message = AsyncMock(side_effect=responses)
@@ -307,7 +308,9 @@ def _topic_client(outlines, chapter_texts, beats_text):
 async def test_chu_de_full_tra_them_truong_thumbnail_va_short_beats():
     chapters = [f"Chương {i} mở đầu. Bác Cả đập bàn đòi đất số {i}. Tôi bật livestream luôn." for i in range(1, 16)]
     beats = _json.dumps({"short_beats": ["Bác Cả đập bàn đòi đất số 2. Tôi bật livestream luôn.", "câu bịa hoàn toàn không có trong truyện nào cả"]}, ensure_ascii=False)
-    client, chat = _topic_client([_topic_outline()], chapters, beats)
+    # 08/11: thiếu 2 -> hỏi lại, lượt hai trả đủ phần còn thiếu.
+    beats_2 = _json.dumps({"short_beats": ["Bác Cả đập bàn đòi đất số 5.", "Bác Cả đập bàn đòi đất số 9."]}, ensure_ascii=False)
+    client, chat = _topic_client([_topic_outline()], chapters, beats, beats_2)
     script = await generate_script(
         "ho_hang_viet", "n", "Tết về quê", client=client,
         fmt="full", topic=TOPICS["ho_hang_viet"], setting="Tết về quê",
@@ -316,8 +319,16 @@ async def test_chu_de_full_tra_them_truong_thumbnail_va_short_beats():
     assert script.setting == "Tết về quê" and script.premise == "P"
     assert script.thumb_keywords == ["Chia Đất"]
     assert "2 = không" in script.comment_question
-    # Đoạn không dò được trong văn bản bị bỏ.
-    assert script.short_beats == ["Bác Cả đập bàn đòi đất số 2. Tôi bật livestream luôn."]
+    # Đoạn không dò được trong văn bản bị bỏ, phần thiếu lấy từ lượt hỏi lại.
+    assert script.short_beats == [
+        "Bác Cả đập bàn đòi đất số 2. Tôi bật livestream luôn.",
+        "Bác Cả đập bàn đòi đất số 5.",
+        "Bác Cả đập bàn đòi đất số 9.",
+    ]
+    retry_prompt = chat.send_message.call_args_list[-2].args[0]  # [-1] là prompt Mở đầu
+    assert "ĐÚNG 2 đoạn KHÁC" in retry_prompt
+    assert "Bác Cả đập bàn đòi đất số 2. Tôi bật livestream luôn." in retry_prompt  # đã nhận, không gửi lại
+    assert "1 đoạn không khớp nguyên văn" in retry_prompt
     prompt = chat.send_message.call_args_list[0].args[0]
     assert "Tết về quê" in prompt and "cá mặn hậu cung" in prompt
     chapter_prompt = chat.send_message.call_args_list[1].args[0]
@@ -327,7 +338,8 @@ async def test_chu_de_full_tra_them_truong_thumbnail_va_short_beats():
 async def test_chu_de_dan_y_trung_thi_hoi_lai():
     chapters = [f"Nội dung {i}." for i in range(1, 16)]
     client, chat = _topic_client(
-        [_topic_outline(title="Cũ"), _topic_outline(title="Mới")], chapters, '{"short_beats": []}'
+        [_topic_outline(title="Cũ"), _topic_outline(title="Mới")], chapters,
+        '{"short_beats": ["Nội dung 1.", "Nội dung 2.", "Nội dung 3."]}',
     )
     script = await generate_script(
         "ho_hang_viet", "n", "s", client=client, fmt="full", topic=TOPICS["ho_hang_viet"],
@@ -341,14 +353,38 @@ async def test_chu_de_tieu_de_dai_hon_60_ky_tu_thi_hoi_lai():
     long_title = "Tôi " + "Rất " * 30 + "Dài"
     chapters = [f"Nội dung {i}." for i in range(1, 16)]
     client, chat = _topic_client(
-        [_topic_outline(title=long_title), _topic_outline(title="Ngắn Gọn")], chapters, "không phải json"
+        [_topic_outline(title=long_title), _topic_outline(title="Ngắn Gọn")], chapters,
+        '{"short_beats": ["Nội dung 1.", "Nội dung 2.", "Nội dung 3."]}',
     )
     script = await generate_script(
         "ho_hang_viet", "n", "s", client=client, fmt="full", topic=TOPICS["ho_hang_viet"], setting="s"
     )
     assert script.title == "Ngắn Gọn"
-    # Bước short_beats hỏng không làm hỏng kịch bản.
-    assert script.short_beats == []
+    assert len(script.short_beats) == 3
+
+
+async def test_short_beats_thieu_sau_3_luot_hoi_thi_stage_1_loi():
+    """08/11: kênh yêu cầu ép đủ 3 short_beats. Truyện #114 từng ra 2 Short vì
+    Gemini trả thiếu mà bộ sinh cho qua. Giờ 3 lượt vẫn thiếu -> lỗi, không
+    dựng 40 phút ra truyện thiếu Short."""
+    from scripts.generator import ScriptGenerationError
+
+    chapters = [f"Nội dung {i}." for i in range(1, 16)]
+    client, chat = _topic_client(
+        [_topic_outline()], chapters,
+        "không phải json",
+        '{"short_beats": ["Nội dung 4."]}',
+        '{"short_beats": ["Nội dung 4.", "câu bịa không có trong truyện"]}',
+    )
+
+    with pytest.raises(ScriptGenerationError, match=r"1/3 short_beats"):
+        await generate_script(
+            "ho_hang_viet", "n", "s", client=client, fmt="full", topic=TOPICS["ho_hang_viet"], setting="s"
+        )
+    beats_prompts = [str(c.args[0]) for c in chat.send_message.call_args_list[-3:]]
+    assert "Hãy chọn 3 đoạn" in beats_prompts[0]
+    assert "không phải JSON" in beats_prompts[1] and "ĐÚNG 3 đoạn KHÁC" in beats_prompts[1]
+    assert "ĐÚNG 2 đoạn KHÁC" in beats_prompts[2] and "Nội dung 4." in beats_prompts[2]
 
 
 async def test_chuong_qua_dai_thi_viet_gon_va_nhac_chuong_sau(monkeypatch):

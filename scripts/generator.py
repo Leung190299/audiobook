@@ -21,6 +21,7 @@ from scripts.prompts import (
     chapter_words_range,
     build_outline_prompt,
     build_short_beats_prompt,
+    build_short_beats_retry_prompt,
     build_story_outline_prompt,
     build_topic_outline_prompt,
 )
@@ -317,29 +318,63 @@ async def _ask_prologue(chat) -> str:
     return ""
 
 
+# Số lần hỏi short_beats trước khi bỏ cuộc (08/11): lượt đầu + hai lượt hỏi lại.
+SHORT_BEATS_ATTEMPTS = 3
+
+
 async def _ask_short_beats(chat, beat_plans: list[str], chapters: list[Chapter]) -> list[str]:
-    """Nguyên văn 3 đoạn hài/sảng. Không bắt buộc: hỏng thì trả [] và stage 4/7
-    tự rơi về cách chọn đoạn cũ (theo vị trí trong chương) -- một lượt Gemini
-    phụ không đáng làm mất cả kịch bản 15 chương vừa viết."""
+    """Nguyên văn SHORT_BEAT_COUNT đoạn hài/sảng -- BẮT BUỘC đủ (08/11).
+
+    Tới 08/11 bước này là "phụ": hỏng thì trả [] và stage 7 rơi về trích đoạn rải
+    đều; Gemini trả 2/3 cũng được cho qua, truyện #114 ra thiếu Short. Kênh yêu
+    cầu ép đủ: đoạn nào không dò được trong văn bản thật (Gemini "trích" bằng
+    cách viết lại) thì bỏ, rồi hỏi lại nêu rõ đoạn đã nhận và còn thiếu bao
+    nhiêu, tối đa SHORT_BEATS_ATTEMPTS lượt. Vẫn thiếu -> ScriptGenerationError
+    để stage 1 đổ ngay, thay vì dựng 40 phút ra một truyện thiếu Short."""
     sentences = [
         {"text": t, "start_seconds": float(i), "end_seconds": float(i + 1), "chapter_index": c.index}
         for c in chapters
         for i, t in enumerate(split_sentences(c.text))
     ]
-    try:
-        response = await chat.send_message(build_short_beats_prompt(beat_plans))
-        data = _parse_json_response(response.text)
-        raw = data.get("short_beats") if isinstance(data, dict) else data
-        beats = [" ".join(str(b).split()) for b in (raw or []) if str(b).strip()]
-    except Exception as exc:  # noqa: BLE001 -- cố ý: bước phụ, không được làm hỏng kịch bản
-        print(f"CẢNH BÁO: không lấy được short_beats ({exc}); stage 4/7 dùng cách chọn đoạn cũ.")
-        return []
-    # Chỉ giữ đoạn dò được trong văn bản thật -- Gemini đôi khi "trích" bằng
-    # cách viết lại, khi đó stage 4/7 không tìm ra mốc thời gian.
-    found = [b for b in beats if locate_quote(b, sentences) is not None]
-    if len(found) < len(beats):
-        print(f"CẢNH BÁO: {len(beats) - len(found)} short_beat không khớp nguyên văn, đã bỏ.")
-    return found[:SHORT_BEAT_COUNT]
+    found: list[str] = []
+    problem = ""
+    for attempt in range(1, SHORT_BEATS_ATTEMPTS + 1):
+        prompt = (
+            build_short_beats_prompt(beat_plans)
+            if attempt == 1
+            else build_short_beats_retry_prompt(found, SHORT_BEAT_COUNT - len(found), problem)
+        )
+        try:
+            response = await chat.send_message(prompt)
+        except LLM_ERRORS as exc:
+            raise ScriptGenerationError(f"Mô hình lỗi khi trích short_beats: {exc}") from exc
+        try:
+            data = _parse_json_response(response.text)
+            raw = data.get("short_beats") if isinstance(data, dict) else data
+            beats = [" ".join(str(b).split()) for b in (raw or []) if str(b).strip()]
+        except (ScriptGenerationError, ValueError, AttributeError, TypeError) as exc:
+            # _parse_json_response coi văn bản thường là lời từ chối -> ScriptGenerationError;
+            # ở bước này đó chỉ là một lượt hỏng, hỏi lại.
+            beats = []
+            problem = f"trả lời không phải JSON hợp lệ ({str(exc)[:80]})"
+        else:
+            rejected = 0
+            for b in beats:
+                if b in found or locate_quote(b, sentences) is None:
+                    rejected += 1
+                    continue
+                found.append(b)
+            problem = (
+                f"{rejected} đoạn không khớp nguyên văn với chương đã viết (hoặc trùng đoạn đã nhận), "
+                f"mới có {len(found)}/{SHORT_BEAT_COUNT}"
+            )
+        if len(found) >= SHORT_BEAT_COUNT:
+            return found[:SHORT_BEAT_COUNT]
+        print(f"CẢNH BÁO: short_beats lượt {attempt}/{SHORT_BEATS_ATTEMPTS}: {problem}; hỏi lại.")
+    raise ScriptGenerationError(
+        f"Chỉ lấy được {len(found)}/{SHORT_BEAT_COUNT} short_beats khớp nguyên văn sau "
+        f"{SHORT_BEATS_ATTEMPTS} lượt hỏi -- stage 1 dừng, không dựng truyện thiếu Short."
+    )
 
 
 
