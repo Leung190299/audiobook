@@ -238,15 +238,27 @@ FIRST_MINUTE_RULE = (
 
 def build_prologue_prompt() -> str:
     """Đoạn "Mở đầu" (26/10): hỏi SAU khi truyện đã viết xong trong cùng hội
-    thoại, để chi tiết kể trước khớp đúng cao trào đã viết."""
+    thoại, để chi tiết kể trước khớp đúng cao trào đã viết.
+
+    08/11: Gemini kể luôn KẾT QUẢ cao trào (ai hủy hôn, nợ gì, bị lừa ra sao) dù
+    đã dặn "dừng trước kết quả" -- vì nó chọn khoảnh khắc SAU màn lật. Giờ ép
+    chọn khoảnh khắc trước khi bằng chứng được mở, cấm đích danh mọi chi tiết
+    thuộc cú lật và phản ứng sau đó, và bắt kết bằng câu treo."""
     lo, hi = PROLOGUE_WORDS
     return f"""Truyện đã viết xong. Giờ viết ĐOẠN MỞ ĐẦU đặt TRƯỚC chương 1, để giữ người nghe ngay từ giây đầu.
 
+CHỌN KHOẢNH KHẮC: giây phút nhân vật 'tôi' SẮP mở bằng chứng / SẮP nói ra sự thật ở cao trào --
+tay đã chạm vào tập hồ sơ, miệng đã mở, cả phòng đang nhìn -- nhưng CHƯA AI biết trong đó là gì.
+Đoạn văn KẾT THÚC ĐÚNG Ở ĐÓ.
+
 YÊU CẦU BẮT BUỘC:
 - {lo}-{hi} từ (đếm theo tiếng cách nhau bởi dấu cách), ngôi 'tôi', cùng giọng kể với truyện.
-- Thả người nghe vào giữa KHOẢNH KHẮC GAY CẤN NHẤT của truyện (ngay trước màn lật tẩy ở cao trào):
-  ai đang đối đầu ai, ở đâu, căng tới mức nào -- bằng hành động và thoại, không tóm tắt.
-- DỪNG NGAY TRƯỚC kết quả: KHÔNG tiết lộ ai thắng, bằng chứng là gì, cú lật ra sao.
+- Dựng cảnh bằng hành động và thoại: ai đang đối đầu ai, ở đâu, căng tới mức nào. Không tóm tắt.
+- TUYỆT ĐỐI KHÔNG viết bất cứ điều gì xảy ra SAU khi bằng chứng được mở: không nói ai thắng,
+  ai bỏ đi, ai quỳ, ai khóc, ai hủy hôn, ai bị lộ, số tiền/món nợ/bí mật là gì, cú lật ra sao.
+  Người nghe xong đoạn này phải CHƯA biết kết cục. Nếu một chi tiết chỉ lộ ra ở cú lật, không được nhắc.
+- Thoại trong đoạn chỉ là lời ĐE DỌA, CHẤT VẤN, PHỦ NHẬN trước khi mở bằng chứng -- không phải lời
+  thú nhận hay phán quyết.
 - Câu cuối cùng là câu dẫn quay về đầu truyện, dạng: 'Nhưng để hiểu vì sao <...>, phải kể lại từ <cái ngày/lúc ...>.'
 - Tên người, chi tiết phải KHỚP đúng với truyện vừa viết.
 - CHỈ trả về văn xuôi của đoạn mở đầu, KHÔNG tiêu đề, KHÔNG giải thích."""

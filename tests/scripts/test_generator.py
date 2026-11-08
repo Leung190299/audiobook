@@ -384,7 +384,7 @@ async def test_ban_full_co_chuong_mo_dau_ke_truoc_doan_gay_can():
     assert script.chapters[0].text == prologue
     assert script.chapters[1].text == "Nội dung chương 1."
     last_prompt = fake_chat.send_message.call_args_list[-1].args[0]
-    assert "DỪNG NGAY TRƯỚC" in last_prompt
+    assert "KHÔNG viết bất cứ điều gì xảy ra SAU khi bằng chứng được mở" in last_prompt
 
 
 async def test_mo_dau_hong_thi_bo_qua_khong_lam_hong_truyen(capsys):
