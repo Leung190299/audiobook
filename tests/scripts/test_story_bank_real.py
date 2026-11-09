@@ -18,12 +18,12 @@ def state(tmp_path):
     return tmp_path / "state.json"
 
 
-def test_kho_that_dung_114_truyen_va_topic_khop_registry():
+def test_kho_that_dung_97_truyen_va_topic_khop_registry():
     from scripts.topics import TOPICS
 
     bank = load_bank()
 
-    assert len(bank.stories) == 114
+    assert len(bank.stories) == 97  # 10/11: 47 đã đăng + 50 từ doc "50 ý tưởng"
     assert {s.topic for s in bank.stories} <= set(TOPICS)
 
 
@@ -136,13 +136,13 @@ def test_truyen_hoc_duong_co_luat_cam_rieng_trong_prompt():
     from scripts.prompts import build_story_outline_prompt
     from scripts.story_bank import get_story
 
-    prompt = build_story_outline_prompt(load_bank(), get_story(109), "full")
+    prompt = build_story_outline_prompt(load_bank(), get_story(101), "full")
     assert "TUYỆT ĐỐI KHÔNG: yêu đương" in prompt
-    assert "Minh Anh (tôi)" in prompt  # khối series được chèn
+    assert "Hà (tôi)" in prompt  # khối series Hội Phụ Huynh Lớp 5A được chèn
 
 
 def test_truyen_cu_khong_doi_prompt_vi_chu_de_moi():
     from scripts.prompts import build_story_outline_prompt
     from scripts.story_bank import get_story
 
-    assert "- TUYỆT ĐỐI KHÔNG:" not in build_story_outline_prompt(load_bank(), get_story(1), "full")
+    assert "- TUYỆT ĐỐI KHÔNG:" not in build_story_outline_prompt(load_bank(), get_story(2), "full")

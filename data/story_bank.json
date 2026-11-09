@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-24",
+  "version": "2026-11-10",
   "channel": "Audio Truyện",
   "publish_hour": 20,
   "writing_rules": [
@@ -81,22 +81,6 @@
   },
   "stories": [
     {
-      "id": 1,
-      "topic": "ho_hang_viet",
-      "series": "Nhà Họ Trần",
-      "title": "Tết Nào Cũng Bị Hỏi Lương, Năm Nay Tôi Hỏi Lại Cả Họ",
-      "premise": "Thảo 27 tuổi, kế toán, năm nào về quê ăn Tết cũng bị cả họ tra hỏi lương, người yêu, bao giờ mua nhà. Năm nay cô chuẩn bị sẵn 'bảng hỏi ngược' cho từng người trong mâm cơm mùng Hai.",
-      "twist": "Bác Cả khoe con trai lương 50 triệu; Thảo hỏi nhẹ sao em Tuấn vay cô ba lần chưa trả. Cả mâm im bặt, bà nội cười to nhất.",
-      "hook": "Bác Cả vừa gắp miếng giò, tôi đã mở sổ: 'Bác ơi, năm nay bác lãi bao nhiêu ạ?'",
-      "comment_question": "Tết vừa rồi bạn bị hỏi câu gì nhiều nhất?",
-      "thumb_keywords": [
-        "Hỏi Lại Cả Họ"
-      ],
-      "timing": "Trước Tết (T1/2027)",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
       "id": 2,
       "topic": "ho_hang_viet",
       "series": "Nhà Họ Trần",
@@ -163,22 +147,6 @@
       "publish_date": "2026-10-12"
     },
     {
-      "id": 5,
-      "topic": "ho_hang_viet",
-      "series": "Nhà Họ Trần",
-      "title": "Em Họ Quý Tử Vay Tiền Cưới Vợ, Tôi Đòi Sổ Đỏ Thế Chấp",
-      "premise": "Tuấn, quý tử nhà bác Cả, hỏi vay Thảo 200 triệu cưới vợ vì 'người nhà cần gì giấy tờ'. Thảo mang luôn hợp đồng công chứng tới.",
-      "twist": "Cô dâu tương lai biết chuyện, đứng về phía Thảo, bắt Tuấn đi làm trả nợ trước khi cưới. Bác Cả lần đầu cứng họng trước con dâu.",
-      "hook": "'Chị ơi, người nhà với nhau…' — 'Ừ, người nhà nên chị mới chuẩn bị sẵn công chứng.'",
-      "comment_question": "Cho người thân vay tiền, bạn có làm giấy tờ không?",
-      "thumb_keywords": [
-        "Đòi Sổ Đỏ"
-      ],
-      "timing": "Mùa cưới (T10–T12)",
-      "priority": "B",
-      "publish_date": "2026-10-19"
-    },
-    {
       "id": 6,
       "topic": "ho_hang_viet",
       "series": "Nhà Họ Trần",
@@ -192,22 +160,6 @@
       ],
       "timing": "Quanh năm",
       "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 7,
-      "topic": "ho_hang_viet",
-      "series": "Nhà Họ Trần",
-      "title": "Giỗ Ông, Cả Họ Tranh Nhau Giữ Quỹ Họ",
-      "premise": "Năm nay ai đứng ra lo giỗ ông sẽ được giữ quỹ họ. Ba nhà tranh nhau; Thảo làm kế toán được giao kiểm sổ.",
-      "twist": "Sổ quỹ thiếu 80 triệu, dấu vết dẫn đúng tới người hăng hái nhất. Thảo công khai sổ ngay trên mâm cỗ.",
-      "hook": "Ông mất 10 năm, năm nào giỗ cũng vui, chỉ có sổ quỹ là buồn.",
-      "comment_question": "Nhà bạn có quỹ họ không? Ai giữ?",
-      "thumb_keywords": [
-        "Giữ Quỹ Họ"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
       "publish_date": null
     },
     {
@@ -243,38 +195,6 @@
       "publish_date": null
     },
     {
-      "id": 10,
-      "topic": "ho_hang_viet",
-      "series": "Nhà Họ Trần",
-      "title": "Cả Họ Đòi Ở Nhờ Căn Hộ Mới Mua Của Tôi",
-      "premise": "Thảo vừa mua chung cư trả góp, họ hàng lên thành phố khám bệnh, đi học, đi chơi lần lượt đòi ở nhờ không thời hạn.",
-      "twist": "Thảo ban hành 'nội quy homestay' kèm bảng giá; ai ở lâu nhất tự thu dọn đi trong ba ngày.",
-      "hook": "Chìa khoá nhà mới cầm chưa nóng tay, tin nhắn đầu tiên đã tới: 'Cháu ơi, tuần sau cả nhà bác lên.'",
-      "comment_question": "Họ hàng ở nhờ: bao lâu là quá lâu?",
-      "thumb_keywords": [
-        "Ở Nhờ Căn Hộ"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 11,
-      "topic": "ho_hang_viet",
-      "series": "Nhà Họ Trần",
-      "title": "Thím Hai Mang Mâm Cỗ Sang Biếu, Kèm Luôn Hoá Đơn",
-      "premise": "Tết nào thím Hai cũng mang cỗ sang 'biếu' rồi nhắc khéo tiền chợ. Năm nay Thảo biếu lại đúng giá trị, có hoá đơn.",
-      "twist": "Hai bên đổi quà qua lại leo thang thành cuộc thi nấu cỗ; cuối cùng cả họ được ăn Tết to nhất 10 năm.",
-      "hook": "Thím đặt mâm cỗ xuống, rút tờ giấy từ túi áo: 'Thím ghi sẵn để cháu khỏi phải tính.'",
-      "comment_question": "Nhà bạn Tết có 'biếu qua biếu lại' không?",
-      "thumb_keywords": [
-        "Kèm Luôn Hoá Đơn"
-      ],
-      "timing": "Trước Tết (T1/2027)",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
       "id": 12,
       "topic": "ho_hang_viet",
       "series": "Nhà Họ Trần",
@@ -288,70 +208,6 @@
       ],
       "timing": "Quanh năm",
       "priority": "C",
-      "publish_date": null
-    },
-    {
-      "id": 13,
-      "topic": "ho_hang_viet",
-      "series": "Nhà Họ Trần",
-      "title": "Bác Cả Dạy Tôi Chuyện Lấy Chồng, Tôi Dạy Lại Chuyện Nợ",
-      "premise": "Mỗi lần gặp, bác Cả giảng một tràng về con gái phải lấy chồng trước 30. Thảo quyết định mở 'lớp tài chính gia đình' đáp lễ.",
-      "twist": "Buổi học lật ra khoản nợ tín dụng bác giấu vợ. Bác gái đứng về phía Thảo; bác Cả phải ký cam kết trả nợ.",
-      "hook": "'Con gái 27 tuổi là ế rồi.' — 'Vâng, còn nợ 3 năm là xấu rồi bác ạ.'",
-      "comment_question": "Câu 'khuyên' khó nghe nhất bạn từng nhận là gì?",
-      "thumb_keywords": [
-        "Dạy Lại Chuyện Nợ"
-      ],
-      "timing": "Quanh năm",
-      "priority": "C",
-      "publish_date": null
-    },
-    {
-      "id": 14,
-      "topic": "ho_hang_viet",
-      "series": "Nhà Họ Trần",
-      "title": "Mùng Hai Tết, Tôi Mở Quầy Lì Xì Có Điều Kiện",
-      "premise": "Họ hàng dắt con tới 'chúc Tết' Thảo để nhận lì xì to. Cô mở quầy lì xì: trả lời câu đố hoặc làm một việc tốt.",
-      "twist": "Trẻ con mê trò chơi, bố mẹ chúng tức; hoá ra người chơi say nhất là bác Cả.",
-      "hook": "Tôi dựng tấm bảng trước cửa: 'Lì xì theo năng lực. Không nhận chúc suông.'",
-      "comment_question": "Tết nhà bạn lì xì bao nhiêu là vừa?",
-      "thumb_keywords": [
-        "Lì Xì Có Điều Kiện"
-      ],
-      "timing": "Trước Tết (T1/2027)",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 15,
-      "topic": "ho_hang_viet",
-      "series": "Nhà Họ Trần",
-      "title": "Cả Họ Tưởng Tôi Thất Nghiệp, Thật Ra Tôi Là Sếp Con Họ",
-      "premise": "Thảo làm việc từ xa, suốt ngày ở nhà nên cả họ đồn cô thất nghiệp và thương hại ra mặt.",
-      "twist": "Tuấn đi phỏng vấn và gặp người phỏng vấn cuối cùng chính là Thảo. Bác Cả gửi giỏ quà sang nhà xin lỗi.",
-      "hook": "'Con Thảo ở nhà cả tuần, chắc bị đuổi việc rồi.' Tôi đang họp với 40 người qua Zoom.",
-      "comment_question": "Làm việc ở nhà có bị người nhà hiểu lầm không?",
-      "thumb_keywords": [
-        "Tôi Là Sếp"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 16,
-      "topic": "ho_hang_viet",
-      "series": "Nhà Họ Trần",
-      "title": "Bà Nội Giả Vờ Lẫn, Chia Tài Sản Không Ai Ngờ",
-      "premise": "Bà nội bỗng 'lẫn', gọi nhầm tên con cháu, và tuyên bố sẽ chia đất theo ai chăm bà nhiều nhất.",
-      "twist": "Thảo phát hiện bà giả vờ và thành đồng phạm; người được chia nhiều nhất là cô Út vô tri, người duy nhất không toan tính.",
-      "hook": "Bà nhìn tôi, nháy một mắt, rồi quay sang bác Cả: 'Anh là ai đấy?'",
-      "comment_question": "Nếu là bà, bạn sẽ chia tài sản thế nào?",
-      "thumb_keywords": [
-        "Giả Vờ Lẫn"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
       "publish_date": null
     },
     {
@@ -384,22 +240,6 @@
       ],
       "timing": "Quanh năm",
       "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 19,
-      "topic": "ho_hang_viet",
-      "series": "Nhà Họ Trần",
-      "title": "Người Yêu Ra Mắt Họ Trần, Cả Họ Phỏng Vấn Như Thi Tuyển",
-      "premise": "Thảo dẫn bạn trai về ra mắt; anh phải qua 5 'vòng thi' của 5 người họ hàng.",
-      "twist": "Anh giả vờ nghèo để thử lòng, bị cả họ chê; cuối cùng anh là người giúp bác Cả thoát vụ nợ, cả họ đổi thái độ.",
-      "hook": "'Vòng 1: lương. Vòng 2: nhà. Vòng 3: bố mẹ làm gì. Mời cháu ngồi.'",
-      "comment_question": "Lần đầu ra mắt nhà người yêu, bạn bị hỏi gì?",
-      "thumb_keywords": [
-        "Phỏng Vấn Như Thi Tuyển"
-      ],
-      "timing": "Mùa cưới (T10–T12)",
-      "priority": "A",
       "publish_date": null
     },
     {
@@ -453,22 +293,6 @@
       ]
     },
     {
-      "id": 22,
-      "topic": "ho_hang_viet",
-      "series": "Truyện lẻ",
-      "title": "Nhà Vợ Chê Tôi Làm Thợ Điện, Đến Khi Cả Xóm Mất Điện",
-      "premise": "Người kể là nam, thợ điện, bị nhà vợ chê kém sang so với anh rể làm ngân hàng.",
-      "twist": "Đêm 30 Tết cả xóm mất điện, chỉ anh cứu được; hoá ra anh là chủ công ty điện lạnh 30 thợ.",
-      "hook": "Bố vợ gắp cho anh rể miếng ngon nhất, gắp cho tôi cái xương.",
-      "comment_question": "Con rể làm nghề tay chân có bị coi thường không?",
-      "thumb_keywords": [
-        "Cả Xóm Mất Điện"
-      ],
-      "timing": "Trước Tết (T1/2027)",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
       "id": 23,
       "topic": "ho_hang_viet",
       "series": "Truyện lẻ",
@@ -479,70 +303,6 @@
       "comment_question": "Bạn có người thân thích khoe không?",
       "thumb_keywords": [
         "Hỏi Đúng Một Câu"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 24,
-      "topic": "ho_hang_viet",
-      "series": "Truyện lẻ",
-      "title": "Cậu Đi Xuất Khẩu Lao Động Về, Cả Họ Xếp Hàng Vay Tiền",
-      "premise": "Cậu đi Hàn 8 năm về quê, cả họ tưởng giàu, xếp hàng vay tiền. Cậu giả vờ nghèo để xem ai thật lòng.",
-      "twist": "Người duy nhất tới hỏi thăm sức khoẻ cậu là đứa cháu bị cả họ coi thường; cậu đầu tư cho cháu mở xưởng.",
-      "hook": "Cậu về đến ngõ, hàng xóm chưa kịp chào, họ hàng đã kịp hỏi vay.",
-      "comment_question": "Người thân đi xa về có hay bị hỏi vay tiền không?",
-      "thumb_keywords": [
-        "Xếp Hàng Vay Tiền"
-      ],
-      "timing": "Trước Tết (T1/2027)",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 25,
-      "topic": "ho_hang_viet",
-      "series": "Truyện lẻ",
-      "title": "Mẹ Vợ Tương Lai Đòi Sính Lễ 500 Triệu, Tôi Trả Giá",
-      "premise": "Người kể là nam, dân kinh doanh chợ; mẹ người yêu đòi sính lễ 500 triệu. Anh trả giá như đi chợ, rất lễ phép.",
-      "twist": "Cuộc 'mặc cả' hài hước làm lộ ra mẹ vợ cần tiền trả nợ cho con trai; anh giúp giải quyết, được lòng cả nhà.",
-      "hook": "'500 triệu, cháu thấy sao?' — 'Dạ, cô bớt cho cháu chút tiền ship được không?'",
-      "comment_question": "Sính lễ bao nhiêu là hợp lý?",
-      "thumb_keywords": [
-        "Sính Lễ 500 Triệu"
-      ],
-      "timing": "Mùa cưới (T10–T12)",
-      "priority": "A",
-      "publish_date": "2026-10-03"
-    },
-    {
-      "id": 26,
-      "topic": "ho_hang_viet",
-      "series": "Truyện lẻ",
-      "title": "Chị Họ Làm Influencer, Bắt Cả Nhà Diễn Hạnh Phúc",
-      "premise": "Chị họ có 1 triệu follow, về quê ăn Tết bắt cả nhà quay clip 'gia đình hạnh phúc' theo kịch bản.",
-      "twist": "Hậu trường lộ ra chị đang nợ nần và kiệt sức; cả nhà thật sự đứng ra giúp, clip thật lại viral nhất.",
-      "hook": "Cảnh 12, lần quay thứ 7: 'Bà ơi, bà cười tự nhiên hơn chút ạ.'",
-      "comment_question": "Bạn có thấy áp lực sống ảo trên mạng không?",
-      "thumb_keywords": [
-        "Diễn Hạnh Phúc"
-      ],
-      "timing": "Trước Tết (T1/2027)",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 27,
-      "topic": "ho_hang_viet",
-      "series": "Truyện lẻ",
-      "title": "Em Chồng Ăn Bám Ba Năm, Tôi Mở Lớp Dạy Kiếm Tiền",
-      "premise": "Em chồng 28 tuổi ở nhà chơi game, xin tiền chị dâu. Chị dâu mở 'lớp kiếm tiền tại gia' bắt buộc.",
-      "twist": "Em chồng dần kiếm được đồng lương đầu tiên và thành người bảo vệ chị dâu trước mẹ chồng.",
-      "hook": "'Chị ơi cho em 500 nghìn.' — 'Được, bài tập hôm nay đây.'",
-      "comment_question": "Nhà bạn có người lớn rồi vẫn ăn bám không?",
-      "thumb_keywords": [
-        "Mở Lớp Dạy Kiếm Tiền"
       ],
       "timing": "Quanh năm",
       "priority": "B",
@@ -579,22 +339,6 @@
       "timing": "Quanh năm",
       "priority": "A",
       "publish_date": "2026-10-07"
-    },
-    {
-      "id": 30,
-      "topic": "ho_hang_viet",
-      "series": "Truyện lẻ",
-      "title": "Họ Hàng Quê Lên Phố Dạy Hội Chị Em Chung Cư Cách Sống",
-      "premise": "Bà ngoại quê và dì lên ở chung cư, bị hội hàng xóm sang chảnh coi thường.",
-      "twist": "Bà ngoại dùng kinh nghiệm quê cứu cả toà nhà trong một đêm mất nước; hội chị em xin học làm tương, muối dưa.",
-      "hook": "Tin nhắn nhóm cư dân: 'Ai cho nhà 12B phơi cá khô ngoài ban công vậy?'",
-      "comment_question": "Ở chung cư bạn có hay va chạm với hàng xóm?",
-      "thumb_keywords": [
-        "Hội Chị Em Chung Cư"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
     },
     {
       "id": 31,
@@ -661,70 +405,6 @@
       "publish_date": "2026-10-21"
     },
     {
-      "id": 35,
-      "topic": "ho_hang_viet",
-      "series": "Truyện lẻ",
-      "title": "Họ Hàng Đồn Tôi Lấy Chồng Già Giàu, Tôi Mời Cả Họ Đến",
-      "premise": "Cô lấy chồng hơn 12 tuổi, bị đồn đào mỏ. Cô mời cả họ đến nhà ăn tân gia.",
-      "twist": "Chồng là thầy giáo lương bình thường, người giàu là cô; họ hàng quay ngoắt 180 độ, cô cười cho qua.",
-      "hook": "'Lấy ông già thế chắc nhiều tiền lắm.' Chồng tôi lương 9 triệu.",
-      "comment_question": "Chênh lệch tuổi bao nhiêu thì bạn thấy ổn?",
-      "thumb_keywords": [
-        "Lấy Chồng Già Giàu"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 36,
-      "topic": "ho_hang_viet",
-      "series": "Truyện lẻ",
-      "title": "Chia Tiền Đền Bù Giải Tỏa, Anh Em Suýt Từ Mặt",
-      "premise": "Nhà bố mẹ bị giải tỏa, 4 anh em tranh nhau tiền đền bù. Người em út (người kể) đứng giữa.",
-      "twist": "Bố mẹ đã chuẩn bị di chúc và 'bài kiểm tra' từ trước; ai tham nhất nhận phần nhỏ nhất, cả nhà cười ra nước mắt.",
-      "hook": "Tờ quyết định đền bù về, 4 anh em cùng lúc gọi cho mẹ.",
-      "comment_question": "Tiền bạc có làm anh em nhà bạn xa cách không?",
-      "thumb_keywords": [
-        "Suýt Từ Mặt"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 37,
-      "topic": "ho_hang_viet",
-      "series": "Truyện lẻ",
-      "title": "Năm Nào Cũng Về Quê Nội Ăn Tết, Năm Nay Tôi Rủ Chồng Trốn",
-      "premise": "Tết nào cũng về nội làm dâu 5 ngày; năm nay cô đề xuất về ngoại, cả nhà chồng phản đối.",
-      "twist": "Chồng đứng về phía vợ, còn mẹ chồng lại xách vali đi theo về ngoại vì 'ở nhà mệt quá'.",
-      "hook": "Năm thứ 7 làm dâu, tôi lần đầu nói câu: 'Tết này nhà mình về ngoại.'",
-      "comment_question": "Tết nội hay Tết ngoại: nhà bạn chia thế nào?",
-      "thumb_keywords": [
-        "Rủ Chồng Trốn"
-      ],
-      "timing": "Trước Tết (T1/2027)",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 38,
-      "topic": "ho_hang_viet",
-      "series": "Truyện lẻ",
-      "title": "Đám Hỏi Em Gái, Nhà Trai Mang Mâm Quả Đi Thuê",
-      "premise": "Nhà trai sĩ diện, mâm quả, xe, cả người bưng lễ đều đi thuê. Chị gái cô dâu (người kể) phát hiện.",
-      "twist": "Thay vì làm lớn, cô giúp nhà trai giữ thể diện và bắt chú rể hứa sống thật; đám cưới sau đó giản dị mà vui.",
-      "hook": "Người bưng mâm quả thứ ba nháy mắt với tôi. Anh ta là bạn cùng phòng trọ của tôi.",
-      "comment_question": "Đám hỏi cần làm to hay làm vừa?",
-      "thumb_keywords": [
-        "Mâm Quả Đi Thuê"
-      ],
-      "timing": "Mùa cưới (T10–T12)",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
       "id": 39,
       "topic": "ho_hang_viet",
       "series": "Truyện lẻ",
@@ -739,22 +419,6 @@
       "timing": "Quanh năm",
       "priority": "A",
       "publish_date": "2026-10-24"
-    },
-    {
-      "id": 40,
-      "topic": "ho_hang_viet",
-      "series": "Truyện lẻ",
-      "title": "Họ Hàng Nhờ Xin Việc Cho Con, Tôi Mở Luôn Lớp Phỏng Vấn",
-      "premise": "Chị làm nhân sự, bị cả họ nhờ 'xin việc' cho con cháu. Chị mở lớp luyện phỏng vấn miễn phí thay vì đi cửa sau.",
-      "twist": "Đứa cháu được bố mẹ chiều nhất trượt thẳng; đứa cháu ít được để ý nhất đỗ vào công ty lớn nhờ tự luyện.",
-      "hook": "Tin nhắn Zalo thứ 9 tuần này: 'Cháu làm nhân sự, xin cho em nó một chân nhé.'",
-      "comment_question": "Xin việc qua người quen: bạn nghĩ sao?",
-      "thumb_keywords": [
-        "Mở Luôn Lớp Phỏng Vấn"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
     },
     {
       "id": 41,
@@ -839,22 +503,6 @@
       "publish_date": "2026-10-20"
     },
     {
-      "id": 45,
-      "topic": "nghe_la_hong_bien",
-      "series": "Khu Trọ Cô Ba",
-      "title": "Có Kẻ Trộm Quần Áo Trong Khu Trọ, Tôi Lập Đội Điều Tra",
-      "premise": "Quần áo phơi trong khu trọ liên tục mất. Cô Ba lập 'đội điều tra' gồm những khách trọ lắm chuyện nhất.",
-      "twist": "Thủ phạm bất ngờ là con mèo của bà cụ phòng 1, và đống quần áo được tìm thấy trên mái nhà hàng xóm.",
-      "hook": "Tuần này mất 4 cái áo, 2 cái quần, và 1 chiếc tất đơn độc.",
-      "comment_question": "Bạn từng mất đồ ở chỗ trọ chưa?",
-      "thumb_keywords": [
-        "Lập Đội Điều Tra"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
       "id": 46,
       "topic": "nghe_la_hong_bien",
       "series": "Khu Trọ Cô Ba",
@@ -867,38 +515,6 @@
         "Diễn Giàu Hộ"
       ],
       "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 47,
-      "topic": "nghe_la_hong_bien",
-      "series": "Khu Trọ Cô Ba",
-      "title": "Khách Trọ Lạ Mặt Trả Tiền Trước Một Năm",
-      "premise": "Người đàn ông ít nói thuê phòng 10, trả trước một năm tiền mặt. Cả dãy trọ đoán già đoán non.",
-      "twist": "Anh là con trai của bà chủ trọ cũ, quay về để tìm lại bức thư mẹ giấu trong tường.",
-      "hook": "Tôi đếm tiền ba lần. Đúng 12 tháng. Anh ta không hỏi giá wifi.",
-      "comment_question": "Người lạ ở cạnh nhà, bạn có tò mò không?",
-      "thumb_keywords": [
-        "Trả Tiền Trước Một Năm"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 48,
-      "topic": "nghe_la_hong_bien",
-      "series": "Khu Trọ Cô Ba",
-      "title": "Tết Này, Cả Khu Trọ Không Ai Về Quê",
-      "premise": "Tết năm nay vì nhiều lý do, cả 10 phòng đều ở lại Sài Gòn. Cô Ba tổ chức Tết chung trong sân.",
-      "twist": "Mỗi người góp một món quê nhà; bữa cơm 30 Tết tiết lộ lý do thật của từng người và gắn kết họ.",
-      "hook": "30 Tết, 10 phòng sáng đèn, 10 người không ai muốn nói vì sao mình ở lại.",
-      "comment_question": "Bạn từng ăn Tết xa nhà chưa?",
-      "thumb_keywords": [
-        "Không Ai Về Quê"
-      ],
-      "timing": "Trước Tết (T1/2027)",
       "priority": "A",
       "publish_date": null
     },
@@ -967,22 +583,6 @@
       "publish_date": null
     },
     {
-      "id": 53,
-      "topic": "nghe_la_hong_bien",
-      "series": "Truyện lẻ",
-      "title": "Nhân Viên Cầm Đồ Ca Đêm, Mỗi Món Đồ Một Câu Chuyện",
-      "premise": "Người kể là nam, làm tiệm cầm đồ ca đêm; mỗi món đồ mang theo một hoàn cảnh.",
-      "twist": "Chiếc nhẫn cưới một cụ bà mang cầm để mua thuốc cho chồng; anh bí mật giữ lại và giúp bà chuộc về.",
-      "hook": "Món đồ thứ ba đêm nay là một chiếc nhẫn cưới đã mòn vành.",
-      "comment_question": "Bạn có món đồ nào không bao giờ bán?",
-      "thumb_keywords": [
-        "Mỗi Món Đồ Một Câu Chuyện"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
       "id": 54,
       "topic": "nghe_la_hong_bien",
       "series": "Truyện lẻ",
@@ -996,22 +596,6 @@
       ],
       "timing": "Quanh năm",
       "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 55,
-      "topic": "nghe_la_hong_bien",
-      "series": "Truyện lẻ",
-      "title": "Dịch Vụ Dọn Nhà Thuê, Tôi Dọn Luôn Người Yêu Cũ Của Khách",
-      "premise": "Cô làm dịch vụ dọn nhà; khách thuê dọn nhà sau chia tay và nhờ 'dọn luôn' người yêu cũ đang ăn vạ không đi.",
-      "twist": "Cô dùng chiêu trò hài hước để người yêu cũ tự ra về; khách tặng cô hợp đồng dọn văn phòng cả năm.",
-      "hook": "Hợp đồng ghi: dọn 3 phòng, 1 bếp, và 1 người yêu cũ.",
-      "comment_question": "Chia tay xong bạn có giữ đồ của người cũ không?",
-      "thumb_keywords": [
-        "Dọn Luôn Người Yêu Cũ"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
       "publish_date": null
     },
     {
@@ -1031,38 +615,6 @@
       "publish_date": null
     },
     {
-      "id": 57,
-      "topic": "nghe_la_hong_bien",
-      "series": "Truyện lẻ",
-      "title": "Tôi Sửa Điện Thoại, Khách Tự Khai Hết Bí Mật",
-      "premise": "Cô chủ tiệm sửa điện thoại không bao giờ xem máy khách, nhưng khách cứ ngồi chờ là tự kể hết.",
-      "twist": "Cô vô tình nối lại được một gia đình: bố con giận nhau 5 năm cùng mang máy tới sửa một ngày.",
-      "hook": "'Chị ơi, sửa được thì sửa, nhưng chị đừng mở ảnh nhé.' Tôi còn chưa hỏi mật khẩu.",
-      "comment_question": "Điện thoại của bạn có ai được biết mật khẩu không?",
-      "thumb_keywords": [
-        "Khách Tự Khai"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 58,
-      "topic": "nghe_la_hong_bien",
-      "series": "Truyện lẻ",
-      "title": "Làm Tài Xế Riêng Cho Sếp Tổng, Tôi Nghe Hết Chuyện Công Ty",
-      "premise": "Người kể là nam, tài xế riêng của nữ tổng giám đốc; ghế lái là nơi nghe được mọi cuộc gọi.",
-      "twist": "Anh phát hiện phó giám đốc định chiếm công ty và giúp sếp lật ngược tình thế bằng một chi tiết lộ trình.",
-      "hook": "Sếp nói với tôi: 'Anh lái xe, còn tai thì để ở nhà.'",
-      "comment_question": "Bạn có từng biết bí mật mà không được nói ra?",
-      "thumb_keywords": [
-        "Tài Xế Riêng"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
       "id": 59,
       "topic": "nghe_la_hong_bien",
       "series": "Truyện lẻ",
@@ -1073,22 +625,6 @@
       "comment_question": "Khu bạn ở có 'trưởng phố không chính thức' nào không?",
       "thumb_keywords": [
         "Nhờ Phân Xử"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 60,
-      "topic": "nghe_la_hong_bien",
-      "series": "Truyện lẻ",
-      "title": "Tôi Làm Bảo Vệ Chung Cư, Cư Dân Nào Cũng Muốn Mua Chuộc",
-      "premise": "Người kể là nam, bảo vệ chung cư cao cấp; cư dân thi nhau 'nhờ vả' anh giấu chuyện.",
-      "twist": "Anh từ chối mọi phong bì và phát hiện ban quản lý ăn chặn phí; cư dân bầu anh vào ban đại diện.",
-      "hook": "Tháng đầu làm bảo vệ, tôi nhận 7 lời nhờ và 3 cái phong bì.",
-      "comment_question": "Ở chung cư, bạn có thân với bảo vệ không?",
-      "thumb_keywords": [
-        "Muốn Mua Chuộc"
       ],
       "timing": "Quanh năm",
       "priority": "A",
@@ -1111,134 +647,6 @@
       "publish_date": null
     },
     {
-      "id": 62,
-      "topic": "nghe_la_hong_bien",
-      "series": "Truyện lẻ",
-      "title": "Tôi Làm Nghề Xếp Hàng Thuê, Nghe Hết Chuyện Thiên Hạ",
-      "premise": "Cô làm dịch vụ xếp hàng thuê: bệnh viện, làm giấy tờ, mua vé concert.",
-      "twist": "Một lần xếp hàng khám bệnh thuê, cô phát hiện đường dây phe vé bệnh viện và giúp tố cáo.",
-      "hook": "Nghề của tôi: đứng chờ. Lương: theo giờ. Phụ cấp: chuyện thiên hạ.",
-      "comment_question": "Bạn từng phải xếp hàng lâu nhất là bao lâu?",
-      "thumb_keywords": [
-        "Xếp Hàng Thuê"
-      ],
-      "timing": "Quanh năm",
-      "priority": "C",
-      "publish_date": null
-    },
-    {
-      "id": 63,
-      "topic": "nghe_la_hong_bien",
-      "series": "Truyện lẻ",
-      "title": "Thợ Cắt Tóc Vỉa Hè Và Hội Các Ông Bàn Chuyện Thế Giới",
-      "premise": "Ông thợ cắt tóc vỉa hè 60 tuổi và hội khách quen toàn các ông về hưu bàn chuyện thế giới mỗi sáng.",
-      "twist": "Hội các ông hợp sức giúp một cậu thanh niên bị lừa tiền; ông thợ lộ quá khứ từng là cảnh sát.",
-      "hook": "Một cái ghế, một cái gương, và năm ông già bàn chuyện Liên Hợp Quốc.",
-      "comment_question": "Bố/ông bạn có hội bạn 'bàn chuyện thế giới' không?",
-      "thumb_keywords": [
-        "Thợ Cắt Tóc Vỉa Hè"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 64,
-      "topic": "nghe_la_hong_bien",
-      "series": "Truyện lẻ",
-      "title": "Tôi Làm Tổng Đài Viên, Khách Gọi Toàn Chuyện Không Tưởng",
-      "premise": "Cô tổng đài viên chăm sóc khách hàng nhận những cuộc gọi dở khóc dở cười.",
-      "twist": "Một cụ ông gọi mỗi ngày chỉ để có người nói chuyện; cô tìm ra con cháu cụ và nối lại gia đình.",
-      "hook": "Cuộc gọi thứ 83 trong ngày: 'Cháu ơi, hôm nay trời có mưa không?'",
-      "comment_question": "Bạn gọi tổng đài gặp chuyện gì buồn cười nhất?",
-      "thumb_keywords": [
-        "Tổng Đài Viên"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 65,
-      "topic": "nghe_la_hong_bien",
-      "series": "Truyện lẻ",
-      "title": "Tôi Làm Kế Toán Thuê Cho Chợ, Bóc Sổ Nợ Cả Chợ",
-      "premise": "Cô kế toán nhận làm sổ sách cho các tiểu thương trong chợ; mỗi quầy một kiểu nợ nần.",
-      "twist": "Cô phát hiện ban quản lý chợ thu phí sai, giúp cả chợ đòi lại tiền.",
-      "hook": "Quầy cá nợ quầy rau, quầy rau nợ quầy thịt, quầy thịt nợ… tôi.",
-      "comment_question": "Bạn có hay mua chịu ở chợ không?",
-      "thumb_keywords": [
-        "Bóc Sổ Nợ Cả Chợ"
-      ],
-      "timing": "Quanh năm",
-      "priority": "C",
-      "publish_date": null
-    },
-    {
-      "id": 66,
-      "topic": "nghe_la_hong_bien",
-      "series": "Truyện lẻ",
-      "title": "Mở Tiệm Trà Sữa Cạnh Đại Học, Tôi Thành Chuyên Gia Tình Yêu",
-      "premise": "Cô chủ tiệm trà sữa cạnh trường đại học bị sinh viên coi là 'chuyên gia tình yêu'.",
-      "twist": "Chính cô, người khuyên ai cũng trúng, lại ế; anh shipper quen giao nguyên liệu mới là chuyện tình của cô.",
-      "hook": "Order hôm nay: 1 trà sữa trân châu, ít đá, và 1 lời khuyên chia tay.",
-      "comment_question": "Lời khuyên tình yêu hay nhất bạn từng nghe?",
-      "thumb_keywords": [
-        "Chuyên Gia Tình Yêu"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 67,
-      "topic": "nghe_la_hong_bien",
-      "series": "Truyện lẻ",
-      "title": "Làm Người Mẫu Ảnh Cưới Thuê, Tôi Suýt Thành Cô Dâu Thật",
-      "premise": "Cô làm mẫu ảnh cưới thuê cho studio; một lần chụp mẫu với anh thợ ảnh bị khách tưởng là vợ chồng.",
-      "twist": "Tin đồn lan tới hai gia đình; họ diễn cho qua chuyện rồi dần thành thật.",
-      "hook": "Chụp 200 tấm ảnh cưới, tôi chưa từng có người yêu.",
-      "comment_question": "Bạn thích chụp ảnh cưới kiểu gì?",
-      "thumb_keywords": [
-        "Suýt Thành Cô Dâu Thật"
-      ],
-      "timing": "Mùa cưới (T10–T12)",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 68,
-      "topic": "nghe_la_hong_bien",
-      "series": "Truyện lẻ",
-      "title": "Tôi Trông Xe Bệnh Viện, Thấy Đủ Kiểu Người Nhà",
-      "premise": "Người kể là nam, trông xe ở bệnh viện tỉnh; nhìn người ra vào mà biết cả chuyện đời.",
-      "twist": "Anh phát hiện đứa con 'hiếu thảo' nhất đang lén bán nhà của bố mẹ nằm viện và báo cho người em.",
-      "hook": "Người vào thăm hỏi nhiều nhất không phải người ở lại lâu nhất.",
-      "comment_question": "Bạn thấy điều gì ở bệnh viện khiến bạn nhớ mãi?",
-      "thumb_keywords": [
-        "Trông Xe Bệnh Viện"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 69,
-      "topic": "nghe_la_hong_bien",
-      "series": "Truyện lẻ",
-      "title": "Bán Vé Số Dạo, Tôi Phát Hiện Tờ Vé Trúng Bị Tráo",
-      "premise": "Cô bán vé số dạo nhớ từng khách quen; một bà cụ trúng số nhưng tờ vé bị người nhà tráo.",
-      "twist": "Nhờ trí nhớ về dãy số đã bán, cô giúp bà cụ lấy lại tiền trúng; kẻ tráo vé bị cả xóm tẩy chay.",
-      "hook": "Tôi bán tờ vé số đó cho bà Sáu lúc 3 giờ chiều. Số đuôi 27. Tôi nhớ rõ.",
-      "comment_question": "Bạn có hay mua vé số không? Trúng lần nào chưa?",
-      "thumb_keywords": [
-        "Vé Trúng Bị Tráo"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
       "id": 70,
       "topic": "nghe_la_hong_bien",
       "series": "Truyện lẻ",
@@ -1253,22 +661,6 @@
       "timing": "Trước 20/10",
       "priority": "A",
       "publish_date": "2026-10-16"
-    },
-    {
-      "id": 71,
-      "topic": "bo_me_trong_sinh",
-      "series": "Truyện lẻ",
-      "title": "Trọng Sinh Năm 60 Tuổi, Tôi Không Chia Nhà Cho Con Nữa",
-      "premise": "Kiếp trước bà Hạnh chia nhà cho con trai rồi bị đưa vào viện dưỡng lão. Bà mở mắt, thấy mình đang ngồi trước tờ giấy sang tên.",
-      "twist": "Bà giữ nhà, sống cho mình; con dâu bị coi là 'ác' lại là người duy nhất thật lòng chăm bà.",
-      "hook": "Cây bút đã chạm mặt giấy. Tôi nhớ ra mình đã chết trong viện dưỡng lão như thế nào.",
-      "comment_question": "Bố mẹ có nên chia tài sản cho con khi còn sống?",
-      "thumb_keywords": [
-        "Không Chia Nhà"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": "2026-10-01"
     },
     {
       "id": 72,
@@ -1335,118 +727,6 @@
       "publish_date": null
     },
     {
-      "id": 76,
-      "topic": "bo_me_trong_sinh",
-      "series": "Truyện lẻ",
-      "title": "Ông Già Trọng Sinh Mở Quán Cà Phê, Con Trai Hối Hận",
-      "premise": "Ông 65 tuổi, kiếp trước bị con trai coi là gánh nặng; sống lại, ông dùng lương hưu mở quán cà phê sách.",
-      "twist": "Quán thành điểm hẹn của cả khu; con trai làm ăn thất bại phải về xin làm phục vụ cho bố.",
-      "hook": "Kiếp trước con tôi bảo: 'Bố già rồi, ngồi yên cho con nhờ.' Kiếp này tôi không ngồi yên.",
-      "comment_question": "Người lớn tuổi có nên khởi nghiệp không?",
-      "thumb_keywords": [
-        "Mở Quán Cà Phê"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 77,
-      "topic": "bo_me_trong_sinh",
-      "series": "Truyện lẻ",
-      "title": "Trọng Sinh Về Tuổi 55, Tôi Ly Hôn Ông Chồng Gia Trưởng",
-      "premise": "Kiếp trước bà nhịn ông chồng gia trưởng cả đời. Sống lại năm 55 tuổi, bà nộp đơn ly hôn.",
-      "twist": "Các con ban đầu phản đối rồi đứng về phía mẹ; ông chồng lần đầu phải tự nấu cơm và thay đổi.",
-      "hook": "Ba mươi năm tôi rót trà cho ông. Sáng nay, tôi rót cho mình.",
-      "comment_question": "Ly hôn tuổi xế chiều: bạn ủng hộ không?",
-      "thumb_keywords": [
-        "Ly Hôn Ông Chồng"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 78,
-      "topic": "bo_me_trong_sinh",
-      "series": "Truyện lẻ",
-      "title": "Kiếp Trước Bán Đất Cho Con Làm Ăn, Kiếp Này Tôi Tự Làm",
-      "premise": "Bà bán đất cho con trai làm ăn, con thua lỗ trắng tay. Sống lại, bà giữ đất và tự làm vườn trái cây.",
-      "twist": "Vườn cây thành nguồn thu lớn; bà dạy con trai làm ăn từ đầu thay vì đưa tiền.",
-      "hook": "Kiếp này, sổ đỏ tôi cất trong nồi cơm điện.",
-      "comment_question": "Bố mẹ có nên đưa vốn cho con làm ăn?",
-      "thumb_keywords": [
-        "Tôi Tự Làm"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 79,
-      "topic": "bo_me_trong_sinh",
-      "series": "Truyện lẻ",
-      "title": "Trọng Sinh Ngày Con Rể Đòi Mượn Sổ Đỏ",
-      "premise": "Ông bà ngoại trọng sinh đúng hôm con rể đến mượn sổ đỏ thế chấp; kiếp trước nhà mất trắng.",
-      "twist": "Hai ông bà diễn già lẩm cẩm để câu giờ, lật tẩy con rể vay nặng lãi và giúp con gái thoát ra.",
-      "hook": "Con rể đặt giỏ cam lên bàn. Kiếp trước, giỏ cam đó giá bằng một căn nhà.",
-      "comment_question": "Có nên cho con cái mượn sổ đỏ?",
-      "thumb_keywords": [
-        "Mượn Sổ Đỏ"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 80,
-      "topic": "bo_me_trong_sinh",
-      "series": "Truyện lẻ",
-      "title": "Bà Nội Trọng Sinh, Lần Này Không Để Cháu Gái Chịu Thiệt",
-      "premise": "Kiếp trước cháu gái bị ép nghỉ học đi làm nuôi em trai. Bà nội sống lại, đứng ra bảo vệ cháu.",
-      "twist": "Bà dùng uy của 'trưởng họ' đổi cả nếp nhà; cháu gái đỗ đại học, cả họ nể bà.",
-      "hook": "Kiếp này tôi sống lại không phải vì tôi. Vì con bé ấy.",
-      "comment_question": "Ông bà bạn có ai 'đứng về phía' bạn không?",
-      "thumb_keywords": [
-        "Không Để Cháu Gái Chịu Thiệt"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 81,
-      "topic": "bo_me_trong_sinh",
-      "series": "Truyện lẻ",
-      "title": "Kiếp Trước Hầu Cả Nhà Chồng, Kiếp Này Tôi Nghỉ Hưu Sớm",
-      "premise": "Bà 58 tuổi, cả đời làm dâu hầu hạ. Sống lại, bà tuyên bố 'nghỉ hưu làm dâu'.",
-      "twist": "Cả nhà chồng loạn lên trong một tuần; cuối cùng ai cũng biết tự làm, và bà được sống cho mình.",
-      "hook": "Sáng mùng Một, tôi không dậy nấu cỗ. Tôi dậy đi tập dưỡng sinh.",
-      "comment_question": "Mẹ bạn có được 'nghỉ hưu' khỏi việc nhà chưa?",
-      "thumb_keywords": [
-        "Nghỉ Hưu Sớm"
-      ],
-      "timing": "Trước Tết (T1/2027)",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 82,
-      "topic": "bo_me_trong_sinh",
-      "series": "Truyện lẻ",
-      "title": "Trọng Sinh Làm Bố, Tôi Dạy Con Trai Biết Thương Vợ",
-      "premise": "Kiếp trước ông dạy con trai gia trưởng như mình, con bị vợ bỏ. Sống lại, ông dạy lại từ đầu.",
-      "twist": "Ông làm gương bằng cách thay đổi chính mình với vợ; con trai học theo, cả nhà hạnh phúc.",
-      "hook": "Tôi tưởng mình dạy con làm đàn ông. Thật ra tôi dạy nó cô đơn.",
-      "comment_question": "Bố bạn dạy bạn điều gì về hôn nhân?",
-      "thumb_keywords": [
-        "Dạy Con Trai"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
       "id": 83,
       "topic": "bo_me_trong_sinh",
       "series": "Truyện lẻ",
@@ -1460,22 +740,6 @@
       ],
       "timing": "Quanh năm",
       "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 84,
-      "topic": "bo_me_trong_sinh",
-      "series": "Truyện lẻ",
-      "title": "Trọng Sinh Về Năm 1998, Tôi Không Lấy Ông Chồng Cờ Bạc",
-      "premise": "Bà sống lại đúng ngày dạm ngõ với người chồng cờ bạc kiếp trước.",
-      "twist": "Bà từ hôn, tự lập nghiệp; ba mươi năm sau gặp lại người chồng cũ đang nợ nần.",
-      "hook": "Mâm trầu cau đã đặt lên bàn. Tôi đứng dậy.",
-      "comment_question": "Nếu được chọn lại, bạn có thay đổi quyết định lớn nào?",
-      "thumb_keywords": [
-        "Năm 1998"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
       "publish_date": null
     },
     {
@@ -1511,70 +775,6 @@
       "publish_date": null
     },
     {
-      "id": 87,
-      "topic": "bo_me_trong_sinh",
-      "series": "Truyện lẻ",
-      "title": "Trọng Sinh Ngày Con Rủ Đầu Tư Tiền Ảo, Tôi Nói Không",
-      "premise": "Kiếp trước ông mất hết tiền hưu vì nghe con đầu tư tiền ảo. Sống lại, ông dùng hiểu biết tương lai để cứu cả nhà.",
-      "twist": "Ông giả vờ đồng ý, gài để con tự nhận ra đó là lừa đảo trước khi quá muộn.",
-      "hook": "'Bố ơi, lãi gấp đôi trong ba tháng.' Kiếp trước tôi đã tin câu này.",
-      "comment_question": "Người lớn tuổi nhà bạn có từng bị lừa đầu tư?",
-      "thumb_keywords": [
-        "Đầu Tư Tiền Ảo"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 88,
-      "topic": "bo_me_trong_sinh",
-      "series": "Truyện lẻ",
-      "title": "Ông Nội Trọng Sinh, Dạy Đám Cháu Hư Cách Kiếm Tiền",
-      "premise": "Ông nội sống lại, thấy đám cháu nội sau này phá hết gia sản. Ông mở 'trường làm người' cuối tuần.",
-      "twist": "Bằng cách hài hước và nghiêm khắc, ông biến đám cháu ăn chơi thành người biết làm ăn.",
-      "hook": "Kiếp trước, căn nhà tổ bị bán vì một ván bài của thằng cháu đích tôn.",
-      "comment_question": "Ông bà bạn dạy bạn bài học tiền bạc nào?",
-      "thumb_keywords": [
-        "Dạy Đám Cháu Hư"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 89,
-      "topic": "bo_me_trong_sinh",
-      "series": "Truyện lẻ",
-      "title": "Trọng Sinh Trước Tiệc Mừng Thọ 70, Tôi Hủy Tiệc",
-      "premise": "Con cái tổ chức mừng thọ linh đình chỉ để khoe. Bà sống lại, hủy tiệc, dùng tiền làm điều bà muốn.",
-      "twist": "Bà xây cầu cho xóm và đi thăm bạn cũ; người con giả tạo lộ mặt, đứa cháu thật lòng được bà thương.",
-      "hook": "Kiếp trước, trong tiệc mừng thọ, không ai hỏi tôi có mệt không.",
-      "comment_question": "Tiệc mừng thọ bố mẹ: làm to hay làm ấm cúng?",
-      "thumb_keywords": [
-        "Hủy Tiệc"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 90,
-      "topic": "bo_me_trong_sinh",
-      "series": "Truyện lẻ",
-      "title": "Kiếp Trước Nhường Hết Cho Em, Kiếp Này Chị Cả Sống Cho Mình",
-      "premise": "Chị cả 52 tuổi, cả đời nhường nhịn các em. Sống lại, chị từ chối làm 'ngân hàng' của cả nhà.",
-      "twist": "Các em lần đầu tự lo; một cô em nhận ra chị đã hy sinh thế nào và đứng về phía chị.",
-      "hook": "Tin nhắn thứ 5 trong tuần: 'Chị ơi, em xoay giúp 20 triệu.' Tôi tắt máy.",
-      "comment_question": "Làm con cả có thiệt thòi không?",
-      "thumb_keywords": [
-        "Chị Cả Sống Cho Mình"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
       "id": 91,
       "topic": "bo_me_trong_sinh",
       "series": "Truyện lẻ",
@@ -1587,22 +787,6 @@
         "Livestream Bán Hàng"
       ],
       "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 92,
-      "topic": "bo_me_trong_sinh",
-      "series": "Mẹ Chồng Trọng Sinh",
-      "title": "Trọng Sinh Về Tết Năm Ấy, Tôi Không Để Con Dâu Khóc",
-      "premise": "Mẹ chồng trọng sinh về cái Tết con dâu khóc trong bếp, cái Tết khiến hai mẹ con xa nhau 20 năm.",
-      "twist": "Bà đổi hết: chia việc cho con trai, đưa con dâu về ngoại sớm; con dâu từ sợ thành thương bà.",
-      "hook": "Kiếp trước, 30 Tết, tôi nghe tiếng con dâu khóc trong bếp mà giả vờ không biết.",
-      "comment_question": "Tết ở nhà chồng, bạn có từng khóc không?",
-      "thumb_keywords": [
-        "Không Để Con Dâu Khóc"
-      ],
-      "timing": "Trước Tết (T1/2027)",
       "priority": "A",
       "publish_date": null
     },
@@ -1671,70 +855,6 @@
       "publish_date": "2026-10-25"
     },
     {
-      "id": 97,
-      "topic": "bo_me_trong_sinh",
-      "series": "Mẹ Chồng Trọng Sinh",
-      "title": "Mẹ Chồng Trọng Sinh Cùng Con Dâu Mở Quán Ăn",
-      "premise": "Mẹ chồng giỏi nấu ăn, con dâu giỏi kinh doanh; kiếp trước họ ghét nhau. Kiếp này bà rủ con dâu hợp tác.",
-      "twist": "Quán ăn thành công vang dội, hai mẹ con cãi nhau vì công thức nhưng thương nhau thật.",
-      "hook": "Kiếp trước chúng tôi tranh nhau cái bếp. Kiếp này chúng tôi mở hẳn một cái bếp.",
-      "comment_question": "Bạn có muốn làm ăn chung với mẹ/mẹ chồng không?",
-      "thumb_keywords": [
-        "Mở Quán Ăn"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 98,
-      "topic": "bo_me_trong_sinh",
-      "series": "Mẹ Chồng Trọng Sinh",
-      "title": "Mẹ Chồng Tôi Học Tiếng Anh Để Cãi Nhau Với Thông Gia Tây",
-      "premise": "Con gái lấy chồng Tây, mẹ chồng (bà ngoại) trọng sinh quyết học tiếng Anh để không bị lép vế.",
-      "twist": "Hai bà thông gia Việt–Tây cãi nhau bằng tiếng bồi rồi thành bạn thân nhất; hài từ đầu tới cuối.",
-      "hook": "Kiếp trước, trong đám cưới con gái, tôi chỉ biết cười. Kiếp này tôi học 'excuse me'.",
-      "comment_question": "Nhà bạn có con dâu/rể nước ngoài không?",
-      "thumb_keywords": [
-        "Học Tiếng Anh"
-      ],
-      "timing": "Quanh năm",
-      "priority": "B",
-      "publish_date": null
-    },
-    {
-      "id": 99,
-      "topic": "bo_me_trong_sinh",
-      "series": "Mẹ Chồng Trọng Sinh",
-      "title": "Hai Bà Thông Gia Cùng Trọng Sinh, Kiếp Này Thành Chị Em",
-      "premise": "Kiếp trước hai bà thông gia đấu nhau làm con cái ly hôn. Cả hai cùng sống lại và nhận ra nhau.",
-      "twist": "Hai bà bí mật lập liên minh cứu cuộc hôn nhân của con, vừa hài vừa cảm động.",
-      "hook": "Bà thông gia nhìn tôi, tôi nhìn bà ấy. Cả hai cùng biết: người kia cũng đã sống lại.",
-      "comment_question": "Hai bà thông gia nhà bạn có hợp nhau không?",
-      "thumb_keywords": [
-        "Hai Bà Thông Gia"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 100,
-      "topic": "bo_me_trong_sinh",
-      "series": "Mẹ Chồng Trọng Sinh",
-      "title": "Mẹ Chồng Trọng Sinh Bắt Con Trai Làm Việc Nhà Mỗi Ngày",
-      "premise": "Bà lập 'bảng phân công' trong nhà, con trai phải rửa bát, giặt đồ mỗi ngày.",
-      "twist": "Con trai phản đối rồi dần quen; con dâu có thời gian học thêm và được thăng chức.",
-      "hook": "Bảng phân công dán trên tủ lạnh. Tên con trai tôi xuất hiện 14 lần.",
-      "comment_question": "Nhà bạn chia việc nhà thế nào?",
-      "thumb_keywords": [
-        "Làm Việc Nhà"
-      ],
-      "timing": "Quanh năm",
-      "priority": "C",
-      "publish_date": null
-    },
-    {
       "id": 101,
       "topic": "hoc_duong",
       "series": "Hội Phụ Huynh Lớp 5A",
@@ -1747,182 +867,6 @@
         "Đòi Xem Sổ Sách"
       ],
       "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 102,
-      "topic": "hoc_duong",
-      "series": "Hội Phụ Huynh Lớp 5A",
-      "title": "Phụ Huynh Khoe Quà 20/11 Hàng Hiệu, Con Tôi Tặng Cô Lá Thư",
-      "premise": "Nhóm Zalo lớp 5A thi nhau khoe quà 20/11: túi hiệu, nước hoa, phiếu spa. Bé Bông chỉ viết tay một lá thư, chị Diệu Linh chụp màn hình chê 'mẹ kế toán mà keo'.",
-      "twist": "Cô Mai đọc lá thư của Bông trước lớp vì nó kể đúng hôm cô ở lại kèm cả lớp mất điện; cô trả hết quà hiệu về nhóm kèm lời cảm ơn, chỉ giữ lá thư.",
-      "hook": "Nhóm Zalo lớp con tôi vừa nổ ba trăm tin nhắn, toàn ảnh túi hiệu, còn con tôi đang ngồi nắn nót viết thư bằng bút mực tím.",
-      "comment_question": "Nếu là bạn, bạn chọn quà 20/11 nào cho con tặng cô? 1 = Quà đắt tiền, 2 = Thư tay",
-      "thumb_keywords": [
-        "Tặng Cô Lá Thư"
-      ],
-      "timing": "Quanh 20/11",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 103,
-      "topic": "hoc_duong",
-      "series": "Hội Phụ Huynh Lớp 5A",
-      "title": "Nhóm Zalo Phụ Huynh Cãi Nhau Nửa Đêm, Tôi Làm Biên Bản",
-      "premise": "Hai giờ sáng, nhóm Zalo phụ huynh cãi nhau vì chuyện xếp chỗ ngồi, ai cũng đòi con mình ngồi bàn đầu. Hà mất ngủ, quyết định ghi lại từng câu thành 'biên bản họp trực tuyến'.",
-      "twist": "Biên bản cho thấy chính chị Diệu Linh đã đổi chỗ con mình lên bàn đầu từ tuần trước mà không báo ai; mẹ Tít lần đầu lên tiếng, đề xuất bốc thăm, cả nhóm thả tim.",
-      "hook": "Đúng hai giờ sáng, điện thoại tôi rung lần thứ bốn mươi, và tôi quyết định đã không ngủ được thì làm thư ký.",
-      "comment_question": "Nếu là bạn, bạn có tắt thông báo nhóm Zalo phụ huynh không? 1 = Tắt luôn, 2 = Không dám tắt",
-      "thumb_keywords": [
-        "Tôi Làm Biên Bản"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 104,
-      "topic": "hoc_duong",
-      "series": "Truyện lẻ",
-      "title": "Làm Cô Chủ Nhiệm Năm Đầu, Tôi Bị Phụ Huynh Ép Sửa Điểm",
-      "premise": "Người kể là cô Mai (tôi), 26 tuổi, năm đầu làm chủ nhiệm. Một phụ huynh quyền thế mang giỏ quà đến phòng giáo viên, nhờ 'nâng nhẹ' điểm Toán cho con để đủ danh hiệu học sinh giỏi.",
-      "twist": "Cô Mai mời phụ huynh ngồi chấm lại bài cùng mình, từng câu một; chính phụ huynh phát hiện con chép bài bạn. Cuối năm cậu bé tự xin thi lại và đạt điểm thật.",
-      "hook": "Giỏ quà vừa đặt xuống bàn tôi, cái phong bì đã thò ra một góc như sợ người ta không thấy.",
-      "comment_question": "Nếu là cô giáo, bạn xử lý phụ huynh xin sửa điểm thế nào? 1 = Từ chối thẳng, 2 = Mời cùng chấm lại",
-      "thumb_keywords": [
-        "Ép Sửa Điểm"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 105,
-      "topic": "hoc_duong",
-      "series": "Phòng 402 Ký Túc Xá",
-      "title": "Bạn Cùng Phòng Xài Chùa Đồ, Tôi Lập Sổ Thu Chi Cả Phòng",
-      "premise": "Phòng 402 hết dầu gội, sữa rửa mặt, mì gói liên tục; Vy luôn nói 'chắc Hoài dùng'. Trang quyết định lập sổ thu chi cả phòng, dán lên cửa tủ.",
-      "twist": "Sổ đối chiếu với giờ tắm và hoá đơn căn tin cho thấy Vy dùng chùa hơn một triệu; Vy đòi đi kiện cô quản lý thì cô Lành đọc to sổ của Trang trước cả tầng.",
-      "hook": "Chai dầu gội mới mua hôm thứ Hai, đến thứ Tư chỉ còn đúng một lớp bọt dưới đáy, và tôi bắt đầu nghi ngờ nó tự bay hơi.",
-      "comment_question": "Nếu là bạn, bạn có lập sổ chia tiền với bạn cùng phòng không? 1 = Có, rõ ràng, 2 = Không, kỳ lắm",
-      "thumb_keywords": [
-        "Sổ Thu Chi"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 106,
-      "topic": "hoc_duong",
-      "series": "Phòng 402 Ký Túc Xá",
-      "title": "Bài Nhóm Bốn Người, Ba Người Chỉ Ghi Tên Cho Có",
-      "premise": "Trang làm bài tập nhóm môn Kế toán quản trị một mình suốt ba tuần, ba thành viên còn lại chỉ nhắn 'cảm ơn bà nha'. Hôm thuyết trình, cả ba xin đứng nói phần mở đầu.",
-      "twist": "Trang đưa giảng viên lịch sử chỉnh sửa tài liệu trực tuyến; thầy cho mỗi người tự thuyết trình đúng phần mình làm. Ba người đứng im, cả lớp cười, thầy chấm điểm riêng từng người.",
-      "hook": "Mười một giờ đêm trước hạn nộp, nhóm chat bốn người có đúng một người đang gõ, và người đó là tôi.",
-      "comment_question": "Nếu là bạn, bạn có báo giảng viên chuyện bạn cùng nhóm không làm không? 1 = Báo luôn, 2 = Gánh hết cho xong",
-      "thumb_keywords": [
-        "Chỉ Ghi Tên Cho Có"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 107,
-      "topic": "hoc_duong",
-      "series": "Phòng 402 Ký Túc Xá",
-      "title": "Trưởng Phòng Livestream Cả Đêm, Tôi Bán Luôn Vé Xem",
-      "premise": "Ngân livestream bán son lúc nửa đêm, bật đèn vòng chói cả phòng. Nhắc mãi không được, Trang quyết định 'góp vui' theo kiểu của mình.",
-      "twist": "Trang ngồi phía sau quay ngược lên, bình luận hài từng thỏi son, lượt xem tăng gấp mười; Ngân hiểu ra người xem thích Trang hơn, cả hai thoả thuận livestream ở phòng sinh hoạt chung lúc tám giờ tối.",
-      "hook": "Đèn vòng của Ngân bật lúc nửa đêm, sáng đến mức con muỗi trong phòng cũng phải nheo mắt.",
-      "comment_question": "Nếu là bạn, bạn xử lý bạn cùng phòng ồn ào ban đêm thế nào? 1 = Nói thẳng, 2 = Báo quản lý",
-      "thumb_keywords": [
-        "Bán Luôn Vé Xem"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 108,
-      "topic": "hoc_duong",
-      "series": "Phòng 402 Ký Túc Xá",
-      "title": "Bị Chê Quê Vì Mang Đồ Ăn Mẹ Gửi, Cuối Kỳ Cả Phòng Xin Ăn",
-      "premise": "Mỗi tuần mẹ Trang gửi lên một thùng: cá kho, ruốc, dưa cà. Vy chê phòng ám mùi quê, đòi Trang để thùng ngoài hành lang.",
-      "twist": "Mùa thi cuối kỳ, căn tin đóng cửa vì sửa chữa, cả tầng hết tiền ăn; thùng đồ ăn của mẹ Trang nuôi cả phòng, Vy là người xin thêm cơm đầu tiên và tự gọi điện cảm ơn mẹ Trang.",
-      "hook": "Vy vừa bịt mũi kêu phòng có mùi cá kho, tôi đã bình tĩnh đậy nắp nồi lại: mùi đó tên là mẹ tôi.",
-      "comment_question": "Nếu là bạn, bạn có mang đồ ăn quê lên ký túc xá không? 1 = Có, tự hào, 2 = Ngại lắm",
-      "thumb_keywords": [
-        "Đồ Ăn Mẹ Gửi"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 109,
-      "topic": "hoc_duong",
-      "series": "Lớp 11A2",
-      "title": "Lớp Trưởng Tiêu Quỹ Lớp, Tôi Trình Biên Lai Trước Cô",
-      "premise": "Quỹ lớp 11A2 hụt một triệu hai, Khánh đổ cho thủ quỹ Diệp làm mất. Minh Anh nhớ từng lần Khánh mua trà sữa cho nhóm bạn mình bằng tiền quỹ.",
-      "twist": "Minh Anh xin lại hoá đơn điện tử ở quán trà sữa có tên lớp; cô Thảo đối chiếu trong giờ sinh hoạt. Khánh xin lỗi Diệp trước lớp và tự bù quỹ bằng tiền làm thêm dịp hè.",
-      "hook": "Khánh vừa nói 'quỹ hụt là do thủ quỹ', Diệp đã đỏ mắt, còn tôi lặng lẽ mở cuốn sổ ghi chép năm trang.",
-      "comment_question": "Nếu là bạn, bạn có đứng ra bênh bạn bị đổ oan trước lớp không? 1 = Có ngay, 2 = Nói riêng với cô",
-      "thumb_keywords": [
-        "Trình Biên Lai"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 110,
-      "topic": "hoc_duong",
-      "series": "Lớp 11A2",
-      "title": "Bị Vu Quay Cóp Bài Kiểm Tra, Tôi Xin Thi Lại Trước Cả Lớp",
-      "premise": "Minh Anh được điểm 10 bài kiểm tra Lý, Khánh tố với thầy là thấy cô nhìn điện thoại. Cả lớp xì xào, thầy định huỷ bài.",
-      "twist": "Minh Anh xin làm lại một đề khác ngay trên bảng trước lớp và giải đúng hết; Tùng nhớ ra chiếc điện thoại 'bị nhìn' là đồng hồ treo tường. Khánh tự nhận đã nghĩ sai.",
-      "hook": "Thầy vừa cầm bài mười điểm của tôi lên thì Khánh nói to: 'Em thấy bạn ấy nhìn điện thoại ạ', và cả lớp quay lại như xem phim.",
-      "comment_question": "Nếu là bạn, bạn có dám xin thi lại trước cả lớp để chứng minh không? 1 = Dám, 2 = Không dám",
-      "thumb_keywords": [
-        "Xin Thi Lại"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 111,
-      "topic": "hoc_duong",
-      "series": "Lớp 11A2",
-      "title": "Nhóm Chat Lớp Nói Xấu Bạn Tôi, Tôi Đọc To Giờ Sinh Hoạt",
-      "premise": "Diệp bị một nhóm trong lớp lập nhóm chat riêng chế ảnh chê giọng quê. Minh Anh không cãi trên mạng, cô in nguyên văn các tin nhắn chê bai, không kèm ảnh.",
-      "twist": "Trong giờ sinh hoạt, Minh Anh xin cô Thảo cho đọc to từng câu chê, không nêu tên người viết; cả nhóm đỏ mặt vì nghe lại lời mình. Cô Thảo cho cả lớp viết một điều tốt về Diệp, nhóm kia viết dài nhất.",
-      "hook": "Tôi gấp tờ giấy in làm tư, bước lên bục và nói: 'Em xin phép đọc một bài văn tập thể của lớp mình.'",
-      "comment_question": "Nếu là bạn, bạn xử lý nhóm chat nói xấu bạn mình thế nào? 1 = Công khai trước lớp, 2 = Báo riêng cô",
-      "thumb_keywords": [
-        "Đọc To Giờ Sinh Hoạt"
-      ],
-      "timing": "Quanh năm",
-      "priority": "A",
-      "publish_date": null
-    },
-    {
-      "id": 112,
-      "topic": "hoc_duong",
-      "series": "Lớp 11A2",
-      "title": "Bị Chê Văn Nghệ Quê Mùa, Lớp Tôi Hát Chèo Đoạt Giải Nhất",
-      "premise": "Hội diễn 20/11, các lớp nhảy nhạc Hàn rầm rộ, Khánh chê ý tưởng hát chèo của Diệp là 'quê, mất mặt lớp'. Minh Anh và Tùng đứng về phía Diệp.",
-      "twist": "Tiết mục chèo pha rap do Tùng viết lời về chuyện thi cử làm cả trường cười rồi vỗ tay đứng dậy; ban giám khảo là nghệ sĩ chèo về hưu chấm giải nhất. Khánh xin vào vai đánh trống năm sau.",
-      "hook": "Khánh vừa nói 'hát chèo thì thà cả lớp đứng im', Diệp đã cầm quạt mo lên và hát luôn một câu ngay giữa lớp.",
-      "comment_question": "Nếu lớp bạn diễn văn nghệ, bạn chọn gì? 1 = Nhảy nhạc trend, 2 = Hát dân ca",
-      "thumb_keywords": [
-        "Hát Chèo Đoạt Giải"
-      ],
-      "timing": "Quanh 20/11",
       "priority": "A",
       "publish_date": null
     },
@@ -1943,37 +887,804 @@
       "publish_date": null
     },
     {
-      "id": 114,
+      "id": 115,
       "topic": "ho_hang_viet",
       "series": "Truyện lẻ",
-      "title": "Mẹ Bảo Chỉ Em Trai Là Con, Tôi Ngừng Chu Cấp Ngay Mâm Cỗ",
-      "premise": "Hạnh 31 tuổi, trưởng phòng kế toán một công ty logistics ở Hải Phòng, 8 năm liền chuyển 8 triệu mỗi tháng về quê Kiến Thụy vì mẹ (bà Nhàn, 58 tuổi) bảo 'mẹ gửi tiết kiệm cho con lấy chồng'. Thực chất tiền nuôi em trai Đạt 26 tuổi khởi nghiệp ba lần đều sập. Giỗ hết tang bố, trước cả họ, mẹ tuyên bố sang tên nhà và dùng 'sổ tiết kiệm của nhà' cho Đạt cưới vợ, nói 'nhà này mẹ chỉ có thằng Đạt là con', rồi yêu cầu Hạnh góp thêm 200 triệu lo cỗ cưới. Hạnh mở điện thoại hủy lệnh chuyển tiền định kỳ ngay trên mâm cỗ và đặt lên mâm cuốn sổ ghi 96 lần chuyển tiền kèm tin nhắn của mẹ. Bác Cả (ông Bình) mắng Hạnh bất hiếu; dì Loan (em mẹ, mỏ hỗn) đứng về phía Hạnh.",
-      "twist": "Sổ tiết kiệm 'của nhà' chỉ còn 2 triệu: Đạt rút sạch từ năm ngoái góp vốn 'cà phê cổ phần' đa cấp, lại cắm sổ đỏ căn nhà vay nóng 400 triệu lãi 5% một tháng, trễ hai kỳ, còn 20 ngày là bị siết. Nhà gái (bà Thoa, mẹ của Quỳnh) đòi sang tên nhà trước cưới vì đã đánh hơi được. Cao trào: trong buổi họp hai nhà do bác Cả triệu tập để 'xử con gái bất hiếu', Hạnh đặt lên bàn ba bộ hồ sơ: 96 lần chuyển tiền 770 triệu, sổ tiết kiệm còn 2 triệu, hợp đồng cắm sổ đỏ kèm ghi âm quán cà phê cổ phần. Nhà gái rút, Đạt lộ mặt, bác Cả im. Kết: Hạnh không trả nợ thay; cô cùng dì Loan dùng 200 triệu chuộc sổ đỏ với điều kiện công chứng tại chỗ: nhà đứng tên mẹ, Đạt ký nhận nợ trả góp từ lương công nhân. Ba tháng sau mẹ gọi điện lần đầu không nhắc tiền, chỉ hỏi 'con ăn cơm chưa'.",
-      "hook": "Giữa mâm cỗ giỗ bố, mẹ gõ đũa tuyên bố: 'Nhà này mẹ chỉ có thằng Đạt là con.'",
-      "comment_question": "Nếu là bạn, bạn có ngừng gửi tiền về nhà không? 1 = Ngừng ngay, 2 = Vẫn gửi nhưng tự giữ sổ",
+      "title": "Mẹ Chồng Giữ Sổ Đỏ Tôi Mua, Tôi Mời Công Chứng Đến Bàn Ăn",
+      "premise": "Lan 30 tuổi, kỹ sư phần mềm ở Long Biên, Hà Nội, mua căn hộ 2,4 tỷ bằng 7 năm tích cóp và số vàng mẹ đẻ cho, sang tên xong 4 tháng trước ngày cưới Khánh. Về làm dâu, mẹ chồng là bà Tuyết 60 tuổi mượn sổ đỏ 'giữ cho chắc, con dâu thì biết gì' rồi giữ luôn hai năm, trước họ hàng chỉ gọi đó là 'nhà của thằng Khánh'. Chị chồng Hoa ly thân, đòi dọn về ở cùng hai con. Một chiều, chị Mai công chứng viên quen của Lan nhắn: bà Tuyết dẫn Khánh tới văn phòng hỏi thủ tục tặng cho căn hộ sang tên con trai, nói chủ nhà bận. Lan không cãi, không khóc. Cô âm thầm xin trích lục sổ đỏ, in 84 lệnh chuyển tiền trả góp, rồi mời chị Mai đến đúng bữa cơm đầu tháng có đủ bố mẹ chồng, vợ chồng chị Hoa và cậu Khánh. Bên mâm cơm, hợp đồng mua bán đứng tên một mình Lan trước hôn nhân và bản sao kê được đặt cạnh bát canh. Chồng Lan im lặng, mẹ chồng đổi sắc mặt, chị Hoa bắt đầu run tay.",
+      "twist": "Sổ đỏ gốc không nằm trong tủ bà Tuyết: bà đã đưa cho chị Hoa mang ra tiệm cầm đồ cuối phố làm tin để vay nóng 300 triệu trả nợ thua lỗ bán hàng online, lãi 4% một tháng, trễ ba kỳ, chủ tiệm đã hai lần gọi dọa đến nhà. Kế hoạch sang tên cho Khánh là để 'có người đàn ông đứng tên, vay ngân hàng cứu chị'. Cao trào tại mâm cơm: chị Mai giải thích căn hộ là tài sản riêng trước hôn nhân, không ai tặng cho thay chủ được, và sổ gốc đang bị giữ trái luật thì chủ nhà chỉ cần báo mất, xin cấp lại, giấy cũ thành tờ giấy lộn. Chủ tiệm cầm đồ đến đúng lúc, bà Tuyết phải nói thật. Khánh đứng dậy ký văn bản xác nhận tài sản riêng của vợ, xin lỗi vợ trước mặt mẹ. Kết: Lan không trả nợ thay, nhưng cho chị Hoa vay 100 triệu không lãi, có giấy tay công chứng, trả góp từ lương bán hàng siêu thị; sổ đỏ mới về tay Lan sau 21 ngày. Tối đó mẹ chồng để ở đầu giường cuốn sổ tiết kiệm 50 triệu tiền mừng cưới bà giữ hai năm chưa đưa, kèm tờ giấy: mẹ sai rồi.",
+      "hook": "Bữa cơm đầu tháng, mẹ chồng gõ đũa: 'Sổ đỏ để mẹ giữ cho chắc, con dâu thì biết gì.'",
+      "comment_question": "Sổ đỏ nhà bạn ai đang giữ? 1 = Tự mình giữ, 2 = Đưa bố mẹ chồng giữ cho yên nhà",
       "thumb_keywords": [
-        "Ngừng Chu Cấp"
+        "Công Chứng Đến Bàn Ăn"
       ],
       "timing": "Quanh năm",
       "priority": "A",
-      "publish_date": null,
-      "outline": [
-        "Mâm cỗ giỗ hết tang bố ở Kiến Thụy: mẹ gõ đũa tuyên bố chỉ có Đạt là con, sang tên nhà và sổ tiết kiệm cho Đạt cưới Quỳnh, đòi tôi góp 200 triệu lo cỗ. Tôi mở điện thoại hủy lệnh chuyển tiền định kỳ ngay tại mâm, đọc to 'chuyển định kỳ 96 tháng, đã hủy'. Dì Loan phụ họa, bác Cả Bình mắng tôi bất hiếu. 200 từ đầu chỉ có hành động và thoại tại mâm cỗ, chưa giải thích gì.",
-        "Mẹ kéo tôi vào bếp bảo 'nói trước họ cho oai thôi'. Tôi đặt lên bàn cuốn sổ ghi 96 lần chuyển tiền và tin nhắn mẹ 'mẹ gửi tiết kiệm cho con rồi'. Mẹ lảng, Đạt xin 'chị cứ chuyển nốt tháng này'. Tôi bắt xe về Hải Phòng ngay trong đêm. Miếng hài: Đạt tiễn chị ra ngõ chỉ để hỏi mật khẩu wifi mới của phòng trọ chị.",
-        "Tuần đầu không có tiền về: nhóm Zalo 'Gia đình họ Lê' nổ. Bác Cả giảng đạo lý, cô Hai kể công trông tôi hồi bé, Đạt đăng ảnh xe máy mới. Tôi chỉ gửi một tấm ảnh biểu đồ chi tiêu 8 năm, cột 'tiền của chị Hạnh' cao hơn cột 'lương cả họ cộng lại'. Nhịp sảng: cô Hai rời nhóm.",
-        "Dì Loan ra ngân hàng huyện hỏi giúp: sổ tiết kiệm 'của nhà' chỉ còn 2 triệu, rút sạch từ tháng 3 năm ngoái bằng giấy ủy quyền mẹ ký cho Đạt. Dì gọi tôi lúc nửa đêm, mở đầu bằng 'cháu ngồi chưa'.",
-        "Tôi về quê âm thầm, gặp Thảo bạn học cũ làm ngân hàng xác nhận, rồi đến quán 'Cà phê cổ phần' đã đóng cửa. Chủ quán tưởng tôi là nhà đầu tư mới, mời 'cổ phần vàng' lãi 30% tháng, tôi bật ghi âm. Đạt đã góp 500 triệu.",
-        "Nhà gái dạm ngõ sớm. Bà Thoa đòi sính lễ 300 triệu và sang tên nhà cho đôi trẻ trước cưới. Mẹ gật đầu. Tôi ngồi góc nhà hỏi đúng một câu 'sổ đỏ nhà mình đang ở đâu ạ'. Mẹ nói trong tủ, Đạt đổ mồ hôi, bà Thoa liếc nhanh về phía Đạt.",
-        "Tối đó tôi mở tủ: hộp đựng sổ đỏ chỉ còn tờ photo. Đạt thú nhận nửa vời: cắm tạm 400 triệu chỗ anh Khánh, trả lãi tháng, vài tháng chuộc. Tôi không mắng, chỉ hỏi lãi bao nhiêu. Đạt nói 5% và tưởng là năm phần nghìn. Miếng hài: tôi bấm máy tính cho nó xem, nó xin tính lại bằng máy khác.",
-        "Tôi gặp Khánh cho vay ở quán nước đầu cầu: hợp đồng, biên bản giao sổ đỏ, lịch lãi Đạt trễ hai kỳ, hạn 20 ngày nữa siết nhà. Tôi chụp lại tất cả. Khánh gợi ý 'chị trả thay là xong', tôi cười bảo để tôi về hỏi mẹ xem mẹ có mấy đứa con.",
-        "Mẹ lên Hải Phòng lần đầu đến chỗ tôi làm, xách con gà, xin tôi 'lo nốt đám cưới cho em'. Tôi mời mẹ ăn cơm căng-tin, kể từng khoản: học phí Đạt, xe, ba lần khởi nghiệp, viện phí bố. Mẹ cãi 'mẹ nuôi con lớn'. Tôi đáp 'mẹ nuôi con đến 18, con nuôi cả nhà 8 năm'. Mẹ về không nói gì, để quên con gà.",
-        "Họ hàng chia phe. Bác Cả triệu tập họp họ tại nhà thờ họ để 'xử đứa con gái bất hiếu', có mời cả nhà gái cho 'minh bạch'. Dì Loan bảo tôi cứ đi nhưng mang theo cái đang có. Tôi in ba bộ hồ sơ, mỗi bộ kẹp màu khác nhau.",
-        "Tôi đề nghị dời buổi họp về đúng nhà mẹ, đúng ngày Đạt định ký giấy mượn thêm 100 triệu của nhà gái. Tôi nhờ anh Tùng công chứng viên bạn dì Loan đi cùng, ngồi uống nước như khách. Nhịp sảng nhỏ: Đạt tưởng anh Tùng là bạn trai tôi, mừng ra mặt vì 'chị có người lo rồi'.",
-        "Cao trào phần một: bác Cả mở màn kết tội tôi bỏ đói mẹ. Tôi đặt bộ hồ sơ thứ nhất: 96 lần chuyển tiền tổng 770 triệu, tin nhắn mẹ. Dì Loan đọc to từng con số cho các cụ nghe. Bà Thoa đổi sắc mặt, bác Cả bắt đầu nói nhỏ.",
-        "Cao trào phần hai: bộ hồ sơ thứ hai là sổ tiết kiệm còn 2 triệu, bộ thứ ba là hợp đồng cắm sổ đỏ 400 triệu lãi 5% tháng trễ hai kỳ, kèm ghi âm quán cà phê cổ phần. Nhà gái đứng dậy rút lui, đòi lại 50 triệu cọc chụp ảnh cưới. Đạt sụp xuống, bác Cả im bặt. Mẹ hỏi 'sao con không nói với mẹ', tôi đáp 'con nói 96 lần, mỗi lần một tin nhắn'.",
-        "Giải quyết: tôi không trả nợ thay. Tôi và dì Loan dùng 200 triệu chuộc sổ đỏ với điều kiện công chứng ngay tại bàn: nhà đứng tên mẹ, di chúc do mẹ toàn quyền, Đạt ký giấy nhận nợ tôi 200 triệu trả góp từ lương công nhân khu công nghiệp. Anh Tùng đã ngồi sẵn. Khánh nhận tiền rồi biến. Miếng hài: bác Cả xin một bản photo 'để về dạy con'.",
-        "Kết ba tháng sau: Đạt đi làm ca, chuyển về 3 triệu mỗi tháng cho mẹ. Mẹ gọi điện lần đầu không nhắc tiền, chỉ hỏi 'con ăn cơm chưa'. Tôi về giỗ 49 ngày bà nội, mẹ xới cơm cho tôi trước, bác Cả lảng ra sân. Câu chốt ấm về ranh giới của lòng tốt, dẫn tự nhiên vào câu hỏi chọn phe."
-      ]
+      "publish_date": null
+    },
+    {
+      "id": 116,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Chồng Đưa Hết Lương Cho Mẹ, Tôi Mở Tài Khoản Nuôi Con Riêng",
+      "premise": "Ngọc 29 tuổi, cựu nhân viên ngân hàng ở Biên Hòa, nghỉ việc ba năm sinh con. Chồng là Dũng, kỹ sư nhà máy, lương 22 triệu, cưới xong vẫn đưa nguyên thẻ lương cho mẹ là bà Sáu 'giữ giùm như hồi độc thân'. Ba năm Ngọc xin tiền sữa, tiền tiêm phòng từng lần, mỗi lần bà Sáu ghi vào cuốn sổ bìa đỏ và nhắc 'lương anh mẹ giữ, em muốn gì thì xin mẹ'. Bà Sáu lấy tiền đó cho con gái ruột là cô Trang đi học thẩm mỹ, mua xe tay ga, còn cháu nội uống sữa nội địa rẻ nhất. Ngọc đi làm lại ở chi nhánh cũ, lương 15 triệu, lặng lẽ mở tài khoản mang tên con gái Bống, chuyển 70% lương vào, đặt lệnh tự động. Cô in bảng chi tiêu 36 tháng, từng dòng sữa, bỉm, viện phí, có chữ ký của bà Sáu bên cạnh, dán lên cửa tủ lạnh giữa nhà. Đám giỗ ông nội, bà Sáu trước mặt cả họ yêu cầu Ngọc 'góp quỹ chung mỗi tháng 5 triệu như con trai mẹ'. Ngọc chỉ tay vào tủ lạnh.",
+      "twist": "Cuốn sổ bìa đỏ bà Sáu giữ ghi 36 tháng lương của Dũng là 792 triệu, nhưng tổng chi cho vợ chồng con cái chỉ 96 triệu. Phần còn lại đi đâu, bà im. Ngọc nhờ bạn cũ ở ngân hàng tra sao kê tài khoản lương: 480 triệu chuyển cho cô Trang mở spa, spa phá sản sau 8 tháng; 150 triệu đứng tên bà Sáu gửi tiết kiệm; chiếc xe tay ga trả góp vẫn trừ vào lương Dũng mỗi tháng 3,2 triệu. Cao trào tại đám giỗ: Ngọc đặt hai bảng cạnh nhau trên bàn thờ ông, bảng chi 36 tháng và sao kê 36 tháng, mời cả họ tự cộng. Cô Trang bỏ về, bà Sáu nói 'mẹ giữ cho tụi bây', Dũng lần đầu lấy lại thẻ lương, đổi mật khẩu ngay tại bàn. Kết: Dũng tự chuyển 60% lương vào tài khoản của Bống, bà Sáu trả lại sổ tiết kiệm 150 triệu làm quỹ học hành cho cháu, có giấy tặng cho. Bảng chi tiêu vẫn dán trên tủ lạnh, nhưng từ tháng đó cột 'người chi' đổi thành tên hai vợ chồng. Ngọc ghi dòng cuối: tháng 37, không ai phải xin ai.",
+      "hook": "Tôi hỏi tiền sữa cho con, mẹ chồng lật sổ: 'Lương anh mẹ giữ, em muốn gì thì xin mẹ.'",
+      "comment_question": "Lương của chồng bạn ai giữ? 1 = Vợ chồng tự giữ, 2 = Mẹ chồng giữ giùm cho chắc",
+      "thumb_keywords": [
+        "Tài Khoản Nuôi Con Riêng"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 117,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Em Chồng Mượn Xe Ba Tháng Không Trả, Tôi Đi Báo Mất Xe",
+      "premise": "Quyên 31 tuổi, điều dưỡng bệnh viện quận ở Gò Vấp, mua xe máy 48 triệu bằng tiền trực đêm hai năm, nhờ chồng là Phong đứng tên vì lúc đó cô chưa có hộ khẩu thành phố. Em chồng Tú 24 tuổi, thất nghiệp, 'mượn xe đi phỏng vấn một hôm' rồi giữ ba tháng, dùng chạy xe ôm công nghệ, sơn lại yếm, thay biển số giả cho đẹp. Quyên đòi, Tú cười: 'Xe chị đứng tên anh, em mượn của anh chứ mượn gì chị.' Mẹ chồng bênh con út, Phong ngại. Giấy phạt nguội 7 triệu về tận nhà, đứng tên Phong. Quyên không cãi nữa. Cô dẫn chồng ra công an phường làm thủ tục sang tên xe về mình, nộp đủ hóa đơn mua xe và biên lai chuyển khoản, rồi gửi đơn trình báo 'xe không rõ người sử dụng, chủ xe không liên lạc được với người cầm xe'. Hai ngày sau, Tú bị tổ tuần tra giữ xe ngay đầu ngõ vì biển số không khớp đăng ký, gọi về nhà gào lên là chị dâu hại em.",
+      "twist": "Tại trụ sở, công an mở cốp xe: 38 gói hàng không rõ nguồn gốc Tú nhận ship cho một đầu mối hàng xách tay, mỗi chuyến 300 nghìn, hàng là mỹ phẩm giả nhãn. Cuốn app chạy xe của Tú cho thấy thu nhập 14 triệu một tháng suốt ba tháng, nhưng mẹ chồng vẫn hàng tuần xin Quyên 2 triệu 'nuôi em thất nghiệp'. Cao trào ở buổi họp gia đình do mẹ chồng triệu tập để bắt Quyên rút đơn: Quyên đặt lên bàn giấy phạt nguội 7 triệu, biên bản tạm giữ xe ghi rõ biển số giả, và sổ tay mẹ chồng ghi 12 lần nhận tiền nuôi em. Phong lần đầu lớn tiếng với mẹ, Tú cúi đầu. Kết có hậu: Quyên rút đơn trình báo sau khi Tú ký giấy nhận nợ 7 triệu tiền phạt và 4 triệu tiền sơn lại xe, trả góp từ tiền chạy xe thật, có chữ ký mẹ chồng làm chứng. Tú đổi sang giao hàng cho siêu thị, ba tháng sau mua được xe cũ của riêng mình. Chiếc xe của Quyên về nhà với giấy đăng ký mang tên cô, treo chìa khóa ở móc riêng, không ai hỏi mượn nữa.",
+      "hook": "Tôi đòi xe, em chồng nhún vai: 'Xe chị đứng tên anh, em mượn của anh chứ mượn gì chị.'",
+      "comment_question": "Người thân mượn đồ rồi quên trả, bạn làm gì? 1 = Đòi thẳng dù mất lòng, 2 = Nhịn cho yên nhà",
+      "thumb_keywords": [
+        "Báo Mất Xe"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 118,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Họ Hàng Ở Nhờ 3 Tháng, Tôi Phát Hóa Đơn Điện Nước Từng Người",
+      "premise": "Thảo 27 tuổi, kế toán, vừa mua được căn hộ ba phòng ngủ ở Hà Đông bằng tiền tích cóp và khoản vay 15 năm. Bác Cả Trần Văn Lợi dẫn cả nhà năm người lên thành phố 'ở tạm hai tuần' chữa đau lưng cho bác gái, rồi ở luôn ba tháng, gọi thêm con trai Tuấn và hai người bạn làm cùng công trình về ngủ nhờ. Hóa đơn điện tháng đầu 2,8 triệu, tháng sau 4,1 triệu, nước gấp bốn lần; tủ lạnh trống, máy giặt chạy ngày ba mẻ. Bác Cả cười: 'Nhà rộng thế này, thêm năm người ăn có mất gì.' Thím Hai Nguyệt gọi điện so sánh 'con nhà người ta nuôi cả họ không kêu'. Thảo không đuổi ai. Cô thuê thợ lắp hai công tơ phụ cho hai phòng khách ở nhờ, in bảng giá phòng theo giá trọ khu Hà Đông, dán nội quy giờ giặt, giờ tắt điều hòa, rồi cuối tháng phát hóa đơn điện nước ghi tên từng người, có chữ ký nhận. Bác Cả nổi giận, gọi cả họ về quê họp, tố cháu gái tính tiền người nhà.",
+      "twist": "Cuộc họp họ ở Hưng Yên biến thành buổi kiểm toán bất đắc dĩ: Thảo mang theo ba tháng hóa đơn, bảng chấm công tơ phụ và cuốn sổ chi chợ 9,6 triệu, nhưng át chủ bài là bà nội 80 tuổi. Bà lôi từ túi áo tờ giấy vay 120 triệu bác Cả ký với người làng để 'lên thành phố kiếm việc cho Tuấn', hóa ra tiền đó đã nướng vào hụi của một người bạn công trình đang ở nhờ chính nhà Thảo, người này còn nợ tiền phòng trọ cũ nên mới đến bám. Cô Út Hằng hồn nhiên hỏi: 'Thế ở nhờ ba tháng mà bác không góp đồng nào thật hả bác?', cả họ im. Kết: họ hàng quay sang phía Thảo, bác Cả ký giấy trả 6 triệu tiền điện nước theo đúng hóa đơn trong ba kỳ, Tuấn xin ở lại thêm một tháng với điều kiện tự trả 1,5 triệu tiền phòng và học nghề điện nước thật. Tháng sau hóa đơn điện của Thảo về 680 nghìn. Bà nội gọi lên: 'Tính tiền thế là đúng, người tử tế thì không sợ con số.'",
+      "hook": "Bác Cả gắp miếng thịt cuối cùng, cười: 'Nhà rộng thế này, thêm năm người ăn có mất gì.'",
+      "comment_question": "Họ hàng lên ở nhờ lâu, bạn làm gì? 1 = Tính tiền điện nước rõ ràng, 2 = Nhịn, ngại nói",
+      "thumb_keywords": [
+        "Hóa Đơn Điện Nước"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 119,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Bố Chồng Ép Chia Đất Cho Con Trai, Tôi Đưa Di Chúc Bà Nội Ra",
+      "premise": "Hiền 33 tuổi, y sĩ trạm xá xã ở Thái Bình, là cháu gái duy nhất của bà nội Lụa, tám năm thay cả nhà chăm bà liệt nửa người: bón cơm, thay tã, đêm nào cũng ngủ võng cạnh giường. Bà mất, chưa hết trăm ngày, bố Hiền là ông Quý và chú Thắng họp họ chia mảnh đất 620 mét vuông mặt đường liên xã thành hai phần cho hai con trai là anh Hưng và em Tùng. Ông Quý tuyên bố: 'Con gái lấy chồng là người ngoài, đất này chỉ chia cho con trai.' Chồng Hiền là Nam bảo thôi kệ. Hiền không kệ. Cô nhớ ba năm trước bà bảo cô chở ra ủy ban huyện, bà ngồi riêng với công chứng viên nửa buổi rồi về chỉ nói 'bà gửi cho cháu một thứ, lúc cần thì hỏi cô Loan'. Ngày họ hàng kéo thước đo đất, Hiền đến phòng công chứng gặp cô Loan, mang về phong bì dán kín. Bữa cơm cúng trăm ngày, trước mặt cả họ và thước dây còn nằm giữa sân, Hiền mở phong bì đặt lên bàn thờ bà.",
+      "twist": "Di chúc công chứng ngày 14 tháng 3 ba năm trước, có hai người làm chứng là cô Loan và ông trưởng thôn, ghi rõ: 220 mét vuông mặt đường thuộc về cháu gái Hiền, phần còn lại chia đều hai cháu trai, kèm điều kiện ai bán đất trong năm năm thì phần đó chuyển cho quỹ khuyến học của thôn. Cú lật thứ hai: anh Hưng đã nhận cọc 400 triệu của một chủ vựa vật liệu để bán phần đất mặt đường từ trước khi bà mất, tiền tiêu vào xe bán tải; hợp đồng cọc bị lộ khi chủ vựa đến đúng ngày cúng đòi sang tên. Cao trào: ông Quý đọc di chúc, tay run, chú Thắng cố cãi bà lẫn, cô Loan đưa video công chứng bà nói rành rọt tên từng cháu. Kết ấm: Hiền nhận đất, không bán, xây trạm sơ cứu nhỏ và nhà thuốc của riêng mình ngay mặt đường, tên biển hiệu là tên bà. Anh Hưng phải tự lo trả cọc, Tùng xin lỗi chị. Ông Quý ba tháng sau ra phụ đổ móng, không nói gì, chỉ đặt tấm ảnh bà lên bàn thờ mới của trạm.",
+      "hook": "Thước dây còn giữa sân, bố nói: 'Con gái lấy chồng là người ngoài, đất này chỉ chia con trai.'",
+      "comment_question": "Nhà bạn chia tài sản theo kiểu nào? 1 = Chia đều trai gái, 2 = Con trai hưởng, con gái lo phận nhà chồng",
+      "thumb_keywords": [
+        "Di Chúc Bà Nội"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 120,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Chị Chồng Gửi Hai Đứa Con Cả Hè, Tôi Gửi Bảng Học Phí",
+      "premise": "My 28 tuổi, thiết kế đồ họa tự do ở Đà Nẵng, thu nhập 25 đến 30 triệu một tháng nhưng vì làm ở nhà nên cả nhà chồng gọi là 'ở nhà rảnh'. Đầu hè, chị chồng Thu đưa hai con 7 và 10 tuổi sang 'gửi vài hôm', rồi gửi luôn ba tháng, mỗi tuần chuyển 500 nghìn tiền ăn và câu nhắn: 'Em ở nhà rảnh, trông thêm hai đứa có gì nặng.' My dạy hai cháu học hè, nấu ba bữa, đưa đi bơi, đêm làm bù việc tới hai giờ sáng, rồi vẫn trễ deadline và mất hợp đồng 60 triệu với một chuỗi cà phê. Mẹ chồng bảo chị Thu bận kinh doanh, em dâu phải đỡ. My không cãi. Cô lập bảng công theo giá thị trường Đà Nẵng: gia sư hai môn 150 nghìn một buổi, bảo mẫu 5 triệu một tháng mỗi cháu, tiền ăn thực tế theo hóa đơn siêu thị, học bơi, sách vở, kèm nhật ký từng ngày và ảnh bài tập. Bữa cơm cuối hè tiễn hai cháu, My đưa chị Thu bảng học phí 42 triệu có đóng dấu đỏ chữ 'đã thanh toán 6 triệu'.",
+      "twist": "Chị Thu phản đòn, đòi ngược My 9 triệu 'tiền ăn ba tháng vì em ở nhà ăn ké lương chồng', mẹ chồng hùa theo. Nhưng anh rể là Lộc, chồng chị Thu, lặng lẽ mở điện thoại: ba tháng nay chị Thu không bận kinh doanh, chị đi học khóa đầu tư tiền số ở Hội An, nộp 120 triệu tiền lớp bằng tiền tiết kiệm học của hai con, và dùng câu 'gửi con cho em dâu' để giấu chồng. Cao trào tại mâm cơm: Lộc đặt biên lai khóa học cạnh bảng học phí của My, hỏi vợ mỗi tháng 500 nghìn tiền ăn cho hai đứa là theo giá nào. Hai cháu thì khoe mẹ cuốn vở hè dày cộp mợ My kèm. Kết: chị Thu xin lỗi, Lộc chuyển cho My đủ 36 triệu còn lại và nhận lỗi vì để vợ coi lao động của em dâu là không khí. My không giữ tiền: cô lập quỹ học hành đứng tên hai cháu, mỗi tháng chị Thu phải góp vào đó 3 triệu, bù lại tiền đã tiêu. Tết năm đó, bé 10 tuổi viết thiệp: mợ là cô giáo đầu tiên con muốn trả lương.",
+      "hook": "Chị chồng đặt hai cái ba lô xuống sàn: 'Em ở nhà rảnh, trông thêm hai đứa có gì nặng.'",
+      "comment_question": "Trông con giúp người thân có nên tính công không? 1 = Có, lao động nào cũng có giá, 2 = Không, người nhà mà",
+      "thumb_keywords": [
+        "Bảng Học Phí"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 121,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Mẹ Lấy Vàng Cưới Tôi Trả Nợ Em Trai, Tôi Đòi Trước Hai Họ",
+      "premise": "Trâm 27 tuổi, giáo viên mầm non ở Cần Thơ, ngày cưới được nhà chồng trao 8 chỉ vàng và đôi bông 2 chỉ của bà nội chồng. Mẹ ruột là bà Bảy xin 'giữ giùm, con gái mới cưới hay lơ đễnh'. Sáu tháng sau Trâm muốn bán hai chỉ góp mua xe cho chồng, hộp vàng trống trơn. Bà Bảy nói thẳng: 'Vàng mẹ cho thì mẹ lấy lại, con đừng tính toán với em.' Em trai Trâm là Tài 23 tuổi thua cá độ bóng đá 180 triệu, bà Bảy đem toàn bộ vàng cưới đi cầm ở tiệm Kim Phát, chuộc không nổi, lại giấu nhà chồng Trâm. Mẹ chồng Trâm là bà Hai tinh ý hỏi đôi bông sao không đeo, Trâm nói dối đang cất. Trâm không muốn cả đời nói dối thay em. Ngày giỗ bố cô, Trâm mời đủ hai họ, nấu mâm cỗ lớn, rồi trước bàn thờ bố đọc to giấy cầm đồ số 0417 của tiệm Kim Phát: 10 chỉ vàng, cầm 95 triệu, lãi 3% một tháng, đã quá hạn hai kỳ. Chồng Trâm là Vinh đứng dậy đứng cạnh vợ.",
+      "twist": "Giấy cầm đồ chỉ là một nửa sự thật: bà Bảy còn đứng tên vay thêm 150 triệu ở quỹ tín dụng xã cho Tài, thế chấp bằng chính căn nhà thờ bố. Tài đã bỏ lên Bình Dương, không phải đi làm mà trốn chủ nợ, còn gọi về đòi mẹ 'bán nốt đất vườn'. Cao trào ở đám giỗ: cậu Út bên ngoại định mắng Trâm bất hiếu thì bà Hai, mẹ chồng Trâm, mở túi lấy ra tờ giấy biên nhận chính tay bà Bảy ký ngày cưới, ghi rõ 'nhận giữ 10 chỉ vàng của con dâu nhà họ Nguyễn, hoàn trả khi con cần', do bà Hai cẩn thận yêu cầu lúc trao vàng. Bà Bảy ngồi sụp, Tài gọi điện về đúng lúc đòi tiền bị Vinh bật loa ngoài cho cả hai họ nghe. Kết ấm: Trâm không đòi vàng về tay mình, cô cùng Vinh chuộc vàng rồi gửi ngân hàng đứng tên Trâm, căn nhà thờ được giữ nhờ họ hàng bên ngoại góp trả quỹ tín dụng với điều kiện Tài về quê làm ở xưởng gỗ của cậu Út, mỗi tháng trả 4 triệu. Hết giỗ, bà Bảy ôm con gái lần đầu kể từ ngày cưới.",
+      "hook": "Hộp vàng cưới trống trơn, mẹ nói: 'Vàng mẹ cho thì mẹ lấy lại, con đừng tính toán với em.'",
+      "comment_question": "Mẹ ruột lấy vàng cưới của bạn trả nợ cho em, bạn chọn gì? 1 = Đòi trước cả họ, 2 = Giữ hòa khí",
+      "thumb_keywords": [
+        "Đòi Trước Hai Họ"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 122,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Hàng Xóm Lấn Sân Nửa Mét, Tôi Thuê Đo Đạc Rồi Xây Lại Tường",
+      "premise": "Oanh 35 tuổi, chủ tiệm may ở thị xã Sơn Tây, sống trong căn nhà ống bố mẹ chồng để lại. Nhà sát vách là cậu Bình, cậu họ của chồng, mười năm sửa nhà ba lần, lần nào cũng nhích móng sang sân nhà Oanh 'một tí cho vuông', tổng cộng nửa mét chiều ngang chạy suốt chiều sâu 18 mét. Chồng Oanh là Hải ngại vì cậu từng cho vay tiền cưới. Lần thứ tư, cậu Bình dựng cổng sắt chắn luôn lối thoát hiểm bên hông, cười: 'Nửa mét đất mà cũng tính, hàng xóm với nhau mà.' Mợ Bình còn trồng giàn mướp bò hẳn sang mái tôn tiệm may. Oanh không cãi tay đôi. Cô lên văn phòng đăng ký đất đai xin trích lục bản đồ địa chính, thuê đội đo đạc có giấy phép đến cắm mốc có mặt tổ trưởng dân phố và công chức địa chính phường. Kết quả: nhà cậu lấn 70 phân, không phải 50, và đường ống thoát nước nhà cậu chôn chéo qua móng nhà Oanh. Đúng đêm cậu Bình đi ăn cưới ở quê, Oanh thuê thợ xây lại tường đúng mốc, sáng hôm sau cậu về đứng trước bức tường mới và giàn mướp nằm dưới đất.",
+      "twist": "Cậu Bình kiện ra phường, tố cháu dâu đập phá tài sản. Buổi hòa giải lật bài: bản đồ địa chính cho thấy chính nhà cậu Bình cũng bị người mua đất phía sau lấn 40 phân, và tờ giấy mua bán đất cũ của cậu ghi chiều ngang 4,2 mét, trong khi nhà hiện tại rộng 4,9 mét. Cú lật lớn hơn: khoản vay cưới 50 triệu mà Hải mang ơn cậu mười năm, Oanh lục được giấy tay chứng minh hai vợ chồng đã trả đủ từ năm thứ ba kèm 12 triệu tiền lãi, cậu Bình vẫn nhắc ơn để lấn đất. Cao trào tại phường: cán bộ địa chính đọc biên bản đo đạc, Oanh đặt giấy trả nợ có chữ ký cậu lên bàn, Hải lần đầu nói 'cậu cho cháu vay, cháu trả rồi, nhà cháu cháu giữ'. Kết có hậu: cậu Bình ký biên bản chấp nhận mốc, tự tháo cổng sắt, đường ống thoát nước được dời trong một tuần với chi phí chia đôi do Oanh chủ động đề nghị. Giàn mướp trồng lại trên tường mới, phía mỗi nhà một nửa, mùa sau cậu mang sang hai quả mướp đầu tiên.",
+      "hook": "Cậu họ chồng dựng cổng sắt chắn lối: 'Nửa mét đất mà cũng tính, hàng xóm với nhau mà.'",
+      "comment_question": "Hàng xóm lấn đất nhà bạn, bạn làm gì? 1 = Đo lại và đòi đúng mốc, 2 = Nhịn cho khỏi mất tình xóm",
+      "thumb_keywords": [
+        "Xây Lại Tường"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 123,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Chồng Giấu Nợ Cờ Bạc 300 Triệu, Tôi Ký Giấy Tách Tài Sản",
+      "premise": "Thủy 34 tuổi, kế toán trưởng một công ty may ở Nam Định, cưới Toàn tám năm, hai con, căn nhà 1,8 tỷ đứng tên chung do tiền hai bên gom góp. Một tối, số lạ gọi: 'Chủ nợ gọi cho em vì anh ghi tên em là người bảo lãnh.' Toàn thua cá độ và bài online 300 triệu qua ba app vay, lãi gộp 6% một tháng, khai tên vợ vào mục người tham chiếu. Mẹ chồng là bà Thơm biết từ hai tháng trước, giấu con dâu, còn đề nghị 'bán nhà cứu con, nhà ở với mẹ'. Thủy không khóc, không đòi ly hôn ngay. Sáng hôm sau cô xin nghỉ phép, đến văn phòng luật sư Hạnh lập văn bản thỏa thuận chia tài sản chung trong thời kỳ hôn nhân, công chứng ngay trong ngày với chữ ký của Toàn đang hoảng sợ; phần nhà của Thủy được chuyển nhượng sang tên mẹ ruột để không ai có thể kê biên; hai sổ tiết kiệm của con chuyển sang tài khoản phong tỏa. Cô sao kê toàn bộ ba năm chi tiêu của chồng để biết dòng tiền. Một tuần sau, chủ nợ đến nhà, bà Thơm tuyên bố sẽ bán nhà, Thủy đặt lên bàn văn bản công chứng.",
+      "twist": "Sao kê lộ ra bà Thơm không chỉ biết mà còn tiếp tay: 120 triệu trong số nợ là tiền Toàn vay để bù vào hụi bà Thơm bể từ năm ngoái, bà hứa giấu con dâu đổi lấy việc 'sau này nhà sang tên cho thằng Toàn'. Cú lật thứ hai: một trong ba app vay là tín dụng đen trá hình, lãi vượt trần gấp 5 lần, hợp đồng vô hiệu phần lãi; luật sư Hạnh hướng dẫn Thủy tố giác, nhóm đòi nợ bị công an mời lên làm việc. Cao trào tại phòng khách: bà Thơm bảo bán nhà, Thủy đọc văn bản tách tài sản, giấy sang tên nửa nhà, rồi bật ghi âm chủ nợ nhắc 'bà Thơm đã nhận tiền'. Toàn quỳ trước vợ, bà Thơm im. Kết: Thủy không ly hôn, nhưng ra điều kiện: Toàn vào nhóm hỗ trợ cai cờ bạc của bệnh viện tỉnh, lương chuyển thẳng vào tài khoản vợ, trả nợ gốc 180 triệu hợp pháp trong 30 tháng; bà Thơm tự bán chiếc xe máy SH để trả 120 triệu phần của bà. Ba năm sau, văn bản tách tài sản vẫn nằm trong két, Thủy nói với con gái: giấy này không phải để chia, mà để không ai lấy được nhà của các con.",
+      "hook": "Số lạ gọi lúc ru con: 'Chủ nợ gọi cho em vì anh ghi tên em là người bảo lãnh.'",
+      "comment_question": "Bạn có biết chính xác vợ hoặc chồng mình đang nợ bao nhiêu không? 1 = Biết từng đồng, 2 = Chưa bao giờ hỏi",
+      "thumb_keywords": [
+        "Tách Tài Sản"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 124,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Mẹ Chồng Đòi Giữ Tiền Thai Sản, Tôi Gửi Sổ Tiết Kiệm Tên Con",
+      "premise": "Hạ 27 tuổi, công nhân kỹ thuật khu công nghiệp Bắc Ninh, sinh con đầu lòng, được bảo hiểm chi trả sáu tháng thai sản tổng 54 triệu cộng trợ cấp một lần. Mẹ chồng là bà Lý giành thẻ ngay ngày tiền về: 'Tiền thai sản là tiền nhà nước cho cháu tôi, đưa đây mẹ giữ.' Chồng Hạ là Tiến đi làm xa, bảo vợ chiều mẹ. Sáu tháng Hạ xin từng hộp sữa, bà Lý mua loại rẻ nhất, trong khi con gái ruột bà là cô Nhung sắm vàng cưới hai chỉ, điện thoại mới, và bà khoe 'của mẹ cho'. Hạ ghi lại từng khoản vào cuốn sổ nhỏ, chụp hóa đơn vàng cô Nhung khoe trên mạng. Hết thai sản, đợt trợ cấp bổ sung 12 triệu về, Hạ ra ngân hàng mở sổ tiết kiệm mang tên con trai Bin, ghi rõ chỉ mẹ ruột là người giám hộ được rút, đồng thời đổi tài khoản nhận lương sang thẻ mới. Bà Lý phát hiện, triệu tập cả nhà chồng họp 'xử con dâu giấu tiền'. Hạ mang theo cuốn sổ, sao kê sáu tháng và tờ sổ tiết kiệm.",
+      "twist": "Sao kê thẻ thai sản cho thấy 54 triệu được rút trong bốn lần, tổng tiền mua sữa, bỉm, tiêm phòng cho Bin chỉ 7,2 triệu; 20 triệu chuyển cho cô Nhung, 15 triệu góp hụi của bà Lý, số còn lại biến mất ở tiệm vàng. Cú lật: cô Nhung đang chuẩn bị cưới nhưng nhà trai đòi vàng của hồi môn, bà Lý tính dùng cả 12 triệu trợ cấp mới để mua nốt chỉ vàng, và dự định sau này 'mượn' luôn sổ tiết kiệm của cháu để lo đám cưới. Cao trào ở buổi họp gia đình: Hạ đặt sao kê cạnh ảnh hóa đơn tiệm vàng có ngày trùng khớp từng lần rút, bố chồng ông Hòa lần đầu mở miệng hỏi vợ 'cháu nội uống sữa gì sáu tháng nay', Tiến gọi video từ công trường bật loa nghe hết. Kết: bà Lý trả lại 20 triệu bằng cách bán hai chỉ vàng của cô Nhung, có giấy tay trước mặt ông Hòa; Tiến chuyển lương vào tài khoản chung với vợ. Sổ tiết kiệm của Bin dán ngay cửa tủ, mỗi tháng hai vợ chồng cùng gửi thêm 2 triệu. Đầy năm Bin, bà Lý mua lon sữa đắt nhất kệ, không nói gì, đặt lên bàn.",
+      "hook": "Tiền thai sản vừa về thẻ, mẹ chồng chìa tay: 'Tiền nhà nước cho cháu tôi, đưa đây mẹ giữ.'",
+      "comment_question": "Tiền thai sản của bạn ai giữ? 1 = Tự giữ, mở sổ cho con, 2 = Đưa mẹ chồng giữ cho khỏi mất lòng",
+      "thumb_keywords": [
+        "Sổ Tiết Kiệm Tên Con"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 125,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Cả Họ Bị Lừa Đầu Tư, Tôi Mở Lớp Nhận Diện Đa Cấp Ở Đám Giỗ",
+      "premise": "Ngân 29 tuổi, chuyên viên tín dụng một ngân hàng ở Vinh, về quê Nam Đàn làm giỗ ông nội. Chú Năm (em bố, 52 tuổi, sĩ diện, hay vỗ ngực) vừa được một 'sàn tiền ảo quốc tế' phong làm trưởng nhóm, đã rủ 12 người trong họ góp tổng cộng 800 triệu, riêng bố Ngân 150 triệu vay thế chấp sổ đỏ. Giữa mâm cỗ, chú Năm chê Ngân học cao mà không biết làm giàu, khoe lãi 30 phần trăm một tháng, bắt cả họ mở điện thoại xem số dư ảo nhảy từng giây. Ngân không cãi tay đôi. Cô mượn tấm bảng viết thực đơn của quán cỗ, dựng ngay sân nhà một buổi học 20 phút với năm dấu hiệu nhận diện đa cấp: hứa lãi cố định cao bất thường, phải kéo người mới mới có hoa hồng, không có giấy phép của cơ quan quản lý, tiền nộp vào tài khoản cá nhân, và rút tiền phải chờ 'duyệt'. Mỗi dấu hiệu cô đối chiếu bằng chính tin nhắn trong nhóm Zalo của chú Năm. Thím Năm gắt lên, bác Cả bảo 'giỗ ông mà cãi nhau', còn bọn trẻ con bắt đầu lôi điện thoại ra thử rút tiền.",
+      "twist": "Cao trào là cuộc gọi trước mặt cả họ: Ngân bật loa ngoài gọi số hotline in trên tờ rơi của sàn, tổng đài báo thuê bao không tồn tại; gọi tiếp số 'giám đốc khu vực' thì đầu dây là một người đàn ông nói giọng lơ lớ bảo chú Năm 'kéo đủ 20 người thì mới được rút'. Cú lật thật nằm ở chỗ khác: tài khoản nhận tiền của cả nhóm đứng tên chính chú Năm, nhưng chú đã chuyển tiếp toàn bộ sang ví điện tử của người tuyến trên và còn được trích hoa hồng 32 triệu từ tiền của anh em mình. Chú Năm sụp xuống thú nhận đã mất 180 triệu tiền riêng từ ba tháng trước, cố kéo thêm người để 'gỡ'. Ngân không mắng chú. Cô mở máy tính, hướng dẫn cả họ lập đơn trình báo công an kinh tế, in sao kê 14 lần chuyển khoản, gọi lên tổng đài ngân hàng yêu cầu phong tỏa giao dịch đang treo, kịp giữ lại 210 triệu chưa được rút. Giỗ năm sau, chú Năm là người cầm tấm bảng đứng giảng lại năm dấu hiệu cho họ hàng bên ngoại, còn Ngân ngồi ăn cỗ nghe chú nói sai thì chỉnh.",
+      "hook": "Chú Năm vỗ vai tôi: 'Cháu học cao mà không biết làm giàu, chú lãi 30 phần trăm một tháng.'",
+      "comment_question": "Người thân rủ góp tiền lãi cao, bạn làm gì? 1 = Từ chối thẳng, 2 = Góp thử một ít cho đỡ mất lòng",
+      "thumb_keywords": [
+        "Nhận Diện Đa Cấp"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 126,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Mẹ Chồng Mê Thuốc Quảng Cáo Mạng, Tôi Dạy Bà Đọc Nhãn Thuốc",
+      "premise": "Trang 31 tuổi, dược sĩ nhà thuốc bệnh viện tỉnh Thái Bình, làm dâu bà Lụa 63 tuổi bị tiểu đường tuýp 2 đã tám năm. Từ ngày biết lướt TikTok, bà Lụa bỏ thuốc bác sĩ kê, theo một 'lương y' livestream mua 'viên gia truyền hết tiểu đường trong ba tháng' giá 4 triệu một liệu trình, tháng nào cũng gọi điện đặt thêm. Bà bảo bác sĩ trên mạng nói uống cái này hết bệnh, con dâu làm dược sĩ mà không bằng người ta. Khi Trang nhắc, bà mách chồng Trang là con dâu 'ghen với bà vì bà được quan tâm'. Đường huyết bà lên 14, hai lần chóng mặt ngã trong bếp. Trang không cấm, cô đổi cách: xin nghỉ một ngày đưa mẹ chồng lên Hà Nội, mang nguyên hộp 'thuốc gia truyền' đến trung tâm kiểm nghiệm, rồi về mở trong bếp một 'lớp học ba dòng': trên mỗi hộp thuốc, bà chỉ cần tìm ba dòng là số đăng ký lưu hành, tên hoạt chất kèm hàm lượng, và tên cơ sở sản xuất có địa chỉ. Hộp nào thiếu một dòng, bà không được bỏ vào miệng. Bà Lụa học mà vẫn cãi, nhưng bắt đầu lấy kính lúp soi từng hộp trong tủ.",
+      "twist": "Kết quả kiểm nghiệm về sau mười ngày: viên 'gia truyền' chứa phenformin, hoạt chất hạ đường huyết đã bị cấm từ lâu vì gây nhiễm toan lactic, trộn cùng bột ngô. Nghĩa là bà hạ đường được vài ngày rồi lại ngã vì chính thuốc. Cú lật lớn hơn: 'lương y' trên mạng chính là cháu rể bên nhà bà Lụa, thằng Khánh con cô Hoa, người vẫn về ăn giỗ và gọi bà là bà trẻ; số điện thoại đặt hàng là của vợ nó. Buổi họp mặt cuối năm ở nhà cô Hoa, bà Lụa không khóc không mắng, bà đặt lên bàn hộp thuốc, tờ kết quả kiểm nghiệm và cuốn sổ ghi 11 lần chuyển khoản tổng 46 triệu, rồi bắt Khánh đọc to ba dòng trên nhãn: không dòng nào có. Cô Hoa định bênh con thì bà hỏi cô có dám uống một viên trước mặt cả nhà không. Khánh xin trả lại tiền, bà chỉ đòi nó gỡ kênh và gọi điện xin lỗi 37 bà cụ trong danh sách khách quen. Tháng sau, hội người cao tuổi phường mời bà Lụa lên nói chuyện; bà cầm kính lúp dạy lại đúng ba dòng, cuối buổi còn khoe con dâu tôi là dược sĩ đấy.",
+      "hook": "Mẹ chồng dí điện thoại: 'Bác sĩ mạng bảo uống cái này hết tiểu đường, dược sĩ mà không bằng.'",
+      "comment_question": "Bố mẹ mua thuốc trên mạng, bạn làm gì? 1 = Giấu thuốc đi, 2 = Đưa đi kiểm nghiệm rồi cho xem kết quả",
+      "thumb_keywords": [
+        "Đọc Nhãn Thuốc"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 127,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Bố Suýt Mất 200 Triệu Vì Công An Giả, Tôi Dạy Cả Xóm Cúp Máy",
+      "premise": "Hà 28 tuổi, nhân viên chăm sóc khách hàng của một ngân hàng ở Đà Nẵng, bố là ông Tâm 61 tuổi, giáo viên về hưu ở Hội An. Một sáng Hà nhận cuộc gọi lạ: chính bố cô gọi từ máy bàn phòng giao dịch, giọng run, hỏi 'chuyển tiền phục vụ điều tra thì mấy ngày người ta trả lại'. Hà bỏ ca làm, phóng xe 30 cây số, đến nơi thì bố đang điền lệnh chuyển 200 triệu, tiền tiết kiệm cả đời, vào 'tài khoản tạm giữ của Bộ Công an'. Người gọi đọc đúng số căn cước, đúng ngày sinh, đúng tên trường ông dạy, bảo ông liên quan đường dây rửa tiền và cấm nói với con cái. Hà ngắt máy, ông Tâm giận con gái vì 'làm bố thành kẻ chống đối'. Hà không tranh cãi; cô mượn nhà văn hóa khu phố, mở một buổi nói chuyện cho 40 ông bà trong xóm, dạy đúng một kỹ năng là cúp máy: công an không làm việc qua điện thoại, không yêu cầu chuyển tiền, không giữ bí mật với người thân; nghe ba chữ 'tài khoản tạm giữ' là cúp. Cô dựng kịch bản gọi giả để bà con tập, bố ngồi hàng cuối, mặt vẫn sưng.",
+      "twist": "Trong buổi diễn tập, Hà nhờ một đồng nghiệp gọi vào số bác tổ trưởng Phúc. Bác Phúc nghe đến đoạn 'số điện thoại của bác bị dùng để lừa đảo' thì líu ríu đọc luôn số tài khoản, cả hội trường cười ồ mà nhớ bài. Cú lật thật đến sau buổi học: ông Tâm kéo con gái ra góc sân, thú nhận cuộc gọi hôm đó không phải lần đầu; tháng trước ông đã chuyển 35 triệu 'xác minh', và thông tin của ông lọt ra từ một tờ phiếu khảo sát sức khỏe người cao tuổi do 'nhân viên y tế' đến tận nhà ghi, chính là đứa cháu họ tên Lộc làm cộng tác viên cho một nhóm thu thập dữ liệu. Hà không mắng bố, hai bố con đến công an phường trình báo, cung cấp số tài khoản nhận tiền và tờ phiếu khảo sát; nhờ ngân hàng phong tỏa kịp một giao dịch, ông lấy lại 20 triệu. Buổi học thứ hai ở nhà văn hóa, ông Tâm là người cầm micro kể chuyện mình bị lừa 35 triệu để bà con khỏi xấu hổ khi nhận mình cũng từng nghe máy. Cuối buổi, cả xóm thống nhất một luật mới: nhận cuộc gọi 'công an', cúp máy rồi gọi cho con.",
+      "hook": "Bố tôi run giọng: 'Người ta đọc đúng số căn cước của tôi, không phải công an thì là ai?'",
+      "comment_question": "Bố mẹ bạn từng nhận cuộc gọi tự xưng công an chưa? 1 = Có, cúp máy kịp, 2 = Có, suýt chuyển tiền",
+      "thumb_keywords": [
+        "Cúp Máy"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 128,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Em Chồng Vay App Đen 50 Triệu, Tôi Bắt Trả Bằng Sổ Thu Chi",
+      "premise": "Nhung 30 tuổi, kế toán trưởng một xưởng may ở Hải Dương, chồng là thợ cơ khí, sống cùng mẹ chồng và em chồng tên Dũng 24 tuổi, ở nhà 'chờ việc xứng tầm'. Một đêm Dũng gõ cửa phòng chị dâu, bảo cần 50 triệu trước sáng mai, không thì bọn cho vay sẽ ghép ảnh chị lên mạng. Hóa ra Dũng vay 8 triệu qua một app để mua điện thoại, lãi và phí phạt cộng dồn thành 50 triệu sau bốn tháng, bị khủng bố cả danh bạ. Mẹ chồng khóc, bảo Nhung đưa tiền 'cho yên nhà yên cửa'. Nhung từ chối đưa tiền mặt. Cô mở laptop, in hợp đồng vay từ app, tính lại: lãi 2.000 đồng một triệu một ngày tương đương hơn 70 phần trăm một năm, vượt xa trần 20 phần trăm một năm của Bộ luật Dân sự, nghĩa là phần lãi vượt trần không có giá trị pháp lý. Rồi cô đưa Dũng một cuốn sổ bìa xanh và một bản cam kết ba điều: đi làm tại xưởng gỗ của bạn chị với lương 7 triệu, thẻ lương chị giữ, mỗi tối ghi sổ thu chi từng đồng và chụp gửi chị. Mẹ chồng mắng Nhung ác với em, Dũng ký trong nước mắt.",
+      "twist": "Nhung dẫn Dũng ra công an phường trình báo hành vi đe dọa ghép ảnh, gửi kèm 63 tin nhắn và ghi âm; bên đòi nợ im hẳn sau hai tuần. Cô liên hệ app, đề nghị trả gốc 8 triệu cộng lãi 20 phần trăm một năm, bên kia chấp nhận chốt 11 triệu. Nhưng cú lật nằm trong cuốn sổ: tháng thứ ba, Nhung đọc được dòng Dũng ghi 'đưa mẹ 2 triệu', rồi phát hiện khoản 8 triệu ban đầu không phải mua điện thoại mà để trả hộ mẹ chồng một hụi vỡ bà giấu cả nhà; bà đã 'chơi hụi' 11 tháng và mất 40 triệu, sợ con dâu khinh nên đẩy con trai đi vay. Bữa cơm tối hôm ấy Nhung đặt cuốn sổ lên bàn, không trách, chỉ đề nghị mẹ cũng ghi sổ chung với Dũng. Sáu tháng sau Dũng trả hết 11 triệu, có 9 triệu tiết kiệm đầu tiên trong đời và được xưởng gỗ nhận làm chính thức; cậu đưa lại chị dâu cuốn sổ đã ghi kín, trang cuối viết 'em xin lỗi vì câu ghép ảnh'. Mẹ chồng tự đi báo công an về chủ hụi, lấy lại được 12 triệu, và cuốn sổ bìa xanh từ đó nằm trên tủ lạnh.",
+      "hook": "Em chồng gõ cửa: 'Chị cho em mượn 50 triệu, không thì tụi nó ghép ảnh chị lên mạng.'",
+      "comment_question": "Em chồng vay app đen, bạn chọn? 1 = Đưa tiền cho yên chuyện, 2 = Không đưa, bắt tự đi làm trả nợ",
+      "thumb_keywords": [
+        "Sổ Thu Chi"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 129,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Chị Dâu Khoe Túi Hiệu Khắp Họ, Tôi Mở Lớp Soi Hàng Thật Giả",
+      "premise": "Vy 27 tuổi, nhân viên thẩm định của một cửa hàng ký gửi hàng hiệu ở quận 3, Sài Gòn, lấy chồng về một đại gia đình ở Biên Hòa có bốn nàng dâu. Chị dâu cả tên Quyên 36 tuổi, vợ anh trưởng làm bất động sản, lần nào họp họ cũng xách túi mới, lần này là túi da 80 triệu, nói thẳng mấy cô làm dâu nhà này còn lâu mới mua nổi, rồi bắt từng người sờ thử. Mẹ chồng hãnh diện, ba cô em dâu cúi mặt. Vy sờ qua đã biết đường chỉ lệch, khóa kéo nhẹ bẫng, nhưng cô im lặng. Hai tuần sau Vy rủ ba chị em dâu và cả mẹ chồng lên cửa hàng của mình 'uống cà phê', thực chất là một buổi học soi hàng với bốn điểm nhận biết cơ bản: đường may đều và đếm được số mũi trên một đoạn, phần cứng khắc chìm sắc nét không bị bóng loáng kiểu mạ, mã số bên trong khớp với giấy tờ và mùi da thật khác mùi keo. Cô cho mọi người cầm một chiếc thật và một chiếc nhái loại tốt cạnh nhau. Mẹ chồng về nhà nhìn túi của chính mình do con dâu cả tặng, mặt tối sầm nhưng không nói gì.",
+      "twist": "Đám cưới em họ, chị Quyên xách chiếc túi 80 triệu khoe tiếp trước bàn họ hàng bên nội, thách ai chứng minh túi giả. Lần này Vy không cần mở miệng: thím Ba đếm mũi chỉ, cô Tư lật mã số, mẹ chồng ngửi quai túi, từng người chỉ ra một lỗi đúng như đã học, cả bàn cười nghiêng ngả. Cú lật thật đến khi Quyên bật khóc trong nhà vệ sinh và Vy đi theo: anh trưởng đã thua lỗ đất nền từ năm ngoái, nhà đang thế chấp, Quyên bán hết túi thật từ tám tháng trước để trả lãi, mua túi nhái giữ thể diện cho chồng, và chính chiếc túi 'tặng mẹ' cũng là túi cũ bán rồi mua nhái thế vào. Vy không kể với ai. Cô dùng nghề của mình giúp chị dâu ký gửi nốt ba món đồ thật còn lại được 142 triệu, đủ đóng kỳ lãi quá hạn, rồi gợi ý Quyên xin vào làm tư vấn tại cửa hàng vì chị thuộc lòng từng mẫu. Buổi họp họ cuối năm, Quyên xách một chiếc túi vải 300 nghìn, khoe là 'nhân viên xuất sắc', còn mẹ chồng ôm chiếc túi nhái cũ, bảo bà biết nó giả nhưng con dâu tặng thì bà vẫn dùng.",
+      "hook": "Chị dâu đặt túi lên bàn: 'Túi này 80 triệu, mấy cô làm dâu còn lâu mới mua nổi.'",
+      "comment_question": "Bạn từng bị người thân khoe hàng hiệu chưa? 1 = Có, cười cho qua, 2 = Có, soi luôn tại chỗ",
+      "thumb_keywords": [
+        "Soi Hàng"
+      ],
+      "timing": "Mùa cưới (T10–T12)",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 130,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Con Bỏ Việc Làm YouTuber, Bố Trọng Sinh Dạy Lại Từ Số Không",
+      "premise": "Ông Bảy 58 tuổi, thợ sửa xe máy ở Cần Thơ, kiếp trước cấm tiệt con trai là Khoa 25 tuổi bỏ việc kỹ thuật viên để làm YouTuber, hai cha con cãi nhau, Khoa bỏ nhà lên Sài Gòn, sáu năm sau ông mất vì tai biến mà chưa kịp nói chuyện lại với con. Mở mắt, ông thấy mình đang ở đúng buổi tối Khoa tuyên bố nghỉ việc, cậu khoe kênh đã có hai nghìn người đăng ký và bảo bố biết gì mà cản. Lần này ông Bảy không cản. Ông im lặng gật đầu, rồi từ hôm sau âm thầm mượn điện thoại cũ của bà, nhờ con bé bán cà phê đầu hẻm chỉ cách quay, dựng và viết tiêu đề. Ông lập kênh 'Bố Già Sửa Xe', mỗi tối một video ba phút sửa một lỗi xe máy thường gặp, giọng miền Tây rề rề, tay dính dầu, nói đúng một câu chốt 'tiền này để dành đi khám bệnh'. Khoa không biết bố làm kênh, cậu bận chạy theo trend, mua đèn, mua micro, đốt 40 triệu tiền tiết kiệm trong bốn tháng mà kênh vẫn lẹt đẹt năm nghìn người theo dõi, bắt đầu xin mẹ tiền trả góp máy quay.",
+      "twist": "Tháng thứ năm, Khoa phát hiện kênh 'Bố Già Sửa Xe' đạt 100 nghìn người đăng ký khi thuật toán đề xuất video của bố vào máy cậu; bình luận gọi bố là 'thầy'. Khoa về nhà, lần đầu ngồi xuống nghe bố nói về kênh. Ông Bảy không dạy quay dựng; ông mở cuốn sổ sửa xe 30 năm ghi từng lỗi khách gặp, bảo đó là 'nghiên cứu khán giả', rồi đưa con một bảng số liệu tự tay chép: tỷ lệ xem hết, giờ đăng, 20 câu hỏi khách hay hỏi nhất. Ông ra điều kiện: Khoa làm kỹ thuật viên lại nửa ngày, nửa ngày còn lại làm kênh với bố, mỗi video phải trả lời được một câu hỏi thật, sau ba tháng không tăng thì nghỉ. Cú lật cuối cùng là ở lần kiểm tra sức khỏe mà kiếp trước ông bỏ qua: nhờ tiền kênh ông đi khám, phát hiện hẹp mạch máu não sớm, đặt stent kịp. Kênh chung của hai cha con đạt nút bạc sau tám tháng, video đầu tiên của Khoa có một triệu lượt xem là cảnh bố ngồi sau xe con đi tái khám. Ông Bảy chỉ nói đúng một câu khi nhận nút: kiếp này tao không cản, tao đi cùng.",
+      "hook": "Con trai tôi đập bàn tuyên bố: 'Bố biết gì mà cản, con có hai nghìn sub rồi.'",
+      "comment_question": "Con bỏ việc ổn định đi làm kênh, bạn làm gì? 1 = Cấm bằng được, 2 = Để con thử và học cùng con",
+      "thumb_keywords": [
+        "Từ Số Không"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 131,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Họ Hàng Nhờ Tôi Xem Bói, Tôi Dạy Họ Xem Sao Kê Ngân Hàng",
+      "premise": "Linh 26 tuổi, chuyên viên phân tích tài chính ở Hà Nội, về quê Bắc Ninh ăn rằm tháng Giêng thì bị cô Tư (em bố, 49 tuổi, buôn vải ở chợ) kéo vào buồng, bảo nghe nói cháu học tài chính, xem hộ cô năm nay có lộc không. Linh cười, bảo cô muốn biết lộc thì đưa cháu cái điện thoại. Cô mở app ngân hàng của cô Tư, kéo sao kê 12 tháng, rồi 'phán' đúng từng chuyện: tháng Ba cô mất 6 triệu ở chỗ thầy Hải làm lễ giải hạn, tháng Bảy 8 triệu cúng sao, tháng Chạp 7 triệu dâng sao giải hạn, cộng cả năm 21 triệu đi vào tài khoản một người tên Nguyễn Văn Hải; lộc của cô nằm ở chỗ tiền hàng tháng Tư và tháng Mười tăng vọt vì đúng mùa cưới. Cô Tư há hốc mồm tưởng cháu có căn. Linh bày thành trò chơi: lần lượt các bác các thím đưa điện thoại, cô 'xem bói' từng người bằng ba cột: tiền vào, tiền ra lặp lại, và những khoản lạ chuyển cho một cái tên. Cả nhà cười ngả nghiêng, chỉ bác Cả im lặng vì sao kê của bác có 14 lần chuyển cho thầy Hải.",
+      "twist": "Mùng Mười, thầy Hải đích thân đến nhà cô Tư làm lễ đầu năm, gặp đúng Linh. Trước cả họ, Linh không cãi lý về tâm linh; cô mở bảng tổng hợp sao kê của bảy người trong họ: 112 triệu trong hai năm chuyển vào cùng một số tài khoản, rồi hỏi thầy vì sao hạn của cả họ luôn rơi vào đúng tháng thầy cần tiền đóng xe. Thầy nổi giận bỏ về. Cú lật thật là ở bác Cả: bác không bị lừa vì mê tín mà vì thầy Hải nắm được bí mật bác vay nặng lãi 200 triệu để con trai chạy việc, dùng nó để ép bác giới thiệu thêm người. Linh ngồi với bác Cả cả buổi chiều, dùng chính sao kê tính ra bác đã trả lãi 96 triệu cho khoản gốc 200 triệu, rồi hướng dẫn bác lập đơn tố giác và thỏa thuận lại với chủ nợ theo mức lãi pháp luật cho phép. Rằm tháng Hai, cô Tư thay buổi lễ giải hạn bằng 'buổi xem sao kê' tại nhà, mời Linh về 'coi' cho hàng xóm, mỗi người mang theo điện thoại và một bát bún riêu thay lễ. Cuối truyện cô Tư nói, năm nay cô có lộc thật: tiết kiệm được 21 triệu.",
+      "hook": "Cô Tư kéo tôi vào buồng: 'Nghe nói cháu học tài chính, xem hộ cô năm nay có lộc không.'",
+      "comment_question": "Nhà bạn mỗi năm tốn bao nhiêu cho cúng giải hạn? 1 = Dưới 2 triệu, 2 = Trên 10 triệu mà không dám tính",
+      "thumb_keywords": [
+        "Xem Sao Kê"
+      ],
+      "timing": "Trước Tết (T1/2027)",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 132,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Chủ Trọ Ăn Chặn Tiền Điện, Tôi Dạy Cả Dãy Trọ Đọc Công Tơ",
+      "premise": "Mai 25 tuổi, kỹ sư điện mới ra trường, vào làm ở một nhà máy ở Bình Dương và thuê phòng trong dãy trọ 12 phòng của ông Sáu Hòa. Tháng đầu nhận hóa đơn, Mai thấy giá điện 5.000 đồng một số trong khi người thuê trọ có đăng ký tạm trú được tính theo giá sinh hoạt bậc thang, thấp hơn một nửa; cô hỏi thì ông Sáu bảo điện 5 nghìn một số, không ở thì dọn. Cả dãy toàn công nhân, ấm ức mà không dám hé răng. Mai không cãi. Cô để ý công tơ tổng ngoài cổng và 12 công tơ phụ trong dãy, cộng chỉ số 12 phòng thì vượt công tơ tổng hơn 300 số mỗi tháng, chuyện vô lý. Cô mở một 'lớp đọc công tơ' ngay sân phơi đồ tối thứ Bảy: cách đọc năm chữ số đen bỏ số đỏ, cách chụp ảnh chỉ số kèm ngày vào cùng một giờ mỗi ngày, cách tự tính số điện đã dùng và cách nhìn đĩa quay để biết công tơ chạy nhanh bất thường. Mười một phòng còn lại lập nhóm Zalo, mỗi tối một người gửi ảnh. Ông Sáu thấy cả dãy soi công tơ thì bắt đầu đe dọa tăng giá phòng.",
+      "twist": "Sau 30 ngày chụp ảnh, Mai có bằng chứng: công tơ phụ của bảy phòng chạy nhanh hơn thực tế từ 18 đến 25 phần trăm, còn công tơ tổng đã bị đấu lại để bỏ qua phần điện ông Sáu dùng cho hai máy lạnh và máy giặt nhà mình. Cô gửi phản ánh kèm 360 bức ảnh lên điện lực địa phương và đề nghị kiểm định công tơ; đoàn kiểm tra xuống, lập biên bản sai lệch và kết luận mức thu 5 nghìn một số sai quy định. Cú lật cuối: ông Sáu không phải chủ thật của dãy trọ. Ông chỉ thuê lại nguyên dãy của bà Năm, chủ đất 70 tuổi đang ở quê, để cho thuê từng phòng, và tiền điện ăn chênh là 'lời' chính của ông. Bà Năm được Mai gọi điện mời về, nhìn biên bản và danh sách 12 phòng rồi chấm dứt hợp đồng với ông Sáu, ký trực tiếp với từng người thuê, giá điện về đúng giá điện lực cộng hao hụt đường dây. Mai được bà Năm nhờ làm 'tổ trưởng kỹ thuật' của dãy, mỗi tháng đọc công tơ chung một lần trước mặt mọi người; ông Sáu dọn đi, bỏ lại chiếc đèn pin Mai từng mượn soi công tơ đêm đầu.",
+      "hook": "Ông chủ trọ dằn hóa đơn xuống bàn: 'Điện 5 nghìn một số, không ở thì dọn.'",
+      "comment_question": "Tiền điện trọ của bạn bao nhiêu một số? 1 = Đúng giá điện lực, 2 = Từ 4 nghìn trở lên, chưa dám hỏi",
+      "thumb_keywords": [
+        "Đọc Công Tơ"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 133,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Mẹ Chồng Dạy Tôi Làm Dâu, Tôi Dạy Lại Bà Cách Làm Mẹ Chồng",
+      "premise": "Hiền 29 tuổi, giáo viên tiểu học ở Nam Định, về làm dâu bà Thục 60 tuổi, góa chồng. Ngày đầu, bà dạy làm dâu nhà này thì 5 giờ dậy nấu cơm, không có chuyện ngủ nướng; rồi cả bảng nội quy: ăn sau, rửa bát xong mới được ngồi, lương nộp mẹ giữ, không về ngoại quá hai lần một năm, nói chuyện với chồng không được to tiếng. Chồng Hiền hiền lành, chỉ biết bảo vợ 'nhịn mẹ chút'. Hiền không cãi. Cô lấy đúng nghề của mình, soạn một 'giáo án làm dâu' viết tay 12 trang, mỗi yêu cầu của mẹ chồng ghi thành một mục kèm 'tiêu chí đánh giá'. Rồi cô âm thầm áp dụng bản giáo án ấy sang người khác: em gái chồng là Nga 27 tuổi, vừa cưới và ở rể ngay nhà bên, chồng Nga là con trai duy nhất của bà. Hiền làm đúng từng điều với em chồng theo cách mẹ chồng muốn: nhắc Nga dậy 5 giờ nấu cơm cho nhà chồng, hỏi Nga nộp lương cho mẹ chồng chưa, bảo Nga về ngoại nhiều thế là hỗn, mỗi lần đều nói nguyên văn câu bà đã dạy mình. Bà Thục nghe thấy sai sai mà không bắt bẻ được, vì câu nào cũng của bà.",
+      "twist": "Giỗ bố chồng, Nga chạy sang khóc với mẹ vì mẹ chồng bên kia 'học' cách quản con dâu từ chính bà Thục, bắt Nga nộp lương và ăn sau. Bà Thục nổi giận định sang bênh con gái, thì Hiền đặt cuốn giáo án 12 trang lên bàn, mỗi trang là một câu bà dạy cô và một câu Nga vừa khóc kể, giống nhau từng chữ. Cú lật thật ở trang cuối: Hiền chép lại lá thư bà Thục viết năm 1990 cho mẹ đẻ, giấu trong hòm gỗ, kể chuyện bị mẹ chồng bắt dậy 4 giờ, không cho về ngoại ba năm, lương nộp hết, kết bằng câu 'sau này con làm mẹ chồng, con sẽ không bao giờ như thế'. Cô tìm thấy khi dọn gác. Bà Thục đọc xong ngồi im rất lâu. Hôm sau bà sang nhà thông gia, chỉ đưa lá thư cho bà sui đọc, và hai bà mẹ chồng cùng xé bảng nội quy. Bà Thục viết lại một bảng mới dán cạnh bếp, chỉ có ba dòng: ai dậy trước thì nấu, lương ai người ấy giữ, về ngoại không cần xin. Cuối truyện bà hỏi cô giáo chấm mẹ mấy điểm, Hiền trả lời chín, trừ một vì bà vẫn dậy 5 giờ nấu cơm cho cả nhà.",
+      "hook": "Mẹ chồng gõ cửa: 'Làm dâu nhà này thì 5 giờ dậy nấu cơm, không có chuyện ngủ nướng.'",
+      "comment_question": "Mẹ chồng bạn từng dạy bạn điều gì khó nhất? 1 = Nộp lương, 2 = Giờ giấc, chuyện về ngoại",
+      "thumb_keywords": [
+        "Dạy Lại"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 134,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Chú Út Bị Lừa Đi Lao Động Chui, Tôi Dạy Cả Họ Đọc Hợp Đồng",
+      "premise": "Thu 30 tuổi, trưởng phòng nhân sự một công ty may ở Hưng Yên, về quê Nghệ An dự lễ 'mừng chú Út sắp đi Hàn Quốc'. Chú Út 38 tuổi, làm thợ xây, đã cầm sổ đỏ của bà nội đi vay 150 triệu để nộp cho một 'công ty xuất khẩu lao động', bên đó nói chỉ cần 150 triệu là bay, hợp đồng để sau cũng được, hai tuần nữa nộp thêm 100 triệu nữa là có vé. Bác Cả còn giục hai cháu đăng ký theo. Thu hỏi xin xem hợp đồng thì chú Út chỉ có một tờ 'phiếu thu' viết tay đóng dấu mờ. Cô tra ngay cổng thông tin Cục Quản lý lao động ngoài nước: tên công ty không có trong danh sách doanh nghiệp được cấp giấy phép. Thu không mắng ai. Cô dọn mâm, lấy tờ giấy khổ lớn, mở một 'lớp đọc hợp đồng' cho cả họ với bốn điều bắt buộc phải có trước khi đưa tiền: doanh nghiệp có tên trên cổng thông tin, hợp đồng ký trước khi nộp bất kỳ khoản nào, phí dịch vụ ghi rõ con số theo trần quy định từng thị trường, và phiếu thu có mã số thuế kèm hóa đơn. Chú Út ngồi nghe, mặt càng lúc càng trắng.",
+      "twist": "Thu dẫn chú Út và bác Cả lên tận văn phòng công ty ở Vinh vào sáng thứ Hai, đến nơi thì nhân viên đang khuân máy tính lên xe tải. Cô bật ghi hình, gọi công an phường, giữ được giám đốc lại đúng lúc hắn định chạy; trong két còn 47 bộ hồ sơ và sổ đỏ của 19 gia đình khắp ba huyện. Cú lật thật là người quen giới thiệu chính là anh Tài, con rể bác Cả, người được hứa hoa hồng 15 triệu mỗi người kéo về và đã kéo sáu người trong họ; anh ta chỉ ham tiền. Họp họ, bác Cả định giấu, Thu đặt danh sách 19 hồ sơ lên bàn, tên con rể bác ở cột 'người giới thiệu'. Bà nội 82 tuổi nói câu quyết định: nhà này không đuổi ai, nhưng ai dắt người vào thì phải dắt người ra. Tài cùng Thu đi sáu nhà làm đơn tố giác tập thể; 19 gia đình lấy lại sổ đỏ và 60 phần trăm tiền. Chú Út sau đó đi Hàn Quốc qua chương trình cấp phép của Nhà nước, phí chưa bằng một phần ba, trước khi bay chụp hợp đồng gửi nhóm họ, kèm dòng chữ 'đủ bốn điều rồi cháu Thu ơi'.",
+      "hook": "Chú Út khoe: 'Công ty nói chỉ cần 150 triệu là bay, hợp đồng để sau cũng được.'",
+      "comment_question": "Quê bạn có ai mất tiền đi lao động chui chưa? 1 = Có, mất trắng, 2 = Có người đang định nộp tiền",
+      "thumb_keywords": [
+        "Đọc Hợp Đồng"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 135,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "5 Kiểu Họ Hàng Ở Đám Cưới, Tôi Gặp Đủ Trong Một Ngày",
+      "premise": "Vy 29 tuổi, MC sự kiện ở Cần Thơ, nhận cầm mic cho chính đám cưới của em gái Thư tổ chức tại nhà hàng tiệc cưới Ninh Kiều với 300 khách, vì mẹ bảo 'người nhà làm cho đỡ tốn'. Từ 9 giờ sáng tới tiệc tối, Vy gặp đủ 5 kiểu họ hàng, mỗi kiểu một ca. Ca 1: bác Hai Tòng hỏi lương Vy ngay bàn gia tiên rồi so với con trai bác làm ngân hàng. Ca 2: dì Bảy chê sính lễ nhà trai 'có ba mâm, nghèo mà bày đặt', trong khi mâm quả của dì năm xưa bốn mâm là nhờ nhà Vy cho mượn. Ca 3: chú Tám say từ 11 giờ trưa, đòi giật mic hát 'Duyên phận' ba lần. Ca 4: thím Chín ghi phong bì 200 nghìn cho cả nhà sáu người nhưng đứng chụp ảnh ở vị trí trung tâm. Ca 5: bà cô Mười tung tin với cả bàn rằng cô dâu có bầu nên mới cưới vội. Mỗi ca Vy đáp đúng một câu qua micro, giọng tươi, lời nói có bằng chứng: bảng giá phòng tiệc, biên lai mượn mâm quả, danh sách phong bì do chính thím ghi, và sợi dây chung là Vy giữ cho em gái một ngày trọn vẹn.",
+      "twist": "Ca thứ 5 là cú lật lớn nhất: bà cô Mười không bịa, bà nghe lời đồn từ chính mẹ Vy, người đã nói với vài bà bạn rằng 'cưới gấp vì có tin vui' để giải thích việc tổ chức trong hai tháng. Sự thật: đám cưới vội vì bố Vy vừa phát hiện u tuyến giáp, mổ ngày 15 tháng sau, ông muốn tự dắt con gái vào lễ đường khi còn khỏe. Cao trào ở phần phát biểu cuối tiệc: Vy đưa mic cho bố, ông cầm tờ giấy hẹn mổ của bệnh viện Ung bướu Cần Thơ đọc ngày giờ trước 300 khách, cảm ơn 'ai đã đoán con gái tôi có bầu'. Bàn bà cô Mười im phắc, bác Hai Tòng tự đứng lên xin lỗi thay cả họ. Cô dâu Thư ôm bố khóc, chú rể hứa đưa ông đi mổ. Phong bì 200 nghìn của thím Chín được Vy công bố là 'quỹ mua hoa cho cô dâu', thím lặng lẽ bỏ thêm hai triệu. Kết: tháng sau ca mổ thành công, ảnh cưới treo giữa nhà có đủ 5 người họ hàng cười gượng, và Vy nhận ra MC giỏi nhất đời cô là người đọc tờ giấy hẹn mổ bằng giọng run.",
+      "hook": "Bà cô Mười nói to cả bàn: 'Cô dâu nhà này chắc có bầu rồi mới cưới vội thế.'",
+      "comment_question": "Kiểu họ hàng đám cưới nào bạn ngán nhất? 1 = Hỏi lương, 2 = Chê sính lễ, 3 = Tung tin có bầu",
+      "thumb_keywords": [
+        "Kiểu Họ Hàng"
+      ],
+      "timing": "Mùa cưới (T10–T12)",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 136,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "7 Câu Mẹ Chồng Hay Nói, Tôi Có Sẵn 7 Câu Trả Lời",
+      "premise": "Nhung 32 tuổi, nhân viên kế hoạch ở một công ty may Nam Định, làm dâu bà Lụa 60 tuổi được 5 năm, sống chung nhà ba tầng ở phường Trần Hưng Đạo. Mỗi ngày trong tuần bà Lụa có một câu kinh điển và Nhung quyết định tuần này không cãi, chỉ đáp bằng một hành động. Thứ hai, câu 'Thời mẹ làm dâu khổ gấp trăm lần con bây giờ': Nhung đưa bà cuốn sổ ghi ba năm bà ở viện chăm bố chồng do chính Nhung chi trả 86 triệu. Thứ ba, 'Con gái người ta khéo lắm': Nhung mời đúng cô con gái người ta sang ăn cơm, cô ấy thú thật mua đồ ăn sẵn. Thứ tư, 'Nhà này mẹ nói là nhất': Nhung dán bảng phân công việc nhà, tên bà không có việc nào. Thứ năm, 'Chồng con mệt, để nó nghỉ': Nhung đưa chồng Hưng bảng lương hai vợ chồng, Nhung cao hơn 3 triệu. Thứ sáu, 'Mẹ không cần tiền của chúng mày': Nhung chuyển khoản trả lại 5 triệu bà vừa xin cho em chồng. Thứ bảy, 'Cháu mẹ gầy vì mẹ nó vụng': Nhung đưa sổ khám dinh dưỡng bé Bin đạt chuẩn.",
+      "twist": "Chủ nhật, câu thứ 7 bà Lụa định nói là 'Con dâu hàng xóm đưa mẹ chồng đi du lịch', thì cô em chồng Hà về, kéo bà vào buồng. Nhung vô tình nghe được sự thật: 5 triệu mỗi tháng bà xin 'cho em' thật ra bà đóng vào tài khoản tiết kiệm mang tên bé Bin, đã được 38 triệu, vì bà sợ hai vợ chồng tiêu hết; còn chuyện khen con gái người ta là vì bà Lụa bị hội bạn già chê con dâu bà, bà nói theo cho khỏi lạc lõng. Cao trào bữa cơm tối chủ nhật có cả nhà Hà: Hà kể cho bố mẹ chồng cô rằng chị dâu Nhung lười, bà Lụa đặt sổ tiết kiệm tên cháu lên bàn, rồi đọc đúng 7 câu bà đã nói trong tuần và 7 việc Nhung đã làm, kết bằng câu thứ 8: 'Mẹ xin lỗi'. Hà đỏ mặt khi mẹ chồng mình hỏi sổ tiết kiệm cho cháu nhà Hà đâu. Nhung không hả hê, cô đưa bà tấm vé xe đi Sầm Sơn cho hai mẹ con, bảo 'du lịch mẹ chồng con dâu nhà mình đi trước hàng xóm'. Kết: tuần sau bà Lụa có câu nói mới mỗi ngày, câu nào cũng bắt đầu bằng 'Nhung ơi'.",
+      "hook": "Mới sáng thứ hai, mẹ chồng đã mở đầu: 'Thời mẹ làm dâu khổ gấp trăm lần con bây giờ.'",
+      "comment_question": "Mẹ chồng bạn hay nói câu nào nhất? 1 = Thời mẹ khổ hơn, 2 = Con gái người ta khéo",
+      "thumb_keywords": [
+        "7 Câu Trả Lời"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 137,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "5 Ca Đòi Nợ Khó Nhất Đời Tôi Làm Nhân Viên Thu Hồi Nợ",
+      "premise": "Trang 30 tuổi, nhân viên thu hồi nợ của một công ty tài chính tiêu dùng chi nhánh Biên Hòa, làm nghề 6 năm, nguyên tắc là 'đòi bằng giấy, không đòi bằng miệng'. Cuối năm công ty giao cô 5 hồ sơ khó nhất mà ba đồng nghiệp trước đã bỏ cuộc. Ca 1: chủ tịch phường cũ nợ 180 triệu mua xe cho con, luôn 'bận họp'; Trang đến đúng buổi tiếp dân, xếp số như mọi người. Ca 2: thầy giáo cũ dạy văn của Trang nợ 60 triệu, lý do là nuôi học trò nghèo, nhưng sao kê cho thấy tiền đổ vào lô đề. Ca 3: Hằng, bạn thân từ cấp hai, nợ 45 triệu, chặn số Trang, Trang gửi thiệp cưới giả làm cớ gặp mặt. Ca 4: ông Phúc, bố chồng tương lai của Trang, nợ 320 triệu đứng tên công ty vật liệu xây dựng đã giải thể, hồ sơ được bạn trai Trang giấu suốt một năm. Mỗi ca một cú vả nhỏ, một bài học nghề. Ca 5, hồ sơ cuối cùng được sếp đặt lên bàn với câu 'chị đòi nợ em thì được, nhưng bà kia là mẹ chồng chị đấy', khiến cả phòng quay lại nhìn Trang.",
+      "twist": "Ca thứ 5: người đứng tên khoản vay 250 triệu quá hạn 14 tháng là bà Thu, mẹ ruột của bạn trai Trang, vợ ông Phúc, thế chấp bằng chính căn nhà mà họ định tặng cho đôi trẻ làm của hồi môn. Trang phát hiện tiền vay không mất vì làm ăn: bà Thu rút 250 triệu đưa cho con trai lớn, anh của bạn trai, để anh này chạy việc biên chế, và bị lừa. Cao trào trong bữa cơm ra mắt chính thức, khi bà Thu khoe sổ đỏ 'nhà này sau cho hai đứa', Trang đặt lên bàn hai hồ sơ nợ, bảng tính lãi 18 tháng và một phương án: công ty đồng ý tái cơ cấu nợ, trả 6 triệu mỗi tháng trong 8 năm nếu cả nhà ký, không ai mất nhà. Anh trai bạn trai định quát, Trang đưa biên nhận chạy việc 250 triệu, anh ngồi xuống. Bạn trai thú nhận giấu hồ sơ bố vì sợ mất Trang. Trang không bỏ cưới, nhưng ra điều kiện: của hồi môn là sổ nợ đã ký cùng nhau, không phải sổ đỏ. Kết: tháng đầu tiên, người chuyển 6 triệu đúng hạn là bà Thu, kèm tin nhắn 'cảm ơn con dâu đòi nợ mẹ'.",
+      "hook": "Sếp đặt hồ sơ lên bàn: 'Chị đòi nợ em thì được, nhưng bà kia là mẹ chồng chị đấy.'",
+      "comment_question": "Bạn từng cho người thân vay mà không đòi được không? 1 = Có, coi như mất, 2 = Đòi được nhờ giấy tờ",
+      "thumb_keywords": [
+        "5 Ca Đòi Nợ"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 138,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "5 Bức Ảnh Khách Mang Đến Tiệm Phục Chế, Tôi Chỉ Dám Kể 4",
+      "premise": "Mai 34 tuổi mở tiệm phục chế ảnh cũ trong con hẻm đường Lê Văn Sỹ, Sài Gòn, khách phần lớn là người già mang ảnh gia đình đến tô màu, xóa người. Mỗi bức ảnh là một bí mật và Mai có luật: làm đúng yêu cầu, không hỏi, không kể. Tháng cận Tết cô nhận 5 bức. Bức 1: ông cụ 80 tuổi nhờ ghép thêm một đứa bé vào ảnh gia đình năm 1975, là đứa con rơi ông chưa bao giờ dám nhận, nay muốn in treo. Bức 2: hai anh em từ mặt 20 năm, cùng mang đến một bức ảnh gốc giống hệt nhau, mỗi người yêu cầu xóa người kia; Mai làm hai bản rồi mời cả hai đến nhận cùng giờ. Bức 3: người đàn bà nhờ phục chế ảnh cưới của chồng với vợ trước để tặng con riêng của chồng ngày cưới. Bức 4: cậu thanh niên mang ảnh bố mặc quân phục, hóa ra bố cậu là người bảo vệ trường, cậu muốn ảnh 'oai' để đăng kết hôn, Mai từ chối sửa nghề nhưng tô màu đẹp nhất đời. Bức 5 do một bà khách sang trọng mang đến với yêu cầu: 'Cô xóa giúp người đứng cạnh mẹ tôi, nhưng đừng hỏi đó là ai.'",
+      "twist": "Bức thứ 5 là ảnh gia đình chụp ở Đà Lạt năm 1998, người đứng cạnh mẹ bà khách chính là bố ruột của Mai, và cô bé 6 tuổi ở góc ảnh là Mai. Bà khách là bà Diệp, mẹ chồng tương lai của Mai, người hay chê Mai 'gốc gác không rõ'. Sự thật lộ dần: mẹ bà Diệp và bố Mai từng là vợ chồng, bố Mai bỏ đi khi Mai 6 tuổi không phải vì vô trách nhiệm mà vì bị gia đình bên kia ép ly hôn để bà cụ lấy người giàu hơn. Bà Diệp muốn xóa ông để cưới con trai cho Mai mà không ai biết hai nhà từng dính líu. Cao trào trong bữa cơm dạm ngõ, bà Diệp lại nhắc 'con dâu phải biết gốc gác', Mai đặt lên bàn bản phục chế đủ cả 4 người, cùng tờ giấy ly hôn năm 1999 mà bố để lại trước khi mất ghi rõ lý do. Bà Diệp lặng đi, mẹ của bà, cụ Hòa 82 tuổi ngồi đầu bàn, là người lên tiếng: 'Bức này để nguyên, treo ở phòng khách.' Kết: ngày cưới hai nhà chụp bức mới, Mai không xóa ai, và vẫn giữ luật của tiệm: kể 4 bức, bức thứ 5 là của riêng cô.",
+      "hook": "Bà khách đặt ảnh lên bàn: 'Cô xóa giúp người đứng cạnh mẹ tôi, nhưng đừng hỏi đó là ai.'",
+      "comment_question": "Nhà bạn có bức ảnh nào bị cắt mất một người? 1 = Có, tôi biết vì sao, 2 = Có, chưa ai dám hỏi",
+      "thumb_keywords": [
+        "Chỉ Dám Kể 4"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 139,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Trúng Đất Đền Bù, 4 Người Đến Xin Lỗi Trong Một Tuần",
+      "premise": "Liên 38 tuổi, bán bún riêu ở chợ Hòa Khánh, Đà Nẵng, một mình nuôi con gái 10 tuổi từ ngày ly hôn. Mảnh đất 320 mét vuông ở Hòa Liên mà bà ngoại để lại cho Liên, cả họ từng chê 'đất cuối đường, chó không ở', nay nằm đúng tuyến đường vành đai, đền bù 7,4 tỷ cộng hai lô tái định cư. Tin đăng báo hôm chủ nhật, và từ thứ hai mỗi ngày có một người đến xin lỗi. Thứ hai, bác Cả Quý, người năm xưa đuổi mẹ con Liên khỏi nhà thờ họ vì 'bỏ chồng là mất mặt', đến mang theo gia phả và đề nghị 'đưa đất vào quỹ họ'. Thứ tư, cô Ba Hường, người từng nói Liên là đồ bỏ đi, đến khóc xin cho con trai vay 500 triệu mua xe chạy dịch vụ. Thứ sáu, chồng cũ Toàn đến với lá đơn xin đổi quyền nuôi con 'vì bây giờ em có điều kiện lo cho con hơn anh' kèm luật sư. Mỗi người Liên tiếp bằng một tô bún và một câu trả lời khác nhau, kèm giấy tờ: bản sao di chúc bà ngoại, biên bản họp họ năm xưa có chữ ký bác Cả, tin nhắn chồng cũ từ chối chu cấp 4 năm.",
+      "twist": "Chủ nhật, người thứ 4 là mẹ đẻ của Liên, bà Sáu, người suốt 8 năm đứng về phía nhà chồng cũ và không gọi cho con gái một lần. Bà không xin tiền, bà mang đến cuốn sổ tiết kiệm 210 triệu đứng tên cháu ngoại, mở từ năm Liên ly hôn, và một bí mật: bà ngoại để đất cho Liên là do chính bà Sáu quỳ xin mẹ mình, đổi lại bà phải im lặng để bác Cả không tranh phần. Cao trào ở buổi họp họ do bác Cả triệu tập để 'bàn chuyện đất vào quỹ họ'. Liên đặt lên bàn thờ tổ ba thứ: quyết định đền bù, di chúc có công chứng, và biên bản năm xưa bác Cả ký đuổi mẹ con cô. Cô tuyên bố dành 300 triệu sửa nhà thờ họ nhưng đứng tên con gái cô là người đóng góp, ghi vào gia phả; chồng cũ rút đơn khi luật sư của Liên đưa bảng chu cấp 0 đồng trong 48 tháng. Cô Ba Hường được cho vay 50 triệu, có giấy. Kết: Liên dùng tiền đền bù mua lại chính căn nhà mẹ con cô từng bị đuổi khỏi năm xưa, để tấm biển nhỏ: 'Quán bún riêu Liên, mở cửa với mọi người'.",
+      "hook": "Bác Cả gõ cửa: 'Hồi đó bác nói cháu là đồ bỏ đi, giờ bác xin lỗi, đất chia sao?'",
+      "comment_question": "Bạn tha cho ai? 1 = Bác Cả, 2 = Cô Ba, 3 = Chồng cũ, 4 = Mẹ đẻ",
+      "thumb_keywords": [
+        "Đến Xin Lỗi"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 140,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "7 Ngày Làm Dâu Trưởng Ngày Giỗ Tổ, Mỗi Ngày Một Cú Vả",
+      "premise": "Quyên 35 tuổi, quản lý bếp của một chuỗi cơm văn phòng ở Hà Nội, là dâu trưởng họ Đặng ở Thường Tín. Giỗ tổ năm nay 40 mâm rơi đúng tuần cô bận nhất, mẹ chồng mất rồi nên cả họ dồn hết cho cô với câu quen thuộc của bác Cả Đặng Văn Thịnh: 'Dâu trưởng thì lo hết, 40 mâm là chuyện nhỏ.' Quyên nhận, nhưng làm theo kiểu nghề của cô: 7 ngày, mỗi ngày một việc và một người trong họ phải nhận phần. Ngày 1 cô in bảng phân công 40 mâm thành 8 nhóm việc, dán ở nhà thờ họ. Ngày 2, thím Hoa từ chối việc rửa rau, Quyên thuê bếp ngoài 12 triệu rồi chia đều phần thím. Ngày 3, chú Sáu đòi mua lợn của bạn giá cao, Quyên đưa ba báo giá. Ngày 4, cô em chồng Ngân than bận, Quyên giao việc thu tiền góp và ghi sổ, ai chưa góp thì Ngân phải gọi. Ngày 5, bác Cả bảo 'năm nào cũng rượu Tây', Quyên đưa hóa đơn ba năm 27 triệu tiền rượu đều do cô ứng. Ngày 6, bà cô bên nội chê cỗ thuê ngoài 'mất thiêng', Quyên để bà nấu thử một mâm, bà xin thôi.",
+      "twist": "Ngày 7, giỗ tổ, cỗ ngon nhất lịch sử họ Đặng, 40 mâm đúng giờ. Bác Cả đứng lên nhận công trước cả họ, tuyên bố năm nay 'bác đứng ra lo liệu', rồi nhân tiện đề nghị bán mảnh đất hương hỏa 400 mét vuông để 'xây lại nhà thờ to hơn', giấy tờ bác đã làm sẵn, chỉ cần trưởng nam Đức, chồng Quyên, ký. Cú vả cuối: Quyên không nói về cỗ, cô đưa bảng chi phí 7 ngày có chữ ký nhận việc của từng người, rồi đến bảng thứ hai là sổ quỹ họ 5 năm do bác Cả giữ: thu 312 triệu, chi có chứng từ 118 triệu, phần còn lại ghi 'tạm ứng' đều do bác. Cô em chồng Ngân, nhờ phần việc gọi điện thu tiền, biết cả họ đã góp tiền xây nhà thờ từ 3 năm trước. Ông Tám, người cao tuổi nhất họ, hỏi bác Cả một câu: 'Đất hương hỏa bán rồi, giỗ tổ sang năm cúng ở đâu?' Bác im. Chồng Quyên không ký, họ biểu quyết chuyển quỹ cho Ngân giữ, sổ công khai. Kết: lúc dọn mâm, bác Cả lặng lẽ rửa chồng bát đầu tiên trong đời, Quyên không nói gì, chỉ bỏ thêm một miếng giò vào đĩa của con gái bác.",
+      "hook": "Bác Cả phán gọn trong bữa cơm họp họ: 'Dâu trưởng thì lo hết, 40 mâm là chuyện nhỏ.'",
+      "comment_question": "Giỗ tổ nhà bạn ai nấu? 1 = Dâu trưởng lo hết, 2 = Cả họ chia việc, 3 = Thuê ngoài",
+      "thumb_keywords": [
+        "Một Cú Vả"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 141,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "5 Lần Bố Tôi Trọng Sinh Sửa Sai, Lần Thứ 5 Cả Họ Quỳ",
+      "premise": "Hạnh 17 tuổi, học sinh lớp 12 ở một thị trấn thuộc Nghệ An, con gái út của ông Toản 52 tuổi, thợ mộc, người cả đời 'nể họ hơn thương con'. Một sáng sau cơn đột quỵ nhẹ, bố Hạnh tỉnh dậy khác hẳn, và từ đó Hạnh chứng kiến 5 lần bố làm ngược lại điều cả họ chờ đợi, như thể ông biết trước mọi chuyện. Lần 1: chú Hòa đến xin bố ký bảo lãnh vay ngân hàng 600 triệu mở xưởng, bố từ chối, ba tháng sau xưởng của chú cháy. Lần 2: bác Cả gọi cả họ ép bố bán mảnh đất mặt đường cho dự án 'giá tốt', bố không bán, năm sau đất tăng gấp ba vì có quy hoạch chợ. Lần 3: cô Lan, em gái bố, xin mượn sổ đỏ 'ba tháng', bố nói không và đưa cô 20 triệu tiền mặt, cô giận, nhưng người cầm sổ đỏ của cô sau này là chủ nợ lãi 6% tháng. Lần 4: cả họ bảo con gái học nhiều làm gì, bố đưa Hạnh đi nộp hồ sơ thi Đại học Y Hà Nội, tự tay nấu cơm cho con ôn thi. Mỗi lần ông chỉ nói một câu: 'Lần này bố không ký cho ai nữa hết.'",
+      "twist": "Lần thứ 5 là buổi giỗ ông nội, bố mời cả họ và một công chứng viên đến, đọc di chúc công khai: nhà và đất chia đều cho ba con, phần Hạnh có thêm điều kiện là học phí sáu năm trường Y. Bác Cả nổi giận vì tin rằng 'đất ông bà để lại cho trưởng nam', chú Hòa đòi phần. Lúc đó bố nói ra sự thật: ông đã sống một kiếp rồi. Kiếp trước ông ký bảo lãnh và mất nhà, bán đất rẻ, cho mượn sổ đỏ rồi bị siết, bắt Hạnh nghỉ học đi may ở Bình Dương; ông chết năm 61 tuổi trong căn phòng trọ, người đưa cơm cuối cùng là Hạnh, còn cả họ không ai đến. Ông đưa ra cuốn sổ ghi từ ngày tỉnh dậy: ngày xưởng cháy, ngày có quy hoạch, tên chủ nợ, đúng từng mốc. Cả họ lặng, rồi cô Lan quỳ xuống trước, bác Cả quỳ sau, vì câu cuối của ông: 'Tôi quỳ cả kiếp trước rồi, kiếp này để các anh chị thử một lần.' Kết: Hạnh đỗ trường Y, ngày nhập học bố đưa cô tấm ảnh phòng trọ ông vẽ lại từ trí nhớ, bảo 'treo để nhớ bố đã từng sai'.",
+      "hook": "Chú Hòa vừa đặt giấy vay lên bàn, bố gạt đi: 'Lần này bố không ký cho ai nữa hết.'",
+      "comment_question": "Bạn muốn bố mẹ sửa quyết định nào? 1 = Không ký nợ hộ, 2 = Không bán đất, 3 = Cho con đi học",
+      "thumb_keywords": [
+        "Cả Họ Quỳ"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 142,
+      "topic": "nghe_la_hong_bien",
+      "series": "Khu Trọ Cô Ba",
+      "title": "6 Kiểu Khách Thuê Tôi Đuổi, Kiểu Thứ 6 Tôi Giữ Lại",
+      "premise": "Ngọc, cô Ba, 30 tuổi, chủ dãy trọ 10 phòng ở Gò Vấp thừa kế từ dì Tư, quyết định một tháng 'dọn dẹp' dãy trọ. Trong 30 ngày cô xử lần lượt 6 kiểu khách. Kiểu 1: phòng 4, khách ký hợp đồng 2 người nhưng ở 5, Ngọc lắp công tơ điện riêng và đưa bảng tiền nước chia đầu người, cả nhóm tự dọn đi. Kiểu 2: phòng 2 nuôi con chó becgie trong phòng 12 mét vuông, cô Ba đưa đơn khiếu nại của bà Sáu phòng 1 kèm clip con Mập bị rượt, khách chuyển chó về quê rồi xin ở lại, cô Ba cho ở nhưng phạt. Kiểu 3: anh Tín phòng 5 nợ ba tháng, trả bằng tin tức như mọi khi, lần này cô Ba đòi tin thật: anh tìm ra ai gửi đơn lên phường. Kiểu 4: phòng 6 là cặp đôi bán hàng online chất hàng ra sân chung, chiếm gốc khế. Kiểu 5: phòng 9 là một 'cậu ấm' thuê để tổ chức nhậu, Ngọc gọi mẹ cậu đến đúng lúc, chị Hoa phòng 8 nhận ra bà mẹ là khách mua vé số quen. Khách thứ 6 đến thuê phòng 10, căn phòng dì Tư dặn không cho thuê.",
+      "twist": "Khách thứ 6 là Dũng, sinh viên năm hai Bách Khoa, quê Quảng Ngãi, đưa trước 3 tháng tiền bằng tiền lẻ bán hàng ăn đêm, năn nỉ thuê đúng phòng 10 vì 'rẻ nhất'. Ngọc định đuổi theo lời dì Tư dặn, nhưng Khoa phòng 7 tra cứu giúp và anh Tín đưa tin cuối: 15 năm trước, bố của Dũng là người thợ điện đã cứu dì Tư khỏi vụ chập điện cháy dãy trọ, dì Tư gửi tiền giúp mỗi tháng cho đến khi mất, và phòng 10 chính là phòng dì giữ lại 'cho con ông thợ điện khi nào nó lên Sài Gòn học'. Trong phòng 10 còn một hộp sắt: giấy tờ chuyển tiền 11 năm và một lá thư dì Tư viết cho Ngọc. Cao trào: người gửi đơn lên phường hóa ra là ông chủ dãy trọ bên cạnh muốn mua đứt dãy của Ngọc; cả dãy trọ, cùng ra phường làm chứng, hợp đồng và nội quy mới của cô Ba thành bằng chứng dãy trọ nền nếp. Kết: Dũng ở phòng 10 miễn phí với điều kiện dạy kèm Toán cho con chị Hoa, và cô Ba thêm một dòng vào nội quy: 'Phòng 10 không cho thuê, chỉ cho ở.'",
+      "hook": "Cô Ba điểm danh: 'Phòng 4 lại dẫn thêm 3 người, phòng 2 nuôi chó, phòng 5 nợ ba tháng.'",
+      "comment_question": "Ở trọ bạn ngán kiểu nào nhất? 1 = Ở chui thêm người, 2 = Nuôi chó mèo, 3 = Nợ tiền trọ",
+      "thumb_keywords": [
+        "Tôi Giữ Lại"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 143,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Hội Chị Em Chung Cư Có 5 Ông Chồng, Ai Cũng Giấu Một Thứ",
+      "premise": "Thảo Vy 36 tuổi, trưởng ban quản lý tòa chung cư 25 tầng ở Thủ Đức, nắm 86 camera. Hội chị em tầng 12 gồm 5 bà vợ hay tụ tập uống trà chiều tại căn hộ của Vy, và trong một tháng, 5 ông chồng lần lượt lộ ra mỗi người giấu một thứ, mà Vy là người nhìn thấy trước qua camera. Ông 1: chồng chị Hương 'đi tập gym' mỗi tối, camera hầm xe thấy anh lên sân thượng nuôi 4 con mèo hoang vì vợ dị ứng. Ông 2: chồng chị Loan khai lương 18 triệu, thực nhận 42, phần chênh anh gửi nuôi mẹ già ở quê mà vợ cấm. Ông 3: chồng chị Mỹ bị thấy đi cùng một phụ nữ lạ lên tầng 9 ba lần, hóa ra là chủ nợ, anh vay 300 triệu chơi chứng khoán thua. Ông 4: chồng chị Trâm, người hay rao giảng 'đàn ông phải thẳng thắn', bị camera ghi lại ôm một cô gái trẻ ở sảnh, là con gái riêng anh giấu 12 năm. Mỗi lần Vy chọn để sự thật tự lộ có bằng chứng thay vì nói hộ. Ông thứ 5 là Khang, chồng của chính Vy, người mà hội chị em khen 'tăng ca chăm nhất tòa'.",
+      "twist": "Chị Mỹ là người buột miệng: 'Chồng em tăng ca hoài, mà hôm qua em thấy xe anh ấy ở tầng hầm lúc 3 giờ chiều.' Vy kiểm tra camera: Khang nghỉ việc đã 4 tháng, mỗi ngày anh xuống hầm lúc 2 giờ chiều, và cô phát hiện anh đi dạy lái xe thuê ở Dĩ An để vẫn có lương đưa vợ. Trong hộp tài liệu Vy tìm được quyết định của công ty cũ, Khang bị cho nghỉ vì từ chối ký khống hồ sơ cho sếp, người sếp ấy chính là chồng chị Trâm, ông chồng 'thẳng thắn' có con riêng. Cao trào buổi họp cư dân do chồng chị Trâm vận động để bãi nhiệm Vy khỏi ban quản lý với lý do 'lạm dụng camera soi đời tư cư dân'. Vy trình trích xuất camera có chữ ký ban quản trị, để chứng minh 300 triệu quỹ bảo trì bị rút sai, người ký là chồng chị Trâm, người bị ép ký là Khang. Cả 4 chị em đứng về phía Vy. Khang nhận lại việc ở ban quản lý tòa nhà. Kết: trà chiều tuần sau có 5 ông chồng ngồi cùng, mỗi người tự kể bí mật của mình, và Vy tắt màn hình camera đúng 4 giờ chiều.",
+      "hook": "Chồng em tăng ca hoài, mà hôm qua em thấy xe anh ấy ở tầng hầm lúc 3 giờ chiều.",
+      "comment_question": "Biết bí mật của chồng bạn thân, bạn chọn gì? 1 = Nói thẳng, 2 = Im lặng, 3 = Để sự thật tự lộ",
+      "thumb_keywords": [
+        "Giấu Một Thứ"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 144,
+      "topic": "hoc_duong",
+      "series": "Truyện lẻ",
+      "title": "10 Năm Họp Lớp, 10 Lần Thằng Giàu Nhất Lớp Đổi Nghề",
+      "premise": "Phương 32 tuổi, giáo viên dạy Toán cấp hai ở Quy Nhơn, là lớp trưởng cũ của lớp 12A3 trường Quốc Học và người tổ chức họp lớp mỗi dịp cuối năm suốt 10 năm. Nhân vật trung tâm của mọi buổi họp là Khải, người 'giàu nhất lớp', mỗi năm một nghề mới và mỗi năm một bạn mất tiền. Năm 1 Khải mở quán trà sữa, Tú góp 50 triệu, quán đóng sau 7 tháng. Năm 2 Khải 'làm bất động sản Nhơn Hội', Hùng góp 200 triệu mua lô đất chưa có sổ. Năm 3 Khải bán thực phẩm chức năng, cả nhóm nữ mua gói 12 triệu. Năm 4 nuôi yến, năm 5 mở lớp tiếng Anh, năm 6 cho vay app, năm 7 làm TikTok bán hàng, năm 8 mở công ty xuất khẩu lao động, năm 9 'đầu tư vàng sinh lời'. Mỗi năm Phương không góp đồng nào nhưng lặng lẽ xin bản sao hợp đồng của các bạn để 'làm kỷ niệm', và chụp lại lời hứa của Khải trong nhóm chat. Mỗi năm là một ca, một miếng hài kiểu Khải khoe xe mới, khoe đồng hồ, và một cú vả nhỏ khi Phương hỏi đúng một câu về giấy tờ. Năm thứ 10, Khải tuyên bố mở sàn coin.",
+      "twist": "Buổi họp lớp cuối năm thứ 10, Khải đến bằng xe Mercedes thuê, công bố dự án sàn coin, kêu gọi mỗi người 100 triệu. Phương đặt lên bàn một cặp hồ sơ: 9 hợp đồng của 9 năm, tổng tiền bạn bè đã đưa Khải là 1 tỷ 140 triệu. Cả lớp im lặng, Khải định bỏ về thì cú lật thật sự xảy ra: Tú, người mất tiền năm 1, nói ra rằng năm nào Khải cũng trả lại tiền cho Tú bằng tiền mặt và dặn giấu, vì Khải nợ ngân hàng 2 tỷ từ việc gánh nợ thay bố, mỗi nghề mới là một lần anh cố trả cho người trước bằng tiền của người sau. Phương đưa ra giấy tờ cuối: sao kê cho thấy Khải đã trả được 4 trong 9 người, còn 5 người với 620 triệu. Cả lớp nhận ra thói quen 10 năm 'góp cho vui vì nó giàu'. Phương đề nghị một thỏa thuận có công chứng: Khải đi làm công ăn lương tại xưởng của Hùng, trả góp 5 năm, không nghề mới. Khải ký trước 28 bạn cùng lớp. Kết: họp lớp năm thứ 11, Khải đến bằng xe máy, mang theo bảng trả nợ tháng 12 và lần đầu tiên không khoe gì.",
+      "hook": "Khải nâng ly: 'Năm nay tao mở sàn coin, chúng mày góp vốn đi, bất động sản chỉ là thử.'",
+      "comment_question": "Lớp bạn có ai như Khải không? 1 = Có, tôi từng góp tiền, 2 = Có, tôi không góp, 3 = Không ai",
+      "thumb_keywords": [
+        "Đổi Nghề"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 145,
+      "topic": "bo_me_trong_sinh",
+      "series": "Mẹ Chồng Trọng Sinh",
+      "title": "Mẹ Chồng Trọng Sinh Ngày Cưới, Bà Trả Lại Sính Lễ Thông Gia",
+      "premise": "Bà Lụa (tôi), 58 tuổi, bán tạp hóa ở thị trấn Phú Mỹ, Bà Rịa, góa chồng 10 năm, có con trai Hoàng 30 tuổi thợ điện lạnh và con gái Hoa 28 tuổi mồm mép. Kiếp trước, sáng ngày cưới Hoàng với Ngân 26 tuổi giáo viên mầm non, bà bưng 6 tráp sính lễ sang nhà thông gia ông Tư Hiền với giọng ban ơn: con bé lấy thằng Hoàng là có phúc. Mười hai năm sau đó bà bắt con dâu nghỉ dạy, giữ hết lương con trai, đổ tội không sinh được con trai; Ngân mất năm 38 tuổi vì ung thư tuyến giáp phát hiện muộn do bà tiếc 2 triệu tiền khám. Hoàng bỏ nhà đi biệt, bà chết cô độc năm 74 tuổi. Bà sống lại đúng 5 giờ sáng ngày cưới, 6 tráp còn xếp trên bàn. Bà tự bưng tráp sang nhà thông gia, đặt xuống, cúi đầu xin hoãn cưới và xin lỗi vì một câu bà chưa kịp nói ra trong kiếp này. Hai họ sốc, Hoàng nổi giận, Hoa kéo cả họ đến mắng mẹ lẩm cẩm. Bà kiên quyết làm lại từ đầu: đưa Ngân đi khám tổng quát, lập sổ tiết kiệm riêng tên con dâu, tự tay sửa phòng cưới.",
+      "twist": "Kết quả khám cho thấy Ngân có khối u tuyến giáp giai đoạn sớm, mổ xong khỏi hẳn, đúng căn bệnh kiếp trước cướp cô ở tuổi 38. Cú lật lớn nằm ở Hoa: kiếp trước chính Hoa xui mẹ giữ lương anh trai để vay 300 triệu mở spa rồi quỵt, sau đó cắm sổ đỏ nhà mẹ vay thêm 500 triệu; kiếp này Hoa đến đúng ngày ấy mượn sổ đỏ với lý do y hệt. Bà Lụa đặt lên bàn giỗ ông cuốn sổ tay ghi sẵn từng khoản Hoa sẽ mượn, từng ngày tháng, từng câu Hoa sẽ nói, rồi để Hoa tự nói trước họ hàng; Hoa nói trùng từng chữ, chết đứng. Hoàng nghe xong hiểu vì sao mẹ hoãn cưới. Bà tuyên bố trước hai họ: nhà đứng tên bà, sau này chia đôi cho con trai và con gái, lương Hoàng ai làm người ấy giữ, con dâu đi dạy lại, ai mượn tiền thì ký giấy công chứng. Đám cưới làm lại sau 3 tháng, bà bưng tráp sang lần hai và nói câu khác hẳn: cảm ơn bên ấy đã gả con bé cho nhà tôi. Câu kết: con dâu gọi bà bằng tiếng má lần đầu, tiếng mà kiếp trước bà chờ 12 năm không có.",
+      "hook": "Kiếp trước tôi nói con dâu lấy con tôi là có phúc; kiếp này mang sính lễ sang xin lỗi.",
+      "comment_question": "Bạn có tin mẹ chồng thay đổi được không? 1 = Tin, biết sai sẽ sửa, 2 = Không, chỉ sợ mất con trai",
+      "thumb_keywords": [
+        "Trả Lại Sính Lễ"
+      ],
+      "timing": "Mùa cưới (T10–T12)",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 146,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Mẹ Bán Vàng Cưới Cho Em Trai, Sống Lại Tôi Giữ Chìa Tủ",
+      "premise": "Diệu (tôi), 29 tuổi, giao dịch viên ngân hàng ở Cần Thơ, cưới Khang được 2 năm, hai vợ chồng thuê trọ nên 5 cây vàng cưới hai họ trao vẫn để trong tủ gỗ ở nhà mẹ đẻ tại Ô Môn. Kiếp trước, sáng 12 tháng Chạp, mẹ Diệu là bà Bảy 56 tuổi mở tủ lấy 5 cây vàng bán cho em trai Tài 24 tuổi mua ô tô chạy dịch vụ, bảo chỉ mượn tạm; xe bán sau 8 tháng, tiền bốc hơi. Nhà chồng phát hiện vàng cưới mất, mẹ chồng mắng, Khang nghi vợ giấu, hai người ly hôn khi Diệu 32 tuổi; Diệu gánh nợ em trai 400 triệu, đến 40 tuổi Tài vẫn nợ, Diệu mất năm 49 trong một tai nạn trên đường đi đòi nợ hộ em. Cô sống lại đúng đêm 11 tháng Chạp. Sáng hôm sau Diệu gọi thợ thay ổ khóa tủ, mang 5 cây vàng gửi két an toàn ngân hàng đứng tên hai vợ chồng. Mẹ đập cửa phòng đòi chìa, Tài dỗ ngọt, cậu Sáu và dì Út được gọi tới xử con gái ích kỷ. Diệu nói thẳng bằng 20 năm ký ức: xe sẽ bán sau 8 tháng, và em trai không hề định mua xe.",
+      "twist": "Tài không đặt cọc chiếc xe nào; kiếp trước 5 cây vàng đi thẳng vào tài khoản một người tên Lộc, bạn gái cũ của Tài, kẻ cầm đầu nhóm cá độ bóng đá qua mạng mà Tài đang nợ 180 triệu. Kiếp này Diệu đến đại lý ô tô hỏi, không có đơn đặt cọc nào tên em trai, rồi lặng lẽ thu bằng chứng: lịch sử chuyển khoản giữa Tài và Lộc, tin nhắn đòi nợ kèm ảnh nhà mẹ bị chụp lén. Cao trào ở bữa cúng tất niên có đủ cậu dì: mẹ tuyên bố sang tên căn nhà cho Tài lo tương lai, Diệu đặt lên bàn bộ sao kê và bật đoạn ghi âm Tài bị đòi nợ, Tài quỳ xuống nhận. Mẹ hiểu mình suýt mất cả vàng lẫn nhà trong một buổi sáng. Kết: Diệu bán 1 cây vàng trả nợ cho em với điều kiện Tài ký giấy nợ chị 180 triệu, đi làm công nhân trả góp mỗi tháng 4 triệu; nhà vẫn đứng tên mẹ nhưng Diệu giữ chìa tủ và sổ đỏ đến khi em trả xong. Câu kết: mẹ cầm chìa khóa, nói nhỏ rằng mẹ giữ con mấy chục năm, cuối cùng con lại là người giữ mẹ.",
+      "hook": "Mẹ giật chìa tủ: 'Mẹ chỉ mượn tạm, con gái đi lấy chồng rồi còn giữ vàng làm gì.'",
+      "comment_question": "Nhà bạn có em trai luôn được ưu tiên không? 1 = Có, tôi từng chịu thiệt, 2 = Không, nhà tôi công bằng",
+      "thumb_keywords": [
+        "Giữ Chìa Tủ"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 147,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Kiếp Trước Nuôi Con Chồng 18 Năm, Kiếp Này Xét Nghiệm Trước",
+      "premise": "Hạ (tôi), 31 tuổi, chủ tiệm may nhỏ ở Biên Hòa, lấy Phong 34 tuổi lái xe tải đường dài được 4 năm, chưa có con. Kiếp trước, sáng 20 tháng 3, Phong bế về một bé trai 2 tháng tuổi tên Bin, nói là con riêng với một người phụ nữ đã mất khi sinh, xin vợ nuôi giùm. Hạ bỏ tiệm may, nuôi Bin 18 năm, đến ngày Bin đậu đại học thì sự thật vỡ: mẹ Bin là Loan, chị dâu, vợ của anh chồng Phúc; Loan quay lại nhận con, cả nhà chồng đứng về phía Loan vì Loan có nhà mặt tiền, Hạ bị đẩy ra khỏi căn nhà cô góp 600 triệu xây và mất năm 52 tuổi trong phòng trọ. Cô sống lại đúng sáng 20 tháng 3, nghe tiếng xe tải của Phong đỗ ngoài cổng. Hạ không khóc, không cãi, chỉ đặt một điều kiện trước khi nhận nuôi: xét nghiệm ADN ba bên, giữa cô với đứa bé, giữa Phong với đứa bé, và lấy thêm mẫu tóc của chị dâu dưới cớ làm hồ sơ sức khỏe cả nhà. Mẹ chồng bà Tám chửi con dâu ích kỷ, chị dâu Loan sốt sắng ngăn cản đến mức ai cũng thấy lạ.",
+      "twist": "Kết quả: Phong là cha, Loan là mẹ ruột của Bin. Cú lật lớn hơn là bà Tám biết từ đầu; chính bà sắp xếp cho Hạ nuôi để giữ cháu nội trong nhà mà anh Phúc không hay, và căn nhà Hạ góp 600 triệu xây chỉ đứng tên bà. Hạ âm thầm xin bản sao sổ đỏ, giữ sao kê 600 triệu, và ghi âm được bà Tám dặn Loan cứ để con Hạ nuôi, mai mốt tính. Cao trào ở buổi họp gia đình bà Tám triệu tập để ép Hạ nhận con: Hạ đặt lên bàn ba tờ kết quả ADN, sao kê 600 triệu và bật đoạn ghi âm; anh Phúc đọc xong lặng người, xách va li rời đi, Loan lộ mặt, Phong quỳ. Hạ nói rõ: cô không hận đứa trẻ, cô chỉ không sống hộ cuộc đời người khác thêm một kiếp nữa. Kết: Hạ ly hôn, đòi lại 600 triệu bằng chứng từ góp vốn qua tòa, về Long Khánh mở tiệm may lớn hơn với 4 thợ; Bin lớn lên với mẹ ruột, mỗi sinh nhật Hạ vẫn gửi một bộ quần áo tự may. Câu kết: kiếp trước cô mất 18 năm để biết sự thật, kiếp này mất 18 ngày, và giữ lại được cả đời mình.",
+      "hook": "Chồng bế đứa bé vào nhà: 'Nó không giống anh vì giống bên ngoại, em đừng nghe người ta xúi.'",
+      "comment_question": "Bạn có nuôi được con riêng của chồng không? 1 = Có, trẻ con không có tội, 2 = Không, phải rõ sự thật trước",
+      "thumb_keywords": [
+        "Xét Nghiệm Trước"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 148,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Bà Ngoại Trọng Sinh, Lần Này Không Ký Giấy Bảo Lãnh Cho Cậu",
+      "premise": "Bà Năm Thu (tôi), 63 tuổi, góa, bán bánh ít lá gai ở Sa Đéc, có nhà vườn 1.200 mét vuông ven sông Tiền. Con gái lớn Hương mất sớm, để lại cháu ngoại Vy 24 tuổi làm điều dưỡng, sống cùng bà; con trai út Lâm 35 tuổi mở xưởng gỗ ở thị xã. Kiếp trước, sáng 8 tháng 4, bà ký bảo lãnh thế chấp nhà vườn vay 2 tỷ cho Lâm; xưởng phá sản sau 14 tháng, ngân hàng phát mãi nhà, Lâm bỏ lên Bình Dương, bà sống trong phòng trọ 12 mét vuông cháu gái thuê và mất năm 69 tuổi, không dám về làng. Bà sống lại đúng sáng 8 tháng 4, cây bút trong tay, nhân viên tín dụng ngồi đối diện, Lâm đẩy tờ giấy qua bàn. Bà gác bút, lắc đầu, mời nhân viên về. Ngay chiều, bà ra văn phòng công chứng lập hợp đồng tặng cho nhà vườn cho Vy, kèm điều khoản bà được ở đến cuối đời. Lâm điên tiết, kéo vợ là Trinh cùng hai người đàn ông xưng là đối tác đến đòi quyền thừa kế, bảo mẹ lẩn thẩn, dọa đưa đi giám định tâm thần để hủy hợp đồng; họ hàng chia hai phe, cô Tư bênh Lâm, chú Chín bênh bà.",
+      "twist": "Xưởng gỗ của Lâm đã nợ 900 triệu từ trước, hai người đàn ông kia là chủ nợ tín dụng đen; khoản 2 tỷ chỉ để đảo nợ, nhà bà sẽ mất trong 14 tháng dù xưởng có chạy hay không. Cú lật thứ hai: Trinh đứng tên căn hộ 1,8 tỷ ở Cần Thơ mua bằng 700 triệu bà cho Lâm mở xưởng lần đầu. Cao trào ở đám giỗ của Hương: Lâm dẫn một bác sĩ quen đến đòi giám định mẹ trước họ hàng; bà đặt lên bàn thờ con gái giấy chủ quyền căn hộ tên Trinh, biên bản nợ 900 triệu, và kể trước cả họ đúng ngày kiếp trước ngân hàng dán niêm phong, đúng số tiền phát mãi, đúng câu Lâm nói khi bỏ đi; Lâm sụp xuống, vị bác sĩ lặng lẽ ra về. Kết: bà không trả nợ thay; Trinh bán căn hộ trả tín dụng đen, Lâm về làm vườn cho mẹ ăn lương ngày 300 nghìn, Vy mở tiệm bánh ít Ngoại Năm ngay cổng nhà, khách đông đến mức Lâm phải phụ gói bánh. Câu kết: kiếp này bà không ký, nhưng bà vẫn ôm con, chỉ là ôm bằng hai bàn tay không cầm bút.",
+      "hook": "Cậu Út đẩy giấy qua bàn: 'Mẹ ký đi, có 2 tỷ thôi, con làm ăn được là mẹ hưởng.'",
+      "comment_question": "Bố mẹ bạn từng ký bảo lãnh cho con chưa? 1 = Rồi, và mất tiền, 2 = Chưa, tiền ai nấy lo",
+      "thumb_keywords": [
+        "Không Ký"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 149,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Giúp Việc 20 Năm Hóa Ra Là Chủ Nợ Của Nhà Chủ",
+      "premise": "Quỳnh (tôi), 30 tuổi, dược sĩ nhà thuốc, làm dâu nhà ông Đức, chủ công ty vật liệu xây dựng ở Thủ Đức, được 4 năm. Trong nhà có bà Tám, 68 tuổi, giúp việc suốt 20 năm, ngủ ở phòng kho sau bếp, bị mẹ chồng Quỳnh là bà Liên sai vặt từ sáng đến khuya, bị em chồng Khôi 27 tuổi gọi là con sen; chỉ Quỳnh mang thuốc khớp cho bà mỗi tối. Ngày giỗ ông nội chồng, ông Đức định công bố chia tài sản trước họ hàng: công ty và căn nhà ba tầng cho Khôi, vợ chồng Quỳnh và Nam 33 tuổi đang làm thuê cho bố cứ ở tạm tầng hai. Bà Tám rửa tay, thay áo, đặt lên bàn thờ một xấp giấy vay nợ công chứng từ năm 2004: chồng bà là ông Bảy Lợi đã cho ông Đức vay 1,2 tỷ, tiền bán ba công đất ở Củ Chi, để mở công ty, kèm thỏa thuận chia 30 phần trăm lợi nhuận; ông Đức quỵt, ông Bảy uất mà mất năm 2005. Bà xin vào làm giúp việc để chờ đúng ngày này. Chỉ Quỳnh được bà cho biết trước một ngày, và bà nhờ Quỳnh cất bản gốc trong tủ thuốc.",
+      "twist": "Ông Đức chối giấy giả, bà Liên đòi đuổi bà Tám ngay trong bữa giỗ, Khôi gọi luật sư của công ty đến. Cú lật: 20 năm qua bà Tám âm thầm giữ sổ bếp núc kiêm sổ phụ của công ty, từng phong bì chi ngoài ông Đức đưa bà cất, từng tập hóa đơn khống tổng cộng 3,4 tỷ tránh thuế; và trong giấy đăng ký kinh doanh năm 2004 vẫn còn tên cổ đông góp 30 phần trăm là ông Bảy Lợi, thứ ông Đức chưa xóa được vì cần chữ ký người thừa kế. Quỳnh, bằng nghiệp vụ dược, chỉ ra loại thuốc khớp bà Tám uống 10 năm là do bà tự bỏ tiền mua, trong khi ông Đức vừa khoe nuôi bà như mẹ; Khôi im, bà Liên khóc. Kết: ông Đức ký trả 30 phần trăm cổ phần cho bà Tám để khỏi bị tố ra cơ quan thuế; bà sang tên phần đó cho hai cháu ngoại và về Củ Chi chuộc lại ba công đất; Nam rời công ty bố, cùng vợ mở cửa hàng vật liệu nhỏ. Câu kết: ngày bà Tám đi, bà dựng cây chổi 20 năm trước cửa phòng Quỳnh kèm mảnh giấy viết tay rằng nhà này chỉ có con là sạch.",
+      "hook": "Bà Tám quét nhà cho nhà tôi hai chục năm, hôm nay bà đem giấy nợ đến.",
+      "comment_question": "Người giúp việc nhà bạn biết bao nhiêu bí mật? 1 = Biết hết, như người nhà, 2 = Không nhiều, nhà tôi kín tiếng",
+      "thumb_keywords": [
+        "Chủ Nợ"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 150,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Con Nuôi Bị Khinh 25 Năm, Ngày Đọc Di Chúc Cả Nhà Đổi Mặt",
+      "premise": "An (tôi), 28 tuổi, kỹ thuật viên vật lý trị liệu ở Đà Nẵng, được ông Thành, chủ xưởng nước mắm Nam Ô, nhận nuôi năm 3 tuổi sau cơn bão năm 2001 cướp mất bố mẹ ruột. Hai mươi lăm năm trong nhà, An bị bác Cả Toàn, cô Ba Lệ và các anh chị họ gọi là con nhặt, ăn bàn cuối mỗi đám giỗ, bị đổ tội mỗi khi nhà mất đồ. Ba năm cuối đời ông Thành liệt nửa người, chỉ An xin chuyển về bệnh viện quận để tối nào cũng tập cho ông; con ruột về mỗi tháng một lần, lần nào cũng hỏi chuyện sổ đỏ và cổ phần. Sau 49 ngày ông mất, luật sư Hùng mời cả nhà đến đọc di chúc, xếp An ngồi bàn chính, bác Cả chỉ tay xuống bàn cuối và quát câu mở đầu. Di chúc công chứng: 70 phần trăm cổ phần xưởng và căn nhà thờ cho An, hai người con ruột mỗi người một mảnh đất 200 mét vuông và 500 triệu. Bác Cả và cô Ba hét di chúc giả, đòi kiện, cho người khóa cổng xưởng, kéo họ hàng đến làm áp lực; An vẫn sáng đi làm, chiều ghé xưởng kiểm cá như mọi ngày.",
+      "twist": "Luật sư công bố điều kiện kèm theo: An chỉ được nhận nếu cam kết giữ xưởng hoạt động 10 năm, không bán, và có đoạn video ông Thành ghi lúc còn tỉnh táo, bác sĩ xác nhận năng lực hành vi. Trong video ông kể điều chưa ai biết: bác Cả 5 năm trước lén bán công thức ủ chượp 300 năm của dòng họ cho một công ty ở Phan Thiết lấy 2 tỷ; cô Ba rút 450 triệu quỹ xưởng cho con du học. Cú lật nữa: bố mẹ ruột của An là hai công nhân đã chết khi cứu kho cá của xưởng trong bão năm 2001, ông Thành nhận nuôi vì món nợ ân tình, giấu vì sợ An mang gánh nặng. Cao trào ở cuộc họp cổ đông bác Cả triệu tập để lật di chúc: An đặt hợp đồng bán công thức và sổ quỹ lên bàn, cả nhà đổi mặt theo nghĩa ngược lại. Kết: An không kiện ai, giữ xưởng, mời các anh chị họ vào làm với lương công nhân; bác Cả bỏ vào Nam, cô Ba ở lại quét sân xưởng. Câu kết: An treo ảnh hai người công nhân lên bàn thờ cạnh ông Thành và lần đầu gọi cả ba người là ba mẹ.",
+      "hook": "Bác Cả chỉ tay: 'Mày là con nuôi, ngồi xuống bàn cuối, chuyện thừa kế không có phần.'",
+      "comment_question": "Là An, bạn có chia lại cho con ruột bố nuôi không? 1 = Có, máu mủ, 2 = Không, ai chăm người đó hưởng",
+      "thumb_keywords": [
+        "Đọc Di Chúc"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 151,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Chồng Trọng Sinh Cùng Tôi, Kiếp Này Anh Đứng Về Phía Vợ",
+      "premise": "Mai (tôi), 30 tuổi, kế toán ở Vinh, chồng là Dũng 33 tuổi kỹ sư cầu đường, sống chung với mẹ chồng bà Hòa 60 tuổi và em chồng Linh 27 tuổi trong căn nhà ba gian ở Hưng Nguyên. Kiếp trước, sau 5 năm cưới không có con, bà Hòa và Linh đuổi Mai ra khỏi nhà, Dũng im lặng vì cả nhà sống bằng lương anh và sổ đỏ tên mẹ; Mai ra đi tay trắng, một năm sau bệnh viện kết luận người hiếm muộn là Dũng. Dũng bị mẹ ép cưới vợ mới, Linh cắm sổ đỏ vay cho chồng chơi lô đề, cả nhà ra đường; Dũng mất năm 45 tuổi vì tai nạn trên công trường, Mai mất một năm sau trong phòng trọ ở Cửa Lò. Cả hai cùng sống lại đúng sáng mùng 2 Tết năm cưới thứ hai. Trong bếp, Dũng nhìn vợ và thì thầm câu mở đầu. Hai vợ chồng lập kế hoạch bằng ký ức chung: Dũng mở tài khoản lương riêng, đưa vợ đi khám hiếm muộn trước để có giấy trắng mực đen, từ chối thẳng khi Linh hỏi mượn sổ đỏ; Mai ghi lại từng lời mẹ chồng. Bà Hòa và Linh thấy cặp đôi biết trước mọi thứ, vừa sợ vừa sinh nghi.",
+      "twist": "Linh đã vay 350 triệu tín dụng đen từ trước Tết cho chồng là Hùng gỡ lô đề và định cắm sổ đỏ vào rằm tháng Giêng; bà Hòa biết, nên muốn đuổi con dâu để lấy phòng cho vợ chồng Linh rồi bán nhà trả nợ. Cú lật: khi Dũng góp 400 triệu xây lại nhà, bà Hòa đã ký cho sổ đỏ đứng tên đồng sở hữu ba người nhưng không nhớ; kiếp này Dũng xin bản sao ở phòng công chứng trước khi Linh kịp mang sổ đi. Cao trào ở giỗ bố chồng, bà Hòa gọi cả họ đến tuyên bố cho con dâu về bên ngoại; Dũng đặt lên bàn giấy khám hiếm muộn của chính anh, bản sao sổ đỏ ba tên và giấy đòi nợ 350 triệu của Linh; Linh khóc nhận. Kết: Dũng và Mai không bỏ nhà, trả nợ cho Linh với điều kiện Linh ly hôn chồng cờ bạc và ký giấy nợ; bà Hòa tự tay dọn lại phòng cho con dâu; năm sau Mai mang thai nhờ điều trị đúng người. Câu kết của Dũng: kiếp trước anh im lặng một lần mà mất em cả đời, kiếp này anh nói một câu mà giữ được cả nhà.",
+      "hook": "Chồng thì thầm: 'Em cũng nhớ hết đúng không? Lần này anh không để mẹ đuổi em đi nữa.'",
+      "comment_question": "Bạn muốn chồng nhớ lại điều gì nhất? 1 = Lần anh im lặng để mẹ nói, 2 = Lần anh hứa mà không giữ",
+      "thumb_keywords": [
+        "Trọng Sinh Cùng Tôi"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 152,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Thím Hai So Sánh Con Cả Đời, Sống Lại Tôi Trả Nợ Cho Cháu",
+      "premise": "Thím Hai Nguyệt (tôi), 52 tuổi, bán vải ở chợ Hạ Long, vợ chú Hai nhà họ Trần. Kiếp trước thím nghiện so sánh con: con trai Quân 24 tuổi được thím khoe thủ khoa khắp họ, cháu gái Thảo 27 tuổi, con chú Ba, làm kế toán, bị thím dìm trước cả họ từ bé với câu con gái học lắm cũng đi lấy chồng; năm 2017 thím giật suất học bổng du học do quỹ họ tài trợ khỏi tay Thảo bằng cách xin bác Cả Lợi dồn phiếu cho Quân. Kết cục kiếp trước: Quân 40 tuổi vẫn ăn bám, nợ 700 triệu, bán cả sạp vải của mẹ; Thảo thành giám đốc tài chính ở Hà Nội, cắt liên lạc với cả họ; thím mất trong phòng trọ, không ai đến. Thím sống lại đúng buổi họp quỹ họ năm 2017, lá phiếu trong tay, bà nội 80 tuổi đang nhìn thím. Thím bỏ phiếu cho Thảo. Cả họ ngã ngửa, Quân giận bỏ ăn, bác Cả cười nhạt bảo thím Hai hôm nay ngộ. Thím đổi hẳn cách dạy con: bắt Quân ra chợ phụ sạp vải từ 5 giờ sáng, ghi sổ từng đồng tiền ăn để sau này trả. Thảo không tin, nghi thím có mưu đồ mới.",
+      "twist": "Thím biết từ kiếp trước rằng Quân không hề là thủ khoa: điểm năm đó có được nhờ thím nộp 60 triệu cho một thầy ở trung tâm luyện thi, do chính bác Cả Lợi giới thiệu và ăn 20 triệu hoa hồng; 23 năm sau chuyện vỡ, Quân mất việc vì điểm thật không đủ. Kiếp này thím đến trung tâm, đặt cọc để lấy biên lai có chữ ký người nhận rồi hủy, giữ biên lai làm bằng chứng. Cú lật ở đám giỗ ông nội: bác Cả đứng lên đề nghị Thảo nhường suất học bổng cho Quân vì con gái không cần đi xa; thím Hai đặt lên bàn biên lai 60 triệu và tờ giấy thím viết sẵn từng câu bác Cả sắp nói, rồi để bác nói, bác nói y chang, cả họ lặng ngắt. Bà nội lên tiếng ủng hộ thím. Kết: Thảo đi du học; Quân tự ôn thi lại; thím không xin Thảo tha thứ, chỉ gửi mỗi tháng một mét vải ấm cho cháu may đồ ở xứ lạnh suốt 4 năm. Ngày Thảo về, cô mặc chiếc áo may từ vải đó ra chợ tìm thím. Câu kết: thím không nói câu so sánh nào nữa, chỉ nói được ba chữ con về rồi.",
+      "hook": "'Nhìn con tao đây, rồi nhìn lại mày', câu đó kiếp trước tôi nói cả nghìn lần.",
+      "comment_question": "Là Thảo, bạn có tha cho thím Hai không? 1 = Tha, thím đã sửa thật, 2 = Không, vết thương tuổi thơ khó xóa",
+      "thumb_keywords": [
+        "Thím Hai"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 153,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Nghe Được Tiếng Lòng Nhà Chồng, Tôi Biết Ai Thật Sự Thương",
+      "premise": "Ngọc (tôi), 29 tuổi, nhân viên thư viện tỉnh ở Huế, làm dâu nhà ông bà Thuận ở Kim Long được 3 năm, chồng là Hiếu 32 tuổi giáo viên cấp hai. Sau tai nạn xe máy ngày 14 tháng 7, hôn mê hai ngày, Ngọc tỉnh dậy và nghe được suy nghĩ của người ngồi trong tầm một bàn ăn. Bữa cơm đầu tiên sau viện, mẹ chồng bà Thuận gắp cá cho cô với câu ăn thêm đi con, trong đầu lại vang câu khác; chị chồng Thủy 36 tuổi bán mỹ phẩm online ngọt ngào ngoài miệng nhưng trong đầu đang tính từng bước đưa bố mẹ ký giấy sang tên nhà vườn 500 mét vuông cho mình rồi bán; Hiếu nghĩ đúng như nói, hiền lành và không biết gì; bố chồng ông Thuận ít nói, cả nhà tưởng ông ghét con dâu, hóa ra ông đang lo con bé gầy đi, chắc tại vợ chồng mình. Ngọc không kể với ai, dùng khả năng này nghe được ngày Thủy hẹn công chứng viên đến nhà, trùng ngày giỗ bà cố, và chuẩn bị: sao lục sổ đỏ, ghi lại từng lần Thủy mượn tiền bố mẹ. Người duy nhất Ngọc kể là bố chồng; ông không cười, chỉ hỏi con cần ba làm gì.",
+      "twist": "Thủy không bán nhà để làm ăn mà để trả 1,1 tỷ nợ lô đề cho chồng là Sơn. Cú lật thứ hai: bà Thuận biết con gái định lừa giấy tờ nhưng im vì thương, và suy nghĩ thật của bà về con dâu không phải ghét mà là tự ti, bà sợ con dâu có học khinh bà ít chữ. Cao trào tại giỗ bà cố: công chứng viên đến, Thủy đưa tờ giấy tặng cho con cháu thực chất là ủy quyền bán nhà; Ngọc đứng dậy đọc to đúng từng ý nghĩ trong đầu Thủy về khoản nợ, về Sơn, rồi đặt lên bàn bản sao giấy nợ mà bố chồng đã lặng lẽ xin được từ chủ nợ. Thủy gục xuống. Ngọc kể luôn điều mẹ chồng nghĩ thật về mình, bà Thuận bật khóc ôm con dâu trước họ hàng. Kết: nhà vườn sang tên đồng sở hữu bố mẹ và Hiếu; Thủy ly hôn Sơn, về ở với bố mẹ bán hàng trả nợ dần; khả năng của Ngọc mất hẳn sau đúng 100 ngày, lúc cô không còn cần nữa. Câu kết: ngày khả năng biến mất, mẹ chồng gắp cho Ngọc miếng cá và nói ăn thêm đi con, Ngọc nghe mà không cần nghe thêm gì.",
+      "hook": "Miệng mẹ chồng nói 'ăn thêm đi con', trong đầu lại vang: 'ăn cho lắm rồi đẻ không được'.",
+      "comment_question": "Bạn muốn nghe được suy nghĩ thật của ai trong nhà chồng? 1 = Mẹ chồng, 2 = Chồng mình",
+      "thumb_keywords": [
+        "Tiếng Lòng"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 154,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Con Dâu Mang 10 Năm Hóa Đơn Ra Tòa, Nhà Chồng Biết Ai Nuôi",
+      "premise": "Trang (tôi), 36 tuổi, kế toán trưởng một công ty may ở Nam Định, làm dâu nhà bà Thoa 10 năm; chồng là Tùng 38 tuổi làm kinh doanh tự do. Ngày 5 tháng 9, Tùng đưa đơn ly hôn vì đã có người mới; bà Thoa chống nạnh giữa phòng khách nói câu mở đầu, đòi Trang ra khỏi nhà trong ngày vì nhà đứng tên bà và tài sản chung không có gì. Trang không cãi. Cô kéo từ gầm giường ra chiếc vali 20 cân đựng 10 năm hóa đơn, biên lai, sao kê mà cô, vì bệnh nghề nghiệp kế toán, lưu từ ngày cưới: viện phí mổ tim bố chồng 186 triệu, học phí 4 năm đại học của em chồng Tú 128 triệu, sửa nhà 240 triệu, góp giỗ chạp hơn 90 triệu, ba lần trả nợ hộ Tùng tổng 310 triệu. Cộng lại 1,42 tỷ, tất cả đi từ tài khoản lương của Trang, nhiều biên lai còn chữ ký nhận của chính bà Thoa. Cô nộp đơn phản tố yêu cầu chia tài sản và hoàn trả đóng góp. Nhà chồng cười nhạo con dâu giữ hóa đơn như con buôn, kéo họ hàng đến bêu Trang bủn xỉn, Tùng đăng bài bóng gió lên mạng.",
+      "twist": "Tại tòa, thẩm phán yêu cầu đối chiếu từng khoản. Hóa ra căn nhà bà Thoa đứng tên được xây lại năm 2019 bằng khoản vay ngân hàng 500 triệu mà Trang đứng tên bảo lãnh và trả hết trong 4 năm, nên phần giá trị tăng thêm phải tính cho con dâu. Cú lật lớn hơn: người mới của Tùng là kế toán một công ty ma, hai người đã dùng bản sao căn cước của Trang để trong tủ mở khoản vay tiêu dùng 200 triệu; Trang phát hiện khi tra lịch sử tín dụng trước phiên tòa và nộp đơn tố cáo riêng. Cao trào: thẩm phán đọc từng tờ hóa đơn, mỗi tờ một con số, một ngày tháng, phòng xử im như tờ; bà Thoa nhận ra 10 năm bà kể công nuôi con dâu thực ra là con dâu nuôi cả nhà; em chồng Tú đứng lên xin làm chứng cho chị dâu. Kết: Trang được chia 1,1 tỷ, Tùng phải tự trả khoản vay giả mạo và bị khởi tố; bà Thoa đến tận công ty xin lỗi, Trang không quay về nhưng vẫn chuyển tiền thuốc tim cho bố chồng mỗi tháng, có biên lai. Câu kết: Trang đóng nắp vali, lần đầu trong 10 năm thấy nó nhẹ.",
+      "hook": "Mẹ chồng chống nạnh: 'Cô ở nhà này 10 năm ăn bám, ly hôn thì ra đi tay trắng.'",
+      "comment_question": "Bạn có giữ hóa đơn chi cho nhà chồng không? 1 = Có, giữ hết cho chắc, 2 = Không, tình cảm ai lại tính",
+      "thumb_keywords": [
+        "10 Năm Hóa Đơn"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 155,
+      "topic": "hoc_duong",
+      "series": "Truyện lẻ",
+      "title": "Cô Giáo Trọng Sinh Về 20/11, Trả Lại Phong Bì Trước Lớp",
+      "premise": "Cô Hoài 34 tuổi, giáo viên chủ nhiệm lớp 4B một trường tiểu học ở Biên Hòa. Kiếp trước, sáng 20/11, mẹ của Bảo (chị Trâm, chủ chuỗi spa, hội trưởng phụ huynh) dúi vào tay cô phong bì 5 triệu kèm câu dặn cho Bảo ngồi bàn đầu. Cô nhận, đổi chỗ, đẩy bé Thắng con chị bán vé số xuống bàn cuối. Thắng mắt kém, học tụt dần, bỏ học hết lớp 5. Nhiều năm sau cô Hoài mất vì bệnh trong tiếc nuối. Mở mắt ra, cô đang đứng giữa lớp đúng sáng 20/11 năm ấy, phong bì còn ấm trong tay, cả lớp và hơn hai chục phụ huynh đang nhìn. Cô đặt phong bì lên bàn, mở ra đọc to số tiền, rồi trả lại trước mặt mọi người, kèm sơ đồ chỗ ngồi xếp theo kết quả khám mắt. Chị Trâm sượng mặt, dọa chuyển trường cho Bảo và kéo thêm bốn phụ huynh đi theo. Hiệu trưởng gọi cô lên nhắc khéo chuyện thi đua. Cô Hoài chỉ xin một việc: lập quỹ kính cận cho lớp từ tiền thưởng dạy giỏi của mình. Nhóm Zalo phụ huynh nổ tung tranh cãi, còn bé Thắng lần đầu ngồi bàn đầu, đọc rõ từng chữ trên bảng.",
+      "twist": "Chị Trâm không chuyển trường. Lý do lộ ra ở buổi họp phụ huynh bất thường: chuỗi spa của chị đang nợ lương nhân viên 3 tháng, và phong bì 5 triệu hôm 20/11 là tiền chị gom từ quỹ lớp năm ngoái mà chị giữ hộ, tổng 27 triệu chưa từng công khai. Cô Hoài, nhớ rõ kiếp trước chị Trâm từng bị phụ huynh tố giữa sân trường, lần này đã âm thầm xin kế toán trường bản sao biên lai thu quỹ và nhờ thủ quỹ cũ ghi lại từng khoản chi. Cao trào: khi chị Trâm đòi bỏ phiếu thay giáo viên chủ nhiệm, cô Hoài đặt lên bàn tập biên lai và bảng chi quỹ, đọc rõ 11 khoản chi không hóa đơn, chênh lệch 19 triệu 800 nghìn. Phụ huynh im phăng phắc, bốn người định chuyển trường theo Bảo rút đơn. Cô không tố lên trên, chỉ yêu cầu hoàn quỹ trong 30 ngày và bàn giao sổ cho thủ quỹ mới. Bảo vẫn học lớp 4B, xếp cạnh Thắng, hai đứa thành đôi bạn cùng tiến. Kết: cuối năm bé Thắng đạt học sinh giỏi; thiệp 20/11 năm sau cả lớp tự vẽ, không phong bì nào. Cô Hoài dán tấm thiệp lên tủ, đúng chỗ kiếp trước cô cất phong bì.",
+      "hook": "Mẹ của Bảo dúi phong bì: 'Cô cầm cái này thì con em cô cho ngồi bàn đầu nhé.'",
+      "comment_question": "20/11 bạn tặng cô giáo gì? 1 = Quà nhỏ tự tay con làm, 2 = Phong bì cho tiện",
+      "thumb_keywords": [
+        "Trả Lại Phong Bì"
+      ],
+      "timing": "Quanh 20/11",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 156,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Chị Chồng Vay Tiền Săn Sale Black Friday, Tôi Mở Sổ Nợ Cả Họ",
+      "premise": "Ngân 30 tuổi, kế toán kho cho một công ty vật liệu xây dựng ở Thủ Đức, làm dâu nhà chồng ở Hóc Môn được bốn năm. Chị chồng tên Loan, 36 tuổi, bán hàng online lúc được lúc mất, nổi tiếng trong họ với câu 'mượn tạm'. Nửa đêm cuối tháng 11, đúng đợt sale lớn, Loan gọi mượn 15 triệu để săn tủ lạnh và túi xách giảm 70%, dọa không mua là lỗ. Ngân từ chối, Loan quay sang mượn cô Sáu, cậu Tám, rồi cả mẹ chồng. Sáng hôm sau, mẹ chồng (bà Hạnh) gọi Ngân về trách con dâu keo kiệt, để chị phải đi vay người ngoài. Ngân mở máy tính, lập một bảng tính công khai, đặt tên 'Sổ nợ nhà mình', ghi đủ: ai nợ ai, bao nhiêu, từ ngày nào, bằng chứng là tin nhắn chuyển khoản. Cô gửi vào nhóm Zalo đại gia đình 43 người. Bảng hiện ra 19 dòng, Loan chiếm 14 dòng, tổng 212 triệu, lâu nhất là 6 năm, người bị nợ nhiều nhất là chính cô Sáu bán xôi. Cả họ im lặng ba phút rồi bùng nổ. Bà Hạnh bắt Ngân xóa sổ ngay trước giỗ ông nội để khỏi mất mặt họ hàng.",
+      "twist": "Ngân không xóa. Ngày giỗ, bà Hạnh định đứng lên mắng con dâu trước cả họ thì cô Sáu, người hiền nhất nhà, đứng dậy trước: sáu năm qua cô không dám đòi vì sợ mang tiếng tính toán với cháu, nhờ cái sổ cô mới dám nói mình bị nợ 48 triệu, số tiền dành dụm cho ca mổ mắt. Cậu Tám tiếp lời, rồi dì Bảy, rồi đứa cháu sinh viên bị Loan mượn 3 triệu tiền trọ. Hóa ra cả họ ai cũng là chủ nợ của Loan và ai cũng tưởng chỉ mình bị. Cú lật lớn: Ngân lật trang hai của sổ: 14 khoản vay không vào tủ lạnh hay túi xách, mà vào một app đầu tư lãi 2% một ngày, kèm ảnh tài khoản đã đóng băng 180 triệu. Loan khóc, thú nhận bị lừa từ hè, mượn người sau trả người trước. Bà Hạnh lặng người vì bốn cây vàng bà đưa Loan giữ hộ cũng nằm trong đó. Kết ấm: cả họ không xóa sổ mà thêm cột 'lịch trả', Loan ký cam kết trả góp 3 triệu một tháng, Ngân quản sổ. Cô Sáu được mổ mắt trước Tết bằng tiền cả họ góp. Mẹ chồng lần đầu nhắn riêng cho Ngân: 'Mẹ cảm ơn cái sổ của con.'",
+      "hook": "Chị chồng gọi lúc nửa đêm: 'Mượn 15 triệu thôi, Black Friday giảm 70% không mua là lỗ.'",
+      "comment_question": "Bạn đang bị người thân nợ tiền mà ngại đòi không? 1 = Có, cứ để vậy, 2 = Lập sổ công khai như Ngân",
+      "thumb_keywords": [
+        "Sổ Nợ Cả Họ"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 157,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Em Chồng Mời Cưới Bằng Thiệp QR, Tôi Chuyển Đúng Một Nghìn",
+      "premise": "Thu 29 tuổi, nhân viên ngân hàng ở Đà Nẵng, làm dâu nhà chồng ở Hội An ba năm. Em chồng tên Khánh, 26 tuổi, làm marketing cho một công ty sự kiện, sắp cưới vào mùa cưới cuối năm. Thiệp cưới của Khánh không có bì, chỉ là tấm card in mã QR tài khoản cô dâu chú rể, dưới ghi dòng chữ nhỏ: mừng cưới quét mã cho tiện, mức tối thiểu 2 triệu. Cả họ xôn xao, mẹ chồng (bà Lý) bảo thời đại số, ai không theo kịp là quê. Thu nhớ rõ năm ngoái Khánh mượn cô 5 triệu để mua điện thoại, hẹn ba tháng trả, đến giờ chưa thấy. Cô quét mã, chuyển đúng 1.000 đồng, nội dung chuyển khoản ghi: mừng trước một nghìn, phần còn lại khấu trừ vào 5 triệu em mượn chị tháng 10 năm ngoái, còn dư chị gửi lại sau đám cưới. Khánh chụp màn hình gửi nhóm gia đình trách chị dâu làm nhục em ngay trước ngày vui. Bà Lý gọi Thu về họp, bắt cô chuyển bù 3 triệu và xin lỗi. Thu mang theo sao kê và tin nhắn mượn tiền, nhưng chưa kịp đưa thì bố chồng gạt đi, bảo chuyện tiền bạc anh em đừng tính.",
+      "twist": "Ngày cưới, công ty sự kiện của Khánh lắp màn hình LED chạy danh sách khách mừng theo thời gian thực. Kỹ thuật viên nhầm, màn hình hiện luôn nội dung chuyển khoản. Dòng của Thu hiện ra: 1.000 đồng kèm lời nhắn về 5 triệu. Màn hình chạy tiếp 23 khoản từ bạn bè Khánh đều ghi 'trả nợ hộ' hoặc 'góp trả tiền sảnh', tổng 86 triệu. Hóa ra Khánh đặt cọc tiệc bằng thẻ tín dụng vượt hạn mức, và cái thiệp QR tối thiểu 2 triệu là để gom đủ tiền trả nhà hàng ngay trong tiệc. Quản lý nhà hàng ra tận bàn gia đình đòi nốt 120 triệu trước khi lên món. Thu đứng dậy, không mỉa mai, nói gia đình sẽ trả, rồi đưa Khánh một phong bì thật: 5 triệu tiền mặt kèm tờ giấy ghi đây là tiền mừng, nợ cũ xóa luôn, điều kiện là em phải nói thật với vợ về số nợ trước khi về phòng tân hôn. Khánh đọc, cúi đầu, lần đầu gọi 'chị Hai'. Kết: bố chồng đứng lên nói câu duy nhất cả đời ông nói trước đám đông: nhà này mừng cưới bằng phong bì, không quét mã nữa.",
+      "hook": "Thiệp cưới em chồng in dòng: 'Mừng cưới quét mã cho tiện, tối thiểu 2 triệu nhé.'",
+      "comment_question": "Mừng cưới bằng mã QR, bạn thấy sao? 1 = Tiện, thời đại số rồi, 2 = Vô duyên, phải có phong bì",
+      "thumb_keywords": [
+        "Chuyển Đúng Một Nghìn"
+      ],
+      "timing": "Mùa cưới (T10–T12)",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 158,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Mẹ Chồng Đòi Giữ Thưởng Tết, Tôi Nộp Thẳng Học Phí Cho Con",
+      "premise": "Hương 33 tuổi, trưởng ca một nhà máy điện tử ở Bắc Ninh, lấy chồng là Dũng, làm dâu ở Từ Sơn sáu năm. Ba năm liền, thưởng Tết 40 triệu của Hương vừa về tài khoản là mẹ chồng (bà Thơm) chìa tay giữ để lo Tết, chồng gật đầu cho yên nhà. Tết nào cũng thiếu trước hụt sau. Năm nay, đầu tháng 12, công ty công bố thưởng, bà Thơm hỏi ngay số tiền và dặn chuyển như mọi năm. Hương dạ, rồi sáng hôm sau đến thẳng trường của con gái Bống, đóng trước học phí, tiền ăn và lớp tiếng Anh cả năm sau, hết 38 triệu, in biên lai dán lên cửa tủ lạnh. Bà Thơm phát hiện khi đi lấy nước, đứng chết lặng trước tủ lạnh. Bữa cơm tối thành phiên tòa: mẹ chồng khóc kể công nuôi cháu, em chồng Vy mỉa chị dâu khôn lỏi, Dũng cúi mặt ăn. Hương chỉ nói một câu: học phí của Bống là việc của mẹ Bống. Tết năm nay, cô tuyên bố, ăn Tết bằng lương của người đàn ông trong nhà.",
+      "twist": "Ba ngày trước Tết, bà Thơm đòi 20 triệu sắm sửa, nói trong nhà hết tiền. Hương bình tĩnh hỏi 120 triệu thưởng Tết ba năm qua của cô đi đâu. Bà Thơm quanh co, Vy bỏ về phòng. Dũng lần đầu lên tiếng, đưa mẹ cuốn sổ anh âm thầm ghi: ba năm, 120 triệu thưởng của vợ thành 9 chỉ vàng cho Vy và 60 triệu chuyển cho Hoàng, bạn trai Vy, để 'mở quán'. Cú lật: Hoàng đã bỏ đi từ tháng 10, quán chưa bao giờ mở, Vy đang giấu khoản vay tiêu dùng 45 triệu mua đồ hiệu để níu kéo. Bà Thơm sụp xuống, vì bà tưởng mình đang giúp con gái lấy được chồng tử tế. Cao trào ấm: Hương không mắng, cô gỡ biên lai học phí trên tủ lạnh xuống đặt cạnh sổ của chồng, nói tiền nào ra việc đó: Bống đi học, Vy đi làm trả nợ, Tết nhà này do Dũng lo. Dũng đặt lên bàn phong bì lương tháng 13, 18 triệu, lần đầu đưa cho vợ thay vì mẹ. Kết: 30 Tết, mâm cỗ nhỏ hơn mọi năm nhưng đủ, bà Thơm tự tay gói bánh chưng, dúi vào tay Hương chiếc áo ấm cô mua cho bà: 'Năm sau mẹ không hỏi tiền con nữa.'",
+      "hook": "Mẹ chồng chìa tay: 'Thưởng Tết đưa mẹ giữ lo Tết, năm nào cũng vậy, có gì mà hỏi.'",
+      "comment_question": "Thưởng Tết của bạn ai giữ? 1 = Mình tự giữ, lo việc của mình, 2 = Đưa mẹ chồng lo chung",
+      "thumb_keywords": [
+        "Nộp Thẳng Học Phí"
+      ],
+      "timing": "Trước Tết (T1/2027)",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 159,
+      "topic": "bo_me_trong_sinh",
+      "series": "Truyện lẻ",
+      "title": "Giọng Con Gọi Vay Tiền Gấp, Bà Nội Hỏi Đúng Một Câu",
+      "premise": "Bà Tư 68 tuổi, bán tạp hóa đầu hẻm ở Gò Vấp, sống cùng cháu nội Tí 10 tuổi; con trai bà là Hưng, thợ điện công trình ở Bình Dương, mỗi tháng về một lần. Kiếp trước, một buổi chiều, điện thoại bà reo, đúng giọng Hưng khóc nghẹn báo bị tai nạn, cần chuyển gấp 80 triệu vào một tài khoản lạ, dặn đừng gọi lại vì công an đang giữ máy. Bà run rẩy ra ngân hàng, rút sạch sổ tiết kiệm 80 triệu dành cho Tí, chuyển đi. Tối đó Hưng về nhà lành lặn. Bà ngã bệnh, sống trong dằn vặt, mất sau hai năm. Mở mắt ra, bà đang đứng sau quầy, điện thoại đang reo, màn hình hiện tên Hưng, giọng khóc ấy vang lên y hệt. Lần này bà không run. Bà hỏi đúng một câu: con nhớ tên con mèo nhà mình không. Đầu dây im hai giây, rồi nói đại 'Mướp'. Con mèo nhà bà tên Cà Ri, do Tí đặt. Bà giả vờ tin, nói sẽ ra ngân hàng ngay, rồi gọi tổ trưởng dân phố và công an phường. Bà biến buổi chiều đó thành một cái bẫy, với hẻm nhỏ, quầy tạp hóa và tấm biển 'cho vay nóng' ai đó mới dán.",
+      "twist": "Công an lần theo tài khoản nhận tiền, xác định điểm rút là một cây ATM gần chợ Hạnh Thông Tây. Người đến rút tiền bị giữ ngay tại chỗ, vừa thấy bà đã gọi 'bà Tư ơi cứu con'. Cú lật: đó là Quân, cháu họ gọi bà bằng bà cô, con của người em họ mà bà từng nuôi ăn học ba năm. Quân nợ app vay 90 triệu, bị nhóm lừa đảo ép làm chân rút tiền để trừ nợ, và chính Quân đưa cho chúng đoạn ghi âm giọng Hưng lấy từ video gia đình trên mạng để làm giả giọng. Cao trào: tại phường, bà đặt lên bàn cuốn sổ tay ghi 7 cuộc gọi lừa trong hẻm hai tháng qua, 4 nhà đã mất tiền, tổng 310 triệu. Nhờ lời khai của Quân, công an bắt được nhóm cầm đầu thuê trọ cách hẻm hai cây số. Kết: bà không bãi nại nhưng xin cho Quân được khoan hồng, đổi lại Quân phải đi dạy cả hẻm cách nhận ra giọng giả. Tối đó bà dán lên tủ kính tờ giấy viết tay: 'Người nhà gọi vay tiền gấp, hỏi tên con mèo trước.' Tí hỏi sao bà biết, bà cười: 'Bà sống hai lần rồi.'",
+      "hook": "Điện thoại reo, giọng Hưng khóc: 'Mẹ ơi con bị tai nạn, chuyển gấp 80 triệu, đừng gọi lại.'",
+      "comment_question": "Nhà bạn đã có câu hỏi mật để nhận ra người thân chưa? 1 = Có rồi, 2 = Chưa, tối nay bàn ngay",
+      "thumb_keywords": [
+        "Hỏi Đúng Một Câu"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 160,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Mẹ Chồng Mượn Vàng Cưới Giá Thấp, Tôi Đòi Đúng Lúc Giá Đỉnh",
+      "premise": "Nhàn 36 tuổi, chủ một tiệm may áo dài ở Nha Trang, làm dâu nhà chồng ở Diên Khánh mười năm. Ngày cưới, hai họ trao cho cô 5 cây vàng. Hai tháng sau, mẹ chồng (bà Cúc) đến mượn cả 5 cây để em chồng tên Phát mở xưởng gỗ, hứa một năm trả. Nhàn khi đó mới về làm dâu, không dám từ chối, chỉ lặng lẽ viết một tờ giấy mượn, ghi rõ mượn 5 cây vàng SJC, trả bằng vàng, có chữ ký bà Cúc và Phát, cất trong hộp áo dài cưới. Tám năm trôi qua, xưởng gỗ của Phát đổi thành quán cà phê rồi thành tiệm điện thoại, mỗi lần Nhàn nhắc, bà Cúc lại bảo chờ em nó ổn. Cuối năm nay, giá vàng tăng gấp ba so với ngày cưới, cả xóm bàn tán. Nhàn nhắc lại lần cuối, bà Cúc cười nhạt bảo hồi đó vàng có 5 triệu một chỉ, giờ đòi theo giá nào, rồi đề nghị trả 250 triệu tiền mặt theo giá cũ, coi như xong. Nhàn mở hộp áo dài cưới, đặt tờ giấy mượn lên bàn thờ ngay ngày giỗ bố chồng, trước mặt cả họ: mượn vàng, trả vàng, 5 cây, không thiếu một chỉ.",
+      "twist": "Cả họ chia hai phe, bà Cúc khóc kể công, Phát nói chị dâu ép em đến đường cùng. Cú lật đến từ chú Út, em ruột bố chồng: chú lấy từ túi áo tờ giấy nhận cầm 5 cây vàng tại chính tiệm của chú tám năm trước, người cầm là Phát, chưa bao giờ chuộc. Vàng của Nhàn bị bán đứt ngay tháng đầu, không có xưởng gỗ nào. Phát thua độ bóng đá 240 triệu năm đó, bà mượn vàng con dâu để bịt nợ và nói dối cả nhà suốt tám năm. Cao trào vả mặt: Nhàn không hét, cô mở bảng giá vàng hôm đó trên điện thoại, đọc to 5 cây vàng hiện trị giá hơn 700 triệu, rồi nói cô không cần tiền, chỉ cần 5 cây vàng về tay con gái cô ngày nó lấy chồng, nhà này trả bằng cách nào tùy. Phát phải bán tiệm điện thoại để mua lại 3 cây, bà Cúc đưa 2 cây vàng hồi môn của chính bà. Kết: ngày nhận vàng, Nhàn cất tất cả vào hộp áo dài cưới cùng tờ giấy mượn, nói với con gái rằng giấy trắng mực đen không làm người ta xa nhau, nó chỉ giúp người ta không phải nói dối nhau tám năm.",
+      "hook": "Mẹ chồng cười nhạt: 'Hồi đó vàng có 5 triệu một chỉ, giờ con đòi theo giá nào?'",
+      "comment_question": "Vàng cưới của bạn còn giữ không? 1 = Còn nguyên, không ai mượn được, 2 = Cho người nhà mượn rồi, chưa đòi",
+      "thumb_keywords": [
+        "Đòi Đúng Lúc Giá Đỉnh"
+      ],
+      "timing": "Quanh năm",
+      "priority": "A",
+      "publish_date": null
+    },
+    {
+      "id": 161,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Em Chồng Livestream Tại Nhà Tôi, Tôi Lên Sóng Bóc Giá Gốc",
+      "premise": "Mai 31 tuổi, dược sĩ đứng quầy thuốc ở Cần Thơ, cùng chồng mua được căn nhà nhỏ ở Ninh Kiều sau bảy năm tích góp. Em chồng tên Trúc, 25 tuổi, tự xưng 'chiến thần livestream', dọn về ở nhờ ba tháng rồi biến phòng khách thành phim trường. Trúc bán kem dưỡng 'nhập Hàn' 890 nghìn một hũ, mỗi tối lên sóng cho hai nghìn người xem. Một tối Mai đi làm về muộn, định vào bếp nấu cháo cho con ốm thì Trúc đẩy cô ra, bảo chị tránh ra em đang live, cái bếp hôm nay là của em. Mai nhịn. Sáng hôm sau dọn rác, cô nhặt được xấp hóa đơn nhập hàng rơi khỏi thùng: hũ kem 'nhập Hàn' lấy từ một kho ở Bình Tân, giá 35 nghìn, kèm tem nhãn in rời. Mai tra số công bố trên nhãn: không tồn tại. Tối đó, giữa phiên live đang chốt 300 đơn, Mai bước vào khung hình với xấp hóa đơn, nói với hai nghìn người đang xem rằng cô là chủ căn nhà này và là dược sĩ, rồi đọc từng dòng: giá nhập, nơi nhập, số công bố không có.",
+      "twist": "Khách kéo đến tận nhà đòi hoàn tiền, 47 người trong hai ngày, Trúc trốn về quê, mẹ chồng (bà Năm) lên trách Mai phá đường làm ăn của em. Cú lật: Mai lần theo kho hàng ở Bình Tân thì phát hiện Trúc không phải chủ, chỉ là 'mặt tiền' cho một người tên Khải, kẻ đứng sau 12 kênh livestream khác bán cùng loại kem, và Trúc đang bị Khải giữ 160 triệu tiền hàng, ép bán tiếp để lấy lại. Trúc không phải kẻ lừa, mà là con nợ bị lừa. Cao trào: Mai mời quản lý thị trường đến lấy mẫu kem tại nhà, kết quả có corticoid vượt ngưỡng; cô mở lại phiên live trên chính kênh của Trúc, ngồi cạnh Trúc, đọc kết quả kiểm nghiệm, công khai số điện thoại tiếp nhận hoàn tiền, và kể đúng sự thật về Khải. Khải bị xử lý cùng kho hàng. Mai ứng 80 triệu tiết kiệm hoàn tiền trước cho 47 khách, Trúc ký giấy trả dần bằng cách đi làm nhân viên quầy thuốc của chị dâu. Kết ấm: ba tháng sau Trúc lên sóng trở lại bán nông sản quê của bà Năm, mỗi phiên mở đầu bằng câu Mai dạy: 'Giá nhập bao nhiêu, em nói trước.'",
+      "hook": "Em chồng đẩy tôi khỏi bếp: 'Chị tránh ra, em đang live, cái bếp này hôm nay là của em.'",
+      "comment_question": "Bạn từng mua gì trên livestream mà hối hận? 1 = Có, mỹ phẩm hoặc đồ ăn, 2 = Chưa bao giờ mua trên live",
+      "thumb_keywords": [
+        "Bóc Giá Gốc"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 162,
+      "topic": "nghe_la_hong_bien",
+      "series": "Truyện lẻ",
+      "title": "Tất Niên Công Ty, Sếp Bắt Tôi Nhường Thưởng Cho Cháu Sếp",
+      "premise": "Linh 28 tuổi, chuyên viên phân tích dữ liệu ở một công ty phân phối hàng tiêu dùng tại Hà Nội, năm nay dẫn đầu toàn công ty về chỉ tiêu, được đề cử nhân viên xuất sắc với phần thưởng 50 triệu và một chuyến du lịch. Một tuần trước tiệc tất niên, trưởng phòng tên Toàn kéo cô ra hành lang, bảo em còn trẻ, nhường suất xuất sắc cho cháu anh, năm sau anh bù. Cháu sếp là Phong, vào công ty tám tháng, nổi tiếng đến muộn và nhờ Linh làm hộ báo cáo. Linh không cãi, chỉ hỏi anh có chắc không, rồi về chỗ. Tối hôm sau, Toàn gửi nhầm vào nhóm chat cả phòng 23 người một email anh viết cho Phong, dặn cách phát biểu nhận giải, kèm câu 'con Linh nó hiền, nhường là xong, anh đã sửa điểm đánh giá của nó'. Email bị thu hồi sau 40 giây, nhưng Linh đã kịp lưu, 6 người khác cũng kịp đọc. Tiệc tất niên ở một khách sạn lớn, có tổng giám đốc và hội đồng quản trị dự. Đến phần trao giải, Toàn đọc tên Phong, rồi mời Linh lên sân khấu để 'cảm ơn người đã nhường'. Linh cầm micro, cả hội trường chờ cô nói lời khiêm tốn.",
+      "twist": "Linh cảm ơn công ty, rồi xin phép đọc một email để mọi người hiểu vì sao cô 'nhường'. Cô đọc nguyên văn email của Toàn. Hội trường im phăng phắc, Toàn tái mặt định giật micro thì tổng giám đốc (bà Thanh Hà) đứng dậy từ bàn đầu. Cú lật: bà Hà chính là người năm ngoái gọi lúc nửa đêm nhờ bộ phận dữ liệu chạy gấp báo cáo cứu hợp đồng 40 tỷ, và người thức đến 4 giờ sáng làm việc đó là Linh. Bà yêu cầu nhân sự mở hệ thống đánh giá lên màn hình sân khấu: điểm gốc của Linh 96, bị sửa thành 71 ba ngày trước bằng tài khoản của Toàn; Phong có 12 lần đi muộn và 3 báo cáo trùng từng chữ với file của Linh. Bà Hà trao giải lại cho Linh ngay tại chỗ, đình chỉ Toàn chờ xử lý, cho Phong làm lại từ thực tập. Kết ấm và lắng: Linh nói cô vẫn cảm ơn anh Toàn, vì nhờ anh cô mới biết sự im lặng của mình đáng giá bao nhiêu; 6 đồng nghiệp từng đọc email đứng dậy vỗ tay. Chuyến du lịch, cô đổi thành vé máy bay cho bố mẹ, hai người cả đời chưa đi máy bay.",
+      "hook": "Sếp kéo tôi ra hành lang: 'Em còn trẻ, nhường suất xuất sắc cho cháu anh, năm sau anh bù.'",
+      "comment_question": "Công ty bạn chia thưởng có công bằng không? 1 = Có, theo số liệu, 2 = Không, cháu sếp luôn được ưu tiên",
+      "thumb_keywords": [
+        "Nhường Thưởng"
+      ],
+      "timing": "Quanh năm",
+      "priority": "C",
+      "publish_date": null
+    },
+    {
+      "id": 163,
+      "topic": "ho_hang_viet",
+      "series": "Nhà Họ Trần",
+      "title": "Trúng Đất Đền Bù, 17 Người Đến Nhận Họ, Tôi Mang Gia Phả Ra",
+      "premise": "Thảo 27 tuổi, kế toán, con gái duy nhất của một gia đình họ Trần ở ngoại thành. Mảnh vườn hai sào của bố Thảo nằm đúng quy hoạch đường vành đai, được đền bù 6 tỷ 4, tiền về tài khoản đúng một tuần thì nhà bắt đầu đông khách. Người đầu tiên là một ông khách lạ nắm tay Thảo, tự nhận là anh con chú con bác của ông ngoại. Trong ba tuần, 17 người kéo đến nhận họ và cùng một câu chuyện: ngày xưa từng giúp ông bà nội, giờ khó khăn xin 'một phần'. Bác Cả Lợi nhiệt tình nhất, tự làm 'trưởng ban tiếp khách', lập danh sách người thân cần giúp và đề nghị bố Thảo trích 1 tỷ chia cho họ hàng để giữ phúc đức. Cô Út Hằng hồn nhiên hỏi sao nhà mình nhiều bác thế mà giỗ năm nào cũng chỉ ba mâm. Thảo xin tổ chức một buổi 'nhận họ' chính thức tại nhà, mời đủ 17 người và bác Cả, hứa chia công bằng. Hôm đó, cô mang từ buồng bà nội ra cuốn gia phả họ Trần dày bốn trăm trang bà giữ suốt sáu mươi năm.",
+      "twist": "Thảo đọc gia phả từng chi, từng đời, đối chiếu tên và quê quán 17 người tự khai. Kết quả: 14 người không có trong gia phả. 3 người có thật, nhưng gia phả ghi bên lề bằng nét chữ ông nội: năm bố Thảo mua vườn, chính ba người này đã từ mặt vì ông nội không cho mượn sổ đỏ. Cú lật lớn hơn nằm ở bác Cả: bà nội đứng dậy, lấy từ trong gia phả ra tờ giấy bác Cả viết tay hai tháng trước cam kết trả 300 triệu đã vay bà, và bản chụp tin nhắn bác Cả gửi cho Hiển, kẻ cầm đầu nhóm 14 người, hẹn chia đôi phần 1 tỷ nếu kế hoạch thành công. Hóa ra bác Cả thuê người nhận họ để ép em trai chia tiền, rồi lấy phần đó trả nợ bà. 14 người lục tục ra về. Kết ấm: bố Thảo vẫn trích 300 triệu, nhưng là trả thay bác Cả món nợ cho bà nội, kèm điều kiện bác Cả làm thủ quỹ đám giỗ cả đời, sổ do Thảo kiểm. Cô Út hỏi vậy nhà mình còn bao nhiêu bác, bà nội đáp: đủ ba mâm, như mọi năm.",
+      "hook": "Khách lạ nắm tay tôi: 'Cháu nhớ bác không? Bác là anh con chú con bác của ông ngoại cháu.'",
+      "comment_question": "Nhà bạn có bao nhiêu họ hàng tự xuất hiện khi có tiền? 1 = Vài người, 2 = Cả một đoàn như nhà Thảo",
+      "thumb_keywords": [
+        "Mang Gia Phả Ra"
+      ],
+      "timing": "Quanh năm",
+      "priority": "B",
+      "publish_date": null
+    },
+    {
+      "id": 164,
+      "topic": "ho_hang_viet",
+      "series": "Truyện lẻ",
+      "title": "Nhà Chồng Bắt Tôi Mua 12 Vé Tàu Tết, Tôi Mua Đúng Một Vé",
+      "premise": "Quyên 32 tuổi, nhân viên bán vé ở ga Sài Gòn, quê ngoại Quảng Ngãi, lấy chồng là Tâm quê Nghệ An, cả nhà sống trọ ở Gò Vấp cùng con gái Su 6 tuổi. Ba năm liền, cứ cuối tháng 11 khi đường sắt mở bán vé Tết, mẹ chồng (bà Hòa) lại gọi: con làm ở ga thì đặt 12 vé về quê cho cả nhà, tiền thì tính sau. 12 vé khứ hồi Sài Gòn đi Vinh dịp Tết hơn 60 triệu mỗi năm, và 'tính sau' chưa bao giờ xảy ra; Quyên phải vay nóng đồng nghiệp hai lần. Ba cái Tết, Su chưa một lần về ngoại. Năm nay, đúng ngày mở bán, bà Hòa gọi, đòi 14 vé vì có thêm vợ chồng em chồng. Quyên dạ, rồi vào hệ thống đặt đúng một vé: ghế trẻ em Sài Gòn đi Quảng Ngãi, hành khách là Su, đi cùng mẹ bằng vé nhân viên. Sau đó cô soạn bài hướng dẫn tự đặt vé tàu Tết trên ứng dụng, đăng vào nhóm Zalo nhà chồng kèm lời chúc cả nhà đặt được vé đẹp. Tâm lần đầu không gọi lại nhắc vợ.",
+      "twist": "Cả nhà chồng không ai đặt được vé: họ chờ đến tuần cuối mới mở ứng dụng, tàu Tết đã hết chỗ. Cú lật đến từ Tâm: anh đưa mẹ bản sao kê ba năm Quyên chi 184 triệu tiền vé cho nhà nội, có 2 lần vay nóng, cùng giấy khám của bà ngoại ở Quảng Ngãi, bệnh tim cần theo dõi, mà Quyên giấu cả nhà để khỏi bị nói là lấy cớ. Tâm nói anh sẽ ở lại Sài Gòn trực Tết kiếm tiền trả nợ vé cũ, vợ con về ngoại. Cao trào ấm: 28 Tết, bà Hòa tự ra ga Vinh mua vé ghế phụ vào Sài Gòn rồi đi tiếp ra Quảng Ngãi, lần đầu đến nhà thông gia, mang theo gói kẹo cu đơ và 60 triệu tiền vé năm ngoái gom từ hai đứa con trai. Bà gọi Quyên là 'con ơi' giữa sân, trước mặt bà ngoại Su. Kết: Tết đó hai bà cùng gói bánh tét, Su lần đầu có đủ hai bà. Trong nhóm Zalo nhà chồng, bài hướng dẫn của Quyên được ghim lên đầu, bà Hòa sửa tiêu đề thành 'năm sau ai về thì tự đặt'.",
+      "hook": "Mẹ chồng gọi vào ga: 'Con làm ở ga thì đặt 12 vé về quê, tiền thì tính sau.'",
+      "comment_question": "Tết này bạn về quê nội hay quê ngoại? 1 = Quê nội như mọi năm, 2 = Năm nay về ngoại một lần",
+      "thumb_keywords": [
+        "Mua Đúng Một Vé"
+      ],
+      "timing": "Trước Tết (T1/2027)",
+      "priority": "C",
+      "publish_date": null
     }
   ]
 }
