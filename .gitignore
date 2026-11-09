@@ -21,3 +21,4 @@ config/drive_token.json
 
 # Video nền tải về (hàng trăm MB, dữ liệu chứ không phải mã nguồn).
 assets/backgrounds/
+assets/music/

@@ -238,15 +238,27 @@ FIRST_MINUTE_RULE = (
 
 def build_prologue_prompt() -> str:
     """Đoạn "Mở đầu" (26/10): hỏi SAU khi truyện đã viết xong trong cùng hội
-    thoại, để chi tiết kể trước khớp đúng cao trào đã viết."""
+    thoại, để chi tiết kể trước khớp đúng cao trào đã viết.
+
+    08/11: Gemini kể luôn KẾT QUẢ cao trào (ai hủy hôn, nợ gì, bị lừa ra sao) dù
+    đã dặn "dừng trước kết quả" -- vì nó chọn khoảnh khắc SAU màn lật. Giờ ép
+    chọn khoảnh khắc trước khi bằng chứng được mở, cấm đích danh mọi chi tiết
+    thuộc cú lật và phản ứng sau đó, và bắt kết bằng câu treo."""
     lo, hi = PROLOGUE_WORDS
     return f"""Truyện đã viết xong. Giờ viết ĐOẠN MỞ ĐẦU đặt TRƯỚC chương 1, để giữ người nghe ngay từ giây đầu.
 
+CHỌN KHOẢNH KHẮC: giây phút nhân vật 'tôi' SẮP mở bằng chứng / SẮP nói ra sự thật ở cao trào --
+tay đã chạm vào tập hồ sơ, miệng đã mở, cả phòng đang nhìn -- nhưng CHƯA AI biết trong đó là gì.
+Đoạn văn KẾT THÚC ĐÚNG Ở ĐÓ.
+
 YÊU CẦU BẮT BUỘC:
 - {lo}-{hi} từ (đếm theo tiếng cách nhau bởi dấu cách), ngôi 'tôi', cùng giọng kể với truyện.
-- Thả người nghe vào giữa KHOẢNH KHẮC GAY CẤN NHẤT của truyện (ngay trước màn lật tẩy ở cao trào):
-  ai đang đối đầu ai, ở đâu, căng tới mức nào -- bằng hành động và thoại, không tóm tắt.
-- DỪNG NGAY TRƯỚC kết quả: KHÔNG tiết lộ ai thắng, bằng chứng là gì, cú lật ra sao.
+- Dựng cảnh bằng hành động và thoại: ai đang đối đầu ai, ở đâu, căng tới mức nào. Không tóm tắt.
+- TUYỆT ĐỐI KHÔNG viết bất cứ điều gì xảy ra SAU khi bằng chứng được mở: không nói ai thắng,
+  ai bỏ đi, ai quỳ, ai khóc, ai hủy hôn, ai bị lộ, số tiền/món nợ/bí mật là gì, cú lật ra sao.
+  Người nghe xong đoạn này phải CHƯA biết kết cục. Nếu một chi tiết chỉ lộ ra ở cú lật, không được nhắc.
+- Thoại trong đoạn chỉ là lời ĐE DỌA, CHẤT VẤN, PHỦ NHẬN trước khi mở bằng chứng -- không phải lời
+  thú nhận hay phán quyết.
 - Câu cuối cùng là câu dẫn quay về đầu truyện, dạng: 'Nhưng để hiểu vì sao <...>, phải kể lại từ <cái ngày/lúc ...>.'
 - Tên người, chi tiết phải KHỚP đúng với truyện vừa viết.
 - CHỈ trả về văn xuôi của đoạn mở đầu, KHÔNG tiêu đề, KHÔNG giải thích."""
@@ -271,7 +283,10 @@ def _fmt_num(n: int) -> str:
 
 
 # 05/11/2026: 3 -> 2, cùng lý do với shorts/planner.py TEASER_COUNT.
-SHORT_BEAT_COUNT = 2
+# 08/11/2026: lên 3 lại theo yêu cầu kênh, và stage 1 BẮT BUỘC trả đủ (xem
+# generator._ask_short_beats: hỏi lại tới SHORT_BEATS_ATTEMPTS lần, thiếu thì lỗi).
+# Lịch nhả kho vẫn chỉ hẹn 2 Short đầu (upload/release.py RELEASE_SHORT_PARTS).
+SHORT_BEAT_COUNT = 3
 # Câu hỏi chọn phe có hai vế đáp án ("1 = ..., 2 = ...") nên dài hơn câu hỏi cũ;
 # cắt ở 25 từ dễ mất vế 2.
 MAX_TOPIC_QUESTION_WORDS = 35
@@ -457,7 +472,29 @@ Mỗi đoạn:
 - Mở bằng một câu thoại buồn cười hoặc sảng, tự đứng được khi nghe riêng.
 - Đoạn thứ nhất là đoạn sảng nhất.
 
-Chỉ trả về DUY NHẤT một JSON: {{"short_beats": ["<đoạn 1>", "<đoạn 2>", "<đoạn 3>"]}}
+Chỉ trả về DUY NHẤT một JSON: {{"short_beats": [{_beats_placeholder(SHORT_BEAT_COUNT)}]}}
+{_JSON_QUOTE_RULE}
+"""
+
+
+def _beats_placeholder(n: int) -> str:
+    return ", ".join(f'"<đoạn {i}>"' for i in range(1, n + 1))
+
+
+def build_short_beats_retry_prompt(accepted: list[str], missing: int, problem: str) -> str:
+    """Hỏi lại khi lượt trước trả thiếu / trích sai (08/11). Nêu rõ đoạn đã nhận
+    để mô hình không gửi lại, và lý do bị loại để nó sửa đúng chỗ."""
+    kept = "\n".join(f"- {b}" for b in accepted) or "(chưa đoạn nào)"
+    return f"""Lượt vừa rồi CHƯA ĐỦ: {problem}.
+Đoạn đã nhận (KHÔNG gửi lại, KHÔNG chọn trùng/chồng lên các đoạn này):
+{kept}
+
+Hãy trích thêm ĐÚNG {missing} đoạn KHÁC trong các chương vừa viết, mỗi đoạn:
+- COPY NGUYÊN VĂN một đoạn liên tục 60-130 từ đúng từng chữ như trong chương -- mở trình soạn thảo trong đầu,
+  chép lại chứ không viết lại; không sửa chính tả, không gộp câu, không tóm tắt.
+- Mở bằng một câu thoại buồn cười hoặc sảng, tự đứng được khi nghe riêng.
+
+Chỉ trả về DUY NHẤT một JSON: {{"short_beats": [{_beats_placeholder(missing)}]}}
 {_JSON_QUOTE_RULE}
 """
 

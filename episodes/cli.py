@@ -34,7 +34,7 @@ from episodes.audio_build import build_episode_wav
 from episodes.cutter import plan_cuts
 from episodes.full import full_outro_text, plan_full_cut, suggest_same_topic
 from episodes.plan import plan_episodes
-from episodes import backgrounds
+from episodes import backgrounds, music
 from episodes.props_builder import build_episode_props, chapter_lines
 from episodes.storage import (
     episode_audio_path,
@@ -153,6 +153,10 @@ def _run(
                 f"{backgrounds.BACKGROUND_DIR}. Thêm video .mp4 vào đó, hoặc chạy stage 3 "
                 "rồi truyền metadata ảnh."
             )
+        # Nhạc nền nhẹ (09/11, thử nghiệm): chỉ khi AUDIOBOOK_BGM bật; mặc định tắt.
+        nhac = music.choose(seed=ep_stem, repo_root=REPO_ROOT)
+        if nhac:
+            props.update(nhac)
         props_path = save_episode_props(ep_stem, props, OUTPUT_DIR)
         _render(props_path, output_path)
 

@@ -40,6 +40,10 @@ export interface VideoProps {
   backgroundVideoSeconds?: number;
   // rộng/cao của video nền; BrandedLayout dùng để tính bề rộng ô giữa.
   backgroundVideoAspect?: number;
+  // Nhạc nền nhẹ lặp suốt tập (episodes/music.py, 09/11 thử nghiệm). Không có
+  // thì chỉ giọng đọc như trước.
+  backgroundMusic?: string;
+  backgroundMusicVolume?: number;
 }
 
 export interface ShortCaption {

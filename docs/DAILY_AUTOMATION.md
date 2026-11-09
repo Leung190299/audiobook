@@ -58,7 +58,7 @@ Một lượt:
 ```
 ├─ Stage 0  trend.cli          ~30s   → output/ideas/<slug>-<ts>.txt
 ├─ Stage 1  scripts.cli        ~5m    → output/scripts/<slug>-<ts>.json
-├─ Stage 2  tts.cli            ~14m   → output/audio/<slug>-<ts>.wav + .json (từ 06/11: đọc xong tăng tốc x1.25 bằng ffmpeg atempo, `speed` trong config/voice.yaml; mốc câu/chương đã chia theo tốc độ)
+├─ Stage 2  tts.cli            ~14m   → output/audio/<slug>-<ts>.wav + .json (từ 06/11: đọc xong tăng tốc bằng ffmpeg atempo, x1.25 tới 09/11, x1.15 từ 10/11, `speed` trong config/voice.yaml; mốc câu/chương đã chia theo tốc độ)
 ├─ Stage 3  images.cli         ~46m (đo 05/09: 66 ảnh)   → output/images/<slug>-<ts>.json + ~64 png
 ├─ Stage 4  episodes.cli       ~25m   → output/episodes/<slug>-<ts>-ep-0N.mp4 (3 tập) + <slug>-<ts>-episodes.json
 ├─ Stage 5  thumbnail.cli      ~1m    → output/thumbnails/<slug>-<ts>.png + -ep-0N.png
@@ -107,14 +107,15 @@ Log cả lượt ở `output/daily/<ngày>/run.log`, log riêng từng stage ở
 
 Đánh giá kênh 05/11: phân phối về ≈0 sau khi tải lên 9+ video một lúc (27/10) và
 hẹn sẵn 30 ngày × 4 video/ngày. Từ 05/11 lịch chỉ giữ **7 ngày tới**, 1 truyện +
-2 Shorts mỗi ngày:
+2 Shorts hẹn giờ mỗi ngày (từ 08/11 stage 1 ép đủ 3 `short_beats` và stage 7 dựng
+3 Short/truyện; Short thứ 3 chỉ nằm kho):
 
 - Mọi video đăng lên đều vào **kho**: riêng tư, không hẹn giờ (`upload.episodes_cli
   --no-schedule`). Kho là trạng thái thật trên YouTube (`videos.list`), sửa tay trong
   Studio cũng không lệch.
 - Mỗi sáng `run_daily.sh --upload` gọi `upload.release` TRƯỚC khi dựng gì: bỏ hẹn
   video hẹn quá 7 ngày (về kho), rồi hẹn đúng **một** video trong kho cho tối trống
-  gần nhất (20h, 2 short đầu 20h05; short thứ 3 của truyện cũ nằm im). Ưu tiên hai
+  gần nhất (20h, 2 short đầu 20h05; short thứ 3 nằm im trong kho). Ưu tiên hai
   chủ đề đang thắng (bố mẹ/mẹ chồng trọng sinh, nghề lạ) xen kẽ, rồi họ hàng,
   cuối cùng học đường — xếp theo tỷ lệ short "nổ" (`metadata.topic_views`, 06/11). Hẹn được hoặc lịch đã kín → thoát, **không dựng mới**.
   Kho trống (mã 3) → dựng truyện mới như cũ, đăng vào kho, rồi Stage 9 hẹn giờ.

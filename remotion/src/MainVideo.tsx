@@ -29,6 +29,8 @@ export const MainVideo: React.FC<VideoProps> = ({
   backgroundVideo,
   backgroundVideoSeconds = 0,
   backgroundVideoAspect,
+  backgroundMusic,
+  backgroundMusicVolume = 0.15,
 }) => {
   useBeVietnamPro();
   const { fps } = useVideoConfig();
@@ -72,6 +74,11 @@ export const MainVideo: React.FC<VideoProps> = ({
         )}
       </BrandedLayout>
       {audioPath ? <Audio src={staticFile(audioPath)} /> : null}
+      {/* Nhạc nền nhẹ (09/11, thử nghiệm): lặp suốt tập, trộn dưới giọng đọc
+          lúc render. props không có backgroundMusic -> y như trước. */}
+      {backgroundMusic ? (
+        <Audio src={staticFile(backgroundMusic)} volume={backgroundMusicVolume} loop />
+      ) : null}
     </AbsoluteFill>
   );
 };

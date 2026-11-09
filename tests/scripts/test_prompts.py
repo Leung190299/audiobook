@@ -55,3 +55,19 @@ def test_chapter_prompt_chuong_cuoi_tap_phai_cliffhanger():
 def test_chapter_prompt_chuong_thuong_va_chuong_ket():
     assert "CHƯƠNG" not in build_chapter_prompt(7, 16, "Giữa", "Tóm tắt.").split("YÊU CẦU BẮT BUỘC")[1][:40]
     assert "CHƯƠNG KẾT" in build_chapter_prompt(16, 16, "Kết", "Tóm tắt.")
+
+
+def test_prompt_mo_dau_ep_dung_truoc_khi_mo_bang_chung_va_cam_ke_ket_cuc():
+    """08/11: bản Mở đầu của Gemini cho truyện #114 kể luôn kết cục (hủy hôn,
+    cắm nợ, đa cấp). Prompt phải ép chọn khoảnh khắc TRƯỚC khi bằng chứng mở
+    và cấm đích danh mọi chi tiết sau màn lật."""
+    from scripts.prompts import PROLOGUE_WORDS, build_prologue_prompt
+
+    prompt = build_prologue_prompt()
+
+    assert "SẮP mở bằng chứng" in prompt
+    assert "CHƯA AI biết trong đó là gì" in prompt
+    assert "KHÔNG viết bất cứ điều gì xảy ra SAU khi bằng chứng được mở" in prompt
+    assert "ai hủy hôn" in prompt and "số tiền/món nợ/bí mật" in prompt
+    assert "Nhưng để hiểu vì sao" in prompt
+    assert f"{PROLOGUE_WORDS[0]}-{PROLOGUE_WORDS[1]} từ" in prompt

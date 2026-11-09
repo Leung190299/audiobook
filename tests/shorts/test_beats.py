@@ -1,5 +1,5 @@
 # tests/shorts/test_beats.py
-"""Shorts từ short_beats (24/09/2026; TEASER_COUNT cái, 2 từ 05/11): 30-55s, mở bằng câu thoại, tiêu đề <= 50 ký tự + #Shorts."""
+"""Shorts từ short_beats (24/09/2026; TEASER_COUNT cái, 2 từ 05/11, 3 lại từ 08/11): 30-55s, mở bằng câu thoại, tiêu đề <= 50 ký tự + #Shorts."""
 
 from shorts.planner import TEASER_COUNT, plan_beat_shorts, short_title_from_line
 from shorts.storage import save_short_metadata
@@ -7,6 +7,7 @@ from shorts.storage import save_short_metadata
 LINES = {
     (2, 3): "'Bác nói to lên, cháu đang livestream!'",
     (4, 5): "'Mợ ơi, sổ đỏ này photo màu đấy ạ.'",
+    (6, 2): "'Năm phần trăm thì đáng bao nhiêu đâu chị.'",
 }
 
 
@@ -29,9 +30,10 @@ def test_beat_thanh_short_30_55s_mo_bang_cau_thoai():
     parts = plan_beat_shorts(tts, [
         "'Mợ ơi, sổ đỏ này photo màu đấy ạ.' Câu thường số 4 chấm 6 trong truyện.",
         "'Bác nói to lên, cháu đang livestream!' Câu thường số 2 chấm 4 trong truyện.",
+        "'Năm phần trăm thì đáng bao nhiêu đâu chị.' Câu thường số 6 chấm 3 trong truyện.",
     ])
-    assert len(parts) == TEASER_COUNT == 2  # đủ 2 beat, không cần trích đoạn bù
-    assert [p.number for p in parts] == [1, 2]
+    assert len(parts) == TEASER_COUNT == 3  # đủ 3 beat, không cần trích đoạn bù
+    assert [p.number for p in parts] == [1, 2, 3]
     beat_parts = [p for p in parts if p.hook_line]
     assert {p.hook_line for p in beat_parts} == set(LINES.values())
     for p in beat_parts:

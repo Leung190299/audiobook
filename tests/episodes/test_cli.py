@@ -108,3 +108,27 @@ def test_render_voi_chat_luong_khung_cao(patched):
 
     render = [c for c in calls if "render" in c][0]
     assert "--jpeg-quality=95" in render
+
+
+def test_nhac_nen_bat_thi_props_mang_backgroundMusic(patched, monkeypatch):
+    """09/11: AUDIOBOOK_BGM bật -> props Remotion có nhạc nền; tắt -> không có."""
+    import json
+
+    sandbox, calls = patched
+    monkeypatch.setattr(
+        episodes_cli.backgrounds, "choose",
+        lambda **kw: {"backgroundVideo": "assets/backgrounds/.prepared/a-h576.mp4",
+                      "backgroundVideoSeconds": 300.0, "backgroundVideoAspect": 0.5625},
+    )
+    monkeypatch.setattr(
+        episodes_cli.music, "choose",
+        lambda **kw: {"backgroundMusic": "assets/music/pad.mp3", "backgroundMusicVolume": 0.15},
+    )
+
+    episodes_cli._run(sandbox["script_path"], sandbox["tts_path"], None)
+
+    props_files = list((sandbox["repo_root"] / "output" / "episodes").glob("*-props.json"))
+    assert props_files, "stage 4 phải ghi file props"
+    props = json.loads(props_files[0].read_text())
+    assert props["backgroundMusic"] == "assets/music/pad.mp3"
+    assert props["backgroundMusicVolume"] == 0.15

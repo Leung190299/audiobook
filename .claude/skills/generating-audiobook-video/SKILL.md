@@ -27,7 +27,7 @@ One **35–50 min long video per day** + **3 Shorts**, Vietnamese family-drama s
 
 **Output quality**: long video renders at **1920×1080** (was 1024×576 until 05/10 — SD, and it threw away over half the vertical detail of the 1024–1280 px Douyin sources). Remotion's intermediate frames are JPEG 95 (`backgrounds.RENDER_JPEG_QUALITY`; default 80 smeared text edges). 1080p renders ~33% slower than 576p. `BrandPanel` scales all its size clamps by `height / 576`, so changing the frame size keeps the layout.
 
-Layout code: `remotion/src/MainVideo.tsx` → `BrandedLayout.tsx` (centre box width) → `BrandPanel.tsx` (panels, colours, AI text) + `BackgroundVideo.tsx` (looped centre clip). Shorts (`ShortVideo.tsx`) keep their own older layout with captions.
+Layout code: `remotion/src/MainVideo.tsx` → `BrandedLayout.tsx` (centre box width) → `BrandPanel.tsx` (panels, colours, AI text) + `BackgroundVideo.tsx` (looped centre clip). Shorts (`ShortVideo.tsx`) keep their own older layout: 3-second hook text + CTA card. **Since 08/11 Shorts burn no captions either** (channel request); `props.captions` is still sent by stage 7 but not drawn.
 
 ## Run it
 
@@ -64,6 +64,10 @@ Drop `.mp4` files into `assets/backgrounds/` — that's all. Each episode picks 
 Each source is prepared **once** by ffmpeg into `assets/backgrounds/.prepared/`: `<name>-h1080.mp4` for the long video and, for vertical sources only, `<name>-h1920.mp4` for Shorts (Short frame is 1080×1920). Aspect kept, **audio stripped** (Douyin music would fight the narration), 30 fps. Shorts prefer vertical clips; a landscape clip squeezed into a vertical frame keeps only the middle ~32%.
 
 With videos present `run_daily.sh` **skips stage 3 entirely** and calls stages 4 and 7 without an images file — a run drops from ~70 to ~40 min. Empty folder → stage 3 runs and everything uses images as before. A source that fails ffmpeg is skipped and the episode falls back to the stage-3 images — one bad clip never kills an hour-long run. `assets/backgrounds/` is gitignored (hundreds of MB).
+
+## Background music (experiment, 09/11)
+
+Off by default. `AUDIOBOOK_BGM=1 ./run_daily.sh --story <id>` mixes a soft looping pad under the narration of the **long video only** (`episodes/music.py` → `MainVideo` `<Audio loop volume=… />`); `AUDIOBOOK_BGM=<path>` picks a file, `AUDIOBOOK_BGM_VOLUME` (default 0.15) sets the level. The pad is generated locally with `uv run python -m scripts.make_bgm` into `assets/music/` (gitignored) — no downloaded music, so no Content ID risk. The TTS wav is untouched, so Shorts timing is unaffected. One episode was built with it for an A/B on retention; do not turn it on for the daily run until that comparison is in.
 
 ## Mascot, avatar, brand assets
 
