@@ -65,6 +65,10 @@ Each source is prepared **once** by ffmpeg into `assets/backgrounds/.prepared/`:
 
 With videos present `run_daily.sh` **skips stage 3 entirely** and calls stages 4 and 7 without an images file — a run drops from ~70 to ~40 min. Empty folder → stage 3 runs and everything uses images as before. A source that fails ffmpeg is skipped and the episode falls back to the stage-3 images — one bad clip never kills an hour-long run. `assets/backgrounds/` is gitignored (hundreds of MB).
 
+## Background music (experiment, 09/11)
+
+Off by default. `AUDIOBOOK_BGM=1 ./run_daily.sh --story <id>` mixes a soft looping pad under the narration of the **long video only** (`episodes/music.py` → `MainVideo` `<Audio loop volume=… />`); `AUDIOBOOK_BGM=<path>` picks a file, `AUDIOBOOK_BGM_VOLUME` (default 0.15) sets the level. The pad is generated locally with `uv run python -m scripts.make_bgm` into `assets/music/` (gitignored) — no downloaded music, so no Content ID risk. The TTS wav is untouched, so Shorts timing is unaffected. One episode was built with it for an A/B on retention; do not turn it on for the daily run until that comparison is in.
+
 ## Mascot, avatar, brand assets
 
 `uv run python -m scripts.cut_sticker_sheet` cuts `assets/brand/sticker-sheet.webp` into 16 transparent stickers in `assets/brand/stickers/<name>.png` (logo, nghe-truyen, hay-qua, thu-gian, dang-ky, ngu, cung-nghe, cam-on, hum, truyen-hay, like, chill, moi-luc, co-len, kien-thuc, hen-gap) and copies the four the panels use to `remotion/public/sticker-*.png`. The sheet's white background equals the stickers' white rim, so the rim is removed with the background and redrawn by `thumbnail.sticker.sticker()`. A new sheet with the same 4×4 layout: replace the file and rerun; a different layout: edit `NAMES`. To change which stickers appear: `MASCOT` in `remotion/src/BrandPanel.tsx`, `thumb_stickers` in `scripts/topics.py` (prefer stickers with short speech text — long text fights the title).
