@@ -343,3 +343,25 @@ def test_het_truyen_dung_chu_de_thi_lay_chu_de_khac_chu_khong_bo_trong(bank, tmp
                               state_path=tmp_path / "st.json", rotation=("hoc_duong",) * 7)
 
     assert s is not None and s.id == 1
+
+
+def test_load_bank_gop_kho_phu_auto_canh_kho_chinh(bank):
+    # Stage 0 từ khóa ghi truyện tự viết vào <kho>.auto.json; load_bank gộp vào
+    # để --story/--pick/get_story thấy như truyện thường.
+    auto = bank.with_name(bank.stem + ".auto.json")
+    auto.write_text(json.dumps({"stories": [{
+        "id": 1000, "topic": "ho_hang_viet", "series": "Truyện lẻ", "title": "Mẹ Chồng Giữ Sổ Đỏ",
+        "premise": "p", "twist": "t", "hook": "h", "comment_question": "q",
+        "thumb_keywords": ["Sổ Đỏ"], "timing": "Quanh năm", "priority": "A", "publish_date": None,
+        "keyword": "mẹ chồng giữ sổ đỏ"}]}, ensure_ascii=False), encoding="utf-8")
+
+    loaded = story_bank.load_bank(bank)
+
+    assert [s.id for s in loaded.stories][-1] == 1000
+    assert story_bank.get_story(1000, bank).title == "Mẹ Chồng Giữ Sổ Đỏ"
+
+
+def test_kho_phu_hong_thi_bo_qua_khong_lam_vo_kho_chinh(bank):
+    bank.with_name(bank.stem + ".auto.json").write_text("{hỏng", encoding="utf-8")
+
+    assert len(story_bank.load_bank(bank).stories) == 5

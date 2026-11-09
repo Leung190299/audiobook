@@ -13,6 +13,8 @@
 #   FAKE_NO_THUMB       upload.cli báo thumbnail chưa đặt
 #   FAKE_NO_STORY       scripts.story_bank --pick thoát 3 (kho hết truyện)
 #   FAKE_STORY_ID       id mà scripts.story_bank --pick in ra (mặc định 42)
+#   FAKE_NO_KEYWORDS    keywords.cli thoát 3 (không cụm từ khóa nào đạt ngưỡng)
+#   FAKE_KEYWORD_STORY_ID id mà keywords.cli in ra (mặc định 1001)
 
 set -u
 
@@ -47,6 +49,17 @@ case "$module" in
     for ((d = 1; d <= days; d++)); do
       echo "2026-09-2$d      #$((40 + d))   A  ho_hang_viet       Truyện giả số $d"
     done
+    exit 0
+    ;;
+  keywords.cli)
+    # Stage 0 từ khóa: FAKE_NO_KEYWORDS -> thoát 3 (không cụm nào đạt);
+    # FAKE_KEYWORD_STORY_ID -> id truyện in ra (mặc định 1001, truyện tự viết).
+    [[ -n "${FAKE_NO_KEYWORDS:-}" ]] && exit 3
+    echo "Gợi ý: 120 cụm từ 15 hạt giống."
+    echo "Từ khóa: mẹ chồng giữ sổ đỏ"
+    echo "Nguồn: ${FAKE_KEYWORD_SOURCE:-mới}"
+    echo "Tiêu đề: Mẹ Chồng Giữ Sổ Đỏ Tôi Mua, Tôi Mời Công Chứng Đến Bàn Ăn"
+    echo "Truyện: ${FAKE_KEYWORD_STORY_ID:-1001}"
     exit 0
     ;;
   trend.cli)

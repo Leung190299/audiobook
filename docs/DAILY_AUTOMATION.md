@@ -56,7 +56,8 @@ tính năng đăng YouTube.
 Một lượt:
 
 ```
-├─ Stage 0  trend.cli          ~30s   → output/ideas/<slug>-<ts>.txt
+├─ Stage 0  keywords.cli       ~1–2m  → "Truyện: <id>" (từ 10/11, mặc định với --story auto: gợi ý tìm kiếm YouTube VN + video đối thủ → chấm Cầu/View/Giọng/Mới → dò kho theo tên, không có thì mô hình viết truyện mới vào data/story_bank.auto.json; thoát 3 = rơi về --pick; tắt: --no-keywords)
+├─ Stage 0  trend.cli          ~30s   → output/ideas/<slug>-<ts>.txt (kiểu cũ, chỉ với --trend)
 ├─ Stage 1  scripts.cli        ~5m    → output/scripts/<slug>-<ts>.json
 ├─ Stage 2  tts.cli            ~14m   → output/audio/<slug>-<ts>.wav + .json (từ 06/11: đọc xong tăng tốc bằng ffmpeg atempo, x1.25 tới 09/11, x1.15 từ 10/11, `speed` trong config/voice.yaml; mốc câu/chương đã chia theo tốc độ)
 ├─ Stage 3  images.cli         ~46m (đo 05/09: 66 ảnh)   → output/images/<slug>-<ts>.json + ~64 png

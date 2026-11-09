@@ -36,6 +36,7 @@ Layout code: `remotion/src/MainVideo.tsx` → `BrandedLayout.tsx` (centre box wi
 ./run_daily.sh --story 42      # a specific story id from data/story_bank.json
 ./run_daily.sh --dry-run-pick  # print the next 7 days' picks, build nothing
 ./run_daily.sh --upload        # build, then upload long video + Shorts
+./run_daily.sh --no-keywords   # skip stage 0 keyword research, pick straight from the bank
 ```
 
 `launchd/com.lee.audiobook.daily.plist` runs `./run_daily.sh --upload` at **09:00 daily: build, then upload** (since 26/10, at the channel's request — before that uploading was a deliberate human checkpoint). Remove the `--upload` line from the plist to go back to build-only. Upload needs a live OAuth token; in Testing mode it dies every 7 days.
@@ -46,6 +47,7 @@ Layout code: `remotion/src/MainVideo.tsx` → `BrandedLayout.tsx` (centre box wi
 
 | # | Module | ~Time | Notes |
 |---|--------|-------|-------|
+| 0 | `keywords.cli` | ~1–2 min (+ model) | **Since 10/11, on by default for `--story auto`.** Collects YouTube VN search suggestions around the channel's seeds (free) and the 50 latest videos of ~16 competitor channels (Data API, cached 7 days in `output/keywords/`), scores each phrase 0–3 on Cầu / View / Giọng / Mới (`config/keywords.yaml`), and takes the best phrase not used in 30 days. If a bank story's **title** already carries the phrase, that story is picked; otherwise the model writes a new bank record (title must contain the phrase, ≤60 chars, no "Tôi"/"Trọng Sinh" start; hook, premise, twist, question, thumb keyword) into `data/story_bank.auto.json` (gitignored, ids from 1000) and stage 1 runs on it like any bank story. Exit 3 (no phrase above `min_score`) or any failure → warning, then the old `--pick` path. `--no-keywords` / `AUDIOBOOK_KEYWORDS=0` skips it. `uv run python -m keywords.cli --dry-run` prints the scoreboard without writing anything. |
 | 1 | `scripts.cli --story <id>` | ~15 min (Claude) / 2 min (Gemini) | Writer chosen by `STORY_LLM` (`claude` / `gemini`, `--llm` overrides; unset → Claude when `ANTHROPIC_API_KEY` is in `.env`) — `scripts/llm.py`. Claude = `claude-opus-5-5`, effort `high`, one multi-turn conversation with prompt caching, server-side refusal fallback. Title, hook, comment question, thumb keywords come **from the bank**, not the model. Approved outline → chapter N follows line N, but **chapter headings come from the model** (outline lines are internal notes like "Miếng hài: …"). |
 | 2 | `tts.cli` | 5.5 min | VieNeu-TTS, ONNX on CPU. |
 | 3 | `images.cli` | 31 min | **Skipped whenever `assets/backgrounds/` has a video** — long video and Shorts both run on background video. Only runs (FLUX via mflux) as the fallback when that folder is empty. |

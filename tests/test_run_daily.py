@@ -118,6 +118,9 @@ def _run(
         **{k: v for k, v in os.environ.items() if not k.startswith("AUDIOBOOK_")},
         "AUDIOBOOK_RUNNER": str(FAKE_STAGE),
         "FAKE_LOG": str(calls_file),
+        # Stage 0 từ khóa (10/11) mặc định bật ngoài đời; test cũ tả đường đi
+        # "kho chọn theo ngày" nên tắt ở đây, test riêng bật lại bằng env_overrides.
+        "AUDIOBOOK_KEYWORDS": "0",
     }
     env.update({k: v for k, v in env_overrides.items() if v is not None})
 
@@ -632,3 +635,50 @@ def test_stage_7b_tiktok_hong_khong_lam_dung_luot_chay(tmp_path: Path):
     assert "CẢNH BÁO: Stage 7b" in run.stdout
     assert not any(c.startswith("notify.cli failure") for c in run.calls)
     assert any(c.startswith("notify.cli success") for c in run.calls)
+
+
+# --- stage 0 từ khóa (10/11) --------------------------------------------------------
+
+
+def test_stage_0_tu_khoa_ra_truyen_thi_stage_1_dung_truyen_do(tmp_path: Path):
+    run = _run(tmp_path, legacy=False, AUDIOBOOK_KEYWORDS="1")
+    assert run.exit_code == 0, run.proc.stderr + run.stdout
+    assert run.called("keywords.cli")
+    assert not run.called("scripts.story_bank") or "--pick" not in (run.call_for("scripts.story_bank") or "")
+    assert run.call_for("scripts.cli") == "scripts.cli --story 1001 --format full"
+    run_log = next((run.root / "output" / "daily").iterdir()) / "run.log"
+    text = run_log.read_text(encoding="utf-8")
+    assert "Từ khóa hôm nay: mẹ chồng giữ sổ đỏ (truyện mới #1001)" in text
+    # Cuối lượt vẫn đánh dấu đã dựng để sáng mai không dựng lại.
+    assert "scripts.story_bank --mark-used 1001" in run.calls
+
+
+def test_stage_0_khong_co_cum_dat_nguong_thi_roi_ve_kho(tmp_path: Path):
+    run = _run(tmp_path, legacy=False, AUDIOBOOK_KEYWORDS="1", FAKE_NO_KEYWORDS="1")
+    assert run.exit_code == 0, run.proc.stderr + run.stdout
+    assert run.called("keywords.cli")
+    assert run.call_for("scripts.cli") == "scripts.cli --story 42 --format full"
+    run_log = next((run.root / "output" / "daily").iterdir()) / "run.log"
+    assert "Không có cụm từ khóa đạt ngưỡng" in run_log.read_text(encoding="utf-8")
+
+
+def test_stage_0_loi_that_cung_chi_canh_bao_roi_ve_kho(tmp_path: Path):
+    run = _run(tmp_path, legacy=False, AUDIOBOOK_KEYWORDS="1", FAKE_FAIL_MODULE="keywords.cli")
+    assert run.exit_code == 0, run.proc.stderr + run.stdout
+    assert run.call_for("scripts.cli") == "scripts.cli --story 42 --format full"
+    run_log = next((run.root / "output" / "daily").iterdir()) / "run.log"
+    assert "stage 0 từ khóa lỗi" in run_log.read_text(encoding="utf-8")
+
+
+def test_co_no_keywords_thi_khong_goi_stage_0(tmp_path: Path):
+    run = _run(tmp_path, ["--no-keywords"], legacy=False, AUDIOBOOK_KEYWORDS="1")
+    assert run.exit_code == 0, run.proc.stderr + run.stdout
+    assert not run.called("keywords.cli")
+    assert run.call_for("scripts.cli") == "scripts.cli --story 42 --format full"
+
+
+def test_story_chi_dinh_thi_khong_goi_stage_0(tmp_path: Path):
+    run = _run(tmp_path, ["--story", "7"], legacy=False, AUDIOBOOK_KEYWORDS="1")
+    assert run.exit_code == 0, run.proc.stderr + run.stdout
+    assert not run.called("keywords.cli")
+    assert run.call_for("scripts.cli") == "scripts.cli --story 7 --format full"
