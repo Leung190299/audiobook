@@ -245,19 +245,21 @@ def pick_story(
         return min(scheduled, key=lambda s: s.id)
 
     topic = topic_for_date(day, rotation)
-    candidates = [
+    pool = [
         s
         for s in bank.stories
         if s.id not in taken
-        and s.topic == topic
         # Truyện đã hẹn ngày khác thì để dành đúng ngày đó, không lấy sớm.
         and s.publish_date is None
         and _timing_allowed(s, day)
     ]
-    for priority in PRIORITY_ORDER:
-        same = [s for s in candidates if s.priority == priority]
-        if same:
-            return min(same, key=lambda s: s.id)
+    # Hết truyện đúng chủ đề của ngày thì lấy chủ đề khác chứ không bỏ trống tối
+    # đó (10/11: kho thay 50 truyện từ doc "50 ý tưởng", hoc_duong chỉ còn 2).
+    for candidates in ([s for s in pool if s.topic == topic], pool):
+        for priority in PRIORITY_ORDER:
+            same = [s for s in candidates if s.priority == priority]
+            if same:
+                return min(same, key=lambda s: s.id)
     return None
 
 

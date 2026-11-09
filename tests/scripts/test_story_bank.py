@@ -333,3 +333,13 @@ def test_set_air_time_dat_va_xoa_gio_chieu(tmp_path):
     # Bỏ hẹn (về kho): xoá hẳn giờ, mark_used không làm được việc này.
     set_air_time(5, None, state_path=state)
     assert load_state(state)["5"] == {"status": "published"}
+
+
+def test_het_truyen_dung_chu_de_thi_lay_chu_de_khac_chu_khong_bo_trong(bank, tmp_path):
+    # 10/11: kho thay 50 truyện từ doc, hoc_duong chỉ còn 2 -> thứ Bảy không
+    # được trống. Chủ đề của ngày không có truyện nào -> vẫn ra truyện A của
+    # chủ đề khác (bỏ qua Tết ngoài mùa và truyện đã hẹn ngày).
+    s = story_bank.pick_story(date(2026, 9, 28), path=bank,
+                              state_path=tmp_path / "st.json", rotation=("hoc_duong",) * 7)
+
+    assert s is not None and s.id == 1
