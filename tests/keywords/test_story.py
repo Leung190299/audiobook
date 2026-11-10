@@ -65,3 +65,17 @@ def test_ban_ghi_kho_co_du_truong_va_uu_tien_A(tmp_path):
 
 def test_slug_bo_dau():
     assert slugify("Mẹ Chồng Giữ Sổ Đỏ") == "me-chong-giu-so-do"
+
+
+def test_tu_khoa_thumbnail_phai_2_den_4_chu():
+    d = _ok(); d["thumb_keywords"] = ["Mẹ Chồng Giữ Sổ Đỏ Tôi Mua"]
+    assert any("2-4 chữ" in p for p in validate_story(d, PHRASE, []))
+
+
+def test_ten_rieng_trong_hook_phai_co_trong_truyen():
+    d = _ok(); d["hook"] = "Bà Loan quát: 'Mày là con nuôi, đem sổ đỏ sang tên em trai!'"
+    d["premise"] = "Mai được ông bà Tám nhận nuôi. " + " ".join(["từ"] * 170)
+    problems = validate_story(d, PHRASE, [])
+    assert any("'Loan'" in p for p in problems)
+    d["hook"] = "Bà Tám quát: 'Mày là con nuôi, đem sổ đỏ sang tên em trai!'"
+    assert not any("trong hook" in p for p in validate_story(d, PHRASE, []))

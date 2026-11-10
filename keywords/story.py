@@ -47,10 +47,33 @@ def validate_story(data: dict, phrase: str, existing_titles: list[str]) -> list[
     kws = data["thumb_keywords"]
     if not isinstance(kws, list) or not kws or not all(isinstance(k, str) and k in title for k in kws):
         problems.append("thumb_keywords phải là 1 cụm nằm nguyên văn trong title")
+    elif not all(2 <= len(k.split()) <= 4 for k in kws):
+        problems.append("thumb_keywords phải dài 2-4 chữ (thumbnail chỉ tô màu một cụm ngắn)")
+    # Tên riêng trong hook phải có trong truyện: lượt 10/11 hook gọi 'bà Loan' còn
+    # premise là 'ông bà Tám' -- stage 1 sẽ viết chương 1 theo hook rồi lạc tên.
+    body = f"{data['premise']} {data['twist']}"
+    for name in _proper_names(str(data["hook"])):
+        if name not in body:
+            problems.append(f"tên '{name}' trong hook không xuất hiện trong premise/twist; dùng đúng tên nhân vật")
     for key in ("premise", "twist", "hook", "comment_question"):
         if '"' in str(data[key]):
             problems.append(f"{key} có dấu nháy kép, dùng nháy đơn")
     return problems
+
+
+# (?i:...) chỉ bỏ phân biệt hoa/thường cho từ xưng hô ('Bà Loan' đầu câu), tên
+# riêng phía sau vẫn phải viết hoa.
+_NAME_PREFIX = r"(?i:ông|bà|chị|anh|cô|chú|bác|thím|dì|cậu|mợ|mẹ|bố|em|thằng|con)"
+
+
+def _proper_names(text: str) -> list[str]:
+    """Tên riêng đi sau từ xưng hô ('bà Loan', 'chị Mai'), bỏ từ đầu câu/đầu thoại."""
+    names = []
+    for match in re.finditer(rf"\b{_NAME_PREFIX}\s+([A-ZÀ-Ỹ][a-zà-ỹ]+)", text):
+        name = match.group(1)
+        if name not in names:
+            names.append(name)
+    return names
 
 
 def to_bank_record(data: dict, story_id: int, phrase: str) -> dict:
