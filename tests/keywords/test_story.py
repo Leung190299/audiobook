@@ -79,3 +79,18 @@ def test_ten_rieng_trong_hook_phai_co_trong_truyen():
     assert any("'Loan'" in p for p in problems)
     d["hook"] = "Bà Tám quát: 'Mày là con nuôi, đem sổ đỏ sang tên em trai!'"
     assert not any("trong hook" in p for p in validate_story(d, PHRASE, []))
+
+
+def test_title_khong_duoc_mang_ten_rieng():
+    d = _ok(); d["title"] = "Mẹ Chồng Giữ Sổ Đỏ, Chị Lan Mời Công Chứng Đến Bàn Ăn"; d["thumb_keywords"] = ["Công Chứng"]
+    d["premise"] = "Chị Lan 32 tuổi về làm dâu bà Thục. " + " ".join(["từ"] * 170)
+    assert any("tên riêng" in p and "Lan" in p for p in validate_story(d, PHRASE, []))
+    # Tiêu đề viết hoa kiểu Title Case không bị coi 'Chồng' là tên.
+    assert validate_story(_ok(), PHRASE, []) == []
+
+
+def test_tu_dau_cau_thoai_viet_hoa_khong_bi_coi_la_ten():
+    from keywords.story import _proper_names
+
+    assert _proper_names("Mẹ nuôi quát: 'Con Đừng hòng chiếm nhà này!'") == []
+    assert _proper_names("Bà Phượng quát: 'Mày Trả sổ đỏ đây!'") == ["Phượng"]

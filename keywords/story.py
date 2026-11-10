@@ -33,6 +33,15 @@ def validate_story(data: dict, phrase: str, existing_titles: list[str]) -> list[
         problems.append(f"title phải chứa các từ chính của từ khóa '{phrase}'")
     if title.lower() in {t.lower() for t in existing_titles}:
         problems.append("title trùng một truyện đã có, đặt tên khác")
+    # Tiêu đề viết hoa mọi chữ nên không dò xưng hô được; lấy tên từ premise/twist
+    # (ở đó 'bà Phượng' viết thường xưng hô) rồi xem tên nào lọt vào tiêu đề.
+    body_names = _proper_names(f"{data['premise']} {data['twist']}")
+    title_words = set(re.findall(r"[A-ZÀ-Ỹ][a-zà-ỹ]+", title))
+    leaked = [n for n in body_names if n in title_words]
+    if leaked:
+        problems.append(
+            f"title không đặt tên riêng nhân vật ({', '.join(leaked)}), nhân vật chính xưng 'Tôi' như mọi truyện của kênh"
+        )
     if str(data["topic"]) not in TOPICS:
         problems.append(f"topic phải là một trong: {', '.join(TOPICS)}")
     if len(str(data["hook"]).split()) > MAX_HOOK_WORDS:
@@ -66,13 +75,23 @@ def validate_story(data: dict, phrase: str, existing_titles: list[str]) -> list[
 _NAME_PREFIX = r"(?i:ông|bà|chị|anh|cô|chú|bác|thím|dì|cậu|mợ|mẹ|bố|em|thằng|con)"
 
 
+# Từ hay đứng đầu câu thoại sau xưng hô, viết hoa nhưng không phải tên: "Con Đừng
+# hòng", "Mày Trả lại". Bắt nhầm thì mô hình bị hỏi lại vô ích (lượt 10/11: 'đừng').
+_NOT_NAMES = {
+    "đừng", "đi", "ơi", "này", "đây", "kia", "không", "có", "là", "mày", "tao", "nó", "ta",
+    "chúng", "cứ", "hãy", "thôi", "đã", "sẽ", "phải", "về", "ra", "vào", "ở", "làm", "nói",
+    "đưa", "ký", "trả", "cút", "im", "nghe", "biết", "muốn", "định", "dám", "mà", "thì",
+}
+
+
 def _proper_names(text: str) -> list[str]:
     """Tên riêng đi sau từ xưng hô ('bà Loan', 'chị Mai'), bỏ từ đầu câu/đầu thoại."""
     names = []
     for match in re.finditer(rf"\b{_NAME_PREFIX}\s+([A-ZÀ-Ỹ][a-zà-ỹ]+)", text):
         name = match.group(1)
-        if name not in names:
-            names.append(name)
+        if name.lower() in _NOT_NAMES or name in names:
+            continue
+        names.append(name)
     return names
 
 

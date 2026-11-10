@@ -23,9 +23,19 @@ from dotenv import load_dotenv
 
 from keywords import sources
 from keywords.matching import find_bank_story
-from keywords.prompts import build_keyword_story_prompt, build_keyword_story_retry_prompt
+from keywords.prompts import (
+    build_keyword_story_edit_prompt,
+    build_keyword_story_prompt,
+    build_keyword_story_retry_prompt,
+)
 from keywords.scoring import Cluster, score_clusters
-from keywords.story import append_auto_story, next_auto_id, to_bank_record, validate_story
+from keywords.story import (
+    append_auto_story,
+    load_auto_stories,
+    next_auto_id,
+    to_bank_record,
+    validate_story,
+)
 from scripts import story_bank
 
 load_dotenv()
@@ -80,13 +90,10 @@ def describe(clusters: list[Cluster], limit: int = 25) -> str:
     return "\n".join(lines)
 
 
-async def write_story(cluster: Cluster, bank, titles: list[str], llm: str | None) -> dict | None:
+async def _ask_valid(chat, prompt: str, phrase: str, titles: list[str], label: str) -> dict | None:
+    """Gửi prompt, kiểm tra JSON theo luật kho, hỏi lại tối đa STORY_ATTEMPTS lượt."""
     from scripts.generator import ScriptGenerationError, _parse_json_response
-    from scripts.llm import make_client
 
-    client = await make_client(llm)
-    chat = client.start_chat()
-    prompt = build_keyword_story_prompt(cluster.phrase, cluster.evidence, bank.writing_rules, titles)
     for attempt in range(STORY_ATTEMPTS):
         reply = await chat.send_message(prompt)
         try:
@@ -94,12 +101,47 @@ async def write_story(cluster: Cluster, bank, titles: list[str], llm: str | None
         except ScriptGenerationError as exc:
             problems = [f"không đọc được JSON: {str(exc)[:160]}"]
         else:
-            problems = validate_story(data, cluster.phrase, titles)
+            problems = validate_story(data, phrase, titles)
             if not problems:
                 return data
-        print(f"Lượt {attempt + 1}/{STORY_ATTEMPTS} chưa đạt: {'; '.join(problems)}")
+        print(f"{label} lượt {attempt + 1}/{STORY_ATTEMPTS} chưa đạt: {'; '.join(problems)}")
         prompt = build_keyword_story_retry_prompt(problems)
     return None
+
+
+async def write_story(
+    cluster: Cluster, bank, titles: list[str], llm: str | None,
+    recent_premises: list[str] | None = None, client=None,
+) -> dict | None:
+    """Bản nháp đạt luật -> biên tập lần hai (số liệu, nhân vật phụ, cú lật hai lớp).
+    Bản biên tập hỏng kiểm tra thì giữ bản nháp: có truyện còn hơn không."""
+    if client is None:
+        from scripts.llm import make_client
+
+        client = await make_client(llm)
+    chat = client.start_chat()
+    draft = await _ask_valid(
+        chat,
+        build_keyword_story_prompt(cluster.phrase, cluster.evidence, bank.writing_rules, titles),
+        cluster.phrase, titles, "Nháp",
+    )
+    if draft is None:
+        return None
+    # Bản biên tập được sửa title nếu có chữ vô nghĩa/tên riêng; vẫn qua đủ kiểm tra
+    # (từ khóa, ≤60 ký tự, không trùng) nhưng không tự so với chính tên nháp.
+    other_titles = [t for t in titles if t.lower() != str(draft["title"]).lower()]
+    edited = await _ask_valid(
+        chat,
+        build_keyword_story_edit_prompt(
+            cluster.phrase, json.dumps(draft, ensure_ascii=False, indent=1), recent_premises or []
+        ),
+        cluster.phrase, other_titles, "Biên tập",
+    )
+    if edited is None:
+        print("CẢNH BÁO: bản biên tập lần hai không đạt; giữ bản nháp.")
+        return draft
+    print("Đã biên tập lần hai.")
+    return edited
 
 
 async def run(args) -> int:
@@ -143,7 +185,8 @@ async def run(args) -> int:
             return 0
         if args.no_llm:
             continue
-        data = await write_story(cluster, bank, titles, args.llm)
+        recent = [r.get("premise", "")[:160] for r in load_auto_stories(args.auto_bank)[-6:]]
+        data = await write_story(cluster, bank, titles, args.llm, recent_premises=recent)
         if data is None:
             print(f"CẢNH BÁO: mô hình không viết được truyện cho '{cluster.phrase}', thử cụm khác.")
             continue
