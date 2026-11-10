@@ -87,6 +87,22 @@ voice_blocklist:
   - "tiểu thư"
   - "thiếu gia"
   - "đại gia"
+  # Motif ngôn tình / web novel (thử 10/11: "cô vợ nhỏ sợ chồng", "chị dâu giả ngốc" lên đầu bảng).
+  - "vợ nhỏ"
+  - "cô vợ"
+  - "nghiện vợ"
+  - "sủng vợ"
+  - "giả ngốc"
+  - "hắc bang"
+  - "thân phận"
+  - "vị hôn thê"
+  - "hôn ước"
+  - "đặc nhiệm"
+  - "trọng sinh hiện đại"
+  - "trọng sinh cổ đại"
+  - "không phải là người"
+  - "quỷ"
+  - "yêu quái"
 # Cụm phải chứa ít nhất một từ gia đình/đời thường để đúng kênh.
 voice_allowlist:
   - "mẹ chồng"

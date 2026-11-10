@@ -42,9 +42,28 @@ def phrase_in_text(phrase: str, text: str, slack: int = 1) -> bool:
         return False
     haystack = set(re.findall(r"[0-9a-z]+", strip_accents(text)))
     missing = sum(1 for w in words if w not in haystack)
-    # Cụm ngắn (≤3 từ) phải đủ hết: 'mẹ chồng vàng' thiếu 'vàng' là truyện khác hẳn.
-    allowed = slack if len(words) >= 4 else 0
+    # Cụm ≤4 từ phải đủ hết: 'mẹ chồng vàng' thiếu 'vàng' là truyện khác hẳn; thử
+    # 10/11 cụm 5 từ thiếu 1 vẫn khớp nhầm tiêu đề đối thủ chỉ vì chung 'vợ', 'chồng'.
+    allowed = slack if len(words) >= 5 else 0
     return missing <= allowed
+
+
+_TITLE_NOISE = re.compile(
+    r"\[[^\]]*\]|#\S+|\bsố\s*\d+\b|\btập\s*\d+\b|\btrọn bộ\b|\bfull\b|\bphần\s*\d+\b|\|",
+    flags=re.IGNORECASE,
+)
+
+
+def clean_title(title: str, channel: str = "") -> str:
+    """Bỏ phần không phải nội dung trong tên video đối thủ: tên kênh, 'SỐ 764',
+    '[FULL]', hashtag, 'Tập 3'. Không bỏ thì 'Bắp Nhỏ Audio Số 764' khớp đủ
+    'vợ nhỏ', 'số' của một cụm chẳng liên quan."""
+    text = _TITLE_NOISE.sub(" ", title)
+    for word in channel.split():
+        if len(word) > 1:
+            text = re.sub(rf"\b{re.escape(word)}\b", " ", text, flags=re.IGNORECASE)
+    text = re.sub(r"\baudio\b|\btruyện\b", " ", text, flags=re.IGNORECASE)
+    return " ".join(text.split())
 
 
 @dataclass
@@ -71,7 +90,7 @@ def demand_level(score: float, best: float) -> int:
 
 
 def view_level(phrase: str, videos: list[CompetitorVideo]) -> tuple[int, list[str]]:
-    hits = [v for v in videos if phrase_in_text(phrase, v.title)]
+    hits = [v for v in videos if phrase_in_text(phrase, clean_title(v.title, v.channel))]
     if not hits:
         return 0, []
     best = max(v.ratio for v in hits)

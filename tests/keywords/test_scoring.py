@@ -67,3 +67,15 @@ def test_xep_hang_theo_tong_va_bo_cum_duoi_2_tu():
     assert all(c.phrase != "truyện audio ma" for c in clusters)  # chỉ còn 1 từ mang nghĩa
     top = clusters[0]
     assert isinstance(top, Cluster) and top.total == top.demand + top.view + top.voice + top.novelty
+
+
+def test_lam_sach_ten_video_doi_thu_bo_ten_kenh_so_va_the():
+    from keywords.scoring import clean_title
+
+    assert clean_title("BẮP NHỎ AUDIO SỐ 764 | CHỒNG ĐÁNH GÃY RĂNG VỢ #truyenaudio", "BẮP NHỎ AUDIO") == "CHỒNG ĐÁNH GÃY RĂNG VỢ"
+    assert clean_title("[FULL] Mẹ Chồng Thiên Vị - Shabi Audio", "Shabi Audio") == "Mẹ Chồng Thiên Vị -"
+
+
+def test_view_khong_khop_nham_qua_ten_kenh():
+    videos = [_video("BẮP NHỎ AUDIO SỐ 764 | CHỒNG ĐÁNH GÃY RĂNG VỢ", 7.0, channel="BẮP NHỎ AUDIO")]
+    assert view_level("cô vợ nhỏ sợ chồng", videos) == (0, [])
