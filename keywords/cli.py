@@ -173,6 +173,13 @@ async def run(args) -> int:
     if not good:
         print(f"Không cụm nào đạt ngưỡng {config.min_score}; dùng kho như cũ.")
         return 3
+    if args.phrase:
+        # Ép đúng cụm người vận hành đã chọn trên bảng điểm (vẫn phải đạt ngưỡng).
+        forced = [c for c in good if c.phrase == args.phrase]
+        if not forced:
+            print(f"Cụm '{args.phrase}' không có trong các cụm đạt ngưỡng.")
+            return 3
+        good = forced
 
     for cluster in good[:TOP_CANDIDATES]:
         print(f"Từ khóa: {cluster.phrase}")
@@ -212,6 +219,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--config", type=Path, default=sources.DEFAULT_CONFIG_PATH)
     parser.add_argument("--cache-dir", type=Path, default=sources.DEFAULT_CACHE_DIR)
     parser.add_argument("--auto-bank", type=Path, default=story_bank.DEFAULT_AUTO_BANK_PATH)
+    parser.add_argument("--phrase", default=None, help="Chỉ dùng đúng cụm này (phải đạt ngưỡng)")
     args = parser.parse_args(argv)
     return asyncio.run(run(args))
 

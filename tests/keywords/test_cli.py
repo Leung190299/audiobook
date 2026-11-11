@@ -10,7 +10,7 @@ from keywords.scoring import Cluster
 
 def _args(tmp_path, **kw):
     base = dict(config=sources.DEFAULT_CONFIG_PATH, cache_dir=tmp_path / "kw", auto_bank=tmp_path / "story_bank.auto.json",
-                dry_run=False, no_llm=False, refresh_competitors=False, llm=None)
+                dry_run=False, no_llm=False, refresh_competitors=False, llm=None, phrase=None)
     base.update(kw)
     return SimpleNamespace(**base)
 
@@ -81,6 +81,22 @@ def test_mo_hinh_that_bai_thi_thu_cum_khac_roi_thoat_3(tmp_path, quiet_sources, 
 
     assert cli.main_sync(_args(tmp_path)) == 3
     assert len(tried) == 2
+
+
+def test_phrase_ep_dung_cum_da_chon(tmp_path, quiet_sources, monkeypatch, capsys):
+    monkeypatch.setattr(sources, "collect_suggestions", lambda *a, **k: {
+        "truyện audio con rể ở nhà vợ": 100, "truyện audio bố vợ đòi sính lễ": 90})
+    tried = []
+
+    async def fake_write(cluster, bank, titles, llm, **kw):
+        tried.append(cluster.phrase)
+        return None
+    monkeypatch.setattr(cli, "write_story", fake_write)
+
+    assert cli.main_sync(_args(tmp_path, phrase="truyện audio bố vợ đòi sính lễ")) == 3
+    assert tried == ["truyện audio bố vợ đòi sính lễ"]
+    assert cli.main_sync(_args(tmp_path, phrase="truyện audio không có")) == 3
+    assert "không có trong các cụm đạt ngưỡng" in capsys.readouterr().out
 
 
 def _story_json(**over):
