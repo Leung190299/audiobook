@@ -20,6 +20,37 @@ seeds:
   - "truyện audio sổ đỏ"
   - "truyện audio vàng cưới"
   - "truyện audio ở rể"
+  # Ngách mở rộng 12/11 (dò thử 11/11: 'lấy chồng xa xứ', 'mẹ kế', 'làng quê', 'nhân quả' đạt 9-10 điểm).
+  - "truyện audio làm dâu"
+  - "truyện audio ly hôn"
+  - "truyện audio chia tài sản"
+  - "truyện audio thừa kế"
+  - "truyện audio anh em ruột"
+  - "truyện audio chị em"
+  - "truyện audio con riêng"
+  - "truyện audio mẹ kế"
+  - "truyện audio lấy chồng xa"
+  - "truyện audio về quê"
+  - "truyện audio làng quê"
+  - "truyện audio người già"
+  - "truyện audio viện dưỡng lão"
+  - "truyện audio hàng xóm"
+  - "truyện audio công sở"
+  - "truyện audio nhân quả"
+  - "truyện audio đời thường"
+  - "truyện audio mẹ đơn thân"
+  - "truyện audio bố chồng"
+  - "truyện audio mẹ vợ"
+  - "truyện audio con rể"
+  - "truyện audio vay tiền"
+  - "truyện audio đám cưới"
+  - "truyện audio đám giỗ"
+  - "truyện audio tết"
+  - "truyện audio em gái"
+  - "truyện audio con trai"
+  - "truyện audio bạn thân"
+  - "truyện audio chồng ngoại tình"
+  - "truyện audio mẹ già"
 letters: "abcdeghklmnpqstvx"
 
 # Kênh đối thủ (handle). Id kênh được giải một lần rồi cache trong output/keywords/.
@@ -44,6 +75,10 @@ competitor_cache_days: 7
 
 # Giọng kênh: cụm có từ nào dưới đây bị loại (ma/kinh dị, bối cảnh Trung Quốc, motif bão hòa).
 voice_blocklist:
+  # 12/11: tên thể loại chung và tiền Trung Quốc (truyện dịch) không phải ngách.
+  - "tâm sự"
+  - "triệu tệ"
+  - "nhân dân tệ"
   - "ma"
   - "kinh dị"
   - "tâm linh"
