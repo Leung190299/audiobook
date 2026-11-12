@@ -5,6 +5,7 @@
 #   ./run_daily.sh                              # truyện từ kho (--story auto), định dạng full
 #   ./run_daily.sh --story 42                   # chỉ định truyện trong data/story_bank.json
 #   ./run_daily.sh --dry-run-pick               # chỉ in lịch 7 ngày tới rồi thoát
+#   ./run_daily.sh --no-keywords                # bỏ stage 0 từ khóa, lấy thẳng truyện trong kho
 #   ./run_daily.sh --topic ho_hang_viet         # kiểu cũ: để Gemini tự nghĩ cốt theo chủ đề
 #   ./run_daily.sh --format episodes            # chia 3 tập như 22/09 thay vì 1 video full
 #   ./run_daily.sh --trend                      # kiểu cũ: bắt trend (stage 0) thay vì chủ đề
@@ -80,6 +81,9 @@ TROPE_ID=""
 TOPIC_ARG=""
 STORY_ARG=""
 DRY_RUN_PICK=0
+# Stage 0 từ khóa (10/11): tìm cụm người xem đang gõ, dò kho, không có thì tự viết
+# truyện mới. Tắt bằng --no-keywords hoặc AUDIOBOOK_KEYWORDS=0 trong môi trường.
+USE_KEYWORDS="${AUDIOBOOK_KEYWORDS:-1}"
 # Số ngày in ra khi --dry-run-pick.
 DRY_RUN_PICK_DAYS="${AUDIOBOOK_PICK_DAYS:-7}"
 USE_TREND=0
@@ -94,6 +98,7 @@ while [[ $# -gt 0 ]]; do
     --topic) TOPIC_ARG="${2:-}"; shift 2 ;;
     --story) STORY_ARG="${2:-}"; shift 2 ;;
     --dry-run-pick) DRY_RUN_PICK=1; shift ;;
+    --no-keywords) USE_KEYWORDS=0; shift ;;
     --format) FORMAT="${2:-}"; shift 2 ;;
     --trend) USE_TREND=1; shift ;;
     --upload) DO_UPLOAD=1; shift ;;
@@ -202,7 +207,33 @@ STORY_ID=""
 if [[ -n "$STORY_ARG" ]]; then
   # `auto` để scripts.story_bank chọn theo ngày lên sóng; mã thoát 3 nghĩa là
   # kho không còn truyện phù hợp (khác lỗi thật), khi đó rơi về --topic auto.
-  if [[ "$STORY_ARG" == "auto" ]]; then
+  if [[ "$STORY_ARG" == "auto" && "$USE_KEYWORDS" != "0" ]]; then
+    # Stage 0 từ khóa: mã thoát 3 = không cụm nào đạt ngưỡng (rơi về kho, không
+    # phải lỗi); lỗi khác cũng chỉ cảnh báo rồi rơi về kho -- lượt dựng không được
+    # chết vì mạng gợi ý hay mô hình trục trặc.
+    KW_LOG="$LOG_DIR/00-keywords.log"
+    log "▶ Stage 0: Từ khóa xu hướng"
+    if $RUNNER keywords.cli >"$KW_LOG" 2>&1; then
+      STORY_ID="$(extract 'Truyện: ([0-9]+)' "$KW_LOG")"
+      KW_PHRASE="$(extract 'Từ khóa: (.+)' "$KW_LOG")"
+      KW_SOURCE="$(extract 'Nguồn: (.+)' "$KW_LOG")"
+      if [[ -n "$STORY_ID" ]]; then
+        log "Từ khóa hôm nay: $KW_PHRASE (truyện $KW_SOURCE #$STORY_ID)"
+      else
+        log "CẢNH BÁO: stage 0 không in id truyện, chọn trong kho như cũ."
+        cat "$KW_LOG" >>"$LOG_FILE" 2>/dev/null || true
+      fi
+    else
+      KW_CODE=$?
+      if (( KW_CODE == 3 )); then
+        log "Không có cụm từ khóa đạt ngưỡng, chọn trong kho như cũ."
+      else
+        log "CẢNH BÁO: stage 0 từ khóa lỗi (mã $KW_CODE), chọn trong kho như cũ."
+        cat "$KW_LOG" >>"$LOG_FILE" 2>/dev/null || true
+      fi
+    fi
+  fi
+  if [[ "$STORY_ARG" == "auto" && -z "$STORY_ID" ]]; then
     PICK_LOG="$LOG_DIR/00-pick.log"
     if STORY_ID="$($RUNNER scripts.story_bank --pick 2>"$PICK_LOG")"; then
       STORY_ID="${STORY_ID//[[:space:]]/}"
@@ -220,7 +251,7 @@ if [[ -n "$STORY_ARG" ]]; then
         STORY_ARG=""
       fi
     fi
-  else
+  elif [[ "$STORY_ARG" != "auto" ]]; then
     STORY_ID="$STORY_ARG"
   fi
 fi

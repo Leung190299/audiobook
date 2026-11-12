@@ -22,6 +22,10 @@ from scripts.topics import parse_rotation, topic_for_date
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_BANK_PATH = ROOT / "data" / "story_bank.json"
 DEFAULT_STATE_PATH = ROOT / "output" / "story_bank_state.json"
+# Kho phụ do stage 0 (keywords/) tự viết từ từ khóa xu hướng; gitignore, id từ
+# AUTO_ID_START để không đụng kho biên tập. load_bank gộp cả hai.
+DEFAULT_AUTO_BANK_PATH = ROOT / "data" / "story_bank.auto.json"
+AUTO_ID_START = 1000
 
 # Cửa sổ Tết 2027 (mùng 1 rơi vào 06/02/2027): truyện gắn nhãn "Trước Tết" chỉ
 # được chọn trong khoảng này, ngoài ra bỏ qua dù ưu tiên A.
@@ -95,7 +99,7 @@ def load_bank(path: Path = DEFAULT_BANK_PATH) -> Bank:
         raise StoryBankError(f"Kho truyện {path} không phải JSON hợp lệ: {exc}") from exc
 
     stories = []
-    for raw in data.get("stories", []):
+    for raw in list(data.get("stories", [])) + _auto_stories(path):
         stories.append(
             Story(
                 id=int(raw["id"]),
@@ -122,6 +126,20 @@ def load_bank(path: Path = DEFAULT_BANK_PATH) -> Bank:
         stories=stories,
         publish_hour=int(data.get("publish_hour", 20)),
     )
+
+
+def _auto_stories(bank_path: Path) -> list[dict]:
+    """Truyện trong kho phụ cạnh kho chính (data/story_bank.auto.json). Kho chính
+    ở chỗ khác (test) thì tìm file .auto.json cạnh nó."""
+    auto_path = bank_path.with_name(bank_path.stem + ".auto.json")
+    if not auto_path.exists():
+        return []
+    try:
+        data = json.loads(auto_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return []
+    rows = data.get("stories", []) if isinstance(data, dict) else data
+    return [r for r in rows if isinstance(r, dict)]
 
 
 def get_story(story_id: int, path: Path = DEFAULT_BANK_PATH) -> Story:
