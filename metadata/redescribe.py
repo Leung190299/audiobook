@@ -34,7 +34,7 @@ from dotenv import load_dotenv
 from metadata.full import build_full_description, youtube_chapter_lines
 from metadata.seo_generator import SeoCopy
 from scripts.topics import TOPICS
-from shorts.storage import short_comment_line
+from shorts.storage import FULL_EPISODE_PLACEHOLDER, short_comment_line
 from upload.auth import YouTubeAuthError, load_credentials
 from upload.episodes_cli import fill_topic_playlist, playlist_ref
 from upload.release import load_index, shorts_of
@@ -90,12 +90,22 @@ def full_description_for(row: dict, episodes_dir: Path = EPISODES_DIR) -> tuple[
     return fill_topic_playlist(description, playlist_url), meta_path
 
 
-def short_description_for(row: dict, episodes_dir: Path = EPISODES_DIR) -> str:
+def short_description_for(row: dict, episodes_dir: Path = EPISODES_DIR, number: int | None = None) -> str:
     index_path = Path(row.get("index") or "")
     manifest = _read_json(_manifest_for(index_path, episodes_dir)) if index_path.is_file() else {}
     title = row.get("story_title") or manifest.get("title") or row.get("title") or ""
     url = row.get("url") or f"https://youtu.be/{row['video_id']}"
-    return f"{title}.\n{FULL_EPISODE_LINE.format(url=url)}\n{short_comment_line(manifest.get('comment_question'))}"
+    link_line = FULL_EPISODE_LINE.format(url=url)
+    # 17/11: stage 7 đã ghi mô tả riêng cho từng Short (câu thoại của nó mở đầu)
+    # vào <shorts_prefix>-part-NN.json -> dùng đúng bản đó, chỉ điền link.
+    if number is not None and index_path.is_file():
+        prefix = (_read_json(index_path) or {}).get("shorts_prefix")
+        if prefix:
+            part_path = Path(f"{prefix}-part-{number:02d}.json")
+            desc = (_read_json(part_path).get("description") or "") if part_path.is_file() else ""
+            if desc and not desc.startswith(f"{title}.") and not desc.startswith(f"{title} —"):
+                return desc.replace(FULL_EPISODE_PLACEHOLDER, link_line)
+    return f"{title}.\n{link_line}\n{short_comment_line(manifest.get('comment_question'))}"
 
 
 def _save_local(meta_path: Path, description: str) -> None:
@@ -124,8 +134,7 @@ def run(
             continue
         jobs = [(row["video_id"], description, meta_path)]
         if include_shorts:
-            short_desc = short_description_for(row, episodes_dir)
-            jobs += [(short_id, short_desc, None) for _, short_id in shorts_of(row)]
+            jobs += [(short_id, short_description_for(row, episodes_dir, n), None) for n, short_id in shorts_of(row)]
         for video_id, desc, local in jobs:
             label = "short" if local is None else "long"
             if dry_run:

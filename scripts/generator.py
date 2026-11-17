@@ -17,6 +17,7 @@ from scripts.prompts import (
     build_chapter_prompt,
     build_length_note,
     build_prologue_prompt,
+    prologue_enabled,
     build_shorten_prompt,
     chapter_words_range,
     build_outline_prompt,
@@ -235,6 +236,7 @@ async def generate_script(
                         summary,
                         fmt=fmt,
                         topic_mode=topic_mode,
+                        title=title,
                     )
                     + length_note
                 )
@@ -277,7 +279,7 @@ async def generate_script(
     if topic_mode or story_mode:
         short_beats = await _ask_short_beats(chat, beat_plans, chapters)
 
-    if fmt == "full":
+    if fmt == "full" and prologue_enabled():
         prologue = await _ask_prologue(chat)
         if prologue:
             chapters = [Chapter(index=1, heading=PROLOGUE_HEADING, text=prologue)] + [

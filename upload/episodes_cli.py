@@ -199,6 +199,20 @@ def fill_topic_playlist(description: str, playlist_url: str | None) -> str:
     )
 
 
+def uploaded_today(index_jsonl: Path, today) -> list[str]:
+    """video_id các video DÀI đã đăng trong ngày (cột `date` của index.jsonl, giờ VN)."""
+    if not index_jsonl.exists():
+        return []
+    found = []
+    for line in index_jsonl.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        if row.get("format") == "full" and row.get("date") == today.isoformat() and row.get("video_id"):
+            found.append(row["video_id"])
+    return found
+
+
 def append_index_jsonl(path: Path, row: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as f:
@@ -264,6 +278,7 @@ def run(
     playlist_adder=add_to_playlist,
     index_jsonl: Path | None = None,
     now: datetime | None = None,
+    allow_second: bool = False,
 ) -> dict:
     index_path = Path(index_path)
     index = json.loads(index_path.read_text(encoding="utf-8"))
@@ -294,6 +309,14 @@ def run(
     if topic and not topic_playlist_id:
         print(f"CẢNH BÁO: chưa đặt {topic.playlist_env} trong .env -- không thêm vào playlist chủ đề.")
     index_jsonl = index_jsonl or INDEX_JSONL
+    if fmt == "full" and not allow_second and not state["uploaded"]:
+        earlier = uploaded_today(index_jsonl, now.date())
+        if earlier:
+            raise EpisodesUploadError(
+                f"Hôm nay đã đăng {len(earlier)} video dài ({', '.join(earlier)}). Quy tắc 1 truyện/ngày "
+                "(đánh giá kênh 17/11: tải dồn nhiều video một ngày làm mất phân phối). "
+                "Để mai, hoặc cố ý thì thêm --allow-second."
+            )
 
     # 1) Tải từng tập lên (bỏ qua tập đã có trong state).
     for ep, air_at in zip(episodes, times):
@@ -432,6 +455,8 @@ def main() -> None:
     parser.add_argument("--playlist-url", default=None)
     parser.add_argument("--keep-files", action="store_true",
                         help="Không chuyển video đã đăng vào Thùng rác")
+    parser.add_argument("--allow-second", action="store_true",
+                        help="Cho đăng video dài thứ hai trong ngày (mặc định chặn: 1 truyện/ngày)")
     args = parser.parse_args()
     first_air = None
     if args.first_air:
@@ -448,6 +473,7 @@ def main() -> None:
             category_id=args.category_id,
             playlist_url=args.playlist_url,
             schedule=not args.no_schedule,
+            allow_second=args.allow_second,
         )
     except (EpisodesUploadError, SeriesUploadError, YouTubeAuthError) as exc:
         raise SystemExit(str(exc))

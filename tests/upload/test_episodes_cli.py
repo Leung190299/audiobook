@@ -542,3 +542,23 @@ def test_main_don_video_tru_khi_keep_files(monkeypatch, capsys):
     monkeypatch.setattr("sys.argv", ["episodes_cli", "x.json", "--keep-files"])
     ec.main()
     assert len(seen) == 1
+
+
+def test_mot_truyen_moi_ngay_chan_video_dai_thu_hai(tmp_path, monkeypatch):
+    """17/11: tải dồn nhiều video một ngày làm mất phân phối -> video dài thứ hai
+    trong ngày bị chặn, trừ khi --allow-second."""
+    import pytest
+
+    monkeypatch.setenv("YOUTUBE_PLAYLIST_HO_HANG", "https://www.youtube.com/playlist?list=PLhohang")
+    jsonl = tmp_path / "index.jsonl"
+    now = datetime(2026, 11, 17, 9, 0, tzinfo=LOCAL_TZ)
+    jsonl.write_text(json.dumps({"date": "2026-11-17", "format": "full", "video_id": "truoc", "topic": "x"})
+                     + "\n", encoding="utf-8")
+    up = FakeUploader()
+    kw = dict(uploader=up, commenter=lambda *a: "c1", description_updater=lambda *a: True,
+              credentials_loader=lambda: "cred", playlist_adder=lambda *a: True, index_jsonl=jsonl, now=now)
+    with pytest.raises(episodes_cli.EpisodesUploadError, match="1 truyện/ngày"):
+        episodes_cli.run(_full_index(tmp_path), **kw)
+    assert up.calls == []
+    episodes_cli.run(_full_index(tmp_path), allow_second=True, **kw)
+    assert len(up.calls) == 1

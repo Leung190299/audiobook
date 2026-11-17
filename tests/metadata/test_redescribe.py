@@ -99,3 +99,23 @@ def test_dry_run_khong_goi_update(tmp_path):
     counts = redescribe.run(None, [row], dry_run=True, episodes_dir=tmp_path / "episodes",
                             updater=lambda *a: pytest.fail("không được gọi"))
     assert counts["long"] == 1
+
+
+def test_mo_ta_short_lay_ban_rieng_cua_stage_7_khi_co(tmp_path):
+    """17/11: Short có mô tả riêng (câu thoại mở đầu) -> giữ nguyên, chỉ điền link."""
+    row = _files(tmp_path)
+    index = json.loads(Path(row["index"]).read_text(encoding="utf-8"))
+    prefix = tmp_path / "shorts" / "bo_me-20261001T000000Z"
+    prefix.parent.mkdir(exist_ok=True)
+    index["shorts_prefix"] = str(prefix)
+    Path(row["index"]).write_text(json.dumps(index, ensure_ascii=False), encoding="utf-8")
+    Path(f"{prefix}-part-02.json").write_text(json.dumps({"description":
+        "Bà Tám quát: 'Ký đi!'\nTrích từ truyện Bà Nội Trọng Sinh.\n"
+        "Nghe trọn tập trên kênh — link ở phần mô tả kênh.\n❓ Chọn 1 hay 2?"}, ensure_ascii=False),
+        encoding="utf-8")
+    assert redescribe.short_description_for(row, tmp_path / "episodes", 2) == (
+        "Bà Tám quát: 'Ký đi!'\nTrích từ truyện Bà Nội Trọng Sinh.\n"
+        "Nghe trọn tập tại: https://youtu.be/v1\n❓ Chọn 1 hay 2?"
+    )
+    # Phần không có file riêng -> mẫu cũ.
+    assert redescribe.short_description_for(row, tmp_path / "episodes", 1).startswith("Bà Nội Trọng Sinh.\n")

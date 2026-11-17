@@ -12,6 +12,7 @@ MAX_WORDS = 15000
 # mô hình đang viết (scripts/prompts.py words_per_second), chừa ~5% viết hụt.
 # Gemini: ~8.400; Claude đọc chậm hơn nên ~7.500.
 FULL_MIN_SLACK = 0.95
+FULL_MAX_SLACK = 1.25
 MIN_CHAPTERS = 14
 # Sàn độ dài MỖI chương. Tổng từ không đủ để bắt lỗi: tập 05/09 có chương 4 chỉ
 # 29 từ — nguyên văn lời từ chối của Gemini — mà tổng vẫn hơn 12.000 nên QA cũ
@@ -76,19 +77,25 @@ def validate_script(script: Script) -> None:
         errors.append(problem)
 
     if script.format == "full":
-        from scripts.prompts import full_words_range
+        from scripts.prompts import FULL_CHAPTERS_RANGE, full_words_range
 
-        min_words = int(full_words_range()[0] * FULL_MIN_SLACK)
+        lo, hi = full_words_range()
+        min_words = int(lo * FULL_MIN_SLACK)
+        # Trần cũng theo mục tiêu phút: đánh giá 17/11 -- đừng kéo cho đủ 42 phút.
+        max_words = int(hi * FULL_MAX_SLACK)
+        # +1 chương cho đoạn "Mở đầu" nếu AUDIOBOOK_PROLOGUE bật.
+        min_chapters, max_chapters = FULL_CHAPTERS_RANGE[0], FULL_CHAPTERS_RANGE[1] + 1
     else:
-        min_words = MIN_WORDS
-    if not (min_words <= script.word_count <= MAX_WORDS):
+        min_words, max_words = MIN_WORDS, MAX_WORDS
+        min_chapters, max_chapters = MIN_CHAPTERS, MAX_CHAPTERS
+    if not (min_words <= script.word_count <= max_words):
         errors.append(
-            f"Độ dài {script.word_count} từ nằm ngoài khoảng {min_words}-{MAX_WORDS}."
+            f"Độ dài {script.word_count} từ nằm ngoài khoảng {min_words}-{max_words}."
         )
 
-    if not (MIN_CHAPTERS <= len(script.chapters) <= MAX_CHAPTERS):
+    if not (min_chapters <= len(script.chapters) <= max_chapters):
         errors.append(
-            f"Số chương {len(script.chapters)} nằm ngoài khoảng {MIN_CHAPTERS}-{MAX_CHAPTERS}."
+            f"Số chương {len(script.chapters)} nằm ngoài khoảng {min_chapters}-{max_chapters}."
         )
 
     for chapter in script.chapters:

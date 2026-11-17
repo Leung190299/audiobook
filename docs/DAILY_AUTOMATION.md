@@ -58,7 +58,7 @@ Một lượt:
 ```
 ├─ Stage 0  keywords.cli       ~1–2m  → "Truyện: <id>" (từ 10/11, mặc định với --story auto: gợi ý tìm kiếm YouTube VN + video đối thủ → chấm Cầu/View/Giọng/Mới → dò kho theo tên, không có thì mô hình viết truyện mới vào data/story_bank.auto.json; thoát 3 = rơi về --pick; tắt: --no-keywords)
 ├─ Stage 0  trend.cli          ~30s   → output/ideas/<slug>-<ts>.txt (kiểu cũ, chỉ với --trend)
-├─ Stage 1  scripts.cli        ~5m    → output/scripts/<slug>-<ts>.json
+├─ Stage 1  scripts.cli        ~5m    → output/scripts/<slug>-<ts>.json   (từ 17/11: ~20 phút/tập, 7–9 chương, không đoạn Mở đầu; chương 1 bám đúng cảnh tiêu đề)
 ├─ Stage 2  tts.cli            ~14m   → output/audio/<slug>-<ts>.wav + .json (từ 06/11: đọc xong tăng tốc bằng ffmpeg atempo, x1.25 tới 09/11, x1.15 từ 10/11, `speed` trong config/voice.yaml; mốc câu/chương đã chia theo tốc độ)
 ├─ Stage 3  images.cli         ~46m (đo 05/09: 66 ảnh)   → output/images/<slug>-<ts>.json + ~64 png
 ├─ Stage 4  episodes.cli       ~25m   → output/episodes/<slug>-<ts>-ep-0N.mp4 (3 tập) + <slug>-<ts>-episodes.json
@@ -280,3 +280,11 @@ hơn cả quy trình audit.
 | Chạy tay ổn nhưng launchd fail | PATH/locale — `run_daily.sh` đã tự set, xem `output/daily/launchd.err.log` |
 | Video lên nhưng ở chế độ private | OAuth project chưa qua audit — hành vi bình thường của YouTube |
 | Không rõ hỏng ở đâu | `uv run python -m preflight.cli --deep` chỉ đúng mục thiếu |
+
+## Quy tắc chống "sản xuất hàng loạt" (đánh giá kênh 17/11/2026)
+
+- Mỗi ngày đăng tối đa 1 video dài: `upload.episodes_cli` chặn video dài thứ hai cùng ngày
+  (cột `date` trong index.jsonl), cố ý thì thêm `--allow-second`.
+- Độ dài ~20 phút (18–22), không kéo cho đủ 42 phút; QA chặn kịch bản quá 125 % mục tiêu.
+- Mô tả video dài không có dòng "Keywords:"; mô tả Short mở bằng câu thoại của chính nó.
+  Sửa video cũ: `uv run python -m metadata.redescribe --all --shorts` (51 đơn vị hạn mức/video).
