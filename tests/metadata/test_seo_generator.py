@@ -86,3 +86,12 @@ async def test_generate_seo_copy_ignores_embedded_label_substring_in_description
         seo_copy.description_draft
         == "Xem thêm TAGS: linh tinh không phải nhãn thật"
     )
+
+
+def test_prompt_seo_dung_ten_the_loai_khong_dung_ma_chu_de():
+    from metadata.seo_generator import build_seo_prompt
+
+    script = Script(trope="ho_hang_viet", topic="ho_hang_viet", title="T",
+                    chapters=[Chapter(index=1, heading="C1", text="x")])
+    prompt = build_seo_prompt(script)
+    assert "Thể loại: Họ hàng cực phẩm" in prompt and "ho_hang_viet" not in prompt
