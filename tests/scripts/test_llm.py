@@ -97,7 +97,8 @@ def test_claude_doc_cham_hon_nen_it_tu_hon(monkeypatch):
     monkeypatch.setenv("STORY_LLM", "claude")
     claude = full_words_range()
     assert claude[0] < gemini[0] and claude[1] < gemini[1]
-    assert full_chapter_words_range() == (530, 670)
+    # 17/11: 8 chương, khoảng từ phụ thuộc tốc độ đọc trong voice.yaml -> so theo công thức.
+    assert full_chapter_words_range() == (round(claude[0] / 8, -1), round(claude[1] / 8, -1))
 
 
 async def test_mat_mang_thi_cho_roi_thu_lai(monkeypatch):

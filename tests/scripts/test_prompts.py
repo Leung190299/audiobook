@@ -71,3 +71,28 @@ def test_prompt_mo_dau_ep_dung_truoc_khi_mo_bang_chung_va_cam_ke_ket_cuc():
     assert "ai hủy hôn" in prompt and "số tiền/món nợ/bí mật" in prompt
     assert "Nhưng để hiểu vì sao" in prompt
     assert f"{PROLOGUE_WORDS[0]}-{PROLOGUE_WORDS[1]} từ" in prompt
+
+
+def test_full_chuong_1_bam_canh_tieu_de_hua_va_khong_dan_dat():
+    prompt = build_chapter_prompt(1, 8, "Mở màn", "Tóm tắt.", fmt="full",
+                                  title="Mẹ Chồng Đòi Sổ Đỏ, Tôi Đưa Giấy Vay Nợ")
+    assert "Mẹ Chồng Đòi Sổ Đỏ, Tôi Đưa Giấy Vay Nợ" in prompt
+    assert "150 TỪ ĐẦU TIÊN" in prompt and "KHÔNG kể trước cao trào" in prompt
+    assert "PHẢI là chính cảnh mà tiêu đề hứa" not in build_chapter_prompt(2, 8, "C2", "T.", fmt="full", title="X")
+
+
+def test_do_dai_full_khoang_20_phut_va_theo_toc_do_doc(monkeypatch, tmp_path):
+    from scripts import prompts
+
+    monkeypatch.setenv("STORY_LLM", "gemini")
+    yaml_path = tmp_path / "voice.yaml"
+    yaml_path.write_text("speed: 1.0\n", encoding="utf-8")
+    monkeypatch.setattr(prompts, "VOICE_CONFIG_PATH", yaml_path)
+    lo, hi = prompts.full_words_range()
+    assert 4_500 <= lo < hi <= 6_000, (lo, hi)          # 18-22 phút ở 4,4 từ/giây
+    yaml_path.write_text("speed: 1.15\n", encoding="utf-8")
+    lo2, hi2 = prompts.full_words_range()
+    assert lo2 > lo and 5_000 <= lo2 < hi2 <= 7_000, (lo2, hi2)
+    assert prompts.FULL_CHAPTERS_RANGE == (7, 9)
+    monkeypatch.setattr(prompts, "VOICE_CONFIG_PATH", tmp_path / "missing.yaml")
+    assert prompts.tts_speed() == 1.0

@@ -7,7 +7,7 @@ description: Use when asked to produce, render, upload, or schedule a finished a
 
 ## What the channel ships (since 2026-10-05)
 
-One **35–50 min long video per day** + **3 Shorts**, Vietnamese family-drama stories read by TTS. The look copies the *layout* of top audiobook channels (reference: Dứa Audio, 2.38M views on a 38-min video) — **never their branding**:
+One **~20 min long video per day (18–22 min since 17/11; was 35–50)** + **3 Shorts** (2 scheduled, 1 kept in stock) — **never more than one long video uploaded per day**, Vietnamese family-drama stories read by TTS. The look copies the *layout* of top audiobook channels (reference: Dứa Audio, 2.38M views on a 38-min video) — **never their branding**:
 
 ```
 ┌──────────── 1920 x 1080 ─────────────┐
@@ -57,6 +57,15 @@ Layout code: `remotion/src/MainVideo.tsx` → `BrandedLayout.tsx` (centre box wi
 | 7 | `shorts.cli --script` | 1–2 min | 3 Shorts from `short_beats`, each on its own background video (vertical clips preferred). **Failure only warns**, never fails the run. |
 | 8 | `upload.episodes_cli` | — | Only with `--upload`. |
 
+## Length, opening and anti-bulk rules (channel review 17/11/2026)
+
+The review found the channel choked on hook/script (42-min videos watched 2:42 on average) and on mass-production signals (9+ uploads in a day on 21–27/10, ~500 same-template Shorts, keyword-stuffed descriptions). Rules now enforced in code:
+
+- **~20 min per episode**: `scripts/prompts.py` `FULL_TARGET_MINUTES = (18, 22)`, 7–9 chapters (target 8). Word targets derive from `TTS_WORDS_PER_SECOND` × the `speed` in `config/voice.yaml` (measured 17/11: ~5.05 words/s at 1.15). QA (`scripts/qa.py`) rejects a full script outside 95 %–125 % of that range or outside 7–10 chapters. Do not pad to 42 minutes.
+- **30 s straight into the title's scene**: chapter 1 prompt gets `title_scene_rule(title)` — the first 150 words must be the villain doing exactly what the title says; no lead-in, no flash-forward. The prologue is off (above).
+- **One long video per upload day**: `upload.episodes_cli` refuses a second full-format upload on the same `date` in `output/metadata/index.jsonl` (`--allow-second` overrides). `upload.release` already schedules one evening per video.
+- **Descriptions**: long videos use `build_full_description` (hook, AI notice, summary, side question, playlist, CTA, chapters, hashtags) — never the old "Keywords:" line. Each Short's description opens with its own dialogue line, then a story line that rotates by part number (`shorts.storage.SHORT_STORY_LINES`), the full-video link and the story's question. `uv run python -m metadata.redescribe --all --shorts` rewrites old uploads (51 quota units per video).
+
 After stage 7, `run_daily.sh` records `shorts_prefix` into the metadata index and marks the story `built` in the bank (see Gotchas).
 
 ## Background videos
@@ -98,7 +107,7 @@ The avatar must be uploaded **by hand in YouTube Studio** — the API cannot cha
 - **Quota resets at midnight Pacific (~14:00 Vietnam), not local midnight.** `videos.insert` = 1,600 regardless of size. The default limit is 10,000/day, **but on 05/10 about 21,000 units' worth of calls (1 long video + 12 Shorts + updates) went through in one Pacific day with no quota error** — this project's real limit is higher. Check Google Cloud Console → YouTube Data API v3 → Quotas before planning around 10,000. `series_cli` stops cleanly on `quotaExceeded` and saves progress, so a rerun the next day picks up where it stopped.
 - **OAuth token dies every 7 days** (project in Testing mode). Symptom: `invalid_grant` in `output/daily/shorts.err.log` or the upload log. Fix: `uv run python -m upload.auth` — the browser consent is the operator's to click, never Claude's.
 - **`run_daily.sh` runs on macOS `/bin/bash` 3.2.** Under `set -u`, expanding an empty array as `"${arr[@]}"` is an "unbound variable" error that kills the run. Use `${arr[@]+"${arr[@]}"}`. And never edit `run_daily.sh` while a run is executing it — bash reads the file as it goes.
-- **Prologue "Mở đầu" (26/10, full format):** after all chapters, stage 1 asks (same conversation) for a 100–150-word flash-forward into the climax that stops before the payoff and ends with a bridge back to the start; it becomes chapter 1 (`scripts.models.PROLOGUE_HEADING`). With a prologue there is no audio cold open (`episodes/full.py`), QA exempts it from the 300-word floor, and cold open / Shorts / TikTok quote-matching skip it (`without_prologue`) — otherwise they match the retelling instead of the real climax. If the prologue fails twice it is skipped and the old cold open is used.
+- **Prologue "Mở đầu" (26/10, full format) — OFF since 17/11 (`AUDIOBOOK_PROLOGUE=1` turns it back on):** the channel review found the first 30 s must open on the exact conflict the title promises, with no lead-in; chapter 1's prompt now carries the title (`title_scene_rule`). When enabled: after all chapters, stage 1 asks (same conversation) for a 100–150-word flash-forward into the climax that stops before the payoff and ends with a bridge back to the start; it becomes chapter 1 (`scripts.models.PROLOGUE_HEADING`). With a prologue there is no audio cold open (`episodes/full.py`), QA exempts it from the 300-word floor, and cold open / Shorts / TikTok quote-matching skip it (`without_prologue`) — otherwise they match the retelling instead of the real climax. If the prologue fails twice it is skipped and the old cold open is used.
 - **Claude counts Vietnamese compound words as one word** and overshot the 590–770 chapter limit (944) until the chapter prompt said to count by syllable ("con gái" = 2). Even so, Claude's dialogue-heavy prose (~39 paragraphs/chapter vs Gemini's ~11) reads at ~3.75 words/s, not 4.25: story #43 had 11,913 words and came out 53:47. `scripts/prompts.py words_per_second()` now picks the rate by `STORY_LLM`, so Claude is asked for 7,900–10,100 words (530–670/chapter) and QA's full-format floor scales with it. Measured on one story — re-measure after a few more. Stages 3/5/6 still use Gemini cookies even when stage 1 writes with Claude.
 - **Only 16 GB RAM.** Never run a second FLUX job (mascots, `mac-image-ai`) while stage 3 or 5 is running, or while a Remotion render is going — swap thrash slows everything and can kill a stage. Check `memory_pressure` first.
 - **Don't edit Remotion or stage-4 Python while stage 4 is starting.** Remotion bundles the source once at render start; once `chrome-headless-shell` processes exist, editing is safe for that render.

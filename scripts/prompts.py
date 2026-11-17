@@ -3,6 +3,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import os
+from pathlib import Path
+
+import yaml
+
 from episodes.plan import EPISODE_COUNT, cliffhanger_chapters, plan_episodes
 
 if TYPE_CHECKING:
@@ -114,9 +119,10 @@ def build_chapter_prompt(
     summary: str,
     fmt: str = "episodes",
     topic_mode: bool = False,
+    title: str = "",
 ) -> str:
     if fmt == "full":
-        return _build_full_chapter_prompt(chapter_number, total_chapters, heading, summary, topic_mode)
+        return _build_full_chapter_prompt(chapter_number, total_chapters, heading, summary, topic_mode, title)
     if chapter_number == 1:
         structure_rule = (
             "- Đây là CHƯƠNG MỞ ĐẦU: ba câu đầu tiên phải là hành động hoặc lời thoại "
@@ -166,10 +172,16 @@ YÊU CẦU BẮT BUỘC:
 # ~4,25 từ/giây. Mục tiêu 35-45 phút sau TTS => 8.900-11.500 từ. Chỉnh hai hằng
 # số này nếu đổi giọng/tốc độ đọc, mọi con số trong prompt tự tính lại.
 TTS_CHARS_PER_SECOND = 18.5
-TTS_WORDS_PER_SECOND = 4.25
-FULL_TARGET_MINUTES = (35, 45)
-FULL_CHAPTERS_RANGE = (14, 16)
-FULL_TARGET_CHAPTERS = 15
+# 17/11/2026: đo lại trên 3 truyện (#1001, #1003, #1004) ở tốc độ đọc 1.15:
+# 9.400 từ -> 30:22, 11.449 -> 37:57, 9.038 -> 29:50, tức ~5,05 từ/giây SAU tăng
+# tốc. Hằng số này là tốc độ GỐC (speed 1.0); words_per_second() nhân thêm
+# `speed` trong config/voice.yaml, nên đổi tốc độ đọc không phải sửa ở đây.
+TTS_WORDS_PER_SECOND = 4.4
+# Đánh giá kênh 17/11/2026: truyện 42 phút nhưng xem trung bình 2:42 -- "rút độ
+# dài về đúng mức nội dung cần, khoảng 20 phút/tập". Trước đó 35-45 phút, 14-16 chương.
+FULL_TARGET_MINUTES = (18, 22)
+FULL_CHAPTERS_RANGE = (7, 9)
+FULL_TARGET_CHAPTERS = 8
 # Văn Claude đọc chậm hơn: truyện #43 (08/10) 11.913 từ ra video 53:47, tức
 # ~3,75 từ/giây. Claude viết nhiều thoại ngắn, ~39 đoạn/chương so với ~11 của
 # Gemini, mỗi câu thêm một quãng nghỉ (sentence_gap_seconds). Đo trên MỘT
@@ -177,15 +189,36 @@ FULL_TARGET_CHAPTERS = 15
 CLAUDE_WORDS_PER_SECOND = 3.75
 
 
+VOICE_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "voice.yaml"
+
+
+def tts_speed(path: Path | None = None) -> float:
+    """`speed` trong config/voice.yaml (ffmpeg atempo sau TTS); thiếu file/khoá -> 1.0."""
+    try:
+        data = yaml.safe_load((path or VOICE_CONFIG_PATH).read_text(encoding="utf-8")) or {}
+        return float(data.get("speed") or 1.0)
+    except (OSError, ValueError, TypeError):
+        return 1.0
+
+
 def words_per_second() -> float:
-    """Tốc độ đọc dùng để quy phút ra số từ, theo mô hình đang viết truyện."""
+    """Tốc độ đọc dùng để quy phút ra số từ: theo mô hình đang viết truyện,
+    nhân với tốc độ đọc đang đặt trong config/voice.yaml."""
     from scripts.llm import CLAUDE, resolve_provider
 
     try:
         claude = resolve_provider() == CLAUDE
     except ValueError:
         claude = False
-    return CLAUDE_WORDS_PER_SECOND if claude else TTS_WORDS_PER_SECOND
+    base = CLAUDE_WORDS_PER_SECOND if claude else TTS_WORDS_PER_SECOND
+    return base * tts_speed()
+
+
+def prologue_enabled() -> bool:
+    """Đoạn "Mở đầu" kể trước cao trào (26/10). Đánh giá 17/11: 30 giây đầu phải vào
+    thẳng cảnh xung đột mà tiêu đề hứa, không dẫn dắt -> TẮT mặc định; bật lại bằng
+    AUDIOBOOK_PROLOGUE=1 khi muốn so sánh."""
+    return os.getenv("AUDIOBOOK_PROLOGUE", "0").strip().lower() in ("1", "true", "yes", "on")
 
 
 def full_words_range() -> tuple[int, int]:
@@ -233,6 +266,20 @@ FIRST_MINUTE_RULE = (
     "KHÔNG tả ngoại hình quá một câu. Chuyện cũ chỉ được nhắc SAU khi nhân vật tôi đã đáp trả "
     "lần đầu trong cảnh mở đầu.\n"
 )
+# Đánh giá kênh 17/11/2026: "viết lại 30 giây đầu: vào thẳng cảnh xung đột mà tiêu
+# đề hứa, không dẫn dắt". 30 giây ~ 150 từ ở tốc độ đọc hiện tại.
+OPENING_WORDS = 150
+
+
+def title_scene_rule(title: str) -> str:
+    if not title:
+        return ""
+    return (
+        f"- {OPENING_WORDS} TỪ ĐẦU TIÊN (30 giây đầu video) PHẢI là chính cảnh mà tiêu đề hứa: "
+        f"'{title}'. Kẻ xấu trong tiêu đề đang làm đúng hành vi đó, ngay câu đầu, trước mặt "
+        "nhân vật tôi; người nghe phải nhận ra tiêu đề đang diễn ra thật. KHÔNG mở bằng cảnh "
+        "khác rồi dẫn tới, KHÔNG kể trước cao trào, KHÔNG câu dẫn kiểu 'để hiểu vì sao... phải kể lại từ'.\n"
+    )
 
 
 
@@ -425,13 +472,14 @@ QUAN TRỌNG: Chỉ trả về DUY NHẤT một khối JSON hợp lệ, không k
 
 
 def _build_full_chapter_prompt(
-    chapter_number: int, total_chapters: int, heading: str, summary: str, topic_mode: bool
+    chapter_number: int, total_chapters: int, heading: str, summary: str, topic_mode: bool, title: str = ""
 ) -> str:
     w_lo, w_hi = full_chapter_words_range()
     if chapter_number == 1:
         structure_rule = (
             "- Đây là CHƯƠNG MỞ ĐẦU: câu đầu tiên là tình huống xung đột đang diễn ra, câu thứ "
             "hai là một câu chọc cười. Không chào hỏi, không giới thiệu bản thân, không tả thời tiết.\n"
+            + title_scene_rule(title)
             + FIRST_MINUTE_RULE
         )
     elif chapter_number == total_chapters:

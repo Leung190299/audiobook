@@ -325,7 +325,7 @@ async def test_chu_de_full_tra_them_truong_thumbnail_va_short_beats():
         "Bác Cả đập bàn đòi đất số 5.",
         "Bác Cả đập bàn đòi đất số 9.",
     ]
-    retry_prompt = chat.send_message.call_args_list[-2].args[0]  # [-1] là prompt Mở đầu
+    retry_prompt = chat.send_message.call_args_list[-1].args[0]  # 17/11: không còn prompt Mở đầu sau nó
     assert "ĐÚNG 2 đoạn KHÁC" in retry_prompt
     assert "Bác Cả đập bàn đòi đất số 2. Tôi bật livestream luôn." in retry_prompt  # đã nhận, không gửi lại
     assert "1 đoạn không khớp nguyên văn" in retry_prompt
@@ -404,11 +404,29 @@ async def test_chuong_qua_dai_thi_viet_gon_va_nhac_chuong_sau(monkeypatch):
     assert "dài 21 từ, VƯỢT trần 20" in prompts[4]
 
 
-async def test_ban_full_co_chuong_mo_dau_ke_truoc_doan_gay_can():
+async def test_ban_full_mac_dinh_khong_co_mo_dau_va_chuong_1_bam_tieu_de(monkeypatch):
+    """17/11: 30 giây đầu vào thẳng cảnh tiêu đề hứa; đoạn 'Mở đầu' kể trước tắt mặc định."""
+    monkeypatch.delenv("AUDIOBOOK_PROLOGUE", raising=False)
+    chapters = [f"Nội dung chương {i}." for i in range(1, 4)]
+    fake_client, fake_chat = _make_fake_client(_outline_json(3), chapters)
+
+    script = await generate_script("t", "T", "m", client=fake_client, fmt="full")
+
+    assert [c.index for c in script.chapters] == [1, 2, 3]
+    assert script.chapters[0].text == "Nội dung chương 1."
+    prompts = [call.args[0] for call in fake_chat.send_message.call_args_list]
+    assert not any("ĐOẠN MỞ ĐẦU" in p for p in prompts)
+    chap1 = next(p for p in prompts if "Chương 1/3" in p)
+    assert "PHẢI là chính cảnh mà tiêu đề hứa" in chap1 and script.title in chap1
+
+
+async def test_ban_full_co_chuong_mo_dau_ke_truoc_doan_gay_can(monkeypatch):
     """26/10: truyện mở bằng đoạn gay cấn nhất rồi mới quay lại kể từ đầu.
-    Viết SAU khi xong truyện để khớp cao trào; thành chương 1 'Mở đầu'."""
+    Viết SAU khi xong truyện để khớp cao trào; thành chương 1 'Mở đầu'.
+    17/11: chỉ khi AUDIOBOOK_PROLOGUE=1."""
     from scripts.models import PROLOGUE_HEADING
 
+    monkeypatch.setenv("AUDIOBOOK_PROLOGUE", "1")
     prologue = " ".join(["gay"] * 120) + " Nhưng để hiểu vì sao, phải kể lại từ đầu."
     chapters = [f"Nội dung chương {i}." for i in range(1, 4)]
     fake_client, fake_chat = _make_fake_client(_outline_json(3), chapters + [prologue])
@@ -423,7 +441,8 @@ async def test_ban_full_co_chuong_mo_dau_ke_truoc_doan_gay_can():
     assert "KHÔNG viết bất cứ điều gì xảy ra SAU khi bằng chứng được mở" in last_prompt
 
 
-async def test_mo_dau_hong_thi_bo_qua_khong_lam_hong_truyen(capsys):
+async def test_mo_dau_hong_thi_bo_qua_khong_lam_hong_truyen(capsys, monkeypatch):
+    monkeypatch.setenv("AUDIOBOOK_PROLOGUE", "1")
     chapters = [f"Nội dung chương {i}." for i in range(1, 4)]
     fake_client, _ = _make_fake_client(_outline_json(3), chapters + ["ngắn", "vẫn ngắn"])
 

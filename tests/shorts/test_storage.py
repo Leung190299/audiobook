@@ -174,3 +174,23 @@ def test_mo_ta_short_dung_cau_hoi_cua_truyen_khi_co(tmp_path: Path):
     assert SHORT_COMMENT_HOOK not in data["description"]
     # Không có câu hỏi (kịch bản cũ) thì vẫn là câu chung.
     assert short_comment_line("") == SHORT_COMMENT_HOOK
+
+
+def test_mo_ta_short_rieng_tung_phan_mo_bang_cau_thoai_cua_no(tmp_path: Path):
+    """17/11: ~500 Shorts cùng khuôn -> mỗi Short mở mô tả bằng câu thoại của nó,
+    dòng dẫn về truyện xoay theo số phần."""
+    descs = []
+    for n, line in enumerate(["Bà Tám đập bàn: 'Trả sổ đỏ đây!'", "Chị dâu cười khẩy: 'Mày tính sao?'",
+                              "Tôi rút tờ giấy vay nợ ra."], 1):
+        _, json_path = save_short_metadata(
+            part_stem("abc-20260822T010000Z", n), trope="abc", episode_title="Tên Truyện", number=n, total=3,
+            output_dir=tmp_path, title_override=f"{line[:20]} #Shorts", comment_question="Chọn 1 hay 2?",
+            hook_line=line,
+        )
+        descs.append(json.loads(json_path.read_text(encoding="utf-8"))["description"])
+    lines = [d.splitlines() for d in descs]
+    assert [l[0] for l in lines] == ["Bà Tám đập bàn: 'Trả sổ đỏ đây!'", "Chị dâu cười khẩy: 'Mày tính sao?'",
+                                     "Tôi rút tờ giấy vay nợ ra."]
+    assert len({l[1] for l in lines}) == 3 and all("Tên Truyện" in l[1] for l in lines)
+    assert all(l[2] == "Nghe trọn tập trên kênh — link ở phần mô tả kênh." and l[3] == "❓ Chọn 1 hay 2?" for l in lines)
+    assert all("#" not in d for d in descs)

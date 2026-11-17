@@ -39,13 +39,22 @@ class SeoCopy:
 _LABELS = ("TITLE", "DESCRIPTION", "TAGS", "HASHTAGS")
 
 
+def genre_label(script: Script) -> str:
+    """Tên thể loại đọc được cho prompt SEO. Mô tả #1003 (11/11) in nguyên mã
+    'ho_hang_viet' vì prompt đưa mã chủ đề -> tra tên trong scripts.topics."""
+    from scripts.topics import TOPICS
+
+    topic = TOPICS.get(getattr(script, "topic", "") or "") or TOPICS.get(script.trope or "")
+    return topic.name if topic else (script.trope or "").replace("_", " ")
+
+
 def build_seo_prompt(script: Script) -> str:
     headings = "\n".join(f"- {c.heading}" for c in script.chapters)
     return (
         "Bạn là chuyên gia SEO YouTube. Dựa trên thông tin truyện audio tiếng Việt sau, "
         "hãy sinh nội dung SEO cho video YouTube.\n\n"
         f"Tiêu đề truyện: {script.title}\n"
-        f"Thể loại: {script.trope}\n"
+        f"Thể loại: {genre_label(script)}\n"
         + (f"Câu hook: {script.hook}\n" if script.hook else "")
         + f"Danh sách chương:\n{headings}\n\n"
         "Trả lời CHÍNH XÁC theo format sau, mỗi nhãn bắt đầu một dòng mới, "

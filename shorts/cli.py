@@ -236,6 +236,7 @@ def _run(
             title_override=short_title_from_line(part.hook_line) if part.hook_line else None,
             tags=short_tags,
             comment_question=script.comment_question if script is not None else None,
+            hook_line=part.hook_line or None,
         )
 
         # In ngay sau khi mỗi phần xong, không dồn đến cuối -- một tập ra ~30

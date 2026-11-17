@@ -191,3 +191,29 @@ def test_chuong_mo_dau_ngan_hon_san_van_qua():
     script = Script(trope="t", title="Tiêu đề", chapters=chapters)
     assert chapters[0].word_count < MIN_CHAPTER_WORDS
     validate_script(script)  # không ném lỗi
+
+
+def _full_script(word_count: int, num_chapters: int) -> Script:
+    s = _make_script(word_count, num_chapters)
+    return Script(trope=s.trope, title=s.title, chapters=s.chapters, format="full")
+
+
+def test_full_khoang_20_phut_8_chuong_dat(monkeypatch):
+    from scripts import prompts
+    from scripts.qa import validate_script
+
+    monkeypatch.setattr(prompts, "words_per_second", lambda: 5.0)   # 18-22 phút = 5.400-6.600 từ
+    validate_script(_full_script(word_count=6000, num_chapters=8))
+
+
+def test_full_keo_dai_42_phut_hay_16_chuong_bi_chan(monkeypatch):
+    import pytest
+
+    from scripts import prompts
+    from scripts.qa import ScriptQAError, validate_script
+
+    monkeypatch.setattr(prompts, "words_per_second", lambda: 5.0)
+    with pytest.raises(ScriptQAError, match="Độ dài"):
+        validate_script(_full_script(word_count=10400, num_chapters=8))
+    with pytest.raises(ScriptQAError, match="Số chương"):
+        validate_script(_full_script(word_count=6000, num_chapters=16))

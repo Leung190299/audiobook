@@ -65,6 +65,20 @@ FULL_EPISODE_PLACEHOLDER = "Nghe trọn tập trên kênh — link ở phần m�
 SHORT_COMMENT_HOOK = "Bạn đoán cô ấy làm gì tiếp? Comment nhé 👇"
 
 
+# Đánh giá kênh 17/11/2026: ~500 Shorts cùng khuôn, mô tả giống hệt nhau -> mỗi
+# Short mở mô tả bằng CHÍNH câu thoại của nó, dòng dẫn về truyện xoay vòng theo
+# số phần để ba Short của một truyện không giống nhau.
+SHORT_STORY_LINES = (
+    "Khúc này nằm trong truyện {title}.",
+    "Trích từ truyện {title} -- nghe tiếp để biết ai phải cúi đầu.",
+    "Cú vả mặt trong truyện {title}, nghe trọn để rõ đầu đuôi.",
+)
+
+
+def short_story_line(title: str, number: int) -> str:
+    return SHORT_STORY_LINES[(max(number, 1) - 1) % len(SHORT_STORY_LINES)].format(title=title)
+
+
 def short_comment_line(comment_question: str | None) -> str:
     """Dòng kéo bình luận: câu hỏi chọn phe của truyện nếu có, không thì câu chung."""
     q = " ".join((comment_question or "").split())
@@ -89,6 +103,7 @@ def save_short_metadata(
     title_override: str | None = None,
     tags: list[str] | None = None,
     comment_question: str | None = None,
+    hook_line: str | None = None,
 ) -> tuple[Path, Path]:
     """Ghi cả `.txt` (đọc tay) lẫn `.json` (upload/series_cli.py đọc máy) cho
     một phần, cùng nội dung tiêu đề/mô tả. Trả về (txt_path, json_path).
@@ -100,15 +115,23 @@ def save_short_metadata(
     nhân vật nam/bà nội."""
     output_dir.mkdir(parents=True, exist_ok=True)
     part_label = f"Trích đoạn {number}/{total}"
-    hook_line = short_comment_line(comment_question)
-    if title_override:
+    question_line = short_comment_line(comment_question)
+    quote = " ".join((hook_line or "").split())
+    if quote:
+        # Mô tả riêng cho từng Short (17/11): câu thoại của chính nó mở đầu.
+        title = title_override or f"{episode_title} — {part_label}"
+        description = (
+            f"{quote}\n{short_story_line(episode_title, number)}\n"
+            f"{FULL_EPISODE_PLACEHOLDER}\n{question_line}"
+        )
+    elif title_override:
         title = title_override
-        description = f"{episode_title}.\n{FULL_EPISODE_PLACEHOLDER}\n{hook_line}"
+        description = f"{episode_title}.\n{FULL_EPISODE_PLACEHOLDER}\n{question_line}"
     else:
         title = f"{episode_title} — {part_label}"
         # Không hashtag: YouTube nhận diện Shorts qua khung 9:16 và thời lượng dưới
         # 3 phút, "#shorts" không còn tác dụng; người dùng không muốn dấu # trong mô tả.
-        description = f"{title}.\n{FULL_EPISODE_PLACEHOLDER}\n{hook_line}"
+        description = f"{title}.\n{FULL_EPISODE_PLACEHOLDER}\n{question_line}"
     video_filename = f"{part_stem}.mp4"
 
     txt_path = output_dir / f"{part_stem}.txt"
