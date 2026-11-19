@@ -24,6 +24,8 @@ import sys
 from datetime import date, datetime
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 from scripts.catchup_shorts import (
     DONG_SHORT,
     ShortsError,
@@ -118,6 +120,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--record", nargs=2, metavar=("CHI_MUC", "TIEN_TO"),
                         help="Ghi tiền tố short vào chỉ mục rồi thoát")
     args = parser.parse_args(argv)
+    load_dotenv()  # launchd không nạp .env: AUDIOBOOK_SHORTS nằm trong đó
 
     if args.record:
         chi_muc, tien_to = args.record
