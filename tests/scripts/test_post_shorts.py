@@ -10,8 +10,9 @@ from scripts import post_shorts as ps
 
 @pytest.fixture(autouse=True)
 def _shorts_bat(monkeypatch):
-    """.env thật có AUDIOBOOK_SHORTS=0 từ 19/11; test tả đường đi cũ nên bật lại."""
-    monkeypatch.delenv("AUDIOBOOK_SHORTS", raising=False)
+    """.env thật có AUDIOBOOK_SHORTS=0 từ 19/11 và main() nạp .env (không đè biến
+    đã có), nên đặt hẳn 1 cho các test tả đường đi cũ."""
+    monkeypatch.setenv("AUDIOBOOK_SHORTS", "1")
 
 
 def _state(tmp_path, data: dict):
