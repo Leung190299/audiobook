@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from datetime import date, datetime
@@ -122,6 +123,10 @@ def main(argv: list[str] | None = None) -> int:
         chi_muc, tien_to = args.record
         ghi_shorts_prefix(Path(chi_muc), tien_to)
         print(f"Đã ghi shorts_prefix vào {chi_muc}: {tien_to}")
+        return 0
+
+    if os.getenv("AUDIOBOOK_SHORTS", "1").strip() == "0":
+        print("Shorts tắt (AUDIOBOOK_SHORTS=0, đánh giá kênh 19/11): không đăng, không bật short nào.")
         return 0
 
     hom_nay = date.fromisoformat(args.date) if args.date else \

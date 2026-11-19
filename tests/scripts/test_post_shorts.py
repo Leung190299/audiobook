@@ -8,6 +8,12 @@ import pytest
 from scripts import post_shorts as ps
 
 
+@pytest.fixture(autouse=True)
+def _shorts_bat(monkeypatch):
+    """.env thật có AUDIOBOOK_SHORTS=0 từ 19/11; test tả đường đi cũ nên bật lại."""
+    monkeypatch.delenv("AUDIOBOOK_SHORTS", raising=False)
+
+
 def _state(tmp_path, data: dict):
     p = tmp_path / "story_bank_state.json"
     p.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
@@ -134,3 +140,9 @@ def test_chi_muc_chua_ghi_prefix_thi_bao_ro_chu_khong_doan(tmp_path, monkeypatch
 
     assert ps.main(["--date", "2026-09-29"]) == 4
     assert "chưa ghi shorts_prefix" in capsys.readouterr().err
+
+
+def test_shorts_tat_thi_main_thoat_0_khong_lam_gi(monkeypatch, capsys):
+    monkeypatch.setenv("AUDIOBOOK_SHORTS", "0")
+    assert ps.main([]) == 0
+    assert "Shorts tắt" in capsys.readouterr().out

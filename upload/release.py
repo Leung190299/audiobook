@@ -48,6 +48,22 @@ from upload.uploader import list_status, update_status
 load_dotenv()
 
 WINDOW_DAYS = 7
+# Đánh giá kênh 19/11/2026: "gỡ lịch đã lên, giữ 3-4 truyện/tuần" -- chỉ hẹn vào
+# các thứ trong AUDIOBOOK_RELEASE_WEEKDAYS (0 = Thứ 2 ... 6 = Chủ nhật); mặc định
+# Thứ 2, 4, 6 và Chủ nhật. Video đang hẹn vào ngày khác bị bỏ hẹn, về kho.
+DEFAULT_RELEASE_WEEKDAYS = (0, 2, 4, 6)
+
+
+def shorts_enabled() -> bool:
+    return os.getenv("AUDIOBOOK_SHORTS", "1").strip() != "0"
+
+
+def release_weekdays() -> set[int]:
+    raw = os.getenv("AUDIOBOOK_RELEASE_WEEKDAYS", "").strip()
+    if not raw:
+        return set(DEFAULT_RELEASE_WEEKDAYS)
+    days = {int(x) for x in raw.replace(";", ",").split(",") if x.strip().lstrip("-").isdigit()}
+    return {d for d in days if 0 <= d <= 6} or set(DEFAULT_RELEASE_WEEKDAYS)
 # Chỉ hẹn giờ short 1 và 2; từ cái thứ 3 trở đi giữ riêng tư.
 RELEASE_SHORT_PARTS = 2
 # Thứ tự ưu tiên chủ đề khi lấy từ kho. Hai cái đầu là "đang thắng" và được xen
@@ -245,20 +261,24 @@ def pick_stock(videos: list[Video]) -> Video | None:
     return min(stock, key=lambda v: rank(v.topic))  # min ổn định: giữ thứ tự kho
 
 
-def plan(videos: list[Video], now: datetime, window_days: int = WINDOW_DAYS) -> Plan:
+def plan(
+    videos: list[Video], now: datetime, window_days: int = WINDOW_DAYS, weekdays: set[int] | None = None
+) -> Plan:
+    weekdays = weekdays if weekdays is not None else release_weekdays()
     now = now.astimezone(LOCAL_TZ)
     today = now.date()
     end = today + timedelta(days=window_days)
     out = Plan()
     out.unschedule = [
-        v for v in videos if v.privacy == "private" and v.air_date and v.air_date > end
+        v for v in videos
+        if v.privacy == "private" and v.air_date and (v.air_date > end or v.air_date.weekday() not in weekdays)
     ]
     freed = {v.video_id for v in out.unschedule}
     taken = {v.air_date for v in videos if v.air_date and v.video_id not in freed}
     start = default_first_air(now).date()
     for offset in range((end - start).days + 1):
         day = start + timedelta(days=offset)
-        if day not in taken:
+        if day not in taken and day.weekday() in weekdays:
             out.hole = day
             break
     stock = [v for v in videos if v.is_stock] + out.unschedule
@@ -307,7 +327,7 @@ def apply(
         print(f"Bỏ hẹn (về kho): {v.title} — {v.url} (từng hẹn {v.air_date})")
 
     if plan_.hole is None:
-        print(f"Lịch {WINDOW_DAYS} ngày đã kín, kho còn {plan_.stock_left} video.")
+        print(f"Lịch {WINDOW_DAYS} ngày đã kín (các ngày đăng {sorted(release_weekdays())}), kho còn {plan_.stock_left} video.")
         return
     if plan_.chosen is None:
         print(f"Kho trống: tối {plan_.hole} chưa có video.")
@@ -319,7 +339,8 @@ def apply(
         raise ReleaseError(f"Không hẹn được {v.title} ({v.video_id}) cho {at:%d/%m %H:%M}.")
     held = 0
     for n, short_id in shorts_of(v.row):
-        if n <= RELEASE_SHORT_PARTS:
+        # 19/11: AUDIOBOOK_SHORTS=0 -> dừng Shorts "Trích đoạn", không hẹn short nào.
+        if n <= RELEASE_SHORT_PARTS and shorts_enabled():
             updater(credentials, short_id, at + SHORT_DELAY)
         else:
             held += 1
