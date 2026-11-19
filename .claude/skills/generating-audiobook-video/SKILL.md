@@ -57,6 +57,15 @@ Layout code: `remotion/src/MainVideo.tsx` → `BrandedLayout.tsx` (centre box wi
 | 7 | `shorts.cli --script` | 1–2 min | 3 Shorts from `short_beats`, each on its own background video (vertical clips preferred). **Failure only warns**, never fails the run. |
 | 8 | `upload.episodes_cli` | — | Only with `--upload`. |
 
+## Cadence: 3–4 stories a week, no Shorts (channel review 19/11/2026)
+
+The 17/11 fixes were not enough (28-day views 48.9k → 20.8k; long videos get a few hundred impressions each; the 2017 karaoke video carries the channel). As a two-week experiment from 19/11:
+
+- `AUDIOBOOK_RELEASE_WEEKDAYS=0,2,4,6` in `.env`: `run_daily.sh --upload` exits early on other weekdays and `upload.release` only schedules onto those weekdays (a video scheduled on another day is unscheduled back to stock). Manual builds (`--story N` without `--upload`) still run any day, but the upload guard (one long video per day) still applies.
+- `AUDIOBOOK_SHORTS=0`: stages 7/7b are skipped, no `--shorts-prefix`, `upload.release` schedules no Shorts and `scripts.post_shorts` exits at once. The ~500 same-template "Trích đoạn" Shorts were a mass-production signal.
+- Stage 0 rejects a title whose first three or last three words match an existing title (`keywords.story.title_template_clash`): "Bác Họ Đòi…" ×2 and "Sau Khi Trọng Sinh Đòi Lại Đất, Tôi Lôi…" ×2 were flagged by the review.
+- Compare impressions per story in Studio after two weeks (from 03/12) against the current few hundred. Impressions are not in the Analytics API.
+
 ## Length, opening and anti-bulk rules (channel review 17/11/2026)
 
 The review found the channel choked on hook/script (42-min videos watched 2:42 on average) and on mass-production signals (9+ uploads in a day on 21–27/10, ~500 same-template Shorts, keyword-stuffed descriptions). Rules now enforced in code:

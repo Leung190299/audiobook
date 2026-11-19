@@ -18,10 +18,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from datetime import date, datetime
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 from scripts.catchup_shorts import (
     DONG_SHORT,
@@ -117,11 +120,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--record", nargs=2, metavar=("CHI_MUC", "TIEN_TO"),
                         help="Ghi tiền tố short vào chỉ mục rồi thoát")
     args = parser.parse_args(argv)
+    load_dotenv()  # launchd không nạp .env: AUDIOBOOK_SHORTS nằm trong đó
 
     if args.record:
         chi_muc, tien_to = args.record
         ghi_shorts_prefix(Path(chi_muc), tien_to)
         print(f"Đã ghi shorts_prefix vào {chi_muc}: {tien_to}")
+        return 0
+
+    if os.getenv("AUDIOBOOK_SHORTS", "1").strip() == "0":
+        print("Shorts tắt (AUDIOBOOK_SHORTS=0, đánh giá kênh 19/11): không đăng, không bật short nào.")
         return 0
 
     hom_nay = date.fromisoformat(args.date) if args.date else \

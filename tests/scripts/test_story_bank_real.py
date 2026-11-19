@@ -23,7 +23,8 @@ def test_kho_that_dung_97_truyen_va_topic_khop_registry():
 
     bank = load_bank()
 
-    assert len(bank.stories) == 97  # 10/11: 47 đã đăng + 50 từ doc "50 ý tưởng"
+    # Kho phụ (story_bank.auto.json, id >= 1000) là dữ liệu máy này, không đếm.
+    assert len([s for s in bank.stories if s.id < 1000]) == 97  # 10/11: 47 đã đăng + 50 từ doc "50 ý tưởng"
     assert {s.topic for s in bank.stories} <= set(TOPICS)
 
 

@@ -8,12 +8,31 @@ import re
 from pathlib import Path
 
 from keywords.prompts import BANNED_TITLE_STARTS, PREMISE_WORDS, TITLE_MAX_CHARS
-from keywords.scoring import content_words, phrase_in_text
+from keywords.scoring import strip_accents, content_words, phrase_in_text
 from scripts.prompts import MAX_HOOK_WORDS, MAX_QUESTION_WORDS
 from scripts.story_bank import AUTO_ID_START, DEFAULT_AUTO_BANK_PATH
 from scripts.topics import TOPICS
 
 REQUIRED = ("topic", "title", "hook", "premise", "twist", "comment_question", "thumb_keywords")
+
+
+def _title_words(title: str) -> list[str]:
+    return [w for w in re.sub(r"[^\w\s]", " ", strip_accents(title).lower()).split() if w]
+
+
+def title_template_clash(title: str, existing_titles: list[str], n: int = 3) -> str | None:
+    """Đánh giá kênh 19/11: các tiêu đề gần trùng nhau ('Bác Họ Đòi...' x2, 'Sau Khi
+    Trọng Sinh Đòi Lại Đất, Tôi Lôi...' x2) là dấu hiệu sản xuất hàng loạt. Trùng
+    `n` chữ đầu hoặc `n` chữ cuối với một tiêu đề đã có -> trả tiêu đề đó."""
+    words = _title_words(title)
+    if len(words) < n:
+        return None
+    head, tail = tuple(words[:n]), tuple(words[-n:])
+    for other in existing_titles:
+        ow = _title_words(other)
+        if len(ow) >= n and (tuple(ow[:n]) == head or tuple(ow[-n:]) == tail):
+            return other
+    return None
 
 
 def validate_story(data: dict, phrase: str, existing_titles: list[str]) -> list[str]:
@@ -33,6 +52,11 @@ def validate_story(data: dict, phrase: str, existing_titles: list[str]) -> list[
         problems.append(f"title phải chứa các từ chính của từ khóa '{phrase}'")
     if title.lower() in {t.lower() for t in existing_titles}:
         problems.append("title trùng một truyện đã có, đặt tên khác")
+    elif clash := title_template_clash(title, existing_titles):
+        problems.append(
+            f"title trùng khuôn với truyện đã có '{clash}' (ba chữ đầu hoặc ba chữ cuối giống nhau); "
+            "đổi hẳn cách mở đầu và cách kết tiêu đề"
+        )
     # Tiêu đề viết hoa mọi chữ nên không dò xưng hô được; lấy tên từ premise/twist
     # (ở đó 'bà Phượng' viết thường xưng hô) rồi xem tên nào lọt vào tiêu đề.
     body_names = _proper_names(f"{data['premise']} {data['twist']}")

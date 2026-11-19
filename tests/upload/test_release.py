@@ -11,6 +11,13 @@ from upload import release
 from upload.episodes_cli import LOCAL_TZ
 from upload.release import Video, attach_status, load_index, pick_stock, plan, rewrite_publish_at
 
+
+@pytest.fixture(autouse=True)
+def _moi_ngay_deu_dang(monkeypatch):
+    """19/11: mặc định chỉ đăng Thứ 2/4/6/CN; test cũ tả lịch liên tục nên mở cả tuần."""
+    monkeypatch.setenv("AUDIOBOOK_RELEASE_WEEKDAYS", "0,1,2,3,4,5,6")
+    monkeypatch.delenv("AUDIOBOOK_SHORTS", raising=False)
+
 NOW = datetime(2026, 11, 5, 9, 0, tzinfo=LOCAL_TZ)
 TODAY = NOW.date()
 
@@ -221,3 +228,42 @@ def test_main_ma_thoat_0_khi_da_hen(monkeypatch, capsys):
     monkeypatch.setattr(release, "rewrite_publish_at", lambda *a: None)
     assert release.main([]) == 0
     assert "Đã hẹn: A" in capsys.readouterr().out
+
+
+# --- 3-4 truyện/tuần (19/11/2026) ---------------------------------------------
+
+
+def test_chi_hen_vao_thu_cho_phep_va_bo_hen_video_hen_sai_thu(monkeypatch):
+    monkeypatch.setenv("AUDIOBOOK_RELEASE_WEEKDAYS", "0,2,4,6")
+    # ngày đầu tiên >= TODAY có thứ không được phép, và ngày được phép kế tiếp
+    sai = next(TODAY + timedelta(days=i) for i in range(1, 8) if (TODAY + timedelta(days=i)).weekday() not in {0, 2, 4, 6})
+    videos = [_v("sai", "ho_hang_viet", sai), _v("kho1", "ho_hang_viet")]
+    p = plan(videos, NOW)
+    assert [v.video_id for v in p.unschedule] == ["sai"]
+    assert p.hole is not None and p.hole.weekday() in {0, 2, 4, 6}
+    assert p.chosen is not None
+
+
+def test_env_thu_dang_hong_thi_ve_mac_dinh(monkeypatch):
+    monkeypatch.setenv("AUDIOBOOK_RELEASE_WEEKDAYS", "")
+    assert release.release_weekdays() == {0, 2, 4, 6}
+    monkeypatch.setenv("AUDIOBOOK_RELEASE_WEEKDAYS", "9,abc")
+    assert release.release_weekdays() == {0, 2, 4, 6}
+    monkeypatch.setenv("AUDIOBOOK_RELEASE_WEEKDAYS", "1,3,5")
+    assert release.release_weekdays() == {1, 3, 5}
+
+
+def test_shorts_tat_thi_khong_hen_short_nao(tmp_path, capsys, monkeypatch):
+    monkeypatch.setenv("AUDIOBOOK_SHORTS", "0")
+    jsonl = tmp_path / "index.jsonl"
+    index = tmp_path / "x-full.json"
+    index.write_text(json.dumps({"shorts_prefix": str(tmp_path / "p")}), encoding="utf-8")
+    (tmp_path / "p-upload-state.json").write_text(json.dumps({"uploaded": {
+        "1": {"video_id": "s1"}, "2": {"video_id": "s2"}, "3": {"video_id": "s3"}}}), encoding="utf-8")
+    v = _v("kho1", "ho_hang_viet"); v.row["index"] = str(index)
+    jsonl.write_text(json.dumps(v.row) + "\n", encoding="utf-8")
+    calls = []
+    p = release.Plan(hole=TODAY + timedelta(days=1), chosen=v, stock_left=0)
+    release.apply(None, p, updater=lambda c, vid, at: calls.append((vid, at)) or True, index_jsonl=jsonl)
+    assert [c[0] for c in calls] == ["kho1"]
+    assert "giữ lại 3 short" in capsys.readouterr().out

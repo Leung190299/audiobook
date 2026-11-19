@@ -94,3 +94,15 @@ def test_tu_dau_cau_thoai_viet_hoa_khong_bi_coi_la_ten():
 
     assert _proper_names("Mẹ nuôi quát: 'Con Đừng hòng chiếm nhà này!'") == []
     assert _proper_names("Bà Phượng quát: 'Mày Trả sổ đỏ đây!'") == ["Phượng"]
+
+
+def test_tieu_de_trung_khuon_ba_chu_dau_hoac_cuoi_bi_chan():
+    from keywords.story import title_template_clash
+
+    co = ["Bác Họ Đòi Tước Sạch Người Thừa Kế, Tôi Mang Di Chúc",
+          "Bố Mẹ Nuôi Đòi Sang Tên Đất, Tôi Lôi 42 Tờ Biên Lai"]
+    assert title_template_clash("Bác Họ Đòi Chia Đất Làng Quê, Tôi Lôi Sổ Đỏ Ra", co) == co[0]
+    assert title_template_clash("Mẹ Kế Giấu Sổ Đỏ, Tôi Lôi 42 Tờ Biên Lai", co) == co[1]
+    assert title_template_clash("Mẹ Kế Giấu Sổ Đỏ, Tôi Mời Công Chứng Đến Nhà", co) is None
+    d = _ok(); d["title"] = "Bác Họ Đòi Chia Đất Làng Quê, Tôi Mời Công Chứng"; d["thumb_keywords"] = ["Công Chứng"]
+    assert any("trùng khuôn" in p for p in validate_story(d, "bác họ đòi chia đất", co))
