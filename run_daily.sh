@@ -76,6 +76,11 @@ env_get() {
 }
 : "${AUDIOBOOK_FORMAT:=$(env_get AUDIOBOOK_FORMAT)}"
 : "${AUDIOBOOK_TOPIC:=$(env_get AUDIOBOOK_TOPIC)}"
+# Đánh giá kênh 19/11: 3-4 truyện/tuần và dừng Shorts "Trích đoạn".
+: "${AUDIOBOOK_RELEASE_WEEKDAYS:=$(env_get AUDIOBOOK_RELEASE_WEEKDAYS)}"
+: "${AUDIOBOOK_SHORTS:=$(env_get AUDIOBOOK_SHORTS)}"
+USE_SHORTS="${AUDIOBOOK_SHORTS:-1}"
+if [[ -z "$USE_SHORTS" ]]; then USE_SHORTS=1; fi
 
 TROPE_ID=""
 TOPIC_ARG=""
@@ -177,6 +182,18 @@ require() {
 }
 
 log "=== Bắt đầu lượt chạy $RUN_DATE (định dạng: $FORMAT) ==="
+
+# --- Ngày đăng (19/11/2026) --------------------------------------------------
+# Lượt tự động (--upload) chỉ chạy vào các thứ trong AUDIOBOOK_RELEASE_WEEKDAYS
+# (0 = Thứ 2 ... 6 = Chủ nhật): 3-4 truyện/tuần, mỗi ngày đăng một truyện. Dựng
+# tay (--story N, không --upload) vẫn chạy mọi ngày.
+if [[ "$DO_UPLOAD" -eq 1 && -n "$AUDIOBOOK_RELEASE_WEEKDAYS" ]]; then
+  DOW=$(( $(date +%u) - 1 ))
+  if [[ ",$AUDIOBOOK_RELEASE_WEEKDAYS," != *",$DOW,"* ]]; then
+    log "Hôm nay không phải ngày đăng (thứ $(date +%u); AUDIOBOOK_RELEASE_WEEKDAYS=$AUDIOBOOK_RELEASE_WEEKDAYS). Bỏ qua lượt chạy."
+    exit 0
+  fi
+fi
 
 # --- Kho video và lịch 7 ngày (05/11/2026) -----------------------------------
 # Có --upload và định dạng full: trước khi dựng gì, bỏ hẹn video nào hẹn quá 7
@@ -375,6 +392,8 @@ TITLE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding
 # notify_failure, không exit.
 SHORT_LOG="$LOG_DIR/07-short.log"
 SHORT_COUNT=""
+SHORTS_PREFIX=""
+if [[ "$USE_SHORTS" == "1" ]]; then
 log "▶ Stage 7: Short"
 # --script: kịch bản chủ đề có 3 đoạn hài/sảng (short_beats) -> 3 Shorts mở bằng
 # câu thoại đó; kịch bản cũ không có thì shorts.cli rải 3 trích đoạn như trước.
@@ -413,6 +432,11 @@ SHORTS_PREFIX="$(extract 'Đã render short: (.+)-part-01\.mp4' "$SHORT_LOG")"
 if [[ -n "$SHORTS_PREFIX" && -n "$METADATA_INDEX" ]]; then
   $RUNNER scripts.post_shorts --record "$METADATA_INDEX" "$SHORTS_PREFIX" \
     >>"$LOG_FILE" 2>&1 || log "CẢNH BÁO: không ghi được shorts_prefix vào $METADATA_INDEX"
+fi
+else
+  # Đánh giá kênh 19/11: ~500 Shorts "Trích đoạn" cùng khuôn là dấu hiệu sản xuất
+  # hàng loạt -> AUDIOBOOK_SHORTS=0 bỏ hẳn stage 7, 7b; stage 8 không có --shorts-prefix.
+  log "Bỏ Stage 7/7b: Shorts tắt (AUDIOBOOK_SHORTS=0)."
 fi
 
 # Đánh dấu truyện đã dựng. Không làm thì kho vẫn coi truyện này chưa dùng, và

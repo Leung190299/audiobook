@@ -682,3 +682,39 @@ def test_story_chi_dinh_thi_khong_goi_stage_0(tmp_path: Path):
     assert run.exit_code == 0, run.proc.stderr + run.stdout
     assert not run.called("keywords.cli")
     assert run.call_for("scripts.cli") == "scripts.cli --story 7 --format full"
+
+
+# --- 3-4 truyện/tuần và tắt Shorts (19/11/2026) ---------------------------------
+
+
+def test_khong_phai_ngay_dang_thi_luot_upload_thoat_som(tmp_path: Path):
+    from datetime import datetime as _dt
+
+    khac = str((_dt.now().weekday() + 1) % 7)
+    run = _run(tmp_path, ["--upload"], AUDIOBOOK_RELEASE_WEEKDAYS=khac)
+    assert run.proc.returncode == 0
+    assert "không phải ngày đăng" in run.proc.stdout
+    assert run.calls == []
+
+
+def test_dung_ngay_dang_thi_chay_binh_thuong(tmp_path: Path):
+    from datetime import datetime as _dt
+
+    run = _run(tmp_path, ["--upload"], AUDIOBOOK_RELEASE_WEEKDAYS=f"{_dt.now().weekday()},6")
+    assert run.call_for("upload.episodes_cli") is not None
+
+
+def test_dung_tay_khong_upload_thi_khong_bi_chan_theo_thu(tmp_path: Path):
+    from datetime import datetime as _dt
+
+    khac = str((_dt.now().weekday() + 1) % 7)
+    run = _run(tmp_path, AUDIOBOOK_RELEASE_WEEKDAYS=khac)
+    assert run.proc.returncode == 0 and run.call_for("episodes.cli") is not None
+
+
+def test_tat_shorts_thi_bo_stage_7_7b_va_upload_khong_prefix(tmp_path: Path):
+    run = _run(tmp_path, ["--upload"], AUDIOBOOK_SHORTS="0")
+    assert run.proc.returncode == 0
+    assert run.call_for("shorts.cli") is None and run.call_for("shorts.tiktok") is None
+    assert run.call_for("upload.episodes_cli") == f"upload.episodes_cli {EXPECTED_METADATA_INDEX}"
+    assert "Shorts tắt" in run.proc.stdout

@@ -288,3 +288,17 @@ hơn cả quy trình audit.
 - Độ dài ~20 phút (18–22), không kéo cho đủ 42 phút; QA chặn kịch bản quá 125 % mục tiêu.
 - Mô tả video dài không có dòng "Keywords:"; mô tả Short mở bằng câu thoại của chính nó.
   Sửa video cũ: `uv run python -m metadata.redescribe --all --shorts` (51 đơn vị hạn mức/video).
+
+## Nhịp 3–4 truyện/tuần, không Shorts (đánh giá kênh 19/11/2026)
+
+Đánh giá 19/11: sửa mô tả chưa đủ (view 28 ngày 48,9k → 20,8k), video dài chỉ vài trăm
+hiển thị, dấu hiệu sản xuất hàng loạt vẫn còn (1–2 truyện + 2 Shorts mỗi ngày, tiêu đề
+gần trùng nhau). Thử nghiệm 2 tuần:
+
+- `AUDIOBOOK_RELEASE_WEEKDAYS=0,2,4,6` (.env): lượt 09:00 chỉ chạy Thứ 2/4/6/CN và
+  `upload.release` chỉ hẹn vào các thứ đó; video hẹn sai thứ bị bỏ hẹn về kho.
+- `AUDIOBOOK_SHORTS=0`: bỏ stage 7/7b, không đăng và không hẹn Short; `scripts.post_shorts`
+  20:05 thoát ngay.
+- Stage 0 từ chối tiêu đề trùng ba chữ đầu hoặc ba chữ cuối với truyện đã có
+  (`keywords.story.title_template_clash`).
+- Sau 2 tuần (từ 03/12) so số hiển thị mỗi truyện trong Studio với mức vài trăm hiện nay.
