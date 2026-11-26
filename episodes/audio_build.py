@@ -24,10 +24,19 @@ class EpisodeAudioError(Exception):
     pass
 
 
+END_TOLERANCE_SECONDS = 0.05
+
+
 def _read_segment(source: Path, start_seconds: float, end_seconds: float, info) -> np.ndarray:
     sample_rate = info.samplerate
     start_frame = round(start_seconds * sample_rate)
     stop_frame = round(end_seconds * sample_rate)
+    # ffmpeg atempo (stage 2, speed != 1) không cho ra đúng frames/speed mẫu:
+    # 25/11/2026 file ngắn hơn mốc chương cuối 112 mẫu (2,3 ms) và cả lượt chết
+    # ở đây. Lố trong END_TOLERANCE_SECONDS thì đọc tới hết file; lố hơn vẫn là
+    # mốc sai thật và phải báo lỗi.
+    if info.frames < stop_frame <= info.frames + round(END_TOLERANCE_SECONDS * sample_rate):
+        stop_frame = info.frames
     if start_frame < 0 or stop_frame > info.frames or stop_frame <= start_frame:
         raise EpisodeAudioError(
             f"Khoảng cắt [{start_seconds}s, {end_seconds}s) nằm ngoài độ dài file "

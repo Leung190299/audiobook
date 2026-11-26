@@ -60,6 +60,22 @@ def test_build_episode_wav_ngoai_file_thi_loi(sandbox):
         build_episode_wav(sandbox["wav_path"], bad, sandbox["repo_root"] / "x.wav")
 
 
+def test_build_episode_wav_moc_cuoi_lo_vai_ms_thi_doc_toi_het_file(sandbox):
+    # 25/11/2026: sau ffmpeg atempo 1.15 file thật ngắn hơn mốc chương cuối
+    # (mốc gốc / speed) 112 mẫu = 2,3 ms, stage 4 chết dù không thiếu tiếng nào.
+    info = sf.info(sandbox["wav_path"])
+    file_seconds = info.frames / info.samplerate
+    cut = EpisodeCut(
+        episode=plan_cuts(sandbox["tts_metadata"], plan_episodes(6))[0].episode,
+        body_source_start_seconds=0.0,
+        body_source_end_seconds=file_seconds + 0.0023,
+        cold_open=None,
+    )
+    dest = sandbox["repo_root"] / "ep-atempo.wav"
+    duration = build_episode_wav(sandbox["wav_path"], cut, dest)
+    assert duration == pytest.approx(file_seconds + cut.outro_seconds, abs=1e-3)
+
+
 def _props(sandbox, ep_number: int) -> tuple[dict, EpisodeCut]:
     script = Script.from_dict(json.loads(sandbox["script_path"].read_text(encoding="utf-8")))
     cut = plan_cuts(sandbox["tts_metadata"], plan_episodes(6))[ep_number - 1]
