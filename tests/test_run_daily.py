@@ -718,3 +718,83 @@ def test_tat_shorts_thi_bo_stage_7_7b_va_upload_khong_prefix(tmp_path: Path):
     assert run.call_for("shorts.cli") is None and run.call_for("shorts.tiktok") is None
     assert run.call_for("upload.episodes_cli") == f"upload.episodes_cli {EXPECTED_METADATA_INDEX}"
     assert "Shorts tắt" in run.proc.stdout
+
+
+# --- người que (27/11/2026) ---------------------------------------------------
+
+FAKE_STICK = Path(__file__).resolve().parent / "fake_stick.sh"
+
+
+def _stick_kit(tmp_path: Path) -> str:
+    kit = tmp_path / "kit"
+    kit.mkdir()
+    shutil.copy(FAKE_STICK, kit / "stick")
+    (kit / "stick").chmod(0o755)
+    return str(kit)
+
+
+def _stick_calls(run: Run) -> list[str]:
+    return [line for line in run.calls if line.startswith("stick ")]
+
+
+def test_nguoi_que_thay_stage_3_7_bang_import_va_auto(tmp_path: Path):
+    run = _run(tmp_path, ["--upload"], legacy=False, video_nen=True,
+               AUDIOBOOK_RENDERER="stickman", STICK_KIT=_stick_kit(tmp_path), FAKE_STORY_ID="1011")
+    assert run.exit_code == 0, run.stdout
+    for module in ("images.cli", "episodes.cli", "thumbnail.cli", "metadata.cli", "shorts.cli", "shorts.tiktok"):
+        assert not run.called(module), module
+    calls = _stick_calls(run)
+    assert len(calls) == 2, calls
+    imp, auto = calls
+    assert imp.startswith("stick import story-1011-")
+    assert f"--script {EXPECTED_SCRIPT} --audio {EXPECTED_AUDIO_JSON} --story-id 1011" in imp
+    slug = imp.split(" ")[2]
+    assert auto == f"stick auto {slug}"
+    upload = run.call_for("upload.episodes_cli")
+    assert upload is not None
+    assert f"stories/{slug}/upload/{slug}-full.json --no-schedule" in upload
+    assert "--shorts-prefix" not in upload
+    assert run.call_for("scripts.story_bank --mark-used 1011") is not None
+    assert run.called("upload.release")
+    assert "Người que xong" in run.stdout
+
+
+def test_nguoi_que_doc_tu_file_env_va_khong_can_upload(tmp_path: Path):
+    kit = _stick_kit(tmp_path)
+    run = _run(tmp_path, legacy=False, video_nen=True, dotenv=f"AUDIOBOOK_RENDERER=stickman\nSTICK_KIT={kit}\n")
+    assert run.exit_code == 0, run.stdout
+    assert len(_stick_calls(run)) == 2
+    assert not run.called("episodes.cli")
+    assert not run.called("upload.episodes_cli")
+    assert "✔ Đã dựng xong" in run.stdout
+
+
+def test_mac_dinh_frame_khong_goi_bo_nguoi_que(tmp_path: Path):
+    run = _run(tmp_path, legacy=False, video_nen=True, STICK_KIT=_stick_kit(tmp_path))
+    assert run.exit_code == 0, run.stdout
+    assert _stick_calls(run) == []
+    assert run.called("episodes.cli") and run.called("metadata.cli")
+
+
+def test_nguoi_que_hong_thi_dung_va_bao(tmp_path: Path):
+    run = _run(tmp_path, legacy=False, video_nen=True, AUDIOBOOK_RENDERER="stickman",
+               STICK_KIT=_stick_kit(tmp_path), FAKE_STICK_FAIL="auto")
+    assert run.exit_code == 1
+    assert "Stage 4s: Người que (auto) THẤT BẠI" in run.stdout
+    assert not run.called("upload.episodes_cli")
+    assert run.call_for("notify.cli") is not None and "failure" in run.call_for("notify.cli")
+
+
+def test_nguoi_que_thieu_bo_lenh_thi_bao_ngay(tmp_path: Path):
+    run = _run(tmp_path, legacy=False, video_nen=True, AUDIOBOOK_RENDERER="stickman",
+               STICK_KIT=str(tmp_path / "khong-co"))
+    assert run.exit_code == 1
+    assert "Không thấy bộ lệnh người que" in run.stdout
+    assert run.called("tts.cli")
+
+
+@pytest.mark.parametrize("env", [{"AUDIOBOOK_RENDERER": "sơn dầu"}, {"AUDIOBOOK_RENDERER": "stickman", "AUDIOBOOK_FORMAT": "episodes"}])
+def test_nguoi_que_cau_hinh_sai_thi_bao_loi_ngay(tmp_path: Path, env):
+    run = _run(tmp_path, legacy=False, **env)
+    assert run.exit_code == 2
+    assert run.calls == []

@@ -57,6 +57,12 @@ Layout code: `remotion/src/MainVideo.tsx` → `BrandedLayout.tsx` (centre box wi
 | 7 | `shorts.cli --script` | 1–2 min | 3 Shorts from `short_beats`, each on its own background video (vertical clips preferred). **Failure only warns**, never fails the run. |
 | 8 | `upload.episodes_cli` | — | Only with `--upload`. |
 
+## Stickman renderer (27/11/2026)
+
+`AUDIOBOOK_RENDERER=stickman` in `.env` (default `frame`; full format only) replaces stages 3–7 with **Stage 4s**: `run_daily.sh` hands the stage-1 script and stage-2 audio to the stickman kit at `STICK_KIT` (default `../lemo/stickman/kit`, skill `making-stickman-story-video`): `kit/stick import story-<id>-<time> --script … --audio … --story-id <id>` then `kit/stick auto <story>` (= `autoboard`: the channel's `STORY_LLM` writes cast, storyboard and speak table and fills `story.json`; `draw`/`wait`: ~150 images at ~3 min each, 7.5–9.5 h; `render --no-mouth`; `check`; `package`). `auto` prints the same `Danh sách:` / `Video full đã đổi tên:` / `Đã lưu thumbnail:` / `Đã render 1 video` lines as stages 4–6, so stages 8–9 (stock, 20:00 release) are untouched; logs are `04s-import.log` and `04s-stickman.log`. A 09:00 run finishes around 17–19 h; `upload.release` still schedules the same evening when it is in time.
+
+The automatic mode skips the two human stages of the kit (looking at every image, mouths): expect ~10% faulty images and no lip movement. To review: `kit/stick sheet <story>`, fix with `redo`/`croptop`, `render`, `package`, replace the file in Studio. Never start a second drawing loop while the pipeline is drawing (16 GB).
+
 ## Cadence: 3–4 stories a week, no Shorts (channel review 19/11/2026)
 
 The 17/11 fixes were not enough (28-day views 48.9k → 20.8k; long videos get a few hundred impressions each; the 2017 karaoke video carries the channel). As a two-week experiment from 19/11:
