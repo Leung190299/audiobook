@@ -10,6 +10,11 @@ from difflib import SequenceMatcher
 
 THUMB_TEXT_MAX_WORDS = 12
 MAX_THUMB_KEYWORDS = 3
+# Chữ bìa là một câu RIÊNG, không phải tiêu đề (kiểm kênh 26/11/2026): ngắn để
+# chữ to ở cỡ feed, và không quá nửa số chữ trùng tiêu đề -- bìa lặp tiêu đề là
+# hai chỗ mời bấm nói cùng một điều.
+THUMB_LINE_MAX_WORDS = 8
+THUMB_TITLE_OVERLAP_MAX = 0.5
 
 
 def clip_chars(text: str, max_chars: int) -> str:
@@ -55,6 +60,33 @@ def clean_thumb_fields(thumb_text: str, keywords, title: str) -> tuple[str, list
         tail = text.split(" ")[-2:]
         result = [" ".join(tail).strip(" ,.;:!?")]
     return text, result
+
+
+def _plain_words(text: str) -> list[str]:
+    return re.findall(r"\w+", unicodedata.normalize("NFC", text).lower())
+
+
+def repeats_title(thumb_text: str, title: str) -> bool:
+    """True khi chữ bìa chỉ nói lại tiêu đề: quá nửa số chữ của nó có trong tiêu đề."""
+    words = _plain_words(thumb_text)
+    if not words:
+        return True
+    title_words = set(_plain_words(title))
+    return sum(w in title_words for w in words) / len(words) > THUMB_TITLE_OVERLAP_MAX
+
+
+def pick_thumb_text(candidate: str, keywords, title: str, title_keywords=()) -> tuple[str, list[str]]:
+    """Chọn chữ in lên bìa. `candidate` (câu mô hình viết) được dùng khi nó có
+    chữ, <= THUMB_LINE_MAX_WORDS chữ và không lặp tiêu đề; khi đó `keywords` là
+    cụm tô màu của nó. Không đạt thì quay về tiêu đề + `title_keywords` như
+    trước 26/11 -- thà bìa cũ còn hơn bìa trống hoặc câu bị cắt cụt."""
+    text = " ".join(str(candidate or "").split())
+    # Gỡ ngoặc kép chỉ khi nó bọc CẢ câu; ngoặc quanh một vế thì là của câu.
+    if len(text) > 1 and text[0] in "\"'“" and text[-1] in "\"'”" and not set(text[1:-1]) & set("\"“”"):
+        text = text[1:-1].strip()
+    if text and len(text.split()) <= THUMB_LINE_MAX_WORDS and not repeats_title(text, title):
+        return clean_thumb_fields(text, keywords, title)
+    return clean_thumb_fields(title, list(title_keywords or []), title)
 
 
 def keyword_spans(text: str, keywords: list[str]) -> list[tuple[int, int, int]]:

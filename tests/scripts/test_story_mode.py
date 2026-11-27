@@ -118,10 +118,30 @@ async def test_giu_nguyen_tieu_de_hook_cau_hoi_tu_kho_khong_lay_cua_gemini():
 
     assert script.title == STORY.title
     assert script.comment_question == STORY.comment_question
-    assert script.thumb_keywords == list(STORY.thumb_keywords)
-    assert script.thumb_text == STORY.title
+    # Chữ bìa là câu riêng của mô hình, KHÁC tiêu đề (kiểm kênh 26/11/2026).
+    assert script.thumb_text == "Gemini Thumb"
+    assert script.thumb_keywords == ["Gemini"]
     assert script.premise == STORY.premise
     assert script.topic == STORY.topic
+
+
+async def test_chu_bia_lap_tieu_de_thi_dung_tieu_de_va_tu_khoa_cua_kho():
+    lap = _outline(2).replace('"thumb_text": "Gemini Thumb"', '"thumb_text": "Bác Cả Đòi Chia Đất Của Bố"')
+    client, _ = _client(lap, ["Nội dung chương một. Bác Cả im bặt.", "Nội dung chương hai."])
+
+    script = await generate_script("x", "y", "z", client=client, fmt="full",
+                                   story=STORY, bank=BANK)
+
+    assert script.thumb_text == STORY.title
+    assert script.thumb_keywords == list(STORY.thumb_keywords)
+
+
+def test_prompt_truyen_kho_yeu_cau_chu_bia_khac_tieu_de():
+    p = build_story_outline_prompt(BANK, STORY, fmt="full")
+
+    assert "chép lại đúng tiêu đề" not in p
+    assert "KHÁC tiêu đề" in p
+    assert '"thumb_keywords"' in p
 
 
 async def test_cau_dau_chuong_1_la_hook_nguyen_van():

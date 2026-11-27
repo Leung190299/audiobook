@@ -22,15 +22,14 @@ STORY = "Bác Cả Đòi Chia Đất Của Bố, Tôi Livestream Luôn"
 QUESTION = "Nếu là bạn, bạn có cho bác Cả mượn sổ đỏ không? 1 = cho, 2 = không"
 
 
-def test_tieu_de_full_dung_khuon_va_gioi_han():
-    t = full_title(STORY, "Audio Truyện")
-    assert t == f"[Truyện Audio] {STORY} | Audio Truyện"
-    assert len(t) <= 100
-    long = full_title("Chữ " * 40, "Kênh")
-    assert len(long) <= 100
-    core = long.removeprefix("[Truyện Audio] ").removesuffix(" | Kênh")
-    assert len(core) <= 60
-    assert len(full_title(STORY, "K" * 60)) <= 100
+def test_tieu_de_full_chi_la_ten_truyen_khong_tien_to_khong_ten_kenh():
+    # Kiểm kênh 26/11/2026: "[Truyện Audio] " chiếm 15/40 ký tự mà feed điện
+    # thoại hiện, " | Audio Truyện" lặp tên kênh; 7/10 tiêu đề dài 72-85 ký tự.
+    t = full_title(STORY)
+    assert t == STORY
+    assert "[Truyện Audio]" not in t and "Audio Truyện" not in t
+    long = full_title("Chữ " * 40)
+    assert len(long) <= 60 and not long.endswith(" ")
 
 
 def test_chuong_theo_luat_youtube():
@@ -86,7 +85,7 @@ async def test_run_full_ghi_metadata_index_va_doi_ten(tmp_path, monkeypatch, cap
     index = json.loads(index_path.read_text(encoding="utf-8"))
     assert index["topic"] == "ho_hang_viet" and index["format"] == "full"
     (ep,) = index["episodes"]
-    assert ep["title"] == f"[Truyện Audio] {STORY} | Audio Truyện"
+    assert ep["title"] == STORY
     assert ep["video_path"].endswith("bac-ca-doi-chia-dat-cua-bo-toi-livestream-luon.mp4")
     assert ep["thumbnail_path"].endswith("-thumbnail-a.png")
     assert ep["thumbnail_b_path"].endswith("-thumbnail-b.png")

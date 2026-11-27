@@ -1,8 +1,8 @@
 # metadata/full.py
 """Metadata YouTube cho video FULL của một truyện CHỦ ĐỀ (spec 24/09/2026 §6).
 
-- Tiêu đề: `[Truyện Audio] <title> | <Tên kênh>` — tổng <= 100 ký tự, phần
-  <title> <= 60 (câu kể chuyện theo công thức của chủ đề, từ stage 1).
+- Tiêu đề: `<title>` <= 60 ký tự (câu kể chuyện theo công thức của chủ đề, từ
+  stage 1). Từ 26/11/2026 bỏ tiền tố `[Truyện Audio]` và đuôi `| <Tên kênh>`.
 - Mô tả: hook → tóm tắt 2 câu → ❓ câu hỏi chọn phe → link playlist CHỦ ĐỀ →
   CTA đăng ký → chương → hashtag (#truyenaudio + 2 hashtag của chủ đề).
 - Bình luận ghim = câu hỏi chọn phe ("1 = ..., 2 = ...").
@@ -18,9 +18,7 @@ from pathlib import Path
 from metadata.chapters import _format_timestamp
 from metadata.seo_generator import SeoCopy, clip_title
 
-TITLE_PREFIX = "[Truyện Audio]"
 MAX_STORY_TITLE_CHARS = 60
-MAX_YOUTUBE_TITLE_CHARS = 100
 DEFAULT_CHANNEL_NAME = "Audio Truyện"
 BASE_HASHTAG = "#truyenaudio"
 FULL_CTA = "👉 Đăng ký kênh và bật chuông — truyện mới lên sóng 20h mỗi tối!"
@@ -55,13 +53,15 @@ def channel_name() -> str:
     return os.getenv("CHANNEL_NAME") or DEFAULT_CHANNEL_NAME
 
 
-def full_title(story_title: str, channel: str | None = None) -> str:
-    channel = channel or channel_name()
-    core = clip_title(story_title, MAX_STORY_TITLE_CHARS)
-    title = f"{TITLE_PREFIX} {core} | {channel}"
-    if len(title) > MAX_YOUTUBE_TITLE_CHARS:
-        title = f"{TITLE_PREFIX} {core}"
-    return title[:MAX_YOUTUBE_TITLE_CHARS]
+def full_title(story_title: str) -> str:
+    """Tiêu đề YouTube = tên truyện, không tiền tố, không tên kênh.
+
+    Trước 26/11/2026 là `[Truyện Audio] <title> | <Tên kênh>` (72-85 ký tự):
+    feed điện thoại chỉ hiện ~40 ký tự, 15 ký tự đầu là tiền tố nên cú trả đòn ở
+    cuối tên truyện bị cắt mất; tên kênh thì YouTube đã hiện ngay dưới tiêu đề.
+    "truyện audio" vẫn nằm trong mô tả, hashtag và tags.
+    """
+    return clip_title(story_title, MAX_STORY_TITLE_CHARS)
 
 
 def youtube_chapter_lines(chapters: list[dict]) -> list[str]:
