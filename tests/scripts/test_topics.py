@@ -3,7 +3,7 @@ from datetime import date
 
 import pytest
 
-from scripts.text_tools import clean_thumb_fields
+from scripts.text_tools import clean_thumb_fields, pick_thumb_text
 from thumbnail.sticker import STICKER_DIR
 from scripts.topics import (
     DEFAULT_ROTATION,
@@ -81,6 +81,39 @@ def test_thumb_text_bi_cat_con_12_chu():
     text, kws = clean_thumb_fields(" ".join(f"chữ{i}" for i in range(20)), ["chữ3"], "t")
     assert len(text.split()) == 12
     assert kws == ["chữ3"]
+
+
+# --- chữ bìa là một câu KHÁC tiêu đề (kiểm kênh 26/11/2026) -------------------
+
+TITLE_MC = "Mẹ Chồng Luôn Muốn Tôi Bẽ Mặt, Tôi Mở File Ghi Âm"
+
+
+def test_chu_bia_khac_tieu_de_thi_giu_va_to_mau_tu_khoa_cua_no():
+    text, kws = pick_thumb_text("Ăn Bám Quen Thói? Nghe Lại Đi Mẹ", ["Ăn Bám"], TITLE_MC, ["File Ghi Âm"])
+    assert text == "Ăn Bám Quen Thói? Nghe Lại Đi Mẹ"
+    assert kws == ["Ăn Bám"]
+
+
+def test_chu_bia_boc_ngoac_kep_thi_go_ca_cap_con_ngoac_o_giua_thi_giu():
+    # Mô hình hay bọc cả câu trong ngoặc kép; gỡ một đầu mà để đầu kia là hỏng chữ.
+    assert pick_thumb_text('"Ăn Bám Quen Thói Rồi!"', [], TITLE_MC)[0] == "Ăn Bám Quen Thói Rồi!"
+    giua = "“Ăn Bám Quen Thói?” Nghe Lại Đi Mẹ"
+    assert pick_thumb_text(giua, [], TITLE_MC)[0] == giua
+
+
+@pytest.mark.parametrize(
+    "candidate",
+    [
+        "",
+        TITLE_MC,
+        "Mẹ Chồng Muốn Tôi Bẽ Mặt",  # rút gọn tiêu đề: vẫn là nói lại tiêu đề
+        "Một Câu Rất Dài Không Ai Đọc Kịp Khi Lướt Ngang Qua Bìa",  # quá 8 chữ
+    ],
+)
+def test_chu_bia_trong_lap_tieu_de_hoac_qua_dai_thi_quay_ve_tieu_de(candidate):
+    text, kws = pick_thumb_text(candidate, ["Bẽ Mặt"], TITLE_MC, ["File Ghi Âm"])
+    assert text == TITLE_MC
+    assert kws == ["File Ghi Âm"]
 
 
 def test_rotation_mac_dinh_7_ngay_hop_le():

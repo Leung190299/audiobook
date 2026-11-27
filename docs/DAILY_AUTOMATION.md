@@ -302,3 +302,25 @@ gần trùng nhau). Thử nghiệm 2 tuần:
 - Stage 0 từ chối tiêu đề trùng ba chữ đầu hoặc ba chữ cuối với truyện đã có
   (`keywords.story.title_template_clash`).
 - Sau 2 tuần (từ 03/12) so số hiển thị mỗi truyện trong Studio với mức vài trăm hiện nay.
+
+## Dựng hoạt hình người que (27/11/2026)
+
+`AUDIOBOOK_RENDERER=stickman` trong `.env` (mặc định `frame`, chỉ dùng với định dạng
+`full`): sau stage 1–2, `run_daily.sh` không chạy stage 3–7 nữa mà giao kịch bản và giọng
+đọc cho bộ lệnh `lemo/stickman/kit` (đường dẫn đổi bằng `STICK_KIT`):
+
+1. `kit/stick import story-<id>-<giờ> --script … --audio … --story-id <id>`: thư mục truyện
+   cạnh `kit/`, bảng câu `cau.txt` theo mốc giọng đọc thật.
+2. `kit/stick auto <truyện>`: `autoboard` (mô hình của kênh, `STORY_LLM`, viết thẻ nhân vật,
+   phân cảnh từng chương, bảng thoại; điền mô tả, tags, hashtags, ảnh bìa vào `story.json`)
+   → `draw` + `wait` (vẽ ~150 tranh bằng Z-Image-Turbo tại máy, 3 phút một tranh, tức 7,5–9,5
+   giờ) → `render --no-mouth` → `check` → `package`. Lệnh in `Danh sách: …/upload/<truyện>-full.json`
+   và các dòng cùng dạng stage 4/5/6, nên stage 8 (vào kho) và stage 9 (hẹn 20:00) chạy như cũ.
+   Log ở `output/daily/<ngày>/04s-import.log` và `04s-stickman.log`.
+
+Giờ giấc: lượt 09:00 xong khoảng 17–19 giờ; `upload.release` vẫn hẹn 20:00 cùng tối nếu
+kịp, không kịp thì tối đăng kế tiếp. Chế độ tự động bỏ hai bước cần mắt người (xem từng
+tranh, gán miệng): khoảng 10% tranh lỗi (mặt màu da, người thừa, chữ giả) lọt vào video và
+nhân vật không nhép miệng. Soát sau bằng `kit/stick sheet <truyện>`, chữa bằng `redo`/`croptop`,
+`render` + `package` lại rồi thay file trong Studio nếu video đã lên kho. Máy 16 GB chỉ chịu
+một vòng vẽ: đừng chạy `stick draw` tay khi lượt tự động đang vẽ.

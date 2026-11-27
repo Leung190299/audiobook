@@ -27,7 +27,7 @@ from scripts.prompts import (
     build_topic_outline_prompt,
 )
 from scripts.qa import MIN_CHAPTER_WORDS, looks_like_refusal, title_problem
-from scripts.text_tools import clean_thumb_fields, clip_chars, locate_quote, split_sentences
+from scripts.text_tools import clip_chars, locate_quote, pick_thumb_text, split_sentences
 
 
 # Tên chương hiện trên khung hình ở cỡ chữ 20px và không xuống dòng
@@ -195,20 +195,33 @@ async def generate_script(
             ]
         raw_beats = outline.get("short_beats") or []
         beat_plans = [str(b) for b in raw_beats if str(b).strip()][:SHORT_BEAT_COUNT]
+        # Chữ bìa: câu riêng của mô hình, khác tiêu đề; lặp tiêu đề hoặc quá dài
+        # thì quay về tiêu đề + từ khoá của kho (kiểm kênh 26/11/2026).
+        thumb_text, thumb_keywords = pick_thumb_text(
+            str(outline.get("thumb_text") or ""),
+            outline.get("thumb_keywords") or [],
+            story.title,
+            story.thumb_keywords,
+        )
+        if thumb_text == story.title:
+            print("⚠ Chữ bìa: mô hình không cho câu khác tiêu đề, dùng lại tiêu đề.")
         extra = dict(
             topic=story.topic,
             premise=story.premise,
             story_id=story.id,
             series=story.series,
-            thumb_text=story.title,
-            thumb_keywords=list(story.thumb_keywords),
+            thumb_text=thumb_text,
+            thumb_keywords=thumb_keywords,
         )
     elif topic_mode:
         title = clip_chars(" ".join(str(title).split()), TITLE_MAX_CHARS)
-        thumb_text, thumb_keywords = clean_thumb_fields(
+        # Lặp tiêu đề thì quay về tiêu đề; từ khoá của mô hình khi đó vốn viết
+        # cho câu giống tiêu đề nên vẫn dùng được.
+        thumb_text, thumb_keywords = pick_thumb_text(
             str(outline.get("thumb_text") or ""),
             outline.get("thumb_keywords") or [],
             title,
+            outline.get("thumb_keywords") or [],
         )
         raw_beats = outline.get("short_beats") or []
         beat_plans = [str(b) for b in raw_beats if str(b).strip()][:SHORT_BEAT_COUNT]
@@ -277,7 +290,13 @@ async def generate_script(
 
     short_beats: list[str] = []
     if topic_mode or story_mode:
-        short_beats = await _ask_short_beats(chat, beat_plans, chapters)
+        # 27/11/2026: lượt thử chết ở đây vì Gemini lỗi tạm (1097) sau khi 8 chương đã
+        # viết xong. short_beats chỉ phục vụ Shorts (đang tắt) và cold open của bản khung
+        # tĩnh (có đường lui) -> hỏng thì cảnh báo và đi tiếp, không bỏ cả kịch bản.
+        try:
+            short_beats = await _ask_short_beats(chat, beat_plans, chapters)
+        except ScriptGenerationError as exc:
+            print(f"CẢNH BÁO: bỏ short_beats ({exc}); Shorts/cold open dùng đường lui.")
 
     if fmt == "full" and prologue_enabled():
         prologue = await _ask_prologue(chat)

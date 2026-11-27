@@ -52,10 +52,16 @@ Layout code: `remotion/src/MainVideo.tsx` → `BrandedLayout.tsx` (centre box wi
 | 2 | `tts.cli` | 5.5 min | VieNeu-TTS, ONNX on CPU. |
 | 3 | `images.cli` | 31 min | **Skipped whenever `assets/backgrounds/` has a video** — long video and Shorts both run on background video. Only runs (FLUX via mflux) as the fallback when that folder is empty. |
 | 4 | `episodes.cli` | 27–41 min | Remotion render; picks the background here. Images arg is optional — omitted when stage 3 is skipped. |
-| 5 | `thumbnail.cli` | seconds | Frog sticker left + almost-full title right in Anton, keywords coloured. Stickers come from the topic's `thumb_stickers` (A, B) in `scripts/topics.py` — no FLUX. |
+| 5 | `thumbnail.cli` | seconds | Frog sticker left + `thumb_text` right in Anton, keywords coloured. Since 26/11 `thumb_text` is a line of ≤8 words written in stage 1 that must differ from the title (`scripts.text_tools.pick_thumb_text`); if the model repeats the title it falls back to the title. Stickers come from the topic's `thumb_stickers` (A, B) in `scripts/topics.py` — no FLUX. |
 | 6 | `metadata.cli` | 5 s | Minimal description (below). Renames the mp4 to the title slug. |
 | 7 | `shorts.cli --script` | 1–2 min | 3 Shorts from `short_beats`, each on its own background video (vertical clips preferred). **Failure only warns**, never fails the run. |
 | 8 | `upload.episodes_cli` | — | Only with `--upload`. |
+
+## Stickman renderer (27/11/2026)
+
+`AUDIOBOOK_RENDERER=stickman` in `.env` (default `frame`; full format only) replaces stages 3–7 with **Stage 4s**: `run_daily.sh` hands the stage-1 script and stage-2 audio to the stickman kit at `STICK_KIT` (default `../lemo/stickman/kit`, skill `making-stickman-story-video`): `kit/stick import story-<id>-<time> --script … --audio … --story-id <id>` then `kit/stick auto <story>` (= `autoboard`: the channel's `STORY_LLM` writes cast, storyboard and speak table and fills `story.json`; `draw`/`wait`: ~150 images at ~3 min each, 7.5–9.5 h; `render --no-mouth`; `check`; `package`). `auto` prints the same `Danh sách:` / `Video full đã đổi tên:` / `Đã lưu thumbnail:` / `Đã render 1 video` lines as stages 4–6, so stages 8–9 (stock, 20:00 release) are untouched; logs are `04s-import.log` and `04s-stickman.log`. A 09:00 run finishes around 17–19 h; `upload.release` still schedules the same evening when it is in time.
+
+The automatic mode skips the two human stages of the kit (looking at every image, mouths): expect ~10% faulty images and no lip movement. To review: `kit/stick sheet <story>`, fix with `redo`/`croptop`, `render`, `package`, replace the file in Studio. Never start a second drawing loop while the pipeline is drawing (16 GB).
 
 ## Cadence: 3–4 stories a week, no Shorts (channel review 19/11/2026)
 
@@ -99,7 +105,7 @@ The avatar must be uploaded **by hand in YouTube Studio** — the API cannot cha
 
 ## Metadata & disclosure
 
-- **Title**: `[Truyện Audio] <story title> | <CHANNEL_NAME>`.
+- **Title**: `<story title>` only (≤60 chars). Since 26/11 no `[Truyện Audio]` prefix and no `| <CHANNEL_NAME>` suffix: a phone feed shows ~40 characters and the prefix ate 15 of them.
 - **Description** (`metadata.full.build_minimal_description`): title → `⚠️ Truyện hư cấu. Kịch bản, giọng đọc và hình ảnh do AI tạo ra.` → `Hashtags:` (topic tags first, ≤15 — over 15 and YouTube ignores all) → `Keywords:`. No chapters, summary, playlist link or question, matching the reference. The side-picking question lives in the pinned comment.
 - **AI disclosure** appears in three places: description line 2, fixed on the right side panel, and YouTube's own flag `status.containsSyntheticMedia = true` set at upload. **That flag only takes effect on `videos.insert`, and `videos.list` never returns it** — reading it back always gives `None` even when it is on. Verify in Studio, never by read-back.
 

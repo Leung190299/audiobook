@@ -384,8 +384,8 @@ def build_topic_outline_prompt(
 
     Trả thêm so với dàn ý cũ: premise, thumb_text, thumb_keywords, short_beats
     (kế hoạch 3 đoạn hài/sảng -- nguyên văn được hỏi lại sau khi viết xong)."""
+    from scripts.text_tools import THUMB_LINE_MAX_WORDS
     from scripts.topics import (
-        THUMB_TEXT_MAX_WORDS,
         TITLE_MAX_CHARS,
         VIETNAM_ONLY_RULE,
         VOICE_RULES,
@@ -443,7 +443,9 @@ Hãy LÊN DÀN Ý (chưa viết nội dung đầy đủ). Dàn ý gồm:
   Viết Hoa Chữ Cái Đầu Mỗi Từ, theo một trong các công thức:
 {formulas}
 - "premise": 1 câu (tối đa 30 từ) tóm tình huống gốc của truyện.
-- "thumb_text": chữ in lên thumbnail, TỐI ĐA {THUMB_TEXT_MAX_WORDS} chữ — thường chính là tiêu đề hoặc bản rút gọn của nó.
+- "thumb_text": chữ in lên ảnh bìa, TỐI ĐA {THUMB_LINE_MAX_WORDS} chữ, phải KHÁC tiêu đề: một câu thoại gây tức
+  của kẻ gây chuyện, hoặc thứ sắp mất, hoặc con số trong truyện. KHÔNG chép, KHÔNG rút gọn tiêu đề
+  (tiêu đề đã hiện ngay dưới ảnh). Không lộ cú lật.
 - "thumb_keywords": mảng 1–3 cụm từ cần tô màu nổi bật; mỗi cụm PHẢI là chuỗi con nguyên văn của thumb_text.
 - "hook": tối đa {MAX_HOOK_WORDS} từ, cú lật/miếng hài lớn nhất, viết như lời mời nghe. Không lộ cái kết.
 - "comment_question": {topic.comment_question_style} Tối đa {MAX_TOPIC_QUESTION_WORDS} từ.
@@ -551,11 +553,11 @@ def build_story_outline_prompt(bank, story, fmt: str = "full") -> str:
     """Dàn ý cho một truyện lấy từ kho biên tập sẵn (`data/story_bank.json`).
 
     Khác `build_topic_outline_prompt`: tiêu đề, hook, câu hỏi bình luận và từ
-    khoá thumbnail ĐÃ có sẵn, Gemini không được nghĩ lại — nó chỉ chia chương và
-    chọn 3 đoạn cắt Shorts. Truyện thuộc series thì chèn nguyên khối nhân vật để
+    khoá thumbnail ĐÃ có sẵn, Gemini không được nghĩ lại — nó chỉ chia chương,
+    chọn 3 đoạn cắt Shorts và viết MỘT câu chữ bìa khác tiêu đề (từ 26/11/2026). Truyện thuộc series thì chèn nguyên khối nhân vật để
     tên và tính cách nhất quán giữa các truyện cùng series.
     """
-    from scripts.topics import THUMB_TEXT_MAX_WORDS
+    from scripts.text_tools import THUMB_LINE_MAX_WORDS
 
     if fmt == "full":
         lo, hi = full_words_range()
@@ -624,12 +626,16 @@ Hãy LÊN DÀN Ý (chưa viết nội dung đầy đủ):
 - "short_beats": mảng đúng {SHORT_BEAT_COUNT} chuỗi — mỗi chuỗi mô tả một đoạn buồn cười/sảng
   nhất (ghi rõ nằm ở chương nào), mỗi đoạn TỰ ĐỨNG ĐƯỢC khi cắt riêng làm video ngắn 30–55 giây.
   Đoạn đầu tiên là đoạn sảng nhất (dùng làm mở đầu video).
-- "thumb_text": chép lại đúng tiêu đề ở trên (tối đa {THUMB_TEXT_MAX_WORDS} chữ).
+- "thumb_text": chữ in lên ảnh bìa, TỐI ĐA {THUMB_LINE_MAX_WORDS} chữ, phải KHÁC tiêu đề: một câu thoại gây tức
+  của kẻ gây chuyện, hoặc thứ sắp mất, hoặc con số trong truyện. KHÔNG chép, KHÔNG rút gọn tiêu đề
+  (tiêu đề đã hiện ngay dưới ảnh). Không lộ cú lật.
+- "thumb_keywords": mảng 1–2 cụm từ cần tô màu nổi bật; mỗi cụm PHẢI là chuỗi con nguyên văn của thumb_text.
 
 QUAN TRỌNG: Chỉ trả về DUY NHẤT một khối JSON hợp lệ, không kèm giải thích:
 {{
   "title": "{story.title}",
   "thumb_text": "...",
+  "thumb_keywords": ["..."],
   "short_beats": ["...", "...", "..."],
   "chapters": [
     {{"heading": "...", "summary": "..."}}

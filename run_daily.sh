@@ -81,6 +81,14 @@ env_get() {
 : "${AUDIOBOOK_SHORTS:=$(env_get AUDIOBOOK_SHORTS)}"
 USE_SHORTS="${AUDIOBOOK_SHORTS:-1}"
 if [[ -z "$USE_SHORTS" ]]; then USE_SHORTS=1; fi
+# 27/11/2026: cách dựng hình. frame = khung tĩnh + video nền (Remotion, mặc định);
+# stickman = hoạt hình người que bằng bộ lệnh lemo/stickman/kit (vẽ ~150 tranh,
+# 7,5-9,5 giờ) -- stage 3-7 thay bằng Stage 4s, stage 8/9 giữ nguyên.
+: "${AUDIOBOOK_RENDERER:=$(env_get AUDIOBOOK_RENDERER)}"
+RENDERER="${AUDIOBOOK_RENDERER:-frame}"
+if [[ -z "$RENDERER" ]]; then RENDERER=frame; fi
+: "${STICK_KIT:=$(env_get STICK_KIT)}"
+STICK_KIT="${STICK_KIT:-$REPO_ROOT/../lemo/stickman/kit}"
 
 TROPE_ID=""
 TOPIC_ARG=""
@@ -116,6 +124,13 @@ case "$FORMAT" in
   full|episodes) ;;
   *) echo "--format phải là full hoặc episodes, nhận '$FORMAT'" >&2; exit 2 ;;
 esac
+case "$RENDERER" in
+  frame|stickman) ;;
+  *) echo "AUDIOBOOK_RENDERER phải là frame hoặc stickman, nhận '$RENDERER'" >&2; exit 2 ;;
+esac
+if [[ "$RENDERER" == "stickman" && "$FORMAT" != "full" ]]; then
+  echo "AUDIOBOOK_RENDERER=stickman chỉ dựng được định dạng full." >&2; exit 2
+fi
 SOURCES=0
 [[ -n "$TROPE_ID" ]] && SOURCES=$((SOURCES + 1))
 [[ -n "$TOPIC_ARG" ]] && SOURCES=$((SOURCES + 1))
@@ -318,6 +333,40 @@ run_stage "Stage 2: TTS" "$TTS_LOG" $RUNNER tts.cli "$SCRIPT_PATH"
 AUDIO_JSON="$(extract 'Metadata: ([^[:space:]]+\.json)' "$TTS_LOG")"
 require "$AUDIO_JSON" "Stage 2: TTS" "$TTS_LOG"
 
+# --- Stage 4s: người que (27/11/2026) -----------------------------------------
+# AUDIOBOOK_RENDERER=stickman: kịch bản + giọng đọc của stage 1-2 giao cho bộ lệnh
+# lemo/stickman/kit: import (thư mục truyện, bảng câu) rồi auto (mô hình viết
+# phân cảnh, vẽ ~150 tranh, dựng, kiểm, soạn bộ tệp đăng). Không có stage 3, 5,
+# 6, 7: `auto` in ra đúng các dòng mà stage 4/5/6 in (Danh sách:, Video full đã
+# đổi tên:, Đã lưu thumbnail:, Đã render N video) để phần sau không phải đổi.
+# Chế độ này bỏ bước xem từng tranh và gán miệng (cần mắt người).
+EPISODES_MANIFEST=""
+IMAGES_JSON=""
+SHORT_COUNT=""
+SHORTS_PREFIX=""
+if [[ "$RENDERER" == "stickman" ]]; then
+  if [[ ! -x "$STICK_KIT/stick" ]]; then
+    log "✖ Không thấy bộ lệnh người que ở $STICK_KIT/stick (đặt STICK_KIT trong .env)"
+    notify_failure "Stage 4s: Người que" "$LOG_FILE"
+    exit 1
+  fi
+  STICK_SLUG="story-${STORY_ID:-$SLUG}-$(date +%Y%m%d-%H%M%S)"
+  STICK_IMPORT_ARGS=(import "$STICK_SLUG" --script "$SCRIPT_PATH" --audio "$AUDIO_JSON")
+  [[ -n "$STORY_ID" ]] && STICK_IMPORT_ARGS+=(--story-id "$STORY_ID")
+  run_stage "Stage 4s: Người que (import)" "$LOG_DIR/04s-import.log" "$STICK_KIT/stick" "${STICK_IMPORT_ARGS[@]}"
+  STICK_LOG="$LOG_DIR/04s-stickman.log"
+  run_stage "Stage 4s: Người que (auto)" "$STICK_LOG" "$STICK_KIT/stick" auto "$STICK_SLUG"
+  METADATA_INDEX="$(extract 'Danh sách: ([^[:space:]]+\.json)' "$STICK_LOG")"
+  require "$METADATA_INDEX" "Stage 4s: Người que" "$STICK_LOG"
+  FINAL_VIDEO="$(extract 'Video full đã đổi tên: ([^[:space:]]+\.mp4)' "$STICK_LOG")"
+  require "$FINAL_VIDEO" "Stage 4s: Người que" "$STICK_LOG"
+  THUMBNAIL_PATH="$(extract 'Đã lưu thumbnail: ([^[:space:]]+\.png)' "$STICK_LOG")"
+  require "$THUMBNAIL_PATH" "Stage 4s: Người que" "$STICK_LOG"
+  EPISODE_COUNT="$(extract 'Đã render ([0-9]+) video vào .+' "$STICK_LOG")"
+  require "$EPISODE_COUNT" "Stage 4s: Người que" "$STICK_LOG"
+  TITLE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["story_title"])' "$METADATA_INDEX")"
+  log "Người que xong: $FINAL_VIDEO (tranh lỗi chưa soát; xem bằng kit/stick sheet $STICK_SLUG)"
+else
 # --- Stage 3: ảnh nền ---------------------------------------------------------
 # Có video trong assets/backgrounds/ thì BỎ HẲN stage 3: video dài và short đều
 # dựng trên video nền (episodes/backgrounds.py), ảnh sinh ra không ai xem mà
@@ -437,6 +486,8 @@ else
   # Đánh giá kênh 19/11: ~500 Shorts "Trích đoạn" cùng khuôn là dấu hiệu sản xuất
   # hàng loạt -> AUDIOBOOK_SHORTS=0 bỏ hẳn stage 7, 7b; stage 8 không có --shorts-prefix.
   log "Bỏ Stage 7/7b: Shorts tắt (AUDIOBOOK_SHORTS=0)."
+fi
+
 fi
 
 # Đánh dấu truyện đã dựng. Không làm thì kho vẫn coi truyện này chưa dùng, và

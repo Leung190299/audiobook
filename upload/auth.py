@@ -6,11 +6,17 @@ Chạy một lần để cấp quyền (mở trình duyệt):
 
 Sau đó refresh token nằm ở config/youtube_token.json và mọi lượt chạy tự động
 đều dùng lại được, không cần trình duyệt nữa.
+
+Token còn sống thì lệnh trên KHÔNG mở trình duyệt và không đặt lại hạn 7 ngày
+(project OAuth ở chế độ Testing). Muốn đặt lại hạn trước khi nó chết:
+
+    uv run python -m upload.auth --force
 """
 
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from pathlib import Path
 
 from google.auth.exceptions import RefreshError
@@ -52,7 +58,10 @@ def load_credentials(
     interactive: bool = False,
     force: bool = False,
     scopes: list[str] = SCOPES,
+    on_consent: Callable[[], None] | None = None,
 ) -> Credentials:
+    """`on_consent` được gọi đúng khi có một lần ĐỒNG Ý mới trên trình duyệt (lúc
+    đó hạn 7 ngày mới được đặt lại); dùng lại hay làm mới token cũ thì không gọi."""
     credentials: Credentials | None = None
 
     # force: bỏ qua token đang có, xin quyền lại từ đầu. Project ở chế độ
@@ -100,6 +109,8 @@ def load_credentials(
     flow = InstalledAppFlow.from_client_secrets_file(str(client_secret_path), CONSENT_SCOPES)
     credentials = flow.run_local_server(port=0, prompt="consent")
     _save(credentials, token_path)
+    if on_consent is not None:
+        on_consent()
     return credentials
 
 
@@ -135,14 +146,25 @@ def main() -> None:
 
     p = argparse.ArgumentParser(description="Cấp quyền YouTube cho pipeline đăng video.")
     p.add_argument("--force", action="store_true", help="Xin quyền lại dù token còn sống (đặt lại hạn 7 ngày)")
-    credentials = load_credentials(interactive=True, force=p.parse_args().force)
+    consented: list[bool] = []
+    credentials = load_credentials(
+        interactive=True, force=p.parse_args().force, on_consent=lambda: consented.append(True)
+    )
     if not credentials.refresh_token:
         raise SystemExit(
             "Cấp quyền xong nhưng Google không trả refresh_token — lượt chạy tự động "
             "sẽ hỏng sau 1 giờ. Xoá config/youtube_token.json rồi chạy lại "
             "(flow này đã đặt prompt=consent để luôn xin refresh_token)."
         )
-    print(f"Đã lưu token YouTube: {TOKEN_PATH}")
+    if consented:
+        print(f"Đã cấp quyền lại và lưu token YouTube: {TOKEN_PATH}. Hạn 7 ngày tính từ bây giờ.")
+    else:
+        # 27/11: câu cũ "Đã lưu token" in cả khi không có lần đồng ý nào, người
+        # chạy tưởng hạn đã được đặt lại.
+        print(
+            "Token YouTube còn dùng được, CHƯA xin quyền lại: hạn 7 ngày vẫn tính từ "
+            "lần đồng ý trước.\nMuốn đặt lại hạn: uv run python -m upload.auth --force"
+        )
 
 
 if __name__ == "__main__":
