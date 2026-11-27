@@ -126,3 +126,58 @@ def test_has_scope_token_cu_hoac_thieu_file(tmp_path):
     assert not auth.has_scope(auth.ANALYTICS_SCOPE, token)
     token.write_text(json.dumps({"scopes": auth.SCOPES}), encoding="utf-8")
     assert not auth.has_scope(auth.ANALYTICS_SCOPE, token)
+
+
+def test_on_consent_chi_goi_khi_that_su_xin_quyen_lai(tmp_path, monkeypatch):
+    """27/11: chạy `upload.auth` không --force khi token còn sống thì KHÔNG có lần
+    đồng ý mới, hạn 7 ngày không đổi. Người gọi phải biết được điều đó."""
+
+    class _Flow:
+        def run_local_server(self, **_kwargs):
+            return _FreshCreds()
+
+    class _Valid:
+        valid = True
+
+    monkeypatch.setattr(auth.Credentials, "from_authorized_user_file", lambda *_a, **_k: _Valid())
+    monkeypatch.setattr(auth.InstalledAppFlow, "from_client_secrets_file", lambda *_a, **_k: _Flow())
+    token = tmp_path / "token.json"; token.write_text("{}", encoding="utf-8")
+    secret = tmp_path / "secret.json"; secret.write_text("{}", encoding="utf-8")
+    seen = []
+
+    auth.load_credentials(
+        token_path=token, client_secret_path=secret, interactive=True, on_consent=lambda: seen.append("lai")
+    )
+    assert seen == []
+
+    auth.load_credentials(
+        token_path=token, client_secret_path=secret, interactive=True, force=True,
+        on_consent=lambda: seen.append("lai"),
+    )
+    assert seen == ["lai"]
+
+
+def _run_main(monkeypatch, capsys, argv, consent: bool) -> str:
+    def fake_load(**kwargs):
+        if consent:
+            kwargs["on_consent"]()
+        return _FreshCreds()
+
+    monkeypatch.setattr(auth, "load_credentials", fake_load)
+    monkeypatch.setattr("sys.argv", ["upload.auth", *argv])
+    auth.main()
+    return capsys.readouterr().out
+
+
+def test_main_token_con_song_bao_ro_chua_dat_lai_han(monkeypatch, capsys):
+    out = _run_main(monkeypatch, capsys, [], consent=False)
+
+    assert "CHƯA xin quyền lại" in out and "--force" in out
+    assert "Đã lưu token" not in out
+
+
+def test_main_sau_khi_dong_y_bao_da_cap_quyen_lai(monkeypatch, capsys):
+    out = _run_main(monkeypatch, capsys, ["--force"], consent=True)
+
+    assert "Đã cấp quyền lại" in out and "7 ngày" in out
+    assert "CHƯA" not in out
