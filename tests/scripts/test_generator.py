@@ -363,12 +363,11 @@ async def test_chu_de_tieu_de_dai_hon_60_ky_tu_thi_hoi_lai():
     assert len(script.short_beats) == 3
 
 
-async def test_short_beats_thieu_sau_3_luot_hoi_thi_stage_1_loi():
-    """08/11: kênh yêu cầu ép đủ 3 short_beats. Truyện #114 từng ra 2 Short vì
-    Gemini trả thiếu mà bộ sinh cho qua. Giờ 3 lượt vẫn thiếu -> lỗi, không
-    dựng 40 phút ra truyện thiếu Short."""
-    from scripts.generator import ScriptGenerationError
-
+async def test_short_beats_thieu_sau_3_luot_hoi_thi_canh_bao_va_di_tiep(capsys):
+    """08/11: ép đủ 3 short_beats qua 3 lượt hỏi. 27/11: 3 lượt vẫn thiếu (hay
+    Gemini lỗi tạm 1097 như lượt thử #1008) thì KHÔNG bỏ cả kịch bản đã viết
+    xong -- cảnh báo, short_beats rỗng, Shorts (đang tắt) và cold open dùng
+    đường lui."""
     chapters = [f"Nội dung {i}." for i in range(1, 16)]
     client, chat = _topic_client(
         [_topic_outline()], chapters,
@@ -377,10 +376,12 @@ async def test_short_beats_thieu_sau_3_luot_hoi_thi_stage_1_loi():
         '{"short_beats": ["Nội dung 4.", "câu bịa không có trong truyện"]}',
     )
 
-    with pytest.raises(ScriptGenerationError, match=r"1/3 short_beats"):
-        await generate_script(
-            "ho_hang_viet", "n", "s", client=client, fmt="full", topic=TOPICS["ho_hang_viet"], setting="s"
-        )
+    script = await generate_script(
+        "ho_hang_viet", "n", "s", client=client, fmt="full", topic=TOPICS["ho_hang_viet"], setting="s"
+    )
+    assert script.short_beats == []
+    assert len(script.chapters) == 15
+    assert "CẢNH BÁO: bỏ short_beats" in capsys.readouterr().out
     beats_prompts = [str(c.args[0]) for c in chat.send_message.call_args_list[-3:]]
     assert "Hãy chọn 3 đoạn" in beats_prompts[0]
     assert "không phải JSON" in beats_prompts[1] and "ĐÚNG 3 đoạn KHÁC" in beats_prompts[1]

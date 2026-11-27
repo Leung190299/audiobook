@@ -290,7 +290,13 @@ async def generate_script(
 
     short_beats: list[str] = []
     if topic_mode or story_mode:
-        short_beats = await _ask_short_beats(chat, beat_plans, chapters)
+        # 27/11/2026: lượt thử chết ở đây vì Gemini lỗi tạm (1097) sau khi 8 chương đã
+        # viết xong. short_beats chỉ phục vụ Shorts (đang tắt) và cold open của bản khung
+        # tĩnh (có đường lui) -> hỏng thì cảnh báo và đi tiếp, không bỏ cả kịch bản.
+        try:
+            short_beats = await _ask_short_beats(chat, beat_plans, chapters)
+        except ScriptGenerationError as exc:
+            print(f"CẢNH BÁO: bỏ short_beats ({exc}); Shorts/cold open dùng đường lui.")
 
     if fmt == "full" and prologue_enabled():
         prologue = await _ask_prologue(chat)
