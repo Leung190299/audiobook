@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.lee.channel.director-chieu</string>
+
+  <!-- Phiên giám đốc kênh buổi chiều: soát tranh, chữa, đăng, báo cáo (đợt 2 mới có việc; đợt 1 chỉ ghi "nghỉ").
+       scripts/director.sh tự caffeinate và tự ghi log vào output/director/<ngày>/claude-chieu.log. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/lee/Project/Apps/audiobook/scripts/director.sh</string>
+    <string>chieu</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/lee/Project/Apps/audiobook</string>
+
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>17</integer>
+    <key>Minute</key><integer>30</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/Users/lee/Project/Apps/audiobook/output/director/launchd-chieu.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/lee/Project/Apps/audiobook/output/director/launchd-chieu.err.log</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>LANG</key><string>en_US.UTF-8</string>
+    <key>LC_ALL</key><string>en_US.UTF-8</string>
+    <key>HOME</key><string>/Users/lee</string>
+  </dict>
+</dict>
+</plist>

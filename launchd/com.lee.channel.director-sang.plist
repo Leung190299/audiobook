@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.lee.channel.director-sang</string>
+
+  <!-- Phiên giám đốc kênh buổi sáng: claude -p đọc số hai kênh, quyết hôm nay, (đợt 2) gọi nhà máy, báo cáo Telegram.
+       scripts/director.sh tự caffeinate và tự ghi log vào output/director/<ngày>/claude-sang.log. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/lee/Project/Apps/audiobook/scripts/director.sh</string>
+    <string>sang</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/lee/Project/Apps/audiobook</string>
+
+  <!-- 08:00 mỗi ngày. Máy ngủ vào giờ này thì launchd chạy bù ngay khi máy thức. -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>8</integer>
+    <key>Minute</key><integer>0</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/Users/lee/Project/Apps/audiobook/output/director/launchd-sang.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/lee/Project/Apps/audiobook/output/director/launchd-sang.err.log</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>LANG</key><string>en_US.UTF-8</string>
+    <key>LC_ALL</key><string>en_US.UTF-8</string>
+    <key>HOME</key><string>/Users/lee</string>
+  </dict>
+</dict>
+</plist>

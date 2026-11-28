@@ -1,0 +1,18 @@
+{
+ "permissions": {
+  "deny": [
+   "Read(./.env)",
+   "Read(./.env.*)",
+   "Read(./config/youtube_token.json)",
+   "Read(./config/youtube_client_secret.json)",
+   "Read(/Users/lee/Project/Apps/lemo/stickman/kit/.youtube_token_*.json)",
+   "Read(/Users/lee/Project/Apps/shortvideo/client_secret.json)",
+   "Bash(cat .env*)",
+   "Bash(cat */youtube_token*)",
+   "Bash(cat */.youtube_token*)",
+   "Bash(git push*)",
+   "Bash(launchctl *)",
+   "Bash(rm -rf*)"
+  ]
+ }
+}
