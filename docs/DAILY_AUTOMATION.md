@@ -324,3 +324,27 @@ tranh, gán miệng): khoảng 10% tranh lỗi (mặt màu da, người thừa, 
 nhân vật không nhép miệng. Soát sau bằng `kit/stick sheet <truyện>`, chữa bằng `redo`/`croptop`,
 `render` + `package` lại rồi thay file trong Studio nếu video đã lên kho. Máy 16 GB chỉ chịu
 một vòng vẽ: đừng chạy `stick draw` tay khi lượt tự động đang vẽ.
+
+## Giám đốc kênh (từ 28/11/2026)
+
+Thiết kế: `docs/superpowers/specs/2026-11-28-daily-director-design.md`; quy trình phiên: `.claude/skills/channel-director/SKILL.md`.
+
+| Giờ | launchd | Lệnh | Việc |
+|---|---|---|---|
+| 08:00 | `com.lee.channel.director-sang` | `scripts/director.sh sang` | phiên Claude nền: số liệu hai kênh (`director.report`, `director.state`), quyết định `quyet-dinh.json`, báo cáo Telegram; đợt 2 mới gọi nhà máy |
+| 10:30 | `com.lee.audiobook.daily` (trước là 09:00) | `scripts/daily_fallback.sh` | dự phòng: chưa có khóa `output/director/<ngày>/da-goi-nha-may` và đúng ngày phát kênh chính → `run_daily.sh --upload` như cũ |
+| 17:30 | `com.lee.channel.director-chieu` | `scripts/director.sh chieu` | phiên Claude nền: soát tranh, chữa, đăng, báo cáo (đợt 2) |
+
+- Chế độ chỉ-báo-cáo: tồn tại `output/director/CHI-BAO-CAO` → phiên sáng không gọi nhà máy. Đợt 1 luôn bật; xóa tệp khi đợt 2 đã kiểm xong.
+- Phiên nền cần `claude` CLI đã đăng nhập (`claude login`); hết phiên đăng nhập thì `director.sh` gửi Telegram "phiên ... hỏng" và thoát 1.
+- Kênh phụ đọc Analytics cần token có quyền `yt-analytics.readonly`: `cd ../lemo/stickman && kit/stick login xomque --force`.
+- Nhịp kênh phụ: `AUDIOBOOK_RELEASE_WEEKDAYS_XOMQUE` trong `.env` (mặc định `0,3,5`).
+- Cài lịch (sau khi thư mục chính đã có nhánh này):
+
+```bash
+launchctl unload ~/Library/LaunchAgents/com.lee.audiobook.shorts.plist 2>/dev/null
+launchctl unload ~/Library/LaunchAgents/com.lee.audiobook.daily.plist
+cp launchd/com.lee.audiobook.daily.plist launchd/com.lee.channel.director-sang.plist launchd/com.lee.channel.director-chieu.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.lee.audiobook.daily.plist ~/Library/LaunchAgents/com.lee.channel.director-sang.plist ~/Library/LaunchAgents/com.lee.channel.director-chieu.plist
+launchctl list | grep com.lee
+```

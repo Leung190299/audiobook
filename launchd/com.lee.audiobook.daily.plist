@@ -9,24 +9,24 @@
        18/09) chết giữa stage 3-4 không lỗi, đúng kiểu máy ngủ khi rảnh tay.
        Không chống được việc đóng nắp máy. -->
   <key>ProgramArguments</key>
+  <!-- Từ 28/11/2026 đây là LƯỢT DỰ PHÒNG 10:30 của giám đốc kênh: scripts/daily_fallback.sh chỉ chạy
+       run_daily.sh --upload khi phiên giám đốc sáng (08:00) chưa gọi nhà máy và hôm nay là ngày phát
+       của kênh chính. Trước đó plist này chạy thẳng run_daily.sh --upload lúc 09:00. -->
   <array>
     <string>/usr/bin/caffeinate</string>
     <string>-i</string>
     <string>/bin/bash</string>
-    <string>/Users/lee/Project/Apps/audiobook/run_daily.sh</string>
-    <!-- Từ 26/10 dựng xong đăng luôn (yêu cầu của kênh): private + hẹn 20h tối
-         trống gần nhất, 3 short hẹn 20:05. Bỏ dòng này để quay về chỉ dựng. -->
-    <string>--upload</string>
+    <string>/Users/lee/Project/Apps/audiobook/scripts/daily_fallback.sh</string>
   </array>
 
   <key>WorkingDirectory</key>
   <string>/Users/lee/Project/Apps/audiobook</string>
 
-  <!-- Chạy 09:00 mỗi ngày. Máy ngủ vào giờ này thì launchd chạy bù ngay khi máy thức. -->
+  <!-- Chạy 10:30 mỗi ngày (sau phiên giám đốc 08:00). Máy ngủ vào giờ này thì launchd chạy bù ngay khi máy thức. -->
   <key>StartCalendarInterval</key>
   <dict>
-    <key>Hour</key><integer>9</integer>
-    <key>Minute</key><integer>0</integer>
+    <key>Hour</key><integer>10</integer>
+    <key>Minute</key><integer>30</integer>
   </dict>
 
   <key>StandardOutPath</key>
