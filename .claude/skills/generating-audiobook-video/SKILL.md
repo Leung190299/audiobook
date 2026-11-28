@@ -146,3 +146,7 @@ uv run python -m scripts.story_bank --mark-used <id>
 ```
 
 Leave out `<images.json>` to render on background video. The input paths are in `output/daily/<date>/01-*.log` and `02-*.log` (`Đã lưu kịch bản:` / `Metadata:`), plus `03-*.log` when stage 3 ran.
+
+## Channel director (28/11/2026)
+
+The daily "thinking" layer lives in the `channel-director` skill (`.claude/skills/channel-director/SKILL.md`): two headless Claude sessions (`scripts/director.sh sang` at 08:00, `chieu` at 17:30) read both channels' Analytics, write `output/director/<date>/quyet-dinh.json`, and (from đợt 2) call `run_daily.sh` themselves; the old 09:00 launchd job is now the 10:30 fallback (`scripts/daily_fallback.sh`) that only runs when no session claimed the day. While `output/director/CHI-BAO-CAO` exists the morning session only reports.
