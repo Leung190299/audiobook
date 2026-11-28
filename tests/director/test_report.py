@@ -38,8 +38,8 @@ def test_fetch_channel_gop_7_va_28_ngay():
     assert v["video_id"] == "abc" and v["views_7d"] == 10 and v["avg_view_seconds_7d"] == 130.0
     assert v["views_28d"] == 31 and v["traffic_7d"] == {"YT_SEARCH": 7, "SUBSCRIBER": 3}
     assert d["totals_7d"]["views"] == 10 and d["totals_28d"]["subs"] == 4
-    assert any(c["startDate"] == "2026-11-20" for c in fa.calls)
-    assert any(c["startDate"] == "2026-10-30" for c in fa.calls)
+    assert any(c["startDate"] == "2026-11-21" for c in fa.calls)
+    assert any(c["startDate"] == "2026-10-31" for c in fa.calls)
     assert d["channel"] == "main" and d["loi"] == []
 
 
