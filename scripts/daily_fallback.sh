@@ -12,7 +12,8 @@ export PATH="$PATH:$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin"
 export LANG="${LANG:-en_US.UTF-8}" LC_ALL="${LC_ALL:-en_US.UTF-8}"
 
 OUT_BASE="${DIRECTOR_OUT:-$REPO_ROOT/output/director}"
-DAY="$(date +%F)"
+DAY="${DIRECTOR_DAY:-$(TZ=Asia/Ho_Chi_Minh date +%F)}"
+export DIRECTOR_DAY="$DAY"
 LOCK="$OUT_BASE/$DAY/da-goi-nha-may"
 RUN_DAILY="${RUN_DAILY:-$REPO_ROOT/run_daily.sh}"
 
@@ -35,6 +36,6 @@ if [[ -n "$WEEKDAYS" ]]; then
 fi
 
 mkdir -p "$(dirname "$LOCK")"
-date '+%Y-%m-%dT%H:%M:%S%z' > "$LOCK"
+echo "$(date '+%Y-%m-%dT%H:%M:%S%z') du-phong" > "$LOCK"
 echo "$(date '+%H:%M:%S') Chưa có phiên giám đốc gọi nhà máy: chạy dự phòng $RUN_DAILY --upload"
 exec /bin/bash "$RUN_DAILY" --upload

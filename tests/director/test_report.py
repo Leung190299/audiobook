@@ -70,3 +70,65 @@ def test_main_mot_kenh_hong_van_ghi_file(tmp_path, monkeypatch):
     assert data[1]["channel"] == "xomque" and data[1]["loi"] == []
     md = (tmp_path / "so-lieu.md").read_text(encoding="utf-8")
     assert "token main hỏng" in md and "Xóm Que" in md
+
+
+class _FakeLogin:
+    """kit/login.py giả: token xomque chỉ có force-ssl."""
+    ANALYTICS = "https://www.googleapis.com/auth/yt-analytics.readonly"
+
+    def __init__(self, tmp_path, scopes):
+        self._path = tmp_path / "tok.json"
+        self._path.write_text(json.dumps({"scopes": scopes}), encoding="utf-8")
+        self.creds_calls = 0
+
+    def token_path(self, key):
+        return self._path
+
+    def credentials(self, key):
+        self.creds_calls += 1
+        return "CREDS-" + key
+
+
+def test_credentials_for_xomque_thieu_quyen_analytics(tmp_path, monkeypatch):
+    fake = _FakeLogin(tmp_path, ["https://www.googleapis.com/auth/youtube.force-ssl"])
+    monkeypatch.setattr(report, "_kit_module", lambda name: fake)
+    with pytest.raises(ReportError, match="kit/stick login xomque --force"):
+        credentials_for("xomque")
+    # Data API v3 (videos.list) chỉ cần force-ssl: không đòi quyền Analytics
+    assert credentials_for("xomque", need_analytics=False) == "CREDS-xomque"
+
+
+def test_main_xomque_thieu_quyen_van_liet_ke_video(tmp_path, monkeypatch):
+    def creds(ch, need_analytics=True):
+        if ch == "xomque":
+            raise ReportError("xomque chưa có quyền yt-analytics.readonly: chạy `kit/stick login xomque --force`")
+        return object()
+
+    monkeypatch.setattr(report, "credentials_for", creds)
+    monkeypatch.setattr(report, "build_analytics", lambda c: FakeAnalytics({}))
+    monkeypatch.setattr(report, "video_ids_for", lambda ch: [("x1", "Vong Hồn 1", "2026-11-29T20:00:00+07:00")] if ch == "xomque" else [])
+    assert report.main(["--date", "2026-11-28", "--out", str(tmp_path)]) == 0
+    data = json.loads((tmp_path / "so-lieu.json").read_text(encoding="utf-8"))
+    xq = data[1]
+    assert "kit/stick login xomque --force" in xq["loi"][0]
+    assert xq["videos"][0]["video_id"] == "x1" and xq["videos"][0]["published_at"] == "2026-11-29T20:00:00+07:00"
+    assert "Vong Hồn 1" in (tmp_path / "so-lieu.md").read_text(encoding="utf-8")
+
+
+def test_render_markdown_xep_video_moi_nhat_truoc():
+    d = fetch_channel(FakeAnalytics({}), "main", [], end=date(2026, 11, 27))
+    d["videos"] = [
+        {"video_id": "cu", "title": "Cũ nhiều view", "published_at": "2026-11-01T20:00:00+07:00", "views_7d": 99, "traffic_7d": {}},
+        {"video_id": "moi", "title": "Mới ít view", "published_at": "2026-11-27T20:00:00+07:00", "views_7d": 0, "traffic_7d": {}},
+    ]
+    md = report.render_markdown([d], date(2026, 11, 27))
+    assert md.index("Mới ít view") < md.index("Cũ nhiều view")
+    assert "chưa cập nhật" in md                      # ghi chú độ trễ Analytics
+
+
+def test_nguon_xem_hoi_theo_lo_nho():
+    ids = [f"v{i}" for i in range(25)]
+    fa = FakeAnalytics({})
+    fetch_channel(fa, "main", ids, end=date(2026, 11, 27))
+    traffic_calls = [c for c in fa.calls if c.get("dimensions") == "video,insightTrafficSourceType"]
+    assert traffic_calls and all(len(c["filters"].split("==")[1].split(",")) <= 10 for c in traffic_calls)

@@ -34,6 +34,9 @@ def test_director_sh_goi_claude_dung_tham_so(tmp_path):
     assert "--add-dir\n/Users/lee/Project/Apps/lemo\n" in args
     assert "--output-format\ntext\n" in args
     assert "director.report" in args                      # prompt sáng được nhúng nguyên văn
+    assert f"Hôm nay là {date.today().isoformat()}" in args  # ngày chốt lúc bắt đầu phiên, nhúng vào prompt
+    assert "<hôm nay>" not in args
+    assert "--settings\n" in args and "channel-director/settings.json" in args
     log = tmp_path / "out" / date.today().isoformat() / "claude-sang.log"
     assert log.exists() and "fake claude ok" in log.read_text(encoding="utf-8")
     assert not (tmp_path / "notify").exists()
@@ -63,3 +66,17 @@ def test_director_sh_khong_co_claude_thi_bao(tmp_path):
 
 def test_director_sh_che_do_la_thi_loi(tmp_path):
     assert _run("toi", _env(tmp_path)).returncode == 2
+
+
+def test_director_sh_qua_gio_thi_giet_va_bao(tmp_path):
+    env = _env(tmp_path, FAKE_CLAUDE_SLEEP="5", DIRECTOR_TIMEOUT="1")
+    r = _run("sang", env)
+    assert r.returncode == 1
+    assert "quá giờ" in (tmp_path / "notify").read_text(encoding="utf-8")
+
+
+def test_settings_cua_giam_doc_chan_doc_tep_bi_mat():
+    import json
+    s = json.loads((ROOT / ".claude" / "skills" / "channel-director" / "settings.json").read_text(encoding="utf-8"))
+    deny = " ".join(s["permissions"]["deny"])
+    assert ".env" in deny and "youtube_token" in deny and "youtube_client_secret" in deny and ".youtube_token_" in deny

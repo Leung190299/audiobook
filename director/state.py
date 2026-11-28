@@ -85,7 +85,7 @@ def _statuses(youtube, ids: list[str]) -> dict[str, dict]:
 
 def default_youtube_for(channel: str):
     from googleapiclient.discovery import build
-    return build("youtube", "v3", credentials=credentials_for(channel), cache_discovery=False)
+    return build("youtube", "v3", credentials=credentials_for(channel, need_analytics=False), cache_discovery=False)
 
 
 def empty_state() -> State:
@@ -103,11 +103,11 @@ def refresh(now: datetime, *, youtube_for: Callable[[str], Any] = default_youtub
         weekdays = channel_weekdays(channel, env, warnings=warn)
         k = {"nhip": sorted(weekdays), "toi_da_chiem": [], "toi_trong_ke_tiep": None, "so_video": 0, "loi": list(warn)}
         try:
-            ids = [v for v, _ in video_ids_for(channel)]
+            ids = [row[0] for row in video_ids_for(channel)]
             k["so_video"] = len(ids)
             taken = taken_evenings(_statuses(youtube_for(channel), ids)) if ids else set()
         except Exception as exc:
-            k["loi"].append(f"{type(exc).__name__}: {str(exc)[:160]}")
+            k["loi"].append(f"{type(exc).__name__}: {str(exc)[:300]}")
             taken = set()
         k["toi_da_chiem"] = [d.isoformat() for d in sorted(taken)]
         nxt = next_free_evening(channel, taken, now, weekdays)

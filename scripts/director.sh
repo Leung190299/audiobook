@@ -25,12 +25,17 @@ export PATH="$PATH:$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin"   # nối 
 export LANG="${LANG:-en_US.UTF-8}" LC_ALL="${LC_ALL:-en_US.UTF-8}"
 
 OUT_BASE="${DIRECTOR_OUT:-$REPO_ROOT/output/director}"
-DAY="$(date +%F)"
+# Ngày chốt MỘT lần lúc bắt đầu (giờ Việt Nam) và truyền cho mọi lệnh con qua DIRECTOR_DAY: phiên vắt qua nửa đêm
+# vẫn ghi vào đúng thư mục ngày; director.paths.today() ưu tiên biến này.
+DAY="${DIRECTOR_DAY:-$(TZ=Asia/Ho_Chi_Minh date +%F)}"
+export DIRECTOR_DAY="$DAY"
 OUT_DIR="$OUT_BASE/$DAY"
 mkdir -p "$OUT_DIR"
 LOG="$OUT_DIR/claude-$MODE.log"
 PROMPT="$REPO_ROOT/.claude/skills/channel-director/prompt-$MODE.md"
+SETTINGS="$REPO_ROOT/.claude/skills/channel-director/settings.json"   # chặn đọc .env và tệp token trong phiên nền
 SKIP_PERMISSIONS="--dangerously-skip-permissions"
+TIMEOUT_S="${DIRECTOR_TIMEOUT:-3600}"                                 # không phiên nào dài quá một giờ (spec)
 
 notify() {
   # $1: nội dung. Test đặt DIRECTOR_NOTIFY để ghi ra tệp; thật thì gửi Telegram, lỗi gửi không làm hỏng mã thoát.
@@ -65,14 +70,30 @@ RUN=()
 if [[ "${DIRECTOR_NO_CAFFEINATE:-0}" != "1" ]]; then
   RUN=(/usr/bin/caffeinate -i)
 fi
-echo "=== $(date '+%Y-%m-%d %H:%M:%S') phiên $MODE bắt đầu ($CLAUDE, max-turns $MAX_TURNS) ===" >>"$LOG"
-"${RUN[@]+"${RUN[@]}"}" "$CLAUDE" -p "$(cat "$PROMPT")" \
+# Nhúng ngày vào prompt: mọi chỗ "<hôm nay>" thành ngày thật, cộng một dòng đầu nêu ngày và thư mục làm việc.
+PROMPT_TEXT="Hôm nay là $DAY (giờ Việt Nam); thư mục làm việc của phiên: $OUT_DIR. Biến DIRECTOR_DAY=$DAY đã đặt cho mọi lệnh.
+$(sed "s|<hôm nay>|$DAY|g" "$PROMPT")"
+
+echo "=== $(date '+%Y-%m-%d %H:%M:%S') phiên $MODE bắt đầu ($CLAUDE, max-turns $MAX_TURNS, tối đa ${TIMEOUT_S}s) ===" >>"$LOG"
+"${RUN[@]+"${RUN[@]}"}" "$CLAUDE" -p "$PROMPT_TEXT" \
   "$SKIP_PERMISSIONS" \
+  --settings "$SETTINGS" \
   --add-dir /Users/lee/Project/Apps/lemo \
   --max-turns "$MAX_TURNS" \
-  --output-format text >>"$LOG" 2>&1
+  --output-format text >>"$LOG" 2>&1 &
+PID=$!
+# Đồng hồ chặn phiên treo (macOS không có `timeout`): quá giờ thì giết tiến trình và báo.
+# Tách stdio của đồng hồ khỏi tiến trình cha, nếu không `sleep` mồ côi giữ ống stdout của launchd/test tới khi hết giờ.
+( sleep "$TIMEOUT_S"; kill "$PID" 2>/dev/null && echo "$(date '+%H:%M:%S') quá ${TIMEOUT_S}s, đã dừng phiên" >>"$LOG" ) </dev/null >/dev/null 2>&1 &
+WATCHDOG=$!
+wait "$PID"
 CODE=$?
+pkill -P "$WATCHDOG" 2>/dev/null; kill "$WATCHDOG" 2>/dev/null; wait "$WATCHDOG" 2>/dev/null
 echo "=== $(date '+%Y-%m-%d %H:%M:%S') phiên $MODE kết thúc, mã $CODE ===" >>"$LOG"
+if grep -q "quá ${TIMEOUT_S}s, đã dừng phiên" "$LOG"; then
+  notify "Giám đốc kênh: phiên $MODE $DAY quá giờ (${TIMEOUT_S}s), đã dừng. Xem $LOG"
+  exit 1
+fi
 if (( CODE != 0 )); then
   notify "Giám đốc kênh: phiên $MODE $DAY hỏng, mã $CODE. Xem $LOG"
   exit 1

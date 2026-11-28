@@ -28,7 +28,8 @@ def test_khong_khoa_dung_thu_thi_chay_va_khoa(tmp_path):
     r = _run(env)
     assert r.returncode == 0, r.stderr
     assert (tmp_path / "run.log").read_text(encoding="utf-8").strip() == "--upload"
-    assert (tmp_path / "out" / date.today().isoformat() / "da-goi-nha-may").exists()
+    lock = tmp_path / "out" / date.today().isoformat() / "da-goi-nha-may"
+    assert lock.exists() and "du-phong" in lock.read_text(encoding="utf-8")
 
 
 def test_da_co_khoa_thi_khong_chay(tmp_path):

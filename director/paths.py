@@ -1,6 +1,7 @@
 """Đường dẫn và ngày làm việc của giám đốc kênh. Mọi thứ ghi vào output/director/<ngày>/ (ngày theo giờ Việt Nam)."""
 from __future__ import annotations
 
+import os
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
@@ -14,7 +15,11 @@ CHANNELS = {
 
 
 def today(now: datetime | None = None) -> date:
-    """Ngày theo giờ Việt Nam của thời điểm `now` (mặc định: bây giờ). Phiên vắt qua nửa đêm giữ nguyên ngày lúc bắt đầu."""
+    """Ngày theo giờ Việt Nam của thời điểm `now` (mặc định: bây giờ).
+    Biến môi trường DIRECTOR_DAY (director.sh/daily_fallback.sh đặt lúc bắt đầu) thắng: phiên vắt qua nửa đêm giữ nguyên ngày."""
+    env_day = os.environ.get("DIRECTOR_DAY")
+    if env_day:
+        return date.fromisoformat(env_day)
     now = now or datetime.now(tz=VN)
     if now.tzinfo is None:
         now = now.replace(tzinfo=VN)
